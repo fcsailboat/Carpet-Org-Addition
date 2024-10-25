@@ -65,11 +65,11 @@ public class TextBuilder {
      * 将当前对象转换为文本对象，每个元素之间不换行
      */
     public MutableText build() {
-        MutableText text = list.getFirst().copy();
-        for (int i = 1; i < this.list.size(); i++) {
-            text.append(this.list.get(i));
+        MutableText result = TextUtils.createEmpty();
+        for (Text text : this.list) {
+            result.append(text);
         }
-        return text;
+        return result;
     }
 
     @Override
