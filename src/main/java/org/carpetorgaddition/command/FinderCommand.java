@@ -5,6 +5,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FluidBlock;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.*;
 import net.minecraft.enchantment.Enchantment;
@@ -25,10 +30,7 @@ import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.carpetorgaddition.util.matcher.ItemStackMatcher;
 import org.carpetorgaddition.util.matcher.Matcher;
 import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
-import org.carpetorgaddition.util.task.findtask.BlockFindTask;
-import org.carpetorgaddition.util.task.findtask.ItemFindTask;
-import org.carpetorgaddition.util.task.findtask.TradeEnchantedBookFindTask;
-import org.carpetorgaddition.util.task.findtask.TradeItemFindTask;
+import org.carpetorgaddition.util.task.findtask.*;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 public class FinderCommand {
@@ -90,7 +92,11 @@ public class FinderCommand {
                                 .then(CommandManager.argument("enchantment", RegistryEntryReferenceArgumentType.registryEntry(commandBuildContext, RegistryKeys.ENCHANTMENT))
                                         .executes(context -> findEnchantedBookTrade(context, 64))
                                         .then(CommandManager.argument("range", IntegerArgumentType.integer(0, 256))
-                                                .executes(context -> findEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "range"))))))));
+                                                .executes(context -> findEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "range")))))))
+                .then(CommandManager.literal("worldEater")
+                        .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
+                                .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
+                                        .executes(FinderCommand::mayAffectWorldEater)))));
     }
 
     // 物品查找
@@ -129,14 +135,31 @@ public class FinderCommand {
         // 获取执行命令的玩家并非空判断
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         // 获取要匹配的方块状态
-        BlockStateArgument blockStateArgument = BlockStateArgumentType.getBlockState(context, "blockState");
+        BlockStateArgument argument = BlockStateArgumentType.getBlockState(context, "blockState");
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.getBlockPos();
         ServerTaskManagerInterface tackManager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
         ServerWorld world = player.getServerWorld();
         SelectionArea selectionArea = new SelectionArea(world, sourceBlockPos, range);
-        tackManager.addTask(new BlockFindTask(world, sourceBlockPos, selectionArea, context, blockStateArgument));
+        ArgumentBlockPredicate predicate = new ArgumentBlockPredicate(argument);
+        tackManager.addTask(new BlockFindTask(world, sourceBlockPos, selectionArea, context, predicate));
         return 1;
+    }
+
+    // 查找可能影响世吞运行的方块
+    private static int mayAffectWorldEater(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        // 获取执行命令的玩家并非空判断
+        ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
+        BlockPos from = BlockPosArgumentType.getBlockPos(context, "from");
+        BlockPos to = BlockPosArgumentType.getBlockPos(context, "to");
+        // 获取命令执行时的方块坐标
+        final BlockPos sourceBlockPos = player.getBlockPos();
+        ServerTaskManagerInterface tackManager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
+        ServerWorld world = player.getServerWorld();
+        SelectionArea selectionArea = new SelectionArea(from, to);
+        BlockBlockPredicate predicate = new BlockBlockPredicate();
+        tackManager.addTask(new MayAffectWorldEaterBlockFindTask(world, sourceBlockPos, selectionArea, context, predicate));
+        return 0;
     }
 
     // 区域方块查找
@@ -149,8 +172,9 @@ public class FinderCommand {
         // 计算要查找的区域
         SelectionArea selectionArea = new SelectionArea(from, to);
         ServerTaskManagerInterface taskManager = ServerTaskManagerInterface.getInstance(player.getServer());
+        ArgumentBlockPredicate predicate = new ArgumentBlockPredicate(argument);
         // 添加查找任务
-        taskManager.addTask(new BlockFindTask(player.getServerWorld(), player.getBlockPos(), selectionArea, context, argument));
+        taskManager.addTask(new BlockFindTask(player.getServerWorld(), player.getBlockPos(), selectionArea, context, predicate));
         return 1;
     }
 
@@ -195,5 +219,72 @@ public class FinderCommand {
         MutableText text = TextConstants.itemCount(count, itemStack.getMaxCount());
         // 如果包含在潜影盒内找到的物品，在数量上添加斜体效果
         return inTheShulkerBox ? TextUtils.toItalic(text) : text;
+    }
+
+    public interface BlockPredicate {
+        boolean test(ServerWorld world, BlockPos pos);
+
+        MutableText getName();
+    }
+
+    private record ArgumentBlockPredicate(BlockStateArgument argument) implements BlockPredicate {
+        @Override
+        public boolean test(ServerWorld world, BlockPos pos) {
+            return argument.test(world, pos);
+        }
+
+        @Override
+        public MutableText getName() {
+            return argument.getBlockState().getBlock().getName();
+        }
+    }
+
+    private record BlockBlockPredicate() implements BlockPredicate {
+        @Override
+        public boolean test(ServerWorld world, BlockPos pos) {
+            BlockState blockState = world.getBlockState(pos);
+            // 排除基岩，空气和流体
+            if (blockState.isOf(Blocks.BEDROCK) || blockState.isAir() || blockState.getBlock() instanceof FluidBlock) {
+                return false;
+            }
+            // 被活塞推动时会被破坏
+            if (blockState.getPistonBehavior() == PistonBehavior.DESTROY) {
+                return false;
+            }
+            // 高爆炸抗性
+            if (blockState.getBlock().getBlastResistance() > 17) {
+                return true;
+            }
+            // 不能推动（实体方块不能被推动）且含水
+            boolean blockPiston = blockState.getBlock() instanceof BlockWithEntity || blockState.getPistonBehavior() == PistonBehavior.BLOCK;
+            boolean hasWater = !blockState.getFluidState().isEmpty();
+            if (blockPiston && hasWater) {
+                return true;
+            }
+            // 含水，可以被推动，但下方8格全都有方块
+            return hasWater && canPush(world, pos);
+        }
+
+        private boolean canPush(ServerWorld world, BlockPos pos) {
+            for (int i = 1; i <= 8; i++) {
+                BlockState blockState = world.getBlockState(pos.down(i));
+                // 不可被推动的方块
+                PistonBehavior pistonBehavior = blockState.getPistonBehavior();
+                if (pistonBehavior == PistonBehavior.BLOCK) {
+                    return true;
+                }
+                // 下方方块可以被推动
+                if (pistonBehavior == PistonBehavior.DESTROY) {
+                    return false;
+                }
+            }
+            // 下方8格内都有方块
+            return true;
+        }
+
+        @Override
+        public MutableText getName() {
+            return TextUtils.translate("carpet.commands.finder.may_affect_world_eater_block.name");
+        }
     }
 }

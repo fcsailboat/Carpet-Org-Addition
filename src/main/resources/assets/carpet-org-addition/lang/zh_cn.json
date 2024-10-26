@@ -229,6 +229,8 @@
   "carpet.commands.finder.block.find": "在指定范围内找到%s个%s",
   "carpet.commands.finder.block.find.limit": "在指定范围内找到%s个%s，距离你最近的%s个分别是：",
   "carpet.commands.finder.block.feedback": "距离: %s格 %s",
+  "carpet.commands.finder.may_affect_world_eater_block.name": "可能会影响世吞运行的方块",
+  "carpet.commands.finder.may_affect_world_eater_block.feedback": "距离: %s格 %s （%s）",
   "carpet.commands.finder.item.drops": "掉落物",
   "carpet.commands.finder.item.each": "在位于%s的%s中找到%s个",
   "carpet.commands.finder.item.too_much_container": "周围包含%s的容器过多，无法统计",

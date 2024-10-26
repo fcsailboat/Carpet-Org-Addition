@@ -145,6 +145,8 @@
   "carpet.commands.finder.block.find": "Found %2$s of %1$s",
   "carpet.commands.finder.block.find.limit": "Found %2$s of %1$s, the nearest %s are:",
   "carpet.commands.finder.block.feedback": "Distance: %s blocks away %s",
+  "carpet.commands.finder.may_affect_world_eater_block.name": "May affect world eater block",
+  "carpet.commands.finder.may_affect_world_eater_block.feedback": "Distance: %s blocks away %s (%s)",
   "carpet.commands.finder.item.drops": "Drops",
   "carpet.commands.finder.item.each": "Found %3$s results in container %2$s in %1$s",
   "carpet.commands.finder.item.too_much_container": "Too many containers with %s, unable to count",
