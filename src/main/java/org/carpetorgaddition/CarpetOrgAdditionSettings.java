@@ -429,4 +429,8 @@ public class CarpetOrgAdditionSettings {
             validators = SyncNavigateWaypointObserver.class
     )
     public static boolean syncNavigateWaypoint = true;
+
+    // 显示假玩家召唤者
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean displayFakePlayerSummoner = false;
 }

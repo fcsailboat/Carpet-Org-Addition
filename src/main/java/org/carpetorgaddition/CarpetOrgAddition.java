@@ -45,4 +45,6 @@ public class CarpetOrgAddition implements ModInitializer {
             DebugRuleRegistrar.getInstance().registrar(DebugSettings.class);
         }
     }
+    // TODO 记录器：钓鱼指示器
+    // TODO 发布前测试在非开发环境能否正常启动
 }
