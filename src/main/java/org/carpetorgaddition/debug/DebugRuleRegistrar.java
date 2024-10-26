@@ -29,7 +29,7 @@ public class DebugRuleRegistrar implements CarpetExtension {
         return instance;
     }
 
-    public DebugRuleRegistrar() {
+    private DebugRuleRegistrar() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             this.settingsManager = new SettingsManager(
                     FabricLoader.getInstance().getModContainer(CarpetOrgAddition.MOD_ID).orElseThrow().toString(),

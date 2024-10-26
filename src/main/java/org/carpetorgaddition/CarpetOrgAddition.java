@@ -41,9 +41,16 @@ public class CarpetOrgAddition implements ModInitializer {
         CarpetServer.manageExtension(new CarpetOrgAdditionExtension());
         NetworkS2CPackRegister.register();
         // 如果当前为调试模式的开发环境，注册测试规则
-        if (IS_DEBUG && FabricLoader.getInstance().isDevelopmentEnvironment()) {
+        if (isDebugDevelopment()) {
             DebugRuleRegistrar.getInstance().registrar(DebugSettings.class);
         }
+    }
+
+    /**
+     * @return 当前环境是否为调试模式的开发环境
+     */
+    public static boolean isDebugDevelopment() {
+        return IS_DEBUG && FabricLoader.getInstance().isDevelopmentEnvironment();
     }
     // TODO 记录器：钓鱼指示器
     // TODO 发布前测试在非开发环境能否正常启动

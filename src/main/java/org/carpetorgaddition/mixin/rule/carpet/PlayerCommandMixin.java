@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(PlayerCommand.class)
 public class PlayerCommandMixin {
-    @SuppressWarnings("UnresolvedMixinReference")
+    // 显示假玩家召唤者
     @WrapOperation(method = "spawn", at = @At(value = "INVOKE", target = "Lcarpet/patches/EntityPlayerMPFake;createFake(Ljava/lang/String;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/util/math/Vec3d;DDLnet/minecraft/registry/RegistryKey;Lnet/minecraft/world/GameMode;Z)Z"))
     private static boolean spawn(
             String username,

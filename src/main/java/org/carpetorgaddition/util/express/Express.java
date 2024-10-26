@@ -122,6 +122,7 @@ public class Express implements Comparable<Express> {
         MessageUtils.sendMessage(recipientPlayer, TextUtils.translate("carpet.commands.mail.sending.recipient", recipientArray));
         // 在接收者位置播放音效
         playXpOrbPickupSound(recipientPlayer);
+        CarpetOrgAddition.LOGGER.info("{}向{}发送了{}个{}", this.sender, this.recipient, this.express.getCount(), this.express.getName().getString());
     }
 
     /**

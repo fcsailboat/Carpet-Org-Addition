@@ -18,6 +18,7 @@ import org.carpetorgaddition.util.constant.TextConstants;
 import org.carpetorgaddition.util.express.Express;
 import org.carpetorgaddition.util.express.ExpressManager;
 import org.carpetorgaddition.util.express.ExpressManagerInterface;
+import org.carpetorgaddition.util.inventory.ImmutableInventory;
 
 import java.io.IOException;
 
@@ -133,5 +134,18 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
                 this.sourcePlayer.getDisplayName(), args[1], args[2], TextConstants.clickRun("/mail receive"));
         Express.playXpOrbPickupSound(this.targetPlayer);
         Express.checkRecipientPermission(this.sourcePlayer, this.targetPlayer);
+        // 日志输出
+        if (onlyOneKind == 2) {
+            CarpetOrgAddition.LOGGER.info("{}向{}发送了{}",
+                    this.sourcePlayer.getName().getString(),
+                    this.targetPlayer.getName().getString(),
+                    new ImmutableInventory(simpleInventory));
+        } else {
+            CarpetOrgAddition.LOGGER.info("{}向{}发送了{}个{}",
+                    this.sourcePlayer.getName().getString(),
+                    this.targetPlayer.getName().getString(),
+                    ((MutableText) args[1]).getString(),
+                    firstStack.getName().getString());
+        }
     }
 }
