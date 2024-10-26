@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.StringJoiner;
 
-public abstract class AbstractTradeFindTask extends ServerTask {
+public abstract class AbstractTradeFindTask extends ServerTask implements FindTask {
     protected final World world;
     protected final SelectionArea selectionArea;
     protected final BlockPos sourcePos;
@@ -184,6 +184,14 @@ public abstract class AbstractTradeFindTask extends ServerTask {
         }
         indexArray = stringJoiner.toString();
         return indexArray;
+    }
+
+    @Override
+    public boolean taskExist(FindTask task) {
+        if (this.getClass() == task.getClass()) {
+            return this.context.getSource().getEntity() == ((AbstractTradeFindTask) task).context.getSource().getEntity();
+        }
+        return false;
     }
 
     private enum FindState {

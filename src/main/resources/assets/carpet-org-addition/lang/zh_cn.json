@@ -243,6 +243,7 @@
   "carpet.commands.finder.trade.result": "在周围找到了%s个出售%s的%s",
   "carpet.commands.finder.trade.result.limit": "在周围找到了%s个出售%s的%s，共有%s项交易，距离最近的前%s个分别是：",
   "carpet.commands.finder.trade.enchanted_book.result.limit": "在周围找到了%s个出售%s的%s，共有%s项交易，等级最高，距离最近的前%s个分别是：",
+  "carpet.commands.finder.add.exist": "等待上一个任务执行完毕",
   "carpet.commands.itemshadowing.main_hand_is_empty": "主手为空",
   "carpet.commands.itemshadowing.off_hand_not_empty": "副手不为空",
   "carpet.commands.itemshadowing.broadcast": "%s制作了一个%s的物品分身",

@@ -29,6 +29,7 @@ import org.carpetorgaddition.util.constant.TextConstants;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.carpetorgaddition.util.matcher.ItemStackMatcher;
 import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.task.ServerTask;
 import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
 import org.carpetorgaddition.util.task.findtask.*;
 import org.carpetorgaddition.util.wheel.SelectionArea;
@@ -109,9 +110,9 @@ public class FinderCommand {
         BlockPos sourceBlockPos = player.getBlockPos();
         // 查找周围容器中的物品
         Matcher matcher = new ItemStackMatcher(itemStack);
-        ServerTaskManagerInterface taskManager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
         World world = player.getWorld();
-        taskManager.addTask(new ItemFindTask(world, matcher, new SelectionArea(world, sourceBlockPos, range), context));
+        ItemFindTask task = new ItemFindTask(world, matcher, new SelectionArea(world, sourceBlockPos, range), context);
+        tryAddTask(context, task);
         return 1;
     }
 
@@ -125,8 +126,8 @@ public class FinderCommand {
         Matcher matcher = new ItemStackMatcher(itemStack);
         // 计算要查找的区域
         SelectionArea selectionArea = new SelectionArea(from, to);
-        ServerTaskManagerInterface taskManager = ServerTaskManagerInterface.getInstance(player.getServer());
-        taskManager.addTask(new ItemFindTask(player.getWorld(), matcher, selectionArea, context));
+        ItemFindTask task = new ItemFindTask(player.getWorld(), matcher, selectionArea, context);
+        tryAddTask(context, task);
         return 1;
     }
 
@@ -138,11 +139,11 @@ public class FinderCommand {
         BlockStateArgument argument = BlockStateArgumentType.getBlockState(context, "blockState");
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.getBlockPos();
-        ServerTaskManagerInterface tackManager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
         ServerWorld world = player.getServerWorld();
         SelectionArea selectionArea = new SelectionArea(world, sourceBlockPos, range);
         ArgumentBlockPredicate predicate = new ArgumentBlockPredicate(argument);
-        tackManager.addTask(new BlockFindTask(world, sourceBlockPos, selectionArea, context, predicate));
+        BlockFindTask task = new BlockFindTask(world, sourceBlockPos, selectionArea, context, predicate);
+        tryAddTask(context, task);
         return 1;
     }
 
@@ -154,11 +155,11 @@ public class FinderCommand {
         BlockPos to = BlockPosArgumentType.getBlockPos(context, "to");
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.getBlockPos();
-        ServerTaskManagerInterface tackManager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
         ServerWorld world = player.getServerWorld();
         SelectionArea selectionArea = new SelectionArea(from, to);
         BlockBlockPredicate predicate = new BlockBlockPredicate();
-        tackManager.addTask(new MayAffectWorldEaterBlockFindTask(world, sourceBlockPos, selectionArea, context, predicate));
+        MayAffectWorldEaterBlockFindTask task = new MayAffectWorldEaterBlockFindTask(world, sourceBlockPos, selectionArea, context, predicate);
+        tryAddTask(context, task);
         return 0;
     }
 
@@ -171,10 +172,10 @@ public class FinderCommand {
         BlockStateArgument argument = BlockStateArgumentType.getBlockState(context, "blockState");
         // 计算要查找的区域
         SelectionArea selectionArea = new SelectionArea(from, to);
-        ServerTaskManagerInterface taskManager = ServerTaskManagerInterface.getInstance(player.getServer());
         ArgumentBlockPredicate predicate = new ArgumentBlockPredicate(argument);
         // 添加查找任务
-        taskManager.addTask(new BlockFindTask(player.getServerWorld(), player.getBlockPos(), selectionArea, context, predicate));
+        BlockFindTask task = new BlockFindTask(player.getServerWorld(), player.getBlockPos(), selectionArea, context, predicate);
+        tryAddTask(context, task);
         return 1;
     }
 
@@ -191,8 +192,7 @@ public class FinderCommand {
         SelectionArea area = new SelectionArea(world, sourcePos, range);
         TradeItemFindTask task = new TradeItemFindTask(world, area, sourcePos, context, matcher);
         // 向任务管理器添加任务
-        ServerTaskManagerInterface taskManager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
-        taskManager.addTask(task);
+        tryAddTask(context, task);
         return 1;
     }
 
@@ -209,9 +209,18 @@ public class FinderCommand {
         SelectionArea area = new SelectionArea(world, sourcePos, range);
         TradeEnchantedBookFindTask task = new TradeEnchantedBookFindTask(world, area, sourcePos, context, enchantment);
         // 向任务管理器添加任务
-        ServerTaskManagerInterface taskManager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
-        taskManager.addTask(task);
+        tryAddTask(context, task);
         return 1;
+    }
+
+    // 尝试添加任务
+    private static void tryAddTask(CommandContext<ServerCommandSource> context, FindTask task) throws CommandSyntaxException {
+        ServerTaskManagerInterface manager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
+        if (manager.findTask(FindTask.class, findTask -> findTask.taskExist(findTask)).isEmpty()) {
+            manager.addTask((ServerTask) task);
+            return;
+        }
+        throw CommandUtils.createException("carpet.commands.finder.add.exist");
     }
 
     // 将物品数量转换为“多少组多少个”的形式

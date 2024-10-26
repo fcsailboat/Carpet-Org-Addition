@@ -19,7 +19,7 @@ import org.carpetorgaddition.util.wheel.SelectionArea;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class BlockFindTask extends ServerTask {
+public class BlockFindTask extends ServerTask implements FindTask {
     protected final ServerWorld world;
     private final SelectionArea selectionArea;
     protected final CommandContext<ServerCommandSource> context;
@@ -173,6 +173,14 @@ public class BlockFindTask extends ServerTask {
         return TextUtils.translate("carpet.commands.finder.block.feedback",
                 MathUtils.getBlockIntegerDistance(sourcteBlockPos, blockPos),
                 TextConstants.blockPos(blockPos, Formatting.GREEN));
+    }
+
+    @Override
+    public boolean taskExist(FindTask task) {
+        if (this.getClass() == task.getClass()) {
+            return this.context.getSource().getEntity() == ((BlockFindTask) task).context.getSource().getEntity();
+        }
+        return false;
     }
 
     private enum FindState {

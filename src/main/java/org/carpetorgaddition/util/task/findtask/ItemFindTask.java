@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class ItemFindTask extends ServerTask {
+public class ItemFindTask extends ServerTask implements FindTask {
     private final World world;
     private final SelectionArea selectionArea;
     private final CommandContext<ServerCommandSource> context;
@@ -234,6 +234,14 @@ public class ItemFindTask extends ServerTask {
     @Override
     public boolean stopped() {
         return this.findState == FindState.END;
+    }
+
+    @Override
+    public boolean taskExist(FindTask task) {
+        if (this.getClass() == task.getClass()) {
+            return this.context.getSource().getEntity() == ((ItemFindTask) task).context.getSource().getEntity();
+        }
+        return false;
     }
 
     private record Result(Item item, @Nullable UUID uuid, BlockPos blockPos,
