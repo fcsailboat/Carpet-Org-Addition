@@ -81,12 +81,10 @@
     "rule.respawnblocksexplode.RespawnAnchorBlockMixin",
     "util.CraftingScreenHandlerMixin",
     "util.PlayerManagerMixin",
-    "util.ServerPlayNetworkHandlerMixin",
-    "util.TranslatableTextContentMixin"
+    "util.ServerPlayNetworkHandlerMixin"
   ],
   "client": [
-    "rule.client.carpet.SettingsManagerMixin",
-    "util.client.InGameHudMixin"
+    "rule.client.carpet.SettingsManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
