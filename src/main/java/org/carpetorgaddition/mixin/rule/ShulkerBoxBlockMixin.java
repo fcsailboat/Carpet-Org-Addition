@@ -68,7 +68,7 @@ public class ShulkerBoxBlockMixin {
     private void onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
         // 提示玩家不能打开用于更新抑制的潜影盒
         if (canUpdateSuppression(world, pos)) {
-            MessageUtils.sendTextMessageToHud(player, TextUtils.translate("carpet.rule.message.CCEUpdateSuppression"));
+            MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.rule.message.CCEUpdateSuppression"));
             cir.setReturnValue(ActionResult.SUCCESS);
         }
     }

@@ -198,7 +198,7 @@ public class PlayerManagerCommand {
             }
         } else {
             String command = "/playerManager safeafk set " + fakePlayer.getName().getString() + " " + threshold + " true";
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.safeafk.successfully_set_up",
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.safeafk.successfully_set_up",
                     fakePlayer.getDisplayName(), threshold, TextConstants.clickRun(command));
         }
         return (int) threshold;
@@ -215,13 +215,13 @@ public class PlayerManagerCommand {
             if (threshold < 0) {
                 continue;
             }
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.safeafk.list.each",
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.safeafk.list.each",
                     player.getDisplayName(), threshold);
             count++;
         }
         // 没有玩家被列出
         if (count == 0) {
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.safeafk.list.empty");
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.safeafk.list.empty");
         }
         return count;
     }
@@ -241,7 +241,7 @@ public class PlayerManagerCommand {
         } else {
             String key = "carpet.commands.playerManager.safeafk.successfully_set_up.cancel";
             MutableText command = TextConstants.clickRun("/playerManager safeafk set " + fakePlayer.getName().getString() + " -1 true");
-            MessageUtils.sendCommandFeedback(context, key, fakePlayer.getDisplayName(), command);
+            MessageUtils.sendMessage(context, key, fakePlayer.getDisplayName(), command);
         }
         return 1;
     }
@@ -251,7 +251,7 @@ public class PlayerManagerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         float threshold = ((FakePlayerSafeAfkInterface) fakePlayer).getHealthThreshold();
         String key = "carpet.commands.playerManager.safeafk.list.each";
-        MessageUtils.sendCommandFeedback(context, key, fakePlayer.getDisplayName(), threshold);
+        MessageUtils.sendMessage(context, key, fakePlayer.getDisplayName(), threshold);
         return (int) threshold;
     }
 
@@ -271,11 +271,11 @@ public class PlayerManagerCommand {
             if (threshold > 0) {
                 // 将玩家安全挂机阈值保存到配置文件
                 properties.setProperty(playerName, String.valueOf(threshold));
-                MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.safeafk.successfully_set_up.save", fakePlayer.getDisplayName(), threshold);
+                MessageUtils.sendMessage(context, "carpet.commands.playerManager.safeafk.successfully_set_up.save", fakePlayer.getDisplayName(), threshold);
             } else {
                 // 将玩家安全挂机阈值从配置文件中删除
                 properties.remove(playerName);
-                MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.safeafk.successfully_set_up.remove", fakePlayer.getDisplayName());
+                MessageUtils.sendMessage(context, "carpet.commands.playerManager.safeafk.successfully_set_up.remove", fakePlayer.getDisplayName());
             }
             BufferedWriter writer = IOUtils.toWriter(file);
             try (writer) {
@@ -315,7 +315,7 @@ public class PlayerManagerCommand {
                     // 广播阈值设置的消息
                     String key = "carpet.commands.playerManager.safeafk.successfully_set_up.auto";
                     MutableText message = TextUtils.translate(key, player.getDisplayName(), threshold);
-                    MessageUtils.broadcastTextMessage(player, TextUtils.toGrayItalic(message));
+                    MessageUtils.broadcastMessage(player, TextUtils.toGrayItalic(message));
                 } catch (NumberFormatException e) {
                     CarpetOrgAddition.LOGGER.error("{}安全挂机阈值设置失败", player.getName().getString(), e);
                 }
@@ -329,7 +329,7 @@ public class PlayerManagerCommand {
         int count = FakePlayerSerial.list(context, worldFormat, filter);
         if (count == 0) {
             // 没有玩家被列出
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.list.no_player");
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.list.no_player");
             return 0;
         }
         return count;
@@ -371,10 +371,10 @@ public class PlayerManagerCommand {
         // 发送命令反馈
         if (remove) {
             // 移除注释
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.annotation.remove", serial.getDisplayName());
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.annotation.remove", serial.getDisplayName());
         } else {
             // 修改注释
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.annotation.modify", serial.getDisplayName(), annotation);
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.annotation.modify", serial.getDisplayName(), annotation);
         }
         return 1;
     }
@@ -397,9 +397,9 @@ public class PlayerManagerCommand {
         }
         // 发送命令反馈
         if (autologin) {
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.autologin.setup", serial.getDisplayName());
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.autologin.setup", serial.getDisplayName());
         } else {
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.autologin.cancel", serial.getDisplayName());
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.autologin.cancel", serial.getDisplayName());
         }
         return 1;
     }
@@ -410,12 +410,12 @@ public class PlayerManagerCommand {
             int result = fakePlayerSerial.save(context, resave);
             if (result == 0) {
                 // 首次保存
-                MessageUtils.sendCommandFeedback(context.getSource(),
+                MessageUtils.sendMessage(context.getSource(),
                         "carpet.commands.playerManager.save.success",
                         fakePlayer.getDisplayName());
             } else if (result == 1) {
                 // 重新保存
-                MessageUtils.sendCommandFeedback(context.getSource(),
+                MessageUtils.sendMessage(context.getSource(),
                         "carpet.commands.playerManager.save.resave",
                         fakePlayer.getDisplayName());
             }
@@ -450,7 +450,7 @@ public class PlayerManagerCommand {
         File file = worldFormat.getFile(name);
         // 文件存在且文件删除成功
         if (file.isFile() && file.delete()) {
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.playerManager.delete.success");
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.playerManager.delete.success");
         } else {
             throw CommandUtils.createException("carpet.commands.playerManager.delete.fail");
         }
@@ -482,7 +482,7 @@ public class PlayerManagerCommand {
             } else {
                 // 修改周期时间
                 task.setInterval(interval);
-                MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.relogin.set_interval", name, interval);
+                MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.relogin.set_interval", name, interval);
             }
             return interval;
         }
@@ -501,7 +501,7 @@ public class PlayerManagerCommand {
         // [这里]的悬停提示
         MutableText input = TextUtils.translate("carpet.command.text.click.input", command);
         here = TextUtils.suggest(here, command, input, Formatting.AQUA);
-        MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.relogin.condition", here);
+        MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.relogin.condition", here);
         return false;
     }
 
@@ -559,14 +559,14 @@ public class PlayerManagerCommand {
                     // <玩家>将于<时间>后再次尝试上线
                     : "carpet.commands.playerManager.schedule.login.try";
             // 发送命令反馈
-            MessageUtils.sendCommandFeedback(context, key, serial.getDisplayName(), time);
+            MessageUtils.sendMessage(context, key, serial.getDisplayName(), time);
         } else {
             // 修改上线时间
-            DelayedLoginTask task = list.get(0);
+            DelayedLoginTask task = list.getFirst();
             // 为名称添加悬停文本
             MutableText info = TextUtils.hoverText(name, task.getInfo());
             task.setDelayed(tick);
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.login.modify", info, time);
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.login.modify", info, time);
         }
         return (int) tick;
     }
@@ -584,12 +584,12 @@ public class PlayerManagerCommand {
         if (list.isEmpty()) {
             // 添加延时下线任务
             instance.addTask(new DelayedLogoutTask(server, fakePlayer, tick));
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.logout", fakePlayer.getDisplayName(), time);
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.logout", fakePlayer.getDisplayName(), time);
         } else {
             // 修改退出时间
-            DelayedLogoutTask task = list.get(0);
+            DelayedLogoutTask task = list.getFirst();
             task.setDelayed(tick);
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.logout.modify", fakePlayer.getDisplayName(), time);
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.logout.modify", fakePlayer.getDisplayName(), time);
         }
         return (int) tick;
     }
@@ -619,7 +619,7 @@ public class PlayerManagerCommand {
         ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
         List<PlayerScheduleTask> list = instance.findTask(PlayerScheduleTask.class, take -> true);
         if (list.isEmpty()) {
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.list.empty");
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.list.empty");
         } else {
             list.forEach(task -> task.sendEachMessage(context.getSource()));
         }

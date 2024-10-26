@@ -56,7 +56,7 @@ public abstract class AbstractTradeFindTask extends ServerTask implements FindTa
         this.tickCount++;
         if (tickCount > FinderCommand.MAX_TICK_COUNT) {
             // 任务超时
-            MessageUtils.sendCommandErrorFeedback(context, FinderCommand.TIME_OUT);
+            MessageUtils.sendErrorMessage(context, FinderCommand.TIME_OUT);
             this.findState = FindState.END;
             return;
         }
@@ -135,10 +135,10 @@ public abstract class AbstractTradeFindTask extends ServerTask implements FindTa
             key = "carpet.commands.finder.trade.result";
         }
         // 发送消息：在周围找到了<交易选项数量>个出售<出售的物品名称>的<村民>或<流浪商人>
-        MessageUtils.sendCommandFeedback(context.getSource(), key, list.toArray(Object[]::new));
+        MessageUtils.sendMessage(context.getSource(), key, list.toArray(Object[]::new));
         // 发送每一条（或前10条）结果
         for (int i = 0; i < this.results.size() && i < FinderCommand.MAX_FEEDBACK_COUNT; i++) {
-            MessageUtils.sendTextMessage(this.context.getSource(), this.results.get(i).toText());
+            MessageUtils.sendMessage(this.context.getSource(), this.results.get(i).toText());
         }
         this.findState = FindState.END;
     }

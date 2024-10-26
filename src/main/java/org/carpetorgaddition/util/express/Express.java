@@ -115,11 +115,11 @@ public class Express implements Comparable<Express> {
         // 向快递发送者发送发出快递的消息
         MutableText cancelText = TextConstants.clickRun("/mail cancel " + this.getId());
         Object[] senderArray = {recipientPlayer.getDisplayName(), this.express.getCount(), this.express.toHoverableText(), cancelText};
-        MessageUtils.sendTextMessage(senderPlayer, TextUtils.translate("carpet.commands.mail.sending.sender", senderArray));
+        MessageUtils.sendMessage(senderPlayer, TextUtils.translate("carpet.commands.mail.sending.sender", senderArray));
         // 向快递接受者发送发出快递的消息
         MutableText receiveText = TextConstants.clickRun("/mail receive " + this.getId());
         Object[] recipientArray = {senderPlayer.getDisplayName(), this.express.getCount(), this.express.toHoverableText(), receiveText};
-        MessageUtils.sendTextMessage(recipientPlayer, TextUtils.translate("carpet.commands.mail.sending.recipient", recipientArray));
+        MessageUtils.sendMessage(recipientPlayer, TextUtils.translate("carpet.commands.mail.sending.recipient", recipientArray));
         // 在接收者位置播放音效
         playXpOrbPickupSound(recipientPlayer);
     }
@@ -136,7 +136,7 @@ public class Express implements Comparable<Express> {
         }
         if (this.cancel) {
             // 快递已被撤回
-            MessageUtils.sendTextMessage(player, TextUtils.translate("carpet.commands.mail.receive.cancel"));
+            MessageUtils.sendMessage(player, TextUtils.translate("carpet.commands.mail.receive.cancel"));
             return;
         }
         int count = this.express.getCount();
@@ -144,7 +144,7 @@ public class Express implements Comparable<Express> {
         switch (insertStack(player)) {
             case COMPLETE -> {
                 // 物品完全接收
-                MessageUtils.sendTextMessage(player,
+                MessageUtils.sendMessage(player,
                         TextUtils.translate("carpet.commands.mail.receive.success",
                                 count, copy.toHoverableText()));
                 // 通知发送者物品以接收
@@ -159,13 +159,13 @@ public class Express implements Comparable<Express> {
                 // 剩余的物品数量
                 int surplusCount = copy.getCount();
                 // 物品部分放入物品栏
-                MessageUtils.sendTextMessage(player,
+                MessageUtils.sendMessage(player,
                         TextUtils.translate("carpet.commands.mail.receive.partial_reception",
                                 count - surplusCount, surplusCount));
                 // 播放物品拾取音效
                 playItemPickupSound(player);
             }
-            case FAIL -> MessageUtils.sendTextMessage(player,
+            case FAIL -> MessageUtils.sendMessage(player,
                     TextUtils.translate("carpet.commands.mail.receive.insufficient_capacity"));
         }
     }
@@ -185,7 +185,7 @@ public class Express implements Comparable<Express> {
         // 将快递内容放入物品栏
         switch (insertStack(player)) {
             case COMPLETE -> {
-                MessageUtils.sendTextMessage(player, TextUtils.translate("carpet.commands.mail.cancel.success",
+                MessageUtils.sendMessage(player, TextUtils.translate("carpet.commands.mail.cancel.success",
                         count, copy.toHoverableText()));
                 // 播放物品拾取音效
                 playItemPickupSound(player);
@@ -194,14 +194,14 @@ public class Express implements Comparable<Express> {
                 // 剩余的物品数量
                 int surplusCount = copy.getCount();
                 // 物品部分放入物品栏
-                MessageUtils.sendTextMessage(player, TextUtils.translate("carpet.commands.mail.cancel.partial_reception",
+                MessageUtils.sendMessage(player, TextUtils.translate("carpet.commands.mail.cancel.partial_reception",
                         count - surplusCount, surplusCount));
                 // 播放物品拾取音效
                 playItemPickupSound(player);
             }
             case FAIL ->
                 // 物品未能成功放入物品栏
-                    MessageUtils.sendTextMessage(player, TextUtils.translate("carpet.commands.mail.cancel.insufficient_capacity"));
+                    MessageUtils.sendMessage(player, TextUtils.translate("carpet.commands.mail.cancel.insufficient_capacity"));
             default -> throw new IllegalStateException();
         }
         // 如果接收者存在，向接收者发送物品被撤回的消息
@@ -281,7 +281,7 @@ public class Express implements Comparable<Express> {
         if (player == null) {
             return;
         }
-        MessageUtils.sendCommandFeedback(player.getCommandSource(), message.get());
+        MessageUtils.sendMessage(player.getCommandSource(), message.get());
     }
 
     /**
@@ -309,7 +309,7 @@ public class Express implements Comparable<Express> {
         }
         // 将消息设置为灰色斜体
         MutableText message = TextUtils.toGrayItalic(TextUtils.translate("carpet.commands.mail.sending.permission"));
-        MessageUtils.sendCommandFeedback(senderPlayer.getCommandSource(), message);
+        MessageUtils.sendMessage(senderPlayer.getCommandSource(), message);
     }
 
     /**

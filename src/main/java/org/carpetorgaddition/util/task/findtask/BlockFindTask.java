@@ -53,7 +53,7 @@ public class BlockFindTask extends ServerTask implements FindTask {
         this.tickCount++;
         if (this.tickCount > FinderCommand.MAX_TICK_COUNT) {
             // 任务超时
-            MessageUtils.sendCommandErrorFeedback(context, FinderCommand.TIME_OUT);
+            MessageUtils.sendErrorMessage(context, FinderCommand.TIME_OUT);
             this.findState = FindState.END;
             return;
         }
@@ -98,7 +98,7 @@ public class BlockFindTask extends ServerTask implements FindTask {
                 }
                 if (this.results.size() > FinderCommand.MAXIMUM_STATISTICAL_COUNT) {
                     // 方块过多，无法统计
-                    Runnable function = () -> MessageUtils.sendCommandErrorFeedback(
+                    Runnable function = () -> MessageUtils.sendErrorMessage(
                             this.context,
                             "carpet.commands.finder.block.too_much_blocks",
                             this.blockPredicate.getName()
@@ -115,7 +115,7 @@ public class BlockFindTask extends ServerTask implements FindTask {
         if (this.results.isEmpty()) {
             // 从周围没有找到指定方块
             MutableText name = this.blockPredicate.getName();
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.block.not_found_block", name);
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.block.not_found_block", name);
             this.findState = FindState.END;
             return;
         }
@@ -128,15 +128,15 @@ public class BlockFindTask extends ServerTask implements FindTask {
         int count = this.results.size();
         MutableText name = this.blockPredicate.getName();
         if (count <= FinderCommand.MAX_FEEDBACK_COUNT) {
-            MessageUtils.sendCommandFeedback(context.getSource(),
+            MessageUtils.sendMessage(context.getSource(),
                     "carpet.commands.finder.block.find", count, name);
         } else {
             // 数量过多，只输出距离最近的前十个
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.block.find.limit",
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.block.find.limit",
                     count, name, FinderCommand.MAX_FEEDBACK_COUNT);
         }
         for (int i = 0; i < this.results.size() && i < FinderCommand.MAX_FEEDBACK_COUNT; i++) {
-            MessageUtils.sendTextMessage(context.getSource(), this.results.get(i).toText());
+            MessageUtils.sendMessage(context.getSource(), this.results.get(i).toText());
         }
         this.findState = FindState.END;
     }

@@ -81,7 +81,7 @@ public class TradeEnchantedBookFindTask extends AbstractTradeFindTask {
 
     @Override
     protected void notFound() {
-        MessageUtils.sendCommandFeedback(context.getSource(),
+        MessageUtils.sendMessage(context.getSource(),
                 "carpet.commands.finder.trade.find.not_trade",
                 this.getTradeName(), FinderCommand.VILLAGER);
     }

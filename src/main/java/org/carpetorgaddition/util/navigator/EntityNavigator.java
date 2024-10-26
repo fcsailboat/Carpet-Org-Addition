@@ -42,7 +42,7 @@ public class EntityNavigator extends AbstractNavigator {
         }
         if (this.targetDeath()) {
             // 如果目标实体死亡，就清除玩家的追踪器
-            MessageUtils.sendTextMessageToHud(this.player, TextUtils.translate("carpet.commands.navigate.hud.target_death"));
+            MessageUtils.sendMessageToHud(this.player, TextUtils.translate("carpet.commands.navigate.hud.target_death"));
             this.clear();
             return;
         }
@@ -61,7 +61,7 @@ public class EntityNavigator extends AbstractNavigator {
                     TextUtils.appendAll(WorldUtils.getDimensionName(entity.getWorld()),
                             TextConstants.simpleBlockPos(entity.getBlockPos())));
         }
-        MessageUtils.sendTextMessageToHud(this.player, text);
+        MessageUtils.sendMessageToHud(this.player, text);
         this.syncWaypoint(new WaypointUpdateS2CPack(this.entity.getEyePos(), world));
     }
 
@@ -76,7 +76,7 @@ public class EntityNavigator extends AbstractNavigator {
         if (this.player.getServerWorld().equals(this.entity.getWorld())
                 && MathUtils.getBlockDistance(player.getBlockPos(), entity.getBlockPos()) <= 8) {
             // 停止追踪
-            MessageUtils.sendTextMessageToHud(this.player, TextUtils.translate(REACH));
+            MessageUtils.sendMessageToHud(this.player, TextUtils.translate(REACH));
             this.clear();
             return true;
         }

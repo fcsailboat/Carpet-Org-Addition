@@ -166,7 +166,7 @@ public class MailCommand {
         List<Express> list = expressManager.stream().toList();
         if (list.isEmpty()) {
             // 没有快递被列出
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.mail.list.empty");
+            MessageUtils.sendMessage(context, "carpet.commands.mail.list.empty");
         }
         list.forEach(express -> list(player, express));
         return list.size();
@@ -198,7 +198,7 @@ public class MailCommand {
         list.add(TextUtils.translate("carpet.commands.mail.list.time", express.getTime()));
         // 拼接字符串
         text = TextUtils.hoverText(text, TextUtils.appendList(list));
-        MessageUtils.sendCommandFeedback(player.getCommandSource(), "carpet.commands.mail.list.each",
+        MessageUtils.sendMessage(player.getCommandSource(), "carpet.commands.mail.list.each",
                 express.getId(), express.getExpress().toHoverableText(), express.getSender(), express.getRecipient(), text);
     }
 

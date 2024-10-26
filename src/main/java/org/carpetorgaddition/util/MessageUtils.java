@@ -23,13 +23,13 @@ public class MessageUtils {
      * @param player  通过这个玩家对象获取玩家管理器对象，然后通过玩家管理器对象发送消息，player不是消息的发送者
      * @param message 要广播消息的内容
      */
-    public static void broadcastTextMessage(ServerPlayerEntity player, Text message) {
+    public static void broadcastMessage(ServerPlayerEntity player, Text message) {
         MinecraftServer server = player.getServer();
         if (server == null) {
             throw new IllegalStateException("尝试在客户端广播聊天消息");
         }
         PlayerManager playerManager = server.getPlayerManager();
-        broadcastTextMessage(playerManager, message);
+        broadcastMessage(playerManager, message);
     }
 
     /**
@@ -38,9 +38,9 @@ public class MessageUtils {
      * @param source  通过这个服务器命令源对象获取玩家管理器对象，然后通过玩家管理器对象发送消息，source不是消息的发送者
      * @param message 要广播消息的内容
      */
-    public static void broadcastTextMessage(ServerCommandSource source, Text message) {
+    public static void broadcastMessage(ServerCommandSource source, Text message) {
         PlayerManager playerManager = source.getServer().getPlayerManager();
-        broadcastTextMessage(playerManager, message);
+        broadcastMessage(playerManager, message);
     }
 
     /**
@@ -49,7 +49,7 @@ public class MessageUtils {
      * @param playerManager 通过这个玩家管理器对象发送消息
      * @param message       要广播消息的内容
      */
-    public static void broadcastTextMessage(PlayerManager playerManager, Text message) {
+    public static void broadcastMessage(PlayerManager playerManager, Text message) {
         playerManager.broadcast(message, false);
     }
 
@@ -59,18 +59,8 @@ public class MessageUtils {
      * @param player  要发送文本消息的玩家
      * @param message 发送文本消息的内容
      */
-    public static void sendTextMessage(PlayerEntity player, Text message) {
+    public static void sendMessage(PlayerEntity player, Text message) {
         player.sendMessage(message);
-    }
-
-    /**
-     * 让一个玩家发送带有特殊样式的文本，文本会显示在屏幕中下方的HUD上，文本内容仅对消息发送者可见
-     *
-     * @param player  要发送文本消息的玩家
-     * @param message 发送文本消息的内容
-     */
-    public static void sendTextMessageToHud(PlayerEntity player, Text message) {
-        player.sendMessage(message, true);
     }
 
     /**
@@ -79,38 +69,34 @@ public class MessageUtils {
      * @param source  要发送文本消息的命令源
      * @param message 发送文本消息的内容
      */
-    public static void sendTextMessage(ServerCommandSource source, Text message) {
+    public static void sendMessage(ServerCommandSource source, Text message) {
         source.sendMessage(message);
     }
 
     /**
      * 发送一条可以被翻译的消息做为命令的执行反馈，消息内容仅消息发送者可见
      */
-    public static void sendCommandFeedback(CommandContext<ServerCommandSource> context, String key, Object... obj) {
-        MessageUtils.sendCommandFeedback(context.getSource(), key, obj);
+    public static void sendMessage(CommandContext<ServerCommandSource> context, String key, Object... obj) {
+        MessageUtils.sendMessage(context.getSource(), key, obj);
     }
 
-    public static void sendCommandFeedback(ServerCommandSource source, String key, Object... obj) {
-        MessageUtils.sendTextMessage(source, TextUtils.translate(key, obj));
-    }
-
-    public static void sendCommandFeedback(ServerCommandSource source, Text message) {
-        MessageUtils.sendTextMessage(source, message);
+    public static void sendMessage(ServerCommandSource source, String key, Object... obj) {
+        MessageUtils.sendMessage(source, TextUtils.translate(key, obj));
     }
 
     /**
      * 发送一条红色的可以被翻译的消息做为命令的执行反馈，消息内容仅消息发送者可见
      */
-    public static void sendCommandErrorFeedback(CommandContext<ServerCommandSource> context, String key, Object... obj) {
-        MessageUtils.sendCommandErrorFeedback(context.getSource(), key, obj);
+    public static void sendErrorMessage(CommandContext<ServerCommandSource> context, String key, Object... obj) {
+        MessageUtils.sendErrorMessage(context.getSource(), key, obj);
     }
 
-    public static void sendCommandErrorFeedback(ServerCommandSource source, String key, Object... obj) {
-        MessageUtils.sendTextMessage(source, TextUtils.setColor(TextUtils.translate(key, obj), Formatting.RED));
+    public static void sendErrorMessage(ServerCommandSource source, String key, Object... obj) {
+        MessageUtils.sendMessage(source, TextUtils.setColor(TextUtils.translate(key, obj), Formatting.RED));
     }
 
-    public static void sendCommandErrorFeedback(ServerCommandSource source, Text message) {
-        MessageUtils.sendTextMessage(source, TextUtils.setColor(message.copy(), Formatting.RED));
+    public static void sendErrorMessage(ServerCommandSource source, Text message) {
+        MessageUtils.sendMessage(source, TextUtils.setColor(message.copy(), Formatting.RED));
     }
 
     /**
@@ -122,10 +108,20 @@ public class MessageUtils {
      * @param key    消息的翻译键
      * @param obj    消息中替代占位符的内容
      */
-    public static void sendCommandErrorFeedback(ServerCommandSource source, Throwable e, String key, Object... obj) {
+    public static void sendErrorMessage(ServerCommandSource source, Throwable e, String key, Object... obj) {
         String error = Objects.requireNonNullElse(e.getMessage(), e.getClass().getSimpleName());
         MutableText message = TextUtils.setColor(TextUtils.translate(key, obj), Formatting.RED);
-        MessageUtils.sendTextMessage(source, TextUtils.hoverText(message, TextUtils.createText(error)));
+        MessageUtils.sendMessage(source, TextUtils.hoverText(message, TextUtils.createText(error)));
+    }
+
+    /**
+     * 让一个玩家发送带有特殊样式的文本，文本会显示在屏幕中下方的HUD上，文本内容仅对消息发送者可见
+     *
+     * @param player  要发送文本消息的玩家
+     * @param message 发送文本消息的内容
+     */
+    public static void sendMessageToHud(PlayerEntity player, Text message) {
+        player.sendMessage(message, true);
     }
 
     /**
@@ -136,7 +132,7 @@ public class MessageUtils {
      */
     public static void sendListMessage(ServerCommandSource source, ArrayList<? extends Text> list) {
         for (Text message : list) {
-            sendTextMessage(source, message);
+            sendMessage(source, message);
         }
     }
 }

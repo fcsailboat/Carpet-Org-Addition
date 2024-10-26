@@ -45,7 +45,7 @@ public class WaypointNavigator extends AbstractNavigator {
         if (playerDimension.equals(waypointDimension)) {
             // 玩家和路径点在相同的维度
             Text text = this.getHUDText(blockPos.toCenterPos(), getIn(blockPos), getDistance(playerBlockPos, blockPos));
-            MessageUtils.sendTextMessageToHud(this.player, text);
+            MessageUtils.sendMessageToHud(this.player, text);
             this.syncWaypoint(new WaypointUpdateS2CPack(blockPos.toCenterPos(), waypointDimension));
         } else {
             BlockPos anotherBlockPos = this.waypoint.getAnotherBlockPos();
@@ -58,7 +58,7 @@ public class WaypointNavigator extends AbstractNavigator {
                         TextUtils.toItalic(TextConstants.simpleBlockPos(blockPos)));
                 Text text = this.getHUDText(anotherBlockPos.toCenterPos(), in,
                         getDistance(playerBlockPos, anotherBlockPos));
-                MessageUtils.sendTextMessageToHud(this.player, text);
+                MessageUtils.sendMessageToHud(this.player, text);
                 this.syncWaypoint(new WaypointUpdateS2CPack(anotherBlockPos.toCenterPos(), playerDimension));
             } else {
                 // 玩家和路径点在不同维度
@@ -66,7 +66,7 @@ public class WaypointNavigator extends AbstractNavigator {
                         this.waypoint.getDimension()));
                 MutableText in = TextUtils.translate(IN, waypoint.getName(),
                         TextUtils.appendAll(dimensionName, TextConstants.simpleBlockPos(blockPos)));
-                MessageUtils.sendTextMessageToHud(this.player, in);
+                MessageUtils.sendMessageToHud(this.player, in);
             }
         }
     }
@@ -76,7 +76,7 @@ public class WaypointNavigator extends AbstractNavigator {
         if (Objects.equals(WorldUtils.getDimensionId(this.player.getWorld()), this.waypointDimension)
                 && MathUtils.getBlockIntegerDistance(this.player.getBlockPos(), this.waypoint.getBlockPos()) <= 8) {
             // 到达目的地，停止追踪
-            MessageUtils.sendTextMessageToHud(this.player, TextUtils.translate(REACH));
+            MessageUtils.sendMessageToHud(this.player, TextUtils.translate(REACH));
             this.clear();
             return true;
         }

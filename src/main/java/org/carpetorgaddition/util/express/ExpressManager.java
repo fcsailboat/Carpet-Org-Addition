@@ -70,7 +70,7 @@ public class ExpressManager {
         for (Express express : list) {
             MutableText clickRun = TextConstants.clickRun("/mail receive " + express.getId());
             ItemStack stack = express.getExpress();
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.prompt_receive",
+            MessageUtils.sendMessage(source, "carpet.commands.mail.prompt_receive",
                     stack.getCount(), stack.toHoverableText(), clickRun);
         }
     }
@@ -141,12 +141,12 @@ public class ExpressManager {
         }
         ServerCommandSource source = player.getCommandSource();
         if (receive == 0) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.receive.insufficient_capacity");
+            MessageUtils.sendMessage(source, "carpet.commands.mail.receive.insufficient_capacity");
         } else {
             if (receive == total) {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.receive.success", total, TextConstants.ITEM);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.receive.success", total, TextConstants.ITEM);
             } else {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.receive.partial_reception", receive, total - receive);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.receive.partial_reception", receive, total - receive);
             }
             // 播放物品拾取音效
             Express.playItemPickupSound(player);
@@ -158,7 +158,7 @@ public class ExpressManager {
                 if (senderPlayer == null) {
                     continue;
                 }
-                MessageUtils.sendCommandFeedback(senderPlayer.getCommandSource(), message);
+                MessageUtils.sendMessage(senderPlayer.getCommandSource(), message);
             }
         }
         return receive;
@@ -191,12 +191,12 @@ public class ExpressManager {
         }
         ServerCommandSource source = player.getCommandSource();
         if (cancel == 0) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.cancel.insufficient_capacity");
+            MessageUtils.sendMessage(source, "carpet.commands.mail.cancel.insufficient_capacity");
         } else {
             if (cancel == total) {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.cancel.success", total, TextConstants.ITEM);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.cancel.success", total, TextConstants.ITEM);
             } else {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.cancel.partial_reception", cancel, total - cancel);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.cancel.partial_reception", cancel, total - cancel);
             }
             // 播放物品拾取音效
             Express.playItemPickupSound(player);
@@ -207,7 +207,7 @@ public class ExpressManager {
                 if (receivePlayer == null) {
                     continue;
                 }
-                MessageUtils.sendCommandFeedback(receivePlayer.getCommandSource(), message);
+                MessageUtils.sendMessage(receivePlayer.getCommandSource(), message);
             }
         }
         return cancel;

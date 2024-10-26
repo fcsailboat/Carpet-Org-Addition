@@ -87,7 +87,7 @@ public class ReLoginTask extends PlayerScheduleTask {
             }
         } else {
             Runnable function = () -> {
-                MessageUtils.sendCommandErrorFeedback(context, "carpet.commands.playerManager.schedule.relogin.rule.disable");
+                MessageUtils.sendErrorMessage(context, "carpet.commands.playerManager.schedule.relogin.rule.disable");
                 // 如果假玩家已经下线，重新生成假玩家
                 ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(this.playerName);
                 if (player == null) {
@@ -157,7 +157,7 @@ public class ReLoginTask extends PlayerScheduleTask {
 
     @Override
     public void onCancel(CommandContext<ServerCommandSource> context) {
-        MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.relogin.cancel", this.playerName);
+        MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.relogin.cancel", this.playerName);
         ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(this.playerName);
         if (player == null) {
             homePositionSpawn(this.playerName, this.server, this.dimensionId);
@@ -166,7 +166,7 @@ public class ReLoginTask extends PlayerScheduleTask {
 
     @Override
     public void sendEachMessage(ServerCommandSource source) {
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.playerManager.schedule.relogin", this.playerName, this.interval);
+        MessageUtils.sendMessage(source, "carpet.commands.playerManager.schedule.relogin", this.playerName, this.interval);
     }
 
     public void setInterval(int interval) {

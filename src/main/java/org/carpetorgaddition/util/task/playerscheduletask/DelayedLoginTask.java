@@ -52,7 +52,7 @@ public class DelayedLoginTask extends PlayerScheduleTask {
     public void onCancel(CommandContext<ServerCommandSource> context) {
         MutableText time = getDisplayTime();
         MutableText displayName = this.serial.getDisplayName().copy();
-        MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.login.cancel", displayName, time);
+        MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.login.cancel", displayName, time);
     }
 
     // 获取带有悬停提示的时间
@@ -62,7 +62,7 @@ public class DelayedLoginTask extends PlayerScheduleTask {
 
     @Override
     public void sendEachMessage(ServerCommandSource source) {
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.playerManager.schedule.login",
+        MessageUtils.sendMessage(source, "carpet.commands.playerManager.schedule.login",
                 this.serial.getDisplayName(), this.getDisplayTime());
     }
 

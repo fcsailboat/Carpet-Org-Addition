@@ -57,7 +57,7 @@ public class XpTransferCommand {
             outputPlayer.setExperiencePoints(0);
             // 把经验给输入玩家
             inputPlayer.addExperience(totalExperience);
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.xpTransfer.all",
+            MessageUtils.sendMessage(source, "carpet.commands.xpTransfer.all",
                     outputPlayer.getDisplayName(), totalExperience, inputPlayer.getDisplayName());
             return totalExperience;
         } else {
@@ -90,7 +90,7 @@ public class XpTransferCommand {
             inputPlayer.addExperience(halfExperience);
             // 将另一半经验再转移回输出玩家身上
             outputPlayer.addExperience(totalExperience - halfExperience);
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.xpTransfer.half",
+            MessageUtils.sendMessage(source, "carpet.commands.xpTransfer.half",
                     outputPlayer.getDisplayName(), halfExperience, inputPlayer.getDisplayName());
             return halfExperience;
         } else {
@@ -130,7 +130,7 @@ public class XpTransferCommand {
             inputPlayer.addExperience(xpNumber);
             // 将剩余的经验再添加回输出玩家
             outputPlayer.addExperience(totalExperience - xpNumber);
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.xpTransfer.point",
+            MessageUtils.sendMessage(source, "carpet.commands.xpTransfer.point",
                     outputPlayer.getDisplayName(), xpNumber, inputPlayer.getDisplayName());
             return xpNumber;
         } else {

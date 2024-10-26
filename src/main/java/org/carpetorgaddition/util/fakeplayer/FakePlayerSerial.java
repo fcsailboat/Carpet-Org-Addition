@@ -151,7 +151,7 @@ public class FakePlayerSerial {
             }
             // 单击执行命令
             MutableText clickResave = TextConstants.clickRun(command);
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.save.file_already_exist", clickResave);
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.save.file_already_exist", clickResave);
             return -1;
         }
         IOUtils.saveJson(file, this.toJson());
@@ -297,7 +297,7 @@ public class FakePlayerSerial {
                 // 如果有注释，在列出的玩家的名字上也添加注释
                 serial.annotation.hasContent() ? TextUtils.hoverText(playerName, serial.annotation.getText()) : playerName);
         // 发送消息
-        MessageUtils.sendCommandFeedback(context.getSource(), mutableText);
+        MessageUtils.sendMessage(context.getSource(), mutableText);
     }
 
     /**

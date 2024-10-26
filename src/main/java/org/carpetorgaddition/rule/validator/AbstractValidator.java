@@ -45,8 +45,8 @@ public abstract class AbstractValidator<T> extends Validator<T> {
     public void notifyFailure(ServerCommandSource source, CarpetRule<T> currentRule, String providedValue) {
         // 获取此规则的翻译名称
         String translatedName = RuleHelper.translatedName(currentRule);
-        MessageUtils.sendCommandErrorFeedback(source, "carpet.rule.validate.invalid_value", translatedName, providedValue);
-        MessageUtils.sendCommandErrorFeedback(source, errorMessage());
+        MessageUtils.sendErrorMessage(source, "carpet.rule.validate.invalid_value", translatedName, providedValue);
+        MessageUtils.sendErrorMessage(source, errorMessage());
     }
 
     /**

@@ -21,7 +21,7 @@ public class RespawnAnchorBlockMixin {
     @Inject(method = "onUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/RespawnAnchorBlock;isNether(Lnet/minecraft/world/World;)Z"), cancellable = true)
     private void onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
         if (CarpetOrgAdditionSettings.disableRespawnBlocksExplode && !RespawnAnchorBlock.isNether(world)) {
-            MessageUtils.sendTextMessageToHud(player, TextUtils.translate("carpet.rule.message.disableRespawnBlocksExplode"));
+            MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.rule.message.disableRespawnBlocksExplode"));
             cir.setReturnValue(ActionResult.SUCCESS);
         }
     }

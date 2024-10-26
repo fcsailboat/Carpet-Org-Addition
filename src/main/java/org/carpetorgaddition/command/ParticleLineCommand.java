@@ -88,9 +88,9 @@ public class ParticleLineCommand {
         double f = -vec3d2.dotProduct(vec3d5);
         if (f <= 0.5) {
             if (verticalAngle > 0.0) {
-                MessageUtils.sendTextMessageToHud(player, Text.literal("-->"));
+                MessageUtils.sendMessageToHud(player, Text.literal("-->"));
             } else if (verticalAngle < 0.0) {
-                MessageUtils.sendTextMessageToHud(player, Text.literal("<--"));
+                MessageUtils.sendMessageToHud(player, Text.literal("<--"));
             }
         }
     }

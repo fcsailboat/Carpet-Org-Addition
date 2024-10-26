@@ -68,7 +68,7 @@ public class CarpetOrgAdditionTestCommand {
         DefaultedList<ItemStack> main = player.getInventory().main;
         for (int index = 0; index < main.size(); index++) {
             if (item.test(main.get(index))) {
-                MessageUtils.sendTextMessage(player, Text.literal(main.get(index).getName().getString() + "在索引" + index));
+                MessageUtils.sendMessage(player, Text.literal(main.get(index).getName().getString() + "在索引" + index));
                 return index;
             }
         }
@@ -109,7 +109,7 @@ public class CarpetOrgAdditionTestCommand {
         }
         float hardness = blockState.getHardness(world, blockPos);
         long takeTime = System.currentTimeMillis() - timeMillis;
-        MessageUtils.sendCommandFeedback(context.getSource(), TextUtils.createText(blockState.getBlock().getName().getString() + "的硬度是" + hardness + "，命令执行耗时" + takeTime + "毫秒"));
+        MessageUtils.sendMessage(context.getSource(), TextUtils.createText(blockState.getBlock().getName().getString() + "的硬度是" + hardness + "，命令执行耗时" + takeTime + "毫秒"));
         return (int) takeTime;
     }
 
@@ -128,7 +128,7 @@ public class CarpetOrgAdditionTestCommand {
             }
             break;
         }
-        MessageUtils.sendTextMessage(context.getSource(),
+        MessageUtils.sendMessage(context.getSource(),
                 TextUtils.createText("给予" + blockState.getBlock().getName().getString() + i + "个随机刻"));
         return i;
     }

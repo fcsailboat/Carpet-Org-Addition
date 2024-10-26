@@ -78,7 +78,7 @@ public class WanderingTraderManagerMixin {
                     continue;
                 }
                 // 广播流浪商人生成成功
-                MessageUtils.sendTextMessage(player, CommandHelper.canUseCommand(player.getCommandSource(),
+                MessageUtils.sendMessage(player, CommandHelper.canUseCommand(player.getCommandSource(),
                         CarpetOrgAdditionSettings.commandNavigate) ? canClickMessage : message);
                 // 播放音效通知流浪商人生成
                 WorldUtils.playSound(trader.getWorld(), player.getBlockPos(), trader.getYesSound(), trader.getSoundCategory());

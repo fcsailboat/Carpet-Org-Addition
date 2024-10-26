@@ -45,7 +45,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
         }
         // 快递接收者可能在发送者发送快递时退出游戏
         if (this.targetPlayer.isRemoved()) {
-            MessageUtils.sendCommandErrorFeedback(this.sourcePlayer.getCommandSource(), "carpet.commands.multiple.no_player");
+            MessageUtils.sendErrorMessage(this.sourcePlayer.getCommandSource(), "carpet.commands.multiple.no_player");
             // 将GUI中的物品放回玩家物品栏
             this.dropInventory(this.sourcePlayer, this.inventory);
             return;
@@ -72,7 +72,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
                 expressManager.putNoMessage(express);
             } catch (IOException e) {
                 CarpetOrgAddition.LOGGER.error("批量发送物品时遇到意外错误", e);
-                MessageUtils.sendCommandErrorFeedback(this.sourcePlayer.getCommandSource(), e, "carpet.commands.multiple.error");
+                MessageUtils.sendErrorMessage(this.sourcePlayer.getCommandSource(), e, "carpet.commands.multiple.error");
                 return;
             }
         }
@@ -127,9 +127,9 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             default -> throw new IllegalStateException();
         };
         // 向物品发送者发送消息
-        MessageUtils.sendCommandFeedback(this.sourcePlayer.getCommandSource(), "carpet.commands.mail.sending.multiple", args);
+        MessageUtils.sendMessage(this.sourcePlayer.getCommandSource(), "carpet.commands.mail.sending.multiple", args);
         // 向物品接收者发送消息
-        MessageUtils.sendCommandFeedback(this.targetPlayer.getCommandSource(), "carpet.commands.mail.receive.multiple",
+        MessageUtils.sendMessage(this.targetPlayer.getCommandSource(), "carpet.commands.mail.receive.multiple",
                 this.sourcePlayer.getDisplayName(), args[1], args[2], TextConstants.clickRun("/mail receive"));
         Express.playXpOrbPickupSound(this.targetPlayer);
         Express.checkRecipientPermission(this.sourcePlayer, this.targetPlayer);

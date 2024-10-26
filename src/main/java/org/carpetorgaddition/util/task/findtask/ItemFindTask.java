@@ -69,7 +69,7 @@ public class ItemFindTask extends ServerTask implements FindTask {
         this.tickCount++;
         if (tickCount > FinderCommand.MAX_TICK_COUNT) {
             // 任务超时
-            MessageUtils.sendCommandErrorFeedback(context, FinderCommand.TIME_OUT);
+            MessageUtils.sendErrorMessage(context, FinderCommand.TIME_OUT);
             this.findState = FindState.END;
             return;
         }
@@ -170,7 +170,7 @@ public class ItemFindTask extends ServerTask implements FindTask {
         }
         if (this.results.size() > FinderCommand.MAXIMUM_STATISTICAL_COUNT) {
             // 容器太多，无法统计
-            Runnable function = () -> MessageUtils.sendCommandErrorFeedback(context,
+            Runnable function = () -> MessageUtils.sendErrorMessage(context,
                     "carpet.commands.finder.item.too_much_container",
                     this.matcher.toText());
             throw new TaskExecutionException(function);
@@ -190,7 +190,7 @@ public class ItemFindTask extends ServerTask implements FindTask {
     private void sort() {
         if (this.results.isEmpty()) {
             // 在周围的容器中找不到指定物品，直接将状态设置为结束，然后结束方法
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.item.find.not_item", matcher.toText());
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.not_item", matcher.toText());
             this.findState = FindState.END;
             return;
         }
@@ -209,18 +209,18 @@ public class ItemFindTask extends ServerTask implements FindTask {
             itemOrTagName = TextUtils.regularStyle(String.valueOf(count), null, false, this.shulkerBox, false, false);
         }
         if (this.results.size() <= FinderCommand.MAX_FEEDBACK_COUNT) {
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.item.find",
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find",
                     this.results.size(), itemOrTagName, matcher.toText());
         } else {
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.item.find.limit",
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.limit",
                     this.results.size(), itemOrTagName, matcher.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
         }
         for (int i = 0; i < this.results.size() && i <= FinderCommand.MAX_FEEDBACK_COUNT; i++) {
             MutableText message = this.results.get(i).toText();
             if (isItem) {
-                MessageUtils.sendTextMessage(this.context.getSource(), message);
+                MessageUtils.sendMessage(this.context.getSource(), message);
             } else {
-                MessageUtils.sendTextMessage(this.context.getSource(), TextUtils.appendAll(message, this.results.get(i).item().getName().copy()));
+                MessageUtils.sendMessage(this.context.getSource(), TextUtils.appendAll(message, this.results.get(i).item().getName().copy()));
             }
         }
         this.findState = FindState.END;

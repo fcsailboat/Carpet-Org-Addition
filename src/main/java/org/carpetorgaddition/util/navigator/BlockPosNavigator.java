@@ -38,7 +38,7 @@ public class BlockPosNavigator extends AbstractNavigator {
         } else {
             text = TextUtils.appendAll(WorldUtils.getDimensionName(this.world), TextConstants.simpleBlockPos(this.blockPos));
         }
-        MessageUtils.sendTextMessageToHud(this.player, text);
+        MessageUtils.sendMessageToHud(this.player, text);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class BlockPosNavigator extends AbstractNavigator {
         if (this.player.getServerWorld().equals(this.world)) {
             if (MathUtils.getBlockIntegerDistance(this.player.getBlockPos(), this.blockPos) <= 8) {
                 // 到达目的地，停止追踪
-                MessageUtils.sendTextMessageToHud(this.player, TextUtils.translate(REACH));
+                MessageUtils.sendMessageToHud(this.player, TextUtils.translate(REACH));
                 this.clear();
                 return true;
             }

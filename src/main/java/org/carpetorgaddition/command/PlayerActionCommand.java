@@ -314,7 +314,7 @@ public class PlayerActionCommand {
         // [这里]的悬停提示
         MutableText hoverText = TextConstants.clickInput(command);
         MutableText suggest = TextUtils.suggest(TextConstants.CLICK_HERE.copy(), command, hoverText, Formatting.AQUA);
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.playerAction.set", suggest);
+        MessageUtils.sendMessage(source, "carpet.commands.playerAction.set", suggest);
     }
 
     // 在设置假玩家合成时获取动作管理器并提示启用合成修复
