@@ -73,6 +73,10 @@ public class AutoGrowInventory implements Inventory, Iterable<ItemStack> {
      * @return 添加后剩余的物品，总是为{@link ItemStack#EMPTY}
      */
     public ItemStack addStack(ItemStack stack) {
+        // 添加过量堆叠的物品
+        while (stack.getCount() > stack.getMaxCount()) {
+            this.addStack(stack.split(stack.getMaxCount()));
+        }
         ItemStack itemStack = this.inventory.addStack(stack);
         // 物品栏内容足够容纳物品
         if (itemStack.isEmpty()) {

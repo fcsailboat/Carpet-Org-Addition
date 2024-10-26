@@ -3,7 +3,6 @@ package org.carpetorgaddition.util.screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -18,6 +17,7 @@ import org.carpetorgaddition.util.constant.TextConstants;
 import org.carpetorgaddition.util.express.Express;
 import org.carpetorgaddition.util.express.ExpressManager;
 import org.carpetorgaddition.util.express.ExpressManagerInterface;
+import org.carpetorgaddition.util.inventory.AutoGrowInventory;
 import org.carpetorgaddition.util.inventory.ImmutableInventory;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             this.dropInventory(this.sourcePlayer, this.inventory);
             return;
         }
-        SimpleInventory simpleInventory = new SimpleInventory(this.inventory.size());
+        AutoGrowInventory autoGrowInventory = new AutoGrowInventory();
         // 合并可堆叠的物品
         for (int i = 0; i < this.inventory.size(); i++) {
             ItemStack itemStack = this.inventory.getStack(i);
@@ -59,11 +59,11 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             if (itemStack.isEmpty()) {
                 continue;
             }
-            simpleInventory.addStack(itemStack);
+            autoGrowInventory.addStack(itemStack);
         }
         // 发送物品
-        for (int i = 0; i < simpleInventory.size(); i++) {
-            ItemStack stack = simpleInventory.getStack(i);
+        for (int i = 0; i < autoGrowInventory.size(); i++) {
+            ItemStack stack = autoGrowInventory.getStack(i);
             // 前面已经对物品进行了整理，所以遇到空物品时，说明物品已发送完毕
             if (stack.isEmpty()) {
                 break;
@@ -77,20 +77,20 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
                 return;
             }
         }
-        sendFeedback(simpleInventory);
+        sendFeedback(autoGrowInventory);
     }
 
     // 发送命令反馈
-    public void sendFeedback(SimpleInventory simpleInventory) {
+    public void sendFeedback(AutoGrowInventory inventory) {
         int count = 0;
-        ItemStack firstStack = simpleInventory.getStack(0);
+        ItemStack firstStack = inventory.getStack(0);
         // 定义变量记录查找状态
         // 如果为0，表示物品栏里只有一种物品，并且NBT也相同
         // 如果为1，表示物品栏里只有一种物品，但是NBT不相同
         // 如果为2，表示物品栏里有多种物品，不考虑NBT
         int onlyOneKind = 0;
-        for (int i = 0; i < simpleInventory.size(); i++) {
-            ItemStack stack = simpleInventory.getStack(i);
+        for (int i = 0; i < inventory.size(); i++) {
+            ItemStack stack = inventory.getStack(i);
             if (stack.isEmpty()) {
                 continue;
             }
@@ -123,7 +123,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             case 2 -> {
                 // 不显示物品堆叠组数，但鼠标悬停可以显示物品栏
                 MutableText itemText = TextUtils.translate("carpet.command.item.item");
-                yield new Object[]{playerName, count, TextConstants.inventory(itemText, simpleInventory), command};
+                yield new Object[]{playerName, count, TextConstants.inventory(itemText, inventory), command};
             }
             default -> throw new IllegalStateException();
         };
@@ -139,7 +139,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             CarpetOrgAddition.LOGGER.info("{}向{}发送了{}",
                     this.sourcePlayer.getName().getString(),
                     this.targetPlayer.getName().getString(),
-                    new ImmutableInventory(simpleInventory));
+                    new ImmutableInventory(inventory));
         } else {
             CarpetOrgAddition.LOGGER.info("{}向{}发送了{}个{}",
                     this.sourcePlayer.getName().getString(),
