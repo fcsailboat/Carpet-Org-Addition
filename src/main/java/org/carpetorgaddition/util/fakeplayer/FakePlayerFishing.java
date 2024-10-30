@@ -36,12 +36,11 @@ public class FakePlayerFishing {
                 }
                 // 检查鱼是否上钩
                 if (canReelInTheFishingPole(fishHook)) {
-                    return;
+                    // 右键收杆
+                    use(fakePlayer);
+                    // 设置5个游戏刻后重新抛竿
+                    timer.set(5);
                 }
-                // 右键收杆
-                use(fakePlayer);
-                // 设置5个游戏刻后重新抛竿
-                timer.set(5);
             }
         }
     }
@@ -100,7 +99,7 @@ public class FakePlayerFishing {
      * @return 是否可以收杆
      */
     private static boolean canReelInTheFishingPole(FishingBobberEntity fishHook) {
-        return ((FishingBobberEntityAccessor) fishHook).getHookCountdown() <= 0;
+        return ((FishingBobberEntityAccessor) fishHook).getHookCountdown() > 0;
     }
 
     /**
