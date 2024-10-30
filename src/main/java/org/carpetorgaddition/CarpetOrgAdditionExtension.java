@@ -12,7 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.command.PlayerManagerCommand;
 import org.carpetorgaddition.command.RegisterCarpetCommands;
-import org.carpetorgaddition.logger.WanderingTraderSpawnLogger;
+import org.carpetorgaddition.logger.Loggers;
 import org.carpetorgaddition.translate.Translate;
 import org.carpetorgaddition.util.express.ExpressManager;
 import org.carpetorgaddition.util.express.ExpressManagerInterface;
@@ -74,8 +74,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     // 注册记录器
     @Override
     public void registerLoggers() {
-        CarpetExtension.super.registerLoggers();
-        WanderingTraderSpawnLogger.registerLoggers();
+        Loggers.register();
     }
 
     // 注册命令
