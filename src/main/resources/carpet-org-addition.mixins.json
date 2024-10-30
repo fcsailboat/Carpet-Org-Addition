@@ -72,6 +72,8 @@
     "rule.carpet.PlayerCommandMixin",
     "rule.carpet.SettingsManagerAccessor",
     "rule.carpet.SettingsManagerMixin",
+    "rule.cceupdatesuppression.BlockPlacementDispenserBehaviorMixin",
+    "rule.cceupdatesuppression.ShulkerBoxBlockMixin",
     "rule.disablemobpeacefuldespawn.MobEntityMixin",
     "rule.disablemobpeacefuldespawn.WitherEntityMixin",
     "rule.entityplayeractionpack.ActionAccessor",
