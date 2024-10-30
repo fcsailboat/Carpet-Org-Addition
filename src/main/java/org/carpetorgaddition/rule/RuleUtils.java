@@ -9,9 +9,6 @@ public class RuleUtils {
 
     /**
      * 潜影盒是否可以触发更新抑制器
-     *
-     * @param world 潜影盒所在维度
-     * @param pos   潜影盒的位置
      */
     public static boolean canUpdateSuppression(@Nullable String blockName) {
         if ("false".equalsIgnoreCase(CarpetOrgAdditionSettings.CCEUpdateSuppression)) {

@@ -434,8 +434,6 @@ public class CarpetOrgAdditionSettings {
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean displayFakePlayerSummoner = false;
 
-    // TODO 更新日志：潜影盒堆叠，mixinextras
-    // TODO 修改翻译
     // 潜影盒堆叠
     @Rule(categories = {ORG, RuleCategory.EXPERIMENTAL})
     public static boolean shulkerBoxStackable = false;
