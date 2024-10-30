@@ -215,7 +215,7 @@ public class TextUtils {
                 default -> throw new IllegalArgumentException(obj + "即不是可变文本对象，也不是字符串对象");
             }
         }
-        return textBuilder.build();
+        return textBuilder.toLine();
     }
 
     /**

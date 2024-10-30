@@ -2,6 +2,7 @@ package org.carpetorgaddition.util.express;
 
 import carpet.utils.CommandHelper;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -19,6 +20,7 @@ import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.WorldUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
+import org.carpetorgaddition.util.wheel.Counter;
 import org.carpetorgaddition.util.wheel.WorldFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -143,16 +145,16 @@ public class Express implements Comparable<Express> {
         int count = this.express.getCount();
         ItemStack copy = this.express.copy();
         // TODO 通知发送者消息中鼠标悬停显示具体物品
+        Counter<Item> counter = new Counter<>();
         switch (insertStack(player)) {
             case COMPLETE -> {
                 // 物品完全接收
                 MessageUtils.sendMessage(player,
                         TextUtils.translate("carpet.commands.mail.receive.success",
                                 count, copy.toHoverableText()));
-                // 通知发送者物品以接收
-                Supplier<Text> message = () -> TextUtils.toGrayItalic(TextUtils.translate(
-                        "carpet.commands.mail.sending.notice",
-                        player.getDisplayName()));
+                counter.add(copy.getItem(), count);
+                // 通知发送者物品已接收
+                Supplier<Text> message = () -> ExpressManager.getReceiveNotice(player, counter);
                 this.ifItExistsSendIt(this.sender, message);
                 // 播放物品拾取音效
                 playItemPickupSound(player);
@@ -164,6 +166,10 @@ public class Express implements Comparable<Express> {
                 MessageUtils.sendMessage(player,
                         TextUtils.translate("carpet.commands.mail.receive.partial_reception",
                                 count - surplusCount, surplusCount));
+                counter.add(copy.getItem(), count - surplusCount);
+                // 通知发送者物品已接收
+                Supplier<Text> message = () -> ExpressManager.getReceiveNotice(player, counter);
+                this.ifItExistsSendIt(this.sender, message);
                 // 播放物品拾取音效
                 playItemPickupSound(player);
             }

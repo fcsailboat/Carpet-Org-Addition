@@ -1,6 +1,7 @@
 package org.carpetorgaddition.util.express;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -15,14 +16,13 @@ import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
+import org.carpetorgaddition.util.wheel.Counter;
+import org.carpetorgaddition.util.wheel.TextBuilder;
 import org.carpetorgaddition.util.wheel.WorldFormat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -66,6 +66,7 @@ public class ExpressManager {
         if (list.isEmpty()) {
             return;
         }
+        // TODO 不提示已经撤回的快递
         ServerCommandSource source = player.getCommandSource();
         for (Express express : list) {
             MutableText clickRun = TextConstants.clickRun("/mail receive " + express.getId());
@@ -123,14 +124,14 @@ public class ExpressManager {
         int total = 0;
         // 接收物品堆叠数
         int receive = 0;
-        HashSet<String> players = new HashSet<>();
+        HashMap<String, Counter<Item>> hashMap = new HashMap<>();
         for (Express express : list) {
-            players.add(express.getSender());
             // 物品插入物品栏之前的堆叠数
             int count = express.getExpress().getCount();
+            Item item = express.getExpress().getItem();
             total += count;
             Express.InsertResult each = express.receiveEach();
-            receive += switch (each) {
+            int result = switch (each) {
                 // 完全插入物品栏
                 case COMPLETE -> count;
                 // 部分插入物品栏
@@ -138,6 +139,15 @@ public class ExpressManager {
                 // 未插入物品栏
                 case FAIL -> 0;
             };
+            Counter<Item> counter = hashMap.get(express.getSender());
+            if (counter == null) {
+                Counter<Item> value = new Counter<>();
+                value.add(item, result);
+                hashMap.put(express.getSender(), value);
+            } else {
+                counter.add(item, result);
+            }
+            receive += result;
         }
         ServerCommandSource source = player.getCommandSource();
         if (receive == 0) {
@@ -150,15 +160,15 @@ public class ExpressManager {
             }
             // 播放物品拾取音效
             Express.playItemPickupSound(player);
-            // 通知发送者物品以接收
-            Text message = TextUtils.toGrayItalic(TextUtils.translate("carpet.commands.mail.sending.notice", player.getDisplayName()));
             PlayerManager playerManager = source.getServer().getPlayerManager();
-            for (String name : players) {
-                ServerPlayerEntity senderPlayer = playerManager.getPlayer(name);
-                if (senderPlayer == null) {
+            for (Map.Entry<String, Counter<Item>> entry : hashMap.entrySet()) {
+                // 通知发送者物品已接收
+                MutableText message = getReceiveNotice(player, entry.getValue());
+                ServerPlayerEntity playerEntity = playerManager.getPlayer(entry.getKey());
+                if (playerEntity == null) {
                     continue;
                 }
-                MessageUtils.sendMessage(senderPlayer.getCommandSource(), message);
+                MessageUtils.sendMessage(playerEntity, message);
             }
         }
         return receive;
@@ -211,6 +221,19 @@ public class ExpressManager {
             }
         }
         return cancel;
+    }
+
+    /**
+     * @return 获取快递发送者的快递被接收者接收的消息
+     */
+    public static MutableText getReceiveNotice(ServerPlayerEntity player, Counter<Item> counter) {
+        TextBuilder builder = new TextBuilder();
+        for (Item item : counter) {
+            builder.append(TextUtils.appendAll(item.getName(), "*", counter.getCount(item)));
+        }
+        MutableText translate = TextUtils.translate("carpet.commands.mail.sending.notice", player.getDisplayName());
+        MutableText message = TextUtils.toGrayItalic(translate);
+        return TextUtils.hoverText(message, builder.toParagraph());
     }
 
     /**

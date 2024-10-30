@@ -208,7 +208,7 @@ public class FakePlayerSerial {
             // 添加注释
             build.newLine().append("carpet.commands.playerManager.info.annotation", this.annotation.getText());
         }
-        return build.build();
+        return build.toLine();
     }
 
     public JsonObject toJson() {
