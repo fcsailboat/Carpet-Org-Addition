@@ -198,6 +198,8 @@
   "carpet.rule.syncNavigateWaypoint.desc": "启用后可以在客户端渲染当前导航器的航点位置",
   "carpet.rule.displayFakePlayerSummoner.name": "显示假玩家召唤者",
   "carpet.rule.displayFakePlayerSummoner.desc": "玩家执行/player <player> spawn命令时，显示执行该命令的玩家",
+  "carpet.rule.shulkerBoxStackable.name": "潜影盒可堆叠",
+  "carpet.rule.shulkerBoxStackable.desc": "允许潜影盒在GUI中堆叠",
   "carpet.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",
   "carpet.rule.message.CCEUpdateSuppression": "你不能打开用于更新抑制的潜影盒",
   "carpet.rule.message.displayFakePlayerSummoner": "%s召唤了%s",

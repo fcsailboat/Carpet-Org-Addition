@@ -80,6 +80,11 @@
     "rule.fakeplayerkeepinventory.ServerPlayerEntityMixin",
     "rule.respawnblocksexplode.BedBlockMixin",
     "rule.respawnblocksexplode.RespawnAnchorBlockMixin",
+    "rule.shulkerboxstackable.CrafterBlockMixin",
+    "rule.shulkerboxstackable.DropperBlockMixin",
+    "rule.shulkerboxstackable.HopperBlockEntityMixin",
+    "rule.shulkerboxstackable.ItemStackMixin",
+    "rule.shulkerboxstackable.ScreenHandlerMixin",
     "util.CraftingScreenHandlerMixin",
     "util.PlayerManagerMixin",
     "util.ServerPlayNetworkHandlerMixin"
