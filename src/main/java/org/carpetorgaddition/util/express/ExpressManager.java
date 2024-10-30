@@ -62,11 +62,13 @@ public class ExpressManager {
      * 提示玩家接收快递
      */
     public void promptToReceive(ServerPlayerEntity player) {
-        List<Express> list = this.expresses.stream().filter(express -> express.isRecipient(player)).toList();
+        List<Express> list = this.expresses.stream()
+                .filter(express -> express.isRecipient(player))
+                .filter(express -> !express.isCancel())
+                .toList();
         if (list.isEmpty()) {
             return;
         }
-        // TODO 不提示已经撤回的快递
         ServerCommandSource source = player.getCommandSource();
         for (Express express : list) {
             MutableText clickRun = TextConstants.clickRun("/mail receive " + express.getId());

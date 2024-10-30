@@ -47,6 +47,7 @@ public class Express implements Comparable<Express> {
      * 快递的内容
      */
     private final ItemStack express;
+
     /**
      * 快递是否已被撤回
      */
@@ -144,7 +145,6 @@ public class Express implements Comparable<Express> {
         }
         int count = this.express.getCount();
         ItemStack copy = this.express.copy();
-        // TODO 通知发送者消息中鼠标悬停显示具体物品
         Counter<Item> counter = new Counter<>();
         switch (insertStack(player)) {
             case COMPLETE -> {
@@ -417,6 +417,13 @@ public class Express implements Comparable<Express> {
      */
     public boolean isRecipient(ServerPlayerEntity player) {
         return Objects.equals(this.recipient, player.getName().getString());
+    }
+
+    /**
+     * @return 快递是否已被撤回
+     */
+    public boolean isCancel() {
+        return cancel;
     }
 
     @Override
