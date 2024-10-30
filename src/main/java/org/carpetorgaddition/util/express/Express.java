@@ -142,6 +142,7 @@ public class Express implements Comparable<Express> {
         }
         int count = this.express.getCount();
         ItemStack copy = this.express.copy();
+        // TODO 通知发送者消息中鼠标悬停显示具体物品
         switch (insertStack(player)) {
             case COMPLETE -> {
                 // 物品完全接收
@@ -158,7 +159,7 @@ public class Express implements Comparable<Express> {
             }
             case PART -> {
                 // 剩余的物品数量
-                int surplusCount = copy.getCount();
+                int surplusCount = this.express.getCount();
                 // 物品部分放入物品栏
                 MessageUtils.sendMessage(player,
                         TextUtils.translate("carpet.commands.mail.receive.partial_reception",
@@ -193,7 +194,7 @@ public class Express implements Comparable<Express> {
             }
             case PART -> {
                 // 剩余的物品数量
-                int surplusCount = copy.getCount();
+                int surplusCount = this.express.getCount();
                 // 物品部分放入物品栏
                 MessageUtils.sendMessage(player, TextUtils.translate("carpet.commands.mail.cancel.partial_reception",
                         count - surplusCount, surplusCount));

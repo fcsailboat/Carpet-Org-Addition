@@ -79,6 +79,13 @@ public class Counter<E> implements Iterable<E> {
     }
 
     /**
+     * @return 当前集合是否为空
+     */
+    public boolean isEmpty() {
+        return this.counter.isEmpty();
+    }
+
+    /**
      * 判断一个元素在集合内是否存在
      *
      * @param element 要判断是否存在的元素

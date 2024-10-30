@@ -38,6 +38,7 @@ public class PlayerCommandMixin {
             Operation<Boolean> original,
             @Local(argsOnly = true) CommandContext<ServerCommandSource> context
     ) {
+        // TODO 鼠标悬停显示更多信息，玩家位置等
         // 检查玩家是否成功召唤
         boolean success = original.call(username, server, pos, yaw, pitch, dimensionId, gamemode, flying);
         if (success && CarpetOrgAdditionSettings.displayFakePlayerSummoner) {

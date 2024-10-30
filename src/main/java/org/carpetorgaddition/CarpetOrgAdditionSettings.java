@@ -151,6 +151,7 @@ public class CarpetOrgAdditionSettings {
             categories = {ORG, RuleCategory.COMMAND},
             options = {"true", "false", "ops", "0", "1", "2", "3", "4"}
     )
+    // TODO 默认值改为false
     public static String commandPlayerTools = "ops";
 
     // 最大方块交互距离适用于实体
