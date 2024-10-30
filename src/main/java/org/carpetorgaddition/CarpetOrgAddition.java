@@ -52,6 +52,5 @@ public class CarpetOrgAddition implements ModInitializer {
     public static boolean isDebugDevelopment() {
         return IS_DEBUG && FabricLoader.getInstance().isDevelopmentEnvironment();
     }
-    // TODO 记录器：钓鱼指示器
     // TODO 发布前测试在非开发环境能否正常启动
 }

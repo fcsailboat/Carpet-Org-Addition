@@ -9,6 +9,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -38,7 +39,6 @@ public class PlayerCommandMixin {
             Operation<Boolean> original,
             @Local(argsOnly = true) CommandContext<ServerCommandSource> context
     ) {
-        // TODO 鼠标悬停显示更多信息，玩家位置等
         // 检查玩家是否成功召唤
         boolean success = original.call(username, server, pos, yaw, pitch, dimensionId, gamemode, flying);
         if (success && CarpetOrgAdditionSettings.displayFakePlayerSummoner) {
@@ -50,15 +50,14 @@ public class PlayerCommandMixin {
                     "carpet.rule.message.displayFakePlayerSummoner",
                     player.getDisplayName(), username
             );
+            ServerWorld world = player.server.getWorld(dimensionId);
+            String worldPos = WorldUtils.toWorldPosString(world, BlockPos.ofFloored(pos));
+            TextUtils.hoverText(message, TextUtils.createText(worldPos));
             // 将消息设置为灰色斜体
             message = TextUtils.toGrayItalic(message);
             // 对所有玩家发送命令反馈
             MessageUtils.broadcastMessage(context.getSource(), message);
-            CarpetOrgAddition.LOGGER.info("{}召唤了{}于{}[{}]",
-                    player.getName().getString(), username,
-                    dimensionId.getValue().toString(),
-                    WorldUtils.toPosString(BlockPos.ofFloored(pos))
-            );
+            CarpetOrgAddition.LOGGER.info("{}召唤了{}于{}", player.getName().getString(), username, worldPos);
         }
         return success;
     }
