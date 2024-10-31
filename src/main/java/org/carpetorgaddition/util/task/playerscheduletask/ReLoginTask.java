@@ -122,20 +122,20 @@ public class ReLoginTask extends PlayerScheduleTask {
         if (var3 instanceof TranslatableTextContent text) {
             if (text.getKey().equals("multiplayer.disconnect.duplicate_login")) {
                 try {
-                    CarpetOrgAddition.hiddenLoginMessages = true;
+                    CarpetOrgAdditionSettings.hiddenLoginMessages = true;
                     fakePlayer.networkHandler.onDisconnected(new DisconnectionInfo(reason));
                 } finally {
-                    CarpetOrgAddition.hiddenLoginMessages = false;
+                    CarpetOrgAdditionSettings.hiddenLoginMessages = false;
                 }
                 return;
             }
         }
         this.server.send(new ServerTask(this.server.getTicks(), () -> {
             try {
-                CarpetOrgAddition.hiddenLoginMessages = true;
+                CarpetOrgAdditionSettings.hiddenLoginMessages = true;
                 fakePlayer.networkHandler.onDisconnected(new DisconnectionInfo(reason));
             } finally {
-                CarpetOrgAddition.hiddenLoginMessages = false;
+                CarpetOrgAdditionSettings.hiddenLoginMessages = false;
             }
         }));
     }
@@ -206,7 +206,7 @@ public class ReLoginTask extends PlayerScheduleTask {
         EntityPlayerMPFake fakePlayer = EntityPlayerMPFake.respawnFake(server, worldIn, gameprofile, SyncedClientOptions.createDefault());
         fakePlayer.fixStartingPosition = GameUtils::pass;
         try {
-            CarpetOrgAddition.hiddenLoginMessages = true;
+            CarpetOrgAdditionSettings.hiddenLoginMessages = true;
             server.getPlayerManager().onPlayerConnect(new FakeClientConnection(NetworkSide.SERVERBOUND), fakePlayer, new ConnectedClientData(gameprofile, 0, fakePlayer.getClientOptions(), false));
         } catch (NullPointerException e) {
             CarpetOrgAddition.LOGGER.warn("{}在尝试在服务器关闭时上线", this.playerName, e);
@@ -214,7 +214,7 @@ public class ReLoginTask extends PlayerScheduleTask {
             return;
         } finally {
             // 假玩家加入游戏后，这个变量必须重写设置为false，防止影响其它广播消息的方法
-            CarpetOrgAddition.hiddenLoginMessages = false;
+            CarpetOrgAdditionSettings.hiddenLoginMessages = false;
         }
         fakePlayer.setHealth(20.0F);
         ((EntityAccessor) fakePlayer).cancelRemoved();

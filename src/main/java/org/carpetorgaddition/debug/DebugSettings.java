@@ -6,4 +6,7 @@ public class DebugSettings {
 
     @DebugRule(name = "显示灵魂沙上物品的数量")
     public static boolean showSoulSandItemCount = false;
+
+    @DebugRule(name = "显示比较器输出等级")
+    public static boolean showComparatorLevel = false;
 }

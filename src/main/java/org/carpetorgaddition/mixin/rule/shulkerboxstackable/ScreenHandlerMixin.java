@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -18,10 +18,10 @@ public abstract class ScreenHandlerMixin {
     @WrapMethod(method = "calculateComparatorOutput(Lnet/minecraft/inventory/Inventory;)I")
     private static int calculateComparatorOutput(Inventory inventory, Operation<Integer> original) {
         try {
-            CarpetOrgAddition.shulkerBoxStackCountChanged.set(false);
+            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
             return original.call(inventory);
         } finally {
-            CarpetOrgAddition.shulkerBoxStackCountChanged.set(true);
+            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(true);
         }
     }
 }

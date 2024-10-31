@@ -8,7 +8,8 @@ import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRender;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderManager;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderType;
-import org.carpetorgaddition.debug.client.render.HudRender;
+import org.carpetorgaddition.debug.client.render.ComparatorLevelRender;
+import org.carpetorgaddition.debug.client.render.SoulSandItemCountRender;
 import org.carpetorgaddition.network.WaypointClearS2CPack;
 import org.carpetorgaddition.network.WaypointUpdateS2CPack;
 
@@ -69,7 +70,8 @@ public class CarpetOrgAdditionClientRegister {
      */
     private static void developed() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            HudRender.render();
+            SoulSandItemCountRender.render();
+            ComparatorLevelRender.render();
         }
     }
 }

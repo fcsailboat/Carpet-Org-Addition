@@ -23,7 +23,10 @@ import org.carpetorgaddition.util.wheel.Counter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HudRender {
+/**
+ * 灵魂沙物品计数渲染器
+ */
+public class SoulSandItemCountRender {
     @SuppressWarnings("DataFlowIssue")
     public static void render() {
         HudRenderCallback.EVENT.register((drawContext, tickCounter) -> {

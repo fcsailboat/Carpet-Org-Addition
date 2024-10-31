@@ -1,7 +1,6 @@
 package org.carpetorgaddition.mixin.rule.shulkerboxstackable;
 
 import net.minecraft.item.ItemStack;
-import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,14 +17,14 @@ public class ItemStackMixin {
 
     @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
     private void getMaxCount(CallbackInfoReturnable<Integer> cir) {
-        if (this.shulkerBoxStackableEnabled() && CarpetOrgAddition.shulkerBoxStackCountChanged.get()) {
+        if (this.shulkerBoxStackableEnabled() && CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
             cir.setReturnValue(64);
         }
     }
 
     @Inject(method = "capCount", at = @At("HEAD"), cancellable = true)
     private void capCount(int maxCount, CallbackInfo ci) {
-        if (this.shulkerBoxStackableEnabled() && !CarpetOrgAddition.shulkerBoxStackCountChanged.get()) {
+        if (this.shulkerBoxStackableEnabled() && !CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
             ci.cancel();
         }
     }

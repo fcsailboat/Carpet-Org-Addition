@@ -8,6 +8,15 @@ import org.carpetorgaddition.rule.value.*;
 
 @SuppressWarnings("CanBeFinal")
 public class CarpetOrgAdditionSettings {
+    /**
+     * 控制玩家登录登出的消息是否显示
+     */
+    public static boolean hiddenLoginMessages = false;
+    /**
+     * 潜影盒是否允许被堆叠，这还需要同时启用{@link CarpetOrgAdditionSettings#shulkerBoxStackable}
+     */
+    public static ThreadLocal<Boolean> shulkerBoxStackCountChanged = ThreadLocal.withInitial(() -> true);
+
     private CarpetOrgAdditionSettings() {
     }
 

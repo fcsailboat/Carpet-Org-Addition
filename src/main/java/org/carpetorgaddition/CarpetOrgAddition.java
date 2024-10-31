@@ -13,11 +13,6 @@ import java.lang.management.ManagementFactory;
 
 public class CarpetOrgAddition implements ModInitializer {
     /**
-     * 控制玩家登录登出的消息是否显示
-     */
-    public static boolean hiddenLoginMessages = false;
-    public static ThreadLocal<Boolean> shulkerBoxStackCountChanged = ThreadLocal.withInitial(() -> true);
-    /**
      * 日志
      */
     public static final Logger LOGGER = LoggerFactory.getLogger("CarpetOrgAddition");
