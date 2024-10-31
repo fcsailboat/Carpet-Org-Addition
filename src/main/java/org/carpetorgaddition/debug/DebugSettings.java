@@ -1,6 +1,13 @@
 package org.carpetorgaddition.debug;
 
+import org.carpetorgaddition.exception.ProductionEnvironmentError;
+
 public class DebugSettings {
+    static {
+        // 不要在非开发环境加载
+        ProductionEnvironmentError.assertDevelopmentEnvironment();
+    }
+
     @DebugRule(name = "打开玩家物品栏")
     public static boolean openFakePlayerInventory = false;
 

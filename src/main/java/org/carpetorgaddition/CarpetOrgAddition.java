@@ -3,13 +3,14 @@ package org.carpetorgaddition;
 import carpet.CarpetServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import org.carpetorgaddition.debug.DebugRuleRegistrar;
-import org.carpetorgaddition.debug.DebugSettings;
 import org.carpetorgaddition.network.NetworkS2CPackRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
+import java.util.Locale;
 
 public class CarpetOrgAddition implements ModInitializer {
     /**
@@ -17,13 +18,25 @@ public class CarpetOrgAddition implements ModInitializer {
      */
     public static final Logger LOGGER = LoggerFactory.getLogger("CarpetOrgAddition");
     /**
-     * 模组名称小写
-     */
-    public static final String MOD_NAME_LOWER_CASE = "carpetorgaddition";
-    /**
      * 模组ID
      */
     public static final String MOD_ID = "carpet-org-addition";
+    /**
+     * 模组元数据
+     */
+    public static final ModMetadata METADATA = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
+    /**
+     * 模组名称
+     */
+    public static final String MOD_NAME = METADATA.getName();
+    /**
+     * 模组当前的版本
+     */
+    public static final String VERSION = METADATA.getVersion().getFriendlyString();
+    /**
+     * 模组名称小写
+     */
+    public static final String MOD_NAME_LOWER_CASE = MOD_NAME.replace(" ", "").toLowerCase(Locale.ROOT);
     /**
      * 当前jvm是否为调试模式
      */
@@ -34,11 +47,12 @@ public class CarpetOrgAddition implements ModInitializer {
      */
     @Override
     public void onInitialize() {
+        LOGGER.info("%s已加载，版本：%s".formatted(MOD_NAME, VERSION));
         CarpetServer.manageExtension(new CarpetOrgAdditionExtension());
         NetworkS2CPackRegister.register();
         // 如果当前为调试模式的开发环境，注册测试规则
         if (isDebugDevelopment()) {
-            DebugRuleRegistrar.getInstance().registrar(DebugSettings.class);
+            DebugRuleRegistrar.getInstance().registrar();
         }
     }
 

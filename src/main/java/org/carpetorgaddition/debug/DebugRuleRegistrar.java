@@ -41,9 +41,9 @@ public class DebugRuleRegistrar implements CarpetExtension {
         }
     }
 
-    public void registrar(Class<?> clazz) {
+    public void registrar() {
         CarpetServer.manageExtension(this);
-        Field[] fields = clazz.getDeclaredFields();
+        Field[] fields = DebugSettings.class.getDeclaredFields();
         for (Field field : fields) {
             DebugRule debugRule = field.getAnnotation(DebugRule.class);
             if (debugRule == null) {
