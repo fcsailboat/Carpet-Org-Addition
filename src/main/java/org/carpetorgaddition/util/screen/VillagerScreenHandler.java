@@ -12,7 +12,7 @@ import org.carpetorgaddition.util.inventory.AbstractCustomSizeInventory;
 import org.carpetorgaddition.util.inventory.VillagerInventory;
 import org.carpetorgaddition.util.wheel.DisabledSlot;
 
-public class VillagerScreenHandler extends ScreenHandler {
+public class VillagerScreenHandler extends ScreenHandler implements UnavailableSlotSyncInterface{
     // 物品栏的大小
     private static final int SIZE = 8;
     private final VillagerEntity villagerEntity;
@@ -138,5 +138,15 @@ public class VillagerScreenHandler extends ScreenHandler {
         super.onClosed(player);
         this.inventory.dropExcess(player);
         AbstractCustomSizeInventory.PLACEHOLDER.setCount(1);
+    }
+
+    @Override
+    public int from() {
+        return 8;
+    }
+
+    @Override
+    public int to() {
+        return 8;
     }
 }

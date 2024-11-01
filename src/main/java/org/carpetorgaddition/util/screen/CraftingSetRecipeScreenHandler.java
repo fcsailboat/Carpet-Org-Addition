@@ -20,7 +20,7 @@ import org.carpetorgaddition.util.fakeplayer.actiondata.CraftingTableCraftData;
 import org.carpetorgaddition.util.fakeplayer.actiondata.InventoryCraftData;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
 
-public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler {
+public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implements UnavailableSlotSyncInterface {
     /**
      * 一个假玩家对象，类中所有操作都是围绕这个假玩家进行的
      */
@@ -34,9 +34,13 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler {
      */
     private final CommandContext<ServerCommandSource> context;
 
-    public CraftingSetRecipeScreenHandler(int syncId, PlayerInventory playerInventory, EntityPlayerMPFake fakePlayer,
-                                          ScreenHandlerContext screenHandlerContext,
-                                          CommandContext<ServerCommandSource> context) {
+    public CraftingSetRecipeScreenHandler(
+            int syncId,
+            PlayerInventory playerInventory,
+            EntityPlayerMPFake fakePlayer,
+            ScreenHandlerContext screenHandlerContext,
+            CommandContext<ServerCommandSource> context
+    ) {
         super(syncId, playerInventory, screenHandlerContext);
         this.inputInventory = ((FakePlayerCraftRecipeInterface) this).getInput();
         this.fakePlayer = fakePlayer;
@@ -118,5 +122,15 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler {
     @Override
     public boolean canUse(PlayerEntity player) {
         return true;
+    }
+
+    @Override
+    public int from() {
+        return this.getCraftingResultSlotIndex();
+    }
+
+    @Override
+    public int to() {
+        return this.getCraftingResultSlotIndex();
     }
 }

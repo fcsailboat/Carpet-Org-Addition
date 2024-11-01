@@ -4,7 +4,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.carpetorgaddition.network.WaypointUpdateS2CPack;
+import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -21,7 +21,7 @@ public class BlockPosNavigator extends AbstractNavigator {
         this.blockPos = blockPos;
         this.world = world;
         // 同步导航点
-        this.syncWaypoint(new WaypointUpdateS2CPack(blockPos.toCenterPos(), world));
+        this.syncWaypoint(new WaypointUpdateS2CPacket(blockPos.toCenterPos(), world));
     }
 
     @Override

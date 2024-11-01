@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.network.WaypointClearS2CPack;
+import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
@@ -224,7 +224,7 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
     @Override
     public void clearNavigator() {
         this.navigator = null;
-        ServerPlayNetworking.send(thisPlayer, new WaypointClearS2CPack());
+        ServerPlayNetworking.send(thisPlayer, new WaypointClearS2CPacket());
     }
 
     @Override

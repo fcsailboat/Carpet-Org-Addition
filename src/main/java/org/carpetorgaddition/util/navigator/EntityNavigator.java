@@ -8,7 +8,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.carpetorgaddition.network.WaypointUpdateS2CPack;
+import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -62,7 +62,7 @@ public class EntityNavigator extends AbstractNavigator {
                             TextConstants.simpleBlockPos(entity.getBlockPos())));
         }
         MessageUtils.sendMessageToHud(this.player, text);
-        this.syncWaypoint(new WaypointUpdateS2CPack(this.entity.getEyePos(), world));
+        this.syncWaypoint(new WaypointUpdateS2CPacket(this.entity.getEyePos(), world));
     }
 
     /**

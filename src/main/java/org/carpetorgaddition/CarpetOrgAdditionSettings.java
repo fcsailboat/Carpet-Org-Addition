@@ -15,7 +15,7 @@ public class CarpetOrgAdditionSettings {
     /**
      * 潜影盒是否允许被堆叠，这还需要同时启用{@link CarpetOrgAdditionSettings#shulkerBoxStackable}
      */
-    public static ThreadLocal<Boolean> shulkerBoxStackCountChanged = ThreadLocal.withInitial(() -> true);
+    public static final ThreadLocal<Boolean> shulkerBoxStackCountChanged = ThreadLocal.withInitial(() -> true);
 
     private CarpetOrgAdditionSettings() {
     }
@@ -443,6 +443,7 @@ public class CarpetOrgAdditionSettings {
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean displayFakePlayerSummoner = false;
 
+    // TODO 实验性改为特性
     // 潜影盒堆叠
     @Rule(categories = {ORG, RuleCategory.EXPERIMENTAL})
     public static boolean shulkerBoxStackable = false;

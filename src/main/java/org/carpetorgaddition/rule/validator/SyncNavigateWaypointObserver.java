@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
-import org.carpetorgaddition.network.WaypointClearS2CPack;
+import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
 import org.carpetorgaddition.util.navigator.NavigatorInterface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +34,7 @@ public class SyncNavigateWaypointObserver extends AbstractValidator<Boolean> {
             // noinspection DataFlowIssue getNavigator()方法不会为null，上面的stream流已经过滤了null值
             list.forEach(player -> NavigatorInterface.getInstance(player).getNavigator().sendWaypointUpdate());
         } else {
-            list.forEach(player -> ServerPlayNetworking.send(player, new WaypointClearS2CPack()));
+            list.forEach(player -> ServerPlayNetworking.send(player, new WaypointClearS2CPacket()));
         }
     }
 }

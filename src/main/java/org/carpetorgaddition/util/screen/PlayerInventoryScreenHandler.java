@@ -1,6 +1,7 @@
 package org.carpetorgaddition.util.screen;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -11,12 +12,12 @@ import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.inventory.AbstractCustomSizeInventory;
 import org.carpetorgaddition.util.inventory.ServerPlayerInventory;
 
-public class PlayerInventoryScreenHandler extends ScreenHandler {
+public class PlayerInventoryScreenHandler extends ScreenHandler implements UnavailableSlotSyncInterface {
     private static final int SIZE = 41;
     private final ServerPlayerEntity player;
     private final ServerPlayerInventory inventory;
 
-    public PlayerInventoryScreenHandler(int syncId, net.minecraft.entity.player.PlayerInventory playerInventory, ServerPlayerEntity player) {
+    public PlayerInventoryScreenHandler(int syncId, PlayerInventory playerInventory, ServerPlayerEntity player) {
         super(ScreenHandlerType.GENERIC_9X6, syncId);
         this.player = player;
         this.inventory = new ServerPlayerInventory(player);
@@ -113,9 +114,19 @@ public class PlayerInventoryScreenHandler extends ScreenHandler {
 
     @Override
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
-        if (MathUtils.betweenTwoNumbers(53, 41, slotIndex)) {
+        if (MathUtils.isInRange(this.from(), this.to(), slotIndex)) {
             return;
         }
         super.onSlotClick(slotIndex, button, actionType, player);
+    }
+
+    @Override
+    public int from() {
+        return 41;
+    }
+
+    @Override
+    public int to() {
+        return 53;
     }
 }

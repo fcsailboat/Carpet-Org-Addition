@@ -9,7 +9,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.network.WaypointUpdateS2CPack;
+import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import org.carpetorgaddition.util.TextUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -117,7 +117,7 @@ public abstract class AbstractNavigator {
     /**
      * 同步路径点
      */
-    protected void syncWaypoint(WaypointUpdateS2CPack pack) {
+    protected void syncWaypoint(WaypointUpdateS2CPacket pack) {
         // 更新上一个坐标
         if (this.updatePrevious(pack)) {
             // 要求玩家有执行/navigate命令的权限
@@ -133,7 +133,7 @@ public abstract class AbstractNavigator {
      *
      * @return 坐标是否更新了
      */
-    private boolean updatePrevious(WaypointUpdateS2CPack pack) {
+    private boolean updatePrevious(WaypointUpdateS2CPacket pack) {
         // 目标未移动，不需要更新
         if (pack.target().equals(this.previousPosition) && pack.worldId().equals(this.previousWorldId)) {
             return false;
@@ -150,7 +150,7 @@ public abstract class AbstractNavigator {
         if (this.previousPosition == null || this.previousWorldId == null) {
             return;
         }
-        ServerPlayNetworking.send(this.player, new WaypointUpdateS2CPack(this.previousPosition, this.previousWorldId));
+        ServerPlayNetworking.send(this.player, new WaypointUpdateS2CPacket(this.previousPosition, this.previousWorldId));
     }
 
     /**

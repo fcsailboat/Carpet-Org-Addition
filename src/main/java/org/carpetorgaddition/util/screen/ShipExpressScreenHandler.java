@@ -29,7 +29,13 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
     private final ServerPlayerEntity sourcePlayer;
     private final ServerPlayerEntity targetPlayer;
 
-    public ShipExpressScreenHandler(int syncId, PlayerInventory playerInventory, ServerPlayerEntity sourcePlayer, ServerPlayerEntity targetPlayer, Inventory inventory) {
+    public ShipExpressScreenHandler(
+            int syncId,
+            PlayerInventory playerInventory,
+            ServerPlayerEntity sourcePlayer,
+            ServerPlayerEntity targetPlayer,
+            Inventory inventory
+    ) {
         super(ScreenHandlerType.GENERIC_9X3, syncId, playerInventory, inventory, 3);
         this.inventory = inventory;
         this.server = targetPlayer.server;

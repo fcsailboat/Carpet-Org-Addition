@@ -2,6 +2,7 @@ package org.carpetorgaddition.client;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.screen.ScreenHandler;
 import org.carpetorgaddition.client.command.DictionaryCommand;
 import org.carpetorgaddition.client.command.HighlightCommand;
 import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
@@ -10,8 +11,10 @@ import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderManager;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderType;
 import org.carpetorgaddition.debug.client.render.ComparatorLevelRender;
 import org.carpetorgaddition.debug.client.render.SoulSandItemCountRender;
-import org.carpetorgaddition.network.WaypointClearS2CPack;
-import org.carpetorgaddition.network.WaypointUpdateS2CPack;
+import org.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
+import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
+import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
+import org.carpetorgaddition.util.screen.UnavailableSlotImplInterface;
 
 public class CarpetOrgAdditionClientRegister {
     public static void register() {
@@ -52,9 +55,16 @@ public class CarpetOrgAdditionClientRegister {
      */
     private static void registerNetworkPackReceiver() {
         // 注册路径点更新数据包
-        ClientPlayNetworking.registerGlobalReceiver(WaypointUpdateS2CPack.ID, (payload, context) -> WaypointRenderManager.setRender(new WaypointRender(WaypointRenderType.NAVIGATOR, payload.target(), payload.worldId())));
+        ClientPlayNetworking.registerGlobalReceiver(WaypointUpdateS2CPacket.ID, (payload, context) -> WaypointRenderManager.setRender(new WaypointRender(WaypointRenderType.NAVIGATOR, payload.target(), payload.worldId())));
         // 注册路径点清除数据包
-        ClientPlayNetworking.registerGlobalReceiver(WaypointClearS2CPack.ID, ((payload, context) -> WaypointRenderManager.setFade(WaypointRenderType.NAVIGATOR)));
+        ClientPlayNetworking.registerGlobalReceiver(WaypointClearS2CPacket.ID, ((payload, context) -> WaypointRenderManager.setFade(WaypointRenderType.NAVIGATOR)));
+        // 容器不可用槽位同步数据包
+        ClientPlayNetworking.registerGlobalReceiver(UnavailableSlotSyncS2CPacket.ID, (payload, context) -> {
+            ScreenHandler screen = context.player().currentScreenHandler;
+            if (screen.syncId == payload.syncId() && screen instanceof UnavailableSlotImplInterface anInterface) {
+                anInterface.sync(payload);
+            }
+        });
     }
 
     /**

@@ -16,6 +16,7 @@
     "logger.HUDControllerMixin",
     "logger.LoggerAccessor",
     "logger.WanderingTraderManagerMixin",
+    "network.unavailableslotsync.ServerPlayerEntityMixin",
     "rule.AbstractBlockStateMixin",
     "rule.AbstractPiglinEntityMixin",
     "rule.AnvilScreenHandlerMixin",
@@ -92,6 +93,7 @@
     "util.ServerPlayNetworkHandlerMixin"
   ],
   "client": [
+    "network.unavailableslotsync.ScreenHandlerMixin",
     "rule.client.carpet.SettingsManagerMixin"
   ],
   "injectors": {

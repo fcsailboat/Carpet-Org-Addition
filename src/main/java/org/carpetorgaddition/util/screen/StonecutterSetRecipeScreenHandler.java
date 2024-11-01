@@ -12,7 +12,7 @@ import org.carpetorgaddition.util.fakeplayer.FakePlayerActionInterface;
 import org.carpetorgaddition.util.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.util.fakeplayer.actiondata.StonecuttingData;
 
-public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler {
+public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler implements UnavailableSlotSyncInterface{
     private final EntityPlayerMPFake fakePlayer;
 
     public StonecutterSetRecipeScreenHandler(
@@ -55,5 +55,15 @@ public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler 
     @Override
     public boolean canUse(PlayerEntity player) {
         return true;
+    }
+
+    @Override
+    public int from() {
+        return 1;
+    }
+
+    @Override
+    public int to() {
+        return 1;
     }
 }
