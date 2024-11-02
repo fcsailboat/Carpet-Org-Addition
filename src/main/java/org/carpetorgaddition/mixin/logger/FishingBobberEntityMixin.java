@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
-import org.carpetorgaddition.logger.Loggers;
+import org.carpetorgaddition.logger.LoggerRegister;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,7 @@ public abstract class FishingBobberEntityMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void tick(CallbackInfo ci) {
-        if (Loggers.fishing) {
+        if (LoggerRegister.fishing) {
             PlayerEntity player = this.getPlayerOwner();
             if (player == null) {
                 return;

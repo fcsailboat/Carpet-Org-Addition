@@ -6,7 +6,7 @@ import carpet.logging.LoggerRegistry;
 
 import java.lang.reflect.Field;
 
-public class Loggers {
+public class LoggerRegister {
     // wanderingTrader这个名字已经被另一个Carpet扩展使用了
     @LoggerConfig(name = LoggerNames.WANDERING_TRADER_SPAWN_COUNTDOWN, type = LoggerType.HUD)
     public static boolean wanderingTrader = false;
@@ -18,7 +18,7 @@ public class Loggers {
      * 注册记录器
      */
     public static void register() {
-        for (Field field : Loggers.class.getFields()) {
+        for (Field field : LoggerRegister.class.getFields()) {
             LoggerConfig annotation = field.getAnnotation(LoggerConfig.class);
             if (annotation == null) {
                 continue;
