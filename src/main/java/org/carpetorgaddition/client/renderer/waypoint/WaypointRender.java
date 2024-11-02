@@ -79,7 +79,7 @@ public class WaypointRender {
         // 获取玩家所在维度ID
         String playerWorldId = WorldUtils.getDimensionId(player.getWorld());
         // 玩家和路径点在同一维度
-        if (WorldUtils.sameWorld(this.worldId, playerWorldId)) {
+        if (WorldUtils.equalsWorld(this.worldId, playerWorldId)) {
             return this.target;
         }
         // 玩家在主世界，路径点在下界，将路径点坐标换算成主世界坐标
