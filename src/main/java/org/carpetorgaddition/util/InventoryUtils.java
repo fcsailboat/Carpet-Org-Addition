@@ -151,6 +151,18 @@ public class InventoryUtils {
      * 断言指定物品为空
      *
      * @param itemStack 被断言的物品
+     */
+    public static void assertEmptyStack(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return;
+        }
+        throw new IllegalStateException();
+    }
+
+    /**
+     * 断言指定物品为空
+     *
+     * @param itemStack 被断言的物品
      * @param message   异常消息
      */
     public static void assertEmptyStack(ItemStack itemStack, Supplier<String> message) {

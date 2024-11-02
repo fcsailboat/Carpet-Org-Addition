@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import org.carpetorgaddition.util.InventoryUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
@@ -70,12 +71,19 @@ public class AutoGrowInventory implements Inventory, Iterable<ItemStack> {
      * 向物品栏内添加物品并自动扩容
      *
      * @param stack 要添加的物品
-     * @return 添加后剩余的物品，总是为{@link ItemStack#EMPTY}
      */
-    public ItemStack addStack(ItemStack stack) {
+    public void addStack(ItemStack stack) {
+        ItemStack itemStack = tryAddStack(stack);
+        InventoryUtils.assertEmptyStack(itemStack);
+    }
+
+    /**
+     * @return 总是为 {@link ItemStack#EMPTY}
+     */
+    private ItemStack tryAddStack(ItemStack stack) {
         // 添加过量堆叠的物品
         while (stack.getCount() > stack.getMaxCount()) {
-            this.addStack(stack.split(stack.getMaxCount()));
+            this.tryAddStack(stack.split(stack.getMaxCount()));
         }
         ItemStack itemStack = this.inventory.addStack(stack);
         // 物品栏内容足够容纳物品
@@ -92,7 +100,7 @@ public class AutoGrowInventory implements Inventory, Iterable<ItemStack> {
         // 将当前封装的物品栏替换为新物品栏，并重新添加物品
         this.inventory = inventory;
         this.growCount++;
-        return this.addStack(itemStack);
+        return this.tryAddStack(itemStack);
     }
 
     @NotNull
