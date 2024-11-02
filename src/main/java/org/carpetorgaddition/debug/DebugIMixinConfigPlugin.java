@@ -1,6 +1,5 @@
 package org.carpetorgaddition.debug;
 
-import net.fabricmc.loader.api.FabricLoader;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -34,7 +33,7 @@ public class DebugIMixinConfigPlugin implements IMixinConfigPlugin {
                 return true;
             }
             // 类被注解，且开发环境
-            if (CarpetOrgAddition.IS_DEBUG && FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            if (CarpetOrgAddition.isDebugDevelopment()) {
                 CarpetOrgAddition.LOGGER.info("Mixin类已被允许开发环境下加载：{}", mixinClassName);
                 return true;
             }

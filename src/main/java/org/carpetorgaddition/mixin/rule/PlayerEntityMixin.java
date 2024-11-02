@@ -16,8 +16,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.rule.RuleUtils;
 import org.carpetorgaddition.util.CommandUtils;
-import org.carpetorgaddition.util.MathUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -109,17 +109,17 @@ public abstract class PlayerEntityMixin {
     // 最大方块交互距离
     @Inject(method = "getBlockInteractionRange", at = @At("HEAD"), cancellable = true)
     private void getBlockInteractionRange(CallbackInfoReturnable<Double> cir) {
-        if (MathUtils.isDefaultDistance()) {
+        if (RuleUtils.isDefaultDistance()) {
             return;
         }
-        cir.setReturnValue(MathUtils.getPlayerMaxInteractionDistance());
+        cir.setReturnValue(RuleUtils.getPlayerMaxInteractionDistance());
     }
 
     // 实体交互距离
     @Inject(method = "getEntityInteractionRange", at = @At("HEAD"), cancellable = true)
     private void getEntityInteractionRange(CallbackInfoReturnable<Double> cir) {
         if (CarpetOrgAdditionSettings.maxBlockPlaceDistanceReferToEntity) {
-            cir.setReturnValue(MathUtils.getPlayerMaxInteractionDistance());
+            cir.setReturnValue(RuleUtils.getPlayerMaxInteractionDistance());
         }
     }
 

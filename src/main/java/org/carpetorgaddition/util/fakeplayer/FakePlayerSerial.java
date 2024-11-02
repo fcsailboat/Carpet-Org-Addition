@@ -176,13 +176,15 @@ public class FakePlayerSerial {
     public Text info() {
         TextBuilder build = new TextBuilder();
         // 玩家位置
+        String pos = MathUtils.numberToTwoDecimalString(this.playerPos.getX()) + " "
+                + MathUtils.numberToTwoDecimalString(this.playerPos.getY()) + " "
+                + MathUtils.numberToTwoDecimalString(this.playerPos.getZ());
         build.appendLine("carpet.commands.playerManager.info.pos",
-                MathUtils.keepTwoDecimalPlaces(this.playerPos.getX(),
-                        this.playerPos.getY(), this.playerPos.getZ()));
+                pos);
         // 获取朝向
         build.appendLine("carpet.commands.playerManager.info.direction",
-                MathUtils.keepTwoDecimalPlaces(this.yaw),
-                MathUtils.keepTwoDecimalPlaces(this.pitch));
+                MathUtils.numberToTwoDecimalString(this.yaw),
+                MathUtils.numberToTwoDecimalString(this.pitch));
         // 维度
         build.appendLine("carpet.commands.playerManager.info.dimension", switch (this.dimension) {
             case "minecraft:overworld", "overworld" -> TextConstants.OVERWORLD;

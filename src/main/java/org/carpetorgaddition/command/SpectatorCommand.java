@@ -141,11 +141,11 @@ public class SpectatorCommand {
     private static void savePlayerPos(MinecraftServer server, ServerPlayerEntity player) {
         WorldFormat worldFormat = new WorldFormat(server, SPECTATOR);
         JsonObject json = new JsonObject();
-        json.addProperty("x", MathUtils.keepTwoDecimalPlaces(player.getX()));
-        json.addProperty("y", MathUtils.keepTwoDecimalPlaces(player.getY()));
-        json.addProperty("z", MathUtils.keepTwoDecimalPlaces(player.getZ()));
-        json.addProperty("yaw", MathUtils.keepTwoDecimalPlaces(player.getYaw()));
-        json.addProperty("pitch", MathUtils.keepTwoDecimalPlaces(player.getPitch()));
+        json.addProperty("x", MathUtils.numberToTwoDecimalString(player.getX()));
+        json.addProperty("y", MathUtils.numberToTwoDecimalString(player.getY()));
+        json.addProperty("z", MathUtils.numberToTwoDecimalString(player.getZ()));
+        json.addProperty("yaw", MathUtils.numberToTwoDecimalString(player.getYaw()));
+        json.addProperty("pitch", MathUtils.numberToTwoDecimalString(player.getPitch()));
         json.addProperty("dimension", WorldUtils.getDimensionId(player.getWorld()));
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonString = gson.toJson(json, JsonObject.class);

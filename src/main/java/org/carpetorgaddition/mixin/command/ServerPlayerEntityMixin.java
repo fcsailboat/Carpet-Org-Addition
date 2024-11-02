@@ -107,7 +107,7 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
         // 玩家安全挂机触发成功
         if (thisPlayer.getHealth() <= this.safeAfkThreshold) {
             // 假玩家剩余血量
-            String health = MathUtils.keepTwoDecimalPlaces(thisPlayer.getHealth());
+            String health = MathUtils.numberToTwoDecimalString(thisPlayer.getHealth());
             MutableText message = TextUtils.translate("carpet.commands.playerManager.safeafk.trigger.success",
                     thisPlayer.getDisplayName(), health);
             // 添加悬停提示
