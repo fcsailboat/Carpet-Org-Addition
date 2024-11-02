@@ -5,13 +5,13 @@
   "name": "Carpet Org Addition",
   "description": "一个非常Not Vanilla的Carpet扩展模组，提供了一些实用和无用的功能，\n默认情况下不会改变游戏的任何机制，所有功能都需要手动开启。",
   "authors": [
-    "cdqtzrc",
+    "fcsailboat",
     "1024_byteeeee",
     "wendavid552"
   ],
   "contact": {
-    "sources": "https://github.com/cdqtzrc/Carpet-Org-Addition",
-    "issues": "https://github.com/cdqtzrc/Carpet-Org-Addition/issues"
+    "sources": "https://github.com/fcsailboat/Carpet-Org-Addition",
+    "issues": "https://github.com/fcsailboat/Carpet-Org-Addition/issues"
   },
   "license": "MIT",
   "icon": "assets/carpet-org-addition/icon.png",
