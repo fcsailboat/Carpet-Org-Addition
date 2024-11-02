@@ -11,9 +11,11 @@ import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderManager;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderType;
 import org.carpetorgaddition.debug.client.render.ComparatorLevelRender;
 import org.carpetorgaddition.debug.client.render.SoulSandItemCountRender;
+import org.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
 import org.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
 import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
 import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
+import org.carpetorgaddition.util.screen.BackgroundSpriteSyncSlot;
 import org.carpetorgaddition.util.screen.UnavailableSlotImplInterface;
 
 public class CarpetOrgAdditionClientRegister {
@@ -63,6 +65,13 @@ public class CarpetOrgAdditionClientRegister {
             ScreenHandler screen = context.player().currentScreenHandler;
             if (screen.syncId == payload.syncId() && screen instanceof UnavailableSlotImplInterface anInterface) {
                 anInterface.sync(payload);
+            }
+        });
+        // 背景精灵同步数据包
+        ClientPlayNetworking.registerGlobalReceiver(BackgroundSpriteSyncS2CPacket.ID, (payload, context) -> {
+            ScreenHandler screen = context.player().currentScreenHandler;
+            if (screen.syncId == payload.syncId() && screen.getSlot(payload.slotIndex()) instanceof BackgroundSpriteSyncSlot slot) {
+                slot.setIdentifier(payload.identifier());
             }
         });
     }

@@ -12,11 +12,11 @@
     "compat.fabricapi.AbstractChanneledNetworkAddonInvoker",
     "compat.fabricapi.AbstractNetworkAddonMixin",
     "debug.PlayerEntityMixin",
+    "event.ServerPlayerEntityMixin",
     "logger.FishingBobberEntityMixin",
     "logger.HUDControllerMixin",
     "logger.LoggerAccessor",
     "logger.WanderingTraderManagerMixin",
-    "network.unavailableslotsync.ServerPlayerEntityMixin",
     "rule.AbstractBlockStateMixin",
     "rule.AbstractPiglinEntityMixin",
     "rule.AnvilScreenHandlerMixin",
@@ -93,6 +93,7 @@
     "util.ServerPlayNetworkHandlerMixin"
   ],
   "client": [
+    "network.backgroundspritesync.SlotMixin",
     "network.unavailableslotsync.ScreenHandlerMixin",
     "rule.client.carpet.SettingsManagerMixin"
   ],

@@ -47,7 +47,6 @@ public class Express implements Comparable<Express> {
      * 快递的内容
      */
     private final ItemStack express;
-
     /**
      * 快递是否已被撤回
      */

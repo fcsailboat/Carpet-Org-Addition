@@ -3,16 +3,33 @@ package org.carpetorgaddition.util.screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.inventory.AbstractCustomSizeInventory;
 import org.carpetorgaddition.util.inventory.ServerPlayerInventory;
+import org.carpetorgaddition.util.wheel.DisabledSlot;
 
-public class PlayerInventoryScreenHandler extends ScreenHandler implements UnavailableSlotSyncInterface {
+import java.util.Map;
+
+public class PlayerInventoryScreenHandler extends ScreenHandler implements UnavailableSlotSyncInterface, BackgroundSpriteSyncServer {
+    private static final Map<Integer, Identifier> BACKGROUND_SPRITE_MAP;
+
+    static {
+        BACKGROUND_SPRITE_MAP = Map.of(
+                36, PlayerScreenHandler.EMPTY_HELMET_SLOT_TEXTURE,
+                37, PlayerScreenHandler.EMPTY_CHESTPLATE_SLOT_TEXTURE,
+                38, PlayerScreenHandler.EMPTY_LEGGINGS_SLOT_TEXTURE,
+                39, PlayerScreenHandler.EMPTY_BOOTS_SLOT_TEXTURE,
+                40, PlayerScreenHandler.EMPTY_OFFHAND_ARMOR_SLOT
+        );
+    }
+
     private static final int SIZE = 41;
     private final ServerPlayerEntity player;
     private final ServerPlayerInventory inventory;
@@ -30,7 +47,7 @@ public class PlayerInventoryScreenHandler extends ScreenHandler implements Unava
                 // 如果槽位id大于玩家物品栏的大小，添加不可用槽位
                 if (index >= SIZE) {
                     // 添加不可用槽位
-                    this.addSlot(new Slot(inventory, index, 8 + k * 18, 18 + j * 18));
+                    this.addSlot(new DisabledSlot(inventory, index, 8 + k * 18, 18 + j * 18));
                 } else {
                     // 添加普通槽位
                     this.addSlot(new Slot(inventory, getIndex(index), 8 + k * 18, 18 + j * 18));
@@ -128,5 +145,10 @@ public class PlayerInventoryScreenHandler extends ScreenHandler implements Unava
     @Override
     public int to() {
         return 53;
+    }
+
+    @Override
+    public Map<Integer, Identifier> getBackgroundSprite() {
+        return BACKGROUND_SPRITE_MAP;
     }
 }

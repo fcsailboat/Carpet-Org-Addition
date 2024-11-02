@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import org.carpetorgaddition.debug.DebugRuleRegistrar;
+import org.carpetorgaddition.event.RegisterEvent;
 import org.carpetorgaddition.network.s2c.NetworkS2CPacketRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,10 @@ public class CarpetOrgAddition implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("%s已加载，版本：%s".formatted(MOD_NAME, VERSION));
         CarpetServer.manageExtension(new CarpetOrgAdditionExtension());
+        // 注册网络数据包
         NetworkS2CPacketRegister.register();
+        // 注册事件
+        RegisterEvent.register();
         // 如果当前为调试模式的开发环境，注册测试规则
         if (isDebugDevelopment()) {
             DebugRuleRegistrar.getInstance().registrar();
