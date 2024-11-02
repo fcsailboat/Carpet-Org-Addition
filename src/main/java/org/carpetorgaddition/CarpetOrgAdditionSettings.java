@@ -447,4 +447,8 @@ public class CarpetOrgAdditionSettings {
     // 潜影盒堆叠
     @Rule(categories = {ORG, RuleCategory.EXPERIMENTAL})
     public static boolean shulkerBoxStackable = false;
+
+    // 最大服务器交互距离同步客户端
+    @Rule(categories = {ORG, RuleCategory.CLIENT})
+    public static boolean maxBlockPlaceDistanceSyncClient = true;
 }

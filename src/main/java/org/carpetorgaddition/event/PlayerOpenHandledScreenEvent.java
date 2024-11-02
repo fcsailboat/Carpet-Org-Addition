@@ -18,7 +18,6 @@ public class PlayerOpenHandledScreenEvent {
         }
     });
 
-
     @FunctionalInterface
     public interface AlreadyOpened {
         void after(ServerPlayerEntity player, ScreenHandler screenHandler);

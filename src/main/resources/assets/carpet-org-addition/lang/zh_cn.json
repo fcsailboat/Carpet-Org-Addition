@@ -201,6 +201,8 @@
   "carpet.rule.displayFakePlayerSummoner.desc": "玩家执行/player <player> spawn命令时，显示执行该命令的玩家",
   "carpet.rule.shulkerBoxStackable.name": "潜影盒可堆叠",
   "carpet.rule.shulkerBoxStackable.desc": "允许空潜影盒物品堆叠到64",
+  "carpet.rule.maxBlockPlaceDistanceSyncClient.name": "最大方块放置距离同步客户端",
+  "carpet.rule.maxBlockPlaceDistanceSyncClient.desc": "是否允许修改客户端的方块放置距离",
   "carpet.rule.shulkerBoxStackable.extra.0": "这不会改变漏斗、投掷器，合成器和比较器的行为",
   "carpet.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",
   "carpet.rule.message.CCEUpdateSuppression": "你不能打开用于更新抑制的潜影盒",

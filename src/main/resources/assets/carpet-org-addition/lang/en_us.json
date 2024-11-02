@@ -116,6 +116,7 @@
   "carpet.rule.displayFakePlayerSummoner.desc": "When a player executes the /player <player> spawn command, display the executor",
   "carpet.rule.shulkerBoxStackable.desc": "Allow empty shulker box to stack up to 64",
   "carpet.rule.shulkerBoxStackable.extra.0": "This will not changing the behavior of hopper, dropper, crafter, and comparator",
+  "carpet.rule.maxBlockPlaceDistanceSyncClient.desc": "Whether it is allowed to change the distance of the client block placement",
   "carpet.rule.message.disableRespawnBlocksExplode": "Respawn blocks explosion is disabled",
   "carpet.rule.message.CCEUpdateSuppression": "You cannot open the shulkerbox for update surpression",
   "carpet.rule.message.displayFakePlayerSummoner": "%s summoned %s",
