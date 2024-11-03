@@ -19,7 +19,6 @@
     "logger.WanderingTraderManagerMixin",
     "rule.AbstractBlockStateMixin",
     "rule.AbstractPiglinEntityMixin",
-    "rule.AnvilScreenHandlerMixin",
     "rule.BatEntityMixin",
     "rule.BeaconBlockEntityMixin",
     "rule.BiomeMixin",
