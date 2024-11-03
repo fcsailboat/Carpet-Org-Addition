@@ -7,10 +7,10 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.carpetorgaddition.util.inventory.ImmutableInventory;
-import org.carpetorgaddition.util.matcher.SimpleMatcher;
 import org.carpetorgaddition.util.wheel.ContainerDeepCopy;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class InventoryUtils {
@@ -24,10 +24,10 @@ public class InventoryUtils {
      * 从物品形式的潜影盒中获取第一个指定的物品，并将该物品从潜影盒的NBT中删除，使用时，为避免不必要的物品浪费，取出来的物品必须使用或丢出
      *
      * @param shulkerBox 潜影盒物品
-     * @param matcher    一个物品匹配器对象，用来指定要从潜影盒中拿取的物品
+     * @param predicate  一个物品匹配器对象，用来指定要从潜影盒中拿取的物品
      * @return 潜影盒中获取的指定物品
      */
-    public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, SimpleMatcher matcher) {
+    public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate) {
         // 判断潜影盒是否为空，空潜影盒直接返回空物品
         if (isEmptyShulkerBox(shulkerBox)) {
             return ItemStack.EMPTY;
@@ -37,7 +37,7 @@ public class InventoryUtils {
         ContainerComponent component = shulkerBox.get(DataComponentTypes.CONTAINER);
         //noinspection DataFlowIssue
         for (ItemStack itemStack : component.iterateNonEmpty()) {
-            if (matcher.test(itemStack)) {
+            if (predicate.test(itemStack)) {
                 ItemStack copy = itemStack.copy();
                 itemStack.setCount(0);
                 ifItIsEmptyRemoveIt(itemStack);
@@ -50,11 +50,11 @@ public class InventoryUtils {
     /**
      * 获取潜影盒中指定物品，并让这个物品执行一个函数，然后将执行函数前的物品返回
      *
-     * @param matcher  匹配物品的谓词
-     * @param consumer 要执行的函数
+     * @param predicate 匹配物品的谓词
+     * @param consumer  要执行的函数
      * @return 执行函数前的物品
      */
-    public static ItemStack shulkerBoxConsumer(ItemStack shulkerBox, SimpleMatcher matcher, Consumer<ItemStack> consumer) {
+    public static ItemStack shulkerBoxConsumer(ItemStack shulkerBox, Predicate<ItemStack> predicate, Consumer<ItemStack> consumer) {
         if (isEmptyShulkerBox(shulkerBox)) {
             // 因为这个判断，可以保证下方的shulkerBox.get(DataComponentTypes.CONTAINER)不会返回null
             return ItemStack.EMPTY;
@@ -62,7 +62,7 @@ public class InventoryUtils {
         ContainerComponent component = shulkerBox.get(DataComponentTypes.CONTAINER);
         // noinspection DataFlowIssue
         for (ItemStack stack : component.iterateNonEmpty()) {
-            if (matcher.test(stack)) {
+            if (predicate.test(stack)) {
                 ItemStack copyStack = stack.copy();
                 consumer.accept(stack);
                 return copyStack;
