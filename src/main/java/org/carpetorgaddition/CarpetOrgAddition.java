@@ -42,6 +42,10 @@ public class CarpetOrgAddition implements ModInitializer {
      * 当前jvm是否为调试模式
      */
     public static final boolean IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(s -> s.contains("jdwp"));
+    /**
+     * 是否同时加载了{@code Lithium}（锂）模组
+     */
+    public static final boolean LITHIUM = FabricLoader.getInstance().isModLoaded("lithium");
 
     /**
      * 模组初始化
