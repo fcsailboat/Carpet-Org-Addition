@@ -2,6 +2,7 @@ package org.carpetorgaddition;
 
 import carpet.api.settings.Rule;
 import carpet.api.settings.RuleCategory;
+import net.fabricmc.loader.api.FabricLoader;
 import org.carpetorgaddition.rule.HideRule;
 import org.carpetorgaddition.rule.validator.*;
 import org.carpetorgaddition.rule.value.*;
@@ -16,6 +17,10 @@ public class CarpetOrgAdditionSettings {
      * 潜影盒是否允许被堆叠，这还需要同时启用{@link CarpetOrgAdditionSettings#shulkerBoxStackable}
      */
     public static final ThreadLocal<Boolean> shulkerBoxStackCountChanged = ThreadLocal.withInitial(() -> true);
+    /**
+     * 是否同时加载了{@code Lithium}（锂）模组
+     */
+    public static final boolean LITHIUM = FabricLoader.getInstance().isModLoaded("lithium");
 
     private CarpetOrgAdditionSettings() {
     }
