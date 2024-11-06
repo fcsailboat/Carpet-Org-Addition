@@ -3,16 +3,26 @@ package org.carpetorgaddition.client.renderer.waypoint;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.util.math.Box;
+import org.carpetorgaddition.client.renderer.BoxRender;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 
 public class WaypointRenderManager {
+    public static Box beaconBox;
     private static final EnumMap<WaypointRenderType, WaypointRender> RENDERS = new EnumMap<>(WaypointRenderType.class);
 
     public static void register() {
         // 注册路径点渲染器
         WorldRenderEvents.LAST.register(WaypointRenderManager::frame);
+        WorldRenderEvents.BEFORE_DEBUG_RENDER.register(context -> {
+            if (beaconBox == null) {
+                return;
+            }
+            BoxRender boxRender = new BoxRender(context.matrixStack(), beaconBox);
+            boxRender.render();
+        });
         // 断开连接时清除路径点
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> WaypointRenderManager.clearAllRender());
     }
