@@ -19,7 +19,7 @@ import java.util.List;
 public class BeaconBlockEntityMixin {
     // TODO 移除测试代码；信标范围向上扩展一格
     @WrapOperation(method = "applyPlayerEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getNonSpectatingEntities(Ljava/lang/Class;Lnet/minecraft/util/math/Box;)Ljava/util/List;"))
-    private static List<PlayerEntity> box(World instance, Class<PlayerEntity> aClass, Box box, Operation<List<PlayerEntity>> original) {
+    private static List<PlayerEntity> box(World world, Class<PlayerEntity> aClass, Box box, Operation<List<PlayerEntity>> original) {
         BeaconRangeBox beaconRangeBox = new BeaconRangeBox(box);
         // 调整信标范围
         if (CarpetOrgAdditionSettings.beaconRangeExpand != 0 && CarpetOrgAdditionSettings.beaconRangeExpand <= 1024) {
@@ -27,9 +27,9 @@ public class BeaconBlockEntityMixin {
         }
         // 调整信标高度
         if (CarpetOrgAdditionSettings.beaconWorldHeight) {
-            beaconRangeBox = beaconRangeBox.worldHeight(instance);
+            beaconRangeBox = beaconRangeBox.worldHeight(world);
         }
         WaypointRenderManager.beaconBox = beaconRangeBox;
-        return original.call(instance, aClass, beaconRangeBox);
+        return original.call(world, aClass, beaconRangeBox);
     }
 }
