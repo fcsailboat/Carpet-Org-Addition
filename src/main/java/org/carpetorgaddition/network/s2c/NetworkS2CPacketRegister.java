@@ -15,5 +15,9 @@ public class NetworkS2CPacketRegister {
         PayloadTypeRegistry.playS2C().register(UnavailableSlotSyncS2CPacket.ID, UnavailableSlotSyncS2CPacket.CODEC);
         // 背景精灵同步数据包
         PayloadTypeRegistry.playS2C().register(BackgroundSpriteSyncS2CPacket.ID, BackgroundSpriteSyncS2CPacket.CODEC);
+        // 信标范围更新数据包
+        PayloadTypeRegistry.playS2C().register(BeaconBoxUpdateS2CPacket.ID, BeaconBoxUpdateS2CPacket.CODEC);
+        // 信标渲染框清除数据包
+        PayloadTypeRegistry.playS2C().register(BeaconBoxClearS2CPacket.ID, BeaconBoxClearS2CPacket.CODEC);
     }
 }

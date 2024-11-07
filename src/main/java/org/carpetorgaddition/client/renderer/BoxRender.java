@@ -15,10 +15,6 @@ import org.joml.Matrix4f;
 public class BoxRender {
     private final Tessellator tessellator = Tessellator.getInstance();
     /**
-     * 用于变换模型的矩阵栈
-     */
-    private final MatrixStack matrixStack;
-    /**
      * 用于确定模型的大小和位置
      */
     @NotNull
@@ -42,28 +38,27 @@ public class BoxRender {
      */
     private boolean seeThroughLine = true;
 
-    public BoxRender(MatrixStack matrixStack, @NotNull Box box) {
-        this.matrixStack = matrixStack;
+    public BoxRender(@NotNull Box box) {
         this.box = box;
     }
 
     /**
      * 渲染立方体
      */
-    public void render() {
+    public void render(MatrixStack matrixStack) {
         float minX = (float) this.box.minX;
         float minY = (float) this.box.minY;
         float minZ = (float) this.box.minZ;
         float maxX = (float) this.box.maxX;
         float maxY = (float) this.box.maxY;
         float maxZ = (float) this.box.maxZ;
-        this.matrixStack.push();
-        MatrixStack.Entry entry = this.matrixStack.peek();
+        matrixStack.push();
+        MatrixStack.Entry entry = matrixStack.peek();
         Matrix4f matrix4f = entry.getPositionMatrix();
         Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
         Vec3d cameraPos = camera.getPos();
         // 平移渲染框
-        this.matrixStack.translate(-cameraPos.getX(), -cameraPos.getY(), -cameraPos.getZ());
+        matrixStack.translate(-cameraPos.getX(), -cameraPos.getY(), -cameraPos.getZ());
         // 启用半透明渲染
         RenderSystem.enableBlend();
         // 禁用剔除
@@ -105,7 +100,7 @@ public class BoxRender {
         RenderSystem.disableBlend();
         // 允许透过方块渲染，避免影响其他渲染器
         RenderSystem.enableDepthTest();
-        this.matrixStack.pop();
+        matrixStack.pop();
     }
 
     /**
@@ -219,6 +214,10 @@ public class BoxRender {
                 {maxX, maxY, minZ, 0.0F, 0.0F, 1.0F},
                 {maxX, maxY, maxZ, 0.0F, 0.0F, 1.0F},
         };
+    }
+
+    public @NotNull Box getBox() {
+        return box;
     }
 
     public void setBox(@NotNull Box box) {

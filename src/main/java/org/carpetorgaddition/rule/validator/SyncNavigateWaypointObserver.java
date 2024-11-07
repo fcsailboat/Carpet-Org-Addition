@@ -19,7 +19,7 @@ public class SyncNavigateWaypointObserver extends AbstractValidator<Boolean> {
 
     @Override
     public @NotNull MutableText errorMessage() {
-        throw new IllegalStateException("规则值设置失败");
+        throw new IllegalStateException();
     }
 
     @Override

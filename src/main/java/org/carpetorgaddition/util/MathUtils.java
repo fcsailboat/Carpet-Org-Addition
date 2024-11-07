@@ -151,11 +151,21 @@ public class MathUtils {
     }
 
     /**
-     * 将一个浮点数数组中的每一个元素格式化为保留两位小数的字符串，然后拼接成一个大字符串，每个元素用空格隔开
-     *
-     * @return 每一个元素拼接后的大字符串
+     * 将一个浮点数格式化为保留两位小数的字符串
      */
     public static String numberToTwoDecimalString(double number) {
         return String.format("%.2f", number);
+    }
+
+    /**
+     * 根据比例因子使一个数逐渐趋近于另一个数
+     *
+     * @param start  起始数值
+     * @param target 目标数值
+     * @param factor {@code start}趋近于{@code target}的程度，需要在0到1之间
+     * @return {@code start}趋近于{@code target}后的新数值
+     */
+    public static double approach(double start, double target, double factor) {
+        return start + (target - start) * factor;
     }
 }

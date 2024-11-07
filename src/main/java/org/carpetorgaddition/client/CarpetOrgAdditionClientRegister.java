@@ -6,15 +6,13 @@ import net.minecraft.screen.ScreenHandler;
 import org.carpetorgaddition.client.command.DictionaryCommand;
 import org.carpetorgaddition.client.command.HighlightCommand;
 import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
+import org.carpetorgaddition.client.renderer.beaconbox.BeaconBoxManager;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRender;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderManager;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderType;
 import org.carpetorgaddition.debug.client.render.ComparatorLevelRender;
 import org.carpetorgaddition.debug.client.render.SoulSandItemCountRender;
-import org.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
-import org.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
-import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
-import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
+import org.carpetorgaddition.network.s2c.*;
 import org.carpetorgaddition.util.screen.BackgroundSpriteSyncSlot;
 import org.carpetorgaddition.util.screen.UnavailableSlotImplInterface;
 
@@ -74,6 +72,10 @@ public class CarpetOrgAdditionClientRegister {
                 slot.setIdentifier(payload.identifier());
             }
         });
+        // 信标范围更新数据包
+        ClientPlayNetworking.registerGlobalReceiver(BeaconBoxUpdateS2CPacket.ID, (payload, context) -> BeaconBoxManager.setBeaconRender(payload.blockPos(), payload.box()));
+        // 信标渲染框清除数据包
+        ClientPlayNetworking.registerGlobalReceiver(BeaconBoxClearS2CPacket.ID, (payload, context) -> BeaconBoxManager.clearRender());
     }
 
     /**
@@ -82,6 +84,8 @@ public class CarpetOrgAdditionClientRegister {
     private static void registerRender() {
         // 注册路径点渲染器
         WaypointRenderManager.register();
+        // 信标范围渲染器
+        BeaconBoxManager.register();
     }
 
     /**

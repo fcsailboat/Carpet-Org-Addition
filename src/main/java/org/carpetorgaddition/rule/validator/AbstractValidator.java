@@ -4,7 +4,7 @@ import carpet.api.settings.CarpetRule;
 import carpet.api.settings.RuleHelper;
 import carpet.api.settings.Validator;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import org.carpetorgaddition.util.MessageUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +39,7 @@ public abstract class AbstractValidator<T> extends Validator<T> {
      * @return 规则校验失败时的错误反馈
      */
     @NotNull
-    public abstract MutableText errorMessage();
+    public abstract Text errorMessage();
 
     @Override
     public void notifyFailure(ServerCommandSource source, CarpetRule<T> currentRule, String providedValue) {

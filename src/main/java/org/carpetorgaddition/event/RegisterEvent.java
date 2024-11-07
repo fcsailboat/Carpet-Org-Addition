@@ -1,7 +1,9 @@
 package org.carpetorgaddition.event;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
+import org.carpetorgaddition.network.s2c.BeaconBoxClearS2CPacket;
 import org.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
 import org.carpetorgaddition.util.screen.BackgroundSpriteSyncServer;
 import org.carpetorgaddition.util.screen.UnavailableSlotSyncInterface;
@@ -19,6 +21,12 @@ public class RegisterEvent {
                         player,
                         new BackgroundSpriteSyncS2CPacket(screenHandler.syncId, index, identifier)
                 ));
+            }
+        });
+        LoggerSubscribeEvent.UNSUBSCRIBE.register((player, logName) -> {
+            // 信标渲染框清除数据包
+            if (LoggerNames.BEACON_RANGE.equals(logName)) {
+                ServerPlayNetworking.send(player, new BeaconBoxClearS2CPacket());
             }
         });
     }

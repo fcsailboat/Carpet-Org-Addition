@@ -12,6 +12,10 @@ public class LoggerNames {
      * 钓鱼指示记录器
      */
     public static final String FISHING = "fishing";
+    /**
+     * 信标范围记录器
+     */
+    public static final String BEACON_RANGE = "beaconRange";
 
     /**
      * @return 指定名称的记录器
