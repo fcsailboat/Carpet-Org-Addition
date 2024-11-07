@@ -33,7 +33,8 @@ public class BeaconBoxRender extends BoxRender {
             return;
         }
         // 计算立方体缩放因子
-        double factor = Math.pow(timeDifference / 1500.0, 2);
+        double x = timeDifference / 1500.0;
+        double factor = x < 0.5 ? 2 * Math.pow(x, 2) : 1 - Math.pow(-2 * x + 2, 2) / 2;
         // 计算新立方体大小
         Box box = new Box(
                 MathUtils.approach(this.sizeModifier.originalBox.minX, this.sizeModifier.targetBox.minX, factor),
