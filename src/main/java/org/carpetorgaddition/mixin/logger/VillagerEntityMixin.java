@@ -43,7 +43,7 @@ public abstract class VillagerEntityMixin {
     // 获取要同步的兴趣点类型
     @Unique
     private Set<MemoryModuleType<GlobalPos>> getList(String option) {
-        if ("all".equals(option)) {
+        if (option == null || "all".equals(option)) {
             return Set.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE);
         }
         List<String> options = Arrays.stream(option.split("[,，]")).toList();
