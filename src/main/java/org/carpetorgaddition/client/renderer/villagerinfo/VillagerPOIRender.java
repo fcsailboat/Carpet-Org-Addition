@@ -21,13 +21,13 @@ import org.carpetorgaddition.client.renderer.LineRender;
 
 import java.util.Objects;
 
-public class VillagerInfoRender {
+public class VillagerPOIRender {
     private final VillagerEntity villagerEntity;
     private final GlobalPos bedPos;
     private final GlobalPos jobSitePos;
     private final GlobalPos potentialJobSite;
 
-    public VillagerInfoRender(VillagerEntity villagerEntity, GlobalPos bedPos, GlobalPos jobSitePos, GlobalPos potentialJobSite) {
+    public VillagerPOIRender(VillagerEntity villagerEntity, GlobalPos bedPos, GlobalPos jobSitePos, GlobalPos potentialJobSite) {
         this.villagerEntity = villagerEntity;
         this.bedPos = bedPos;
         this.jobSitePos = jobSitePos;
@@ -92,7 +92,7 @@ public class VillagerInfoRender {
     @Override
     public boolean equals(Object obj) {
         if (this.getClass() == obj.getClass()) {
-            return this.villagerEntity.equals(((VillagerInfoRender) obj).villagerEntity);
+            return this.villagerEntity.equals(((VillagerPOIRender) obj).villagerEntity);
         }
         return false;
     }

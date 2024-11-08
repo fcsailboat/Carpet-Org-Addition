@@ -7,8 +7,8 @@ import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.HashSet;
 
-public class VillagerInfoRenderingManager {
-    public static final HashSet<VillagerInfoRender> VILLAGER_INFO_RENDERS = new HashSet<>();
+public class VillagerPOIRenderingManager {
+    public static final HashSet<VillagerPOIRender> VILLAGER_INFO_RENDERS = new HashSet<>();
 
     public static void register() {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(context -> frame(context.matrixStack(), context.tickCounter()));
@@ -16,7 +16,7 @@ public class VillagerInfoRenderingManager {
     }
 
     public static void frame(MatrixStack matrixStack, RenderTickCounter tickCounter) {
-        VILLAGER_INFO_RENDERS.removeIf(VillagerInfoRender::shouldStop);
+        VILLAGER_INFO_RENDERS.removeIf(VillagerPOIRender::shouldStop);
         VILLAGER_INFO_RENDERS.forEach(render -> render.render(matrixStack, tickCounter));
     }
 }

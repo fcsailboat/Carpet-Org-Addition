@@ -8,8 +8,8 @@ import org.carpetorgaddition.client.command.DictionaryCommand;
 import org.carpetorgaddition.client.command.HighlightCommand;
 import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
 import org.carpetorgaddition.client.renderer.beaconbox.BeaconBoxManager;
-import org.carpetorgaddition.client.renderer.villagerinfo.VillagerInfoRender;
-import org.carpetorgaddition.client.renderer.villagerinfo.VillagerInfoRenderingManager;
+import org.carpetorgaddition.client.renderer.villagerinfo.VillagerPOIRender;
+import org.carpetorgaddition.client.renderer.villagerinfo.VillagerPOIRenderingManager;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRender;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderManager;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderType;
@@ -84,13 +84,13 @@ public class CarpetOrgAdditionClientRegister {
             // noinspection all
             if (context.client().world.getEntityById(payload.info().geVillagerId()) instanceof VillagerEntity villagerEntity) {
                 VillagerPOISyncS2CPacket.VillagerInfo villagerInfo = payload.info();
-                VillagerInfoRender render = new VillagerInfoRender(villagerEntity, villagerInfo.getBedPos(), villagerInfo.getJobSitePos(), villagerInfo.getPotentialJobSite());
-                VillagerInfoRenderingManager.VILLAGER_INFO_RENDERS.remove(render);
-                VillagerInfoRenderingManager.VILLAGER_INFO_RENDERS.add(render);
+                VillagerPOIRender render = new VillagerPOIRender(villagerEntity, villagerInfo.getBedPos(), villagerInfo.getJobSitePos(), villagerInfo.getPotentialJobSite());
+                VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.remove(render);
+                VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.add(render);
             }
         });
         // 村民信息渲染器清除数据包
-        ClientPlayNetworking.registerGlobalReceiver(VillagerPOIRenderClearS2CPacket.ID, (payload, context) -> VillagerInfoRenderingManager.VILLAGER_INFO_RENDERS.clear());
+        ClientPlayNetworking.registerGlobalReceiver(VillagerPOIRenderClearS2CPacket.ID, (payload, context) -> VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.clear());
     }
 
     /**
@@ -102,7 +102,7 @@ public class CarpetOrgAdditionClientRegister {
         // 信标范围渲染器
         BeaconBoxManager.register();
         // 注册村民信息渲染器
-        VillagerInfoRenderingManager.register();
+        VillagerPOIRenderingManager.register();
     }
 
     /**
