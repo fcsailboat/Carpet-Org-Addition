@@ -5,6 +5,7 @@ import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
 import org.carpetorgaddition.network.s2c.BeaconBoxClearS2CPacket;
 import org.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
+import org.carpetorgaddition.network.s2c.VillagerPOIRenderClearS2CPacket;
 import org.carpetorgaddition.util.screen.BackgroundSpriteSyncServer;
 import org.carpetorgaddition.util.screen.UnavailableSlotSyncInterface;
 
@@ -27,6 +28,16 @@ public class RegisterEvent {
             // 信标渲染框清除数据包
             if (LoggerNames.BEACON_RANGE.equals(logName)) {
                 ServerPlayNetworking.send(player, new BeaconBoxClearS2CPacket());
+            }
+            // 清除村民兴趣点渲染器
+            if (LoggerNames.VILLAGER.equals(logName)) {
+                ServerPlayNetworking.send(player, new VillagerPOIRenderClearS2CPacket());
+            }
+        });
+        LoggerSubscribeEvent.SUBSCRIBE.register((player, logName, option) -> {
+            // 切换选项时，清除之前的渲染器
+            if (LoggerNames.VILLAGER.equals(logName)) {
+                ServerPlayNetworking.send(player, new VillagerPOIRenderClearS2CPacket());
             }
         });
     }

@@ -9,6 +9,7 @@ import org.carpetorgaddition.mixin.rule.carpet.LoggerAccessor;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class NetworkPacketLogger extends Logger {
@@ -25,6 +26,14 @@ public class NetworkPacketLogger extends Logger {
                 .map(this::playerFromName)
                 .filter(Objects::nonNull)
                 .forEach(player -> ServerPlayNetworking.send(player, supplier.get()));
+    }
+
+    public void sendPacket(Function<String, CustomPayload> function) {
+        for (Map.Entry<String, String> entry : this.onlinePlayers.entrySet()) {
+            if (this.playerFromName(entry.getKey()) instanceof ServerPlayerEntity player) {
+                ServerPlayNetworking.send(player, function.apply(entry.getValue()));
+            }
+        }
     }
 
     public void sendPacketIfOnline(ServerPlayerEntity player, Supplier<CustomPayload> supplier) {

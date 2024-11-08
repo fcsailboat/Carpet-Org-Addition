@@ -18,6 +18,13 @@ public class LoggerRegister {
     @LoggerConfig(name = LoggerNames.BEACON_RANGE, type = LoggerType.NETWORK)
     public static boolean beaconRange = false;
 
+    @LoggerConfig(
+            name = LoggerNames.VILLAGER,
+            type = LoggerType.NETWORK,
+            options = {"bed", "jobSitePos", "potentialJobSite", "\"bed,jobSitePos\"", "\"jobSitePos,potentialJobSite\"", "all"}
+    )
+    public static boolean villager = false;
+
     /**
      * 注册记录器
      */

@@ -98,7 +98,7 @@ public class BoxRender {
         RenderSystem.enableCull();
         // 禁用半透明渲染
         RenderSystem.disableBlend();
-        // 允许透过方块渲染，避免影响其他渲染器
+        // 允许透过方块渲染
         RenderSystem.enableDepthTest();
         matrixStack.pop();
     }
@@ -120,7 +120,7 @@ public class BoxRender {
         for (float[] arr : fillBoxVertex) {
             bufferBuilder
                     .vertex(matrix4f, arr[0], arr[1], arr[2])
-                    .color(this.faceColor.red, this.faceColor.green, this.faceColor.blue, this.faceColor.alpha);
+                    .color(this.faceColor.red(), this.faceColor.green(), this.faceColor.blue(), this.faceColor.alpha());
         }
     }
 
@@ -141,7 +141,7 @@ public class BoxRender {
         for (float[] arr : lineBoxVertex) {
             bufferBuilder
                     .vertex(entry, arr[0], arr[1], arr[2])
-                    .color(this.lineColor.red, this.lineColor.green, this.lineColor.blue, this.lineColor.alpha)
+                    .color(this.lineColor.red(), this.lineColor.green(), this.lineColor.blue(), this.lineColor.alpha())
                     .normal(entry, arr[3], arr[4], arr[5]);
         }
     }
@@ -240,12 +240,4 @@ public class BoxRender {
         this.seeThroughLine = seeThroughLine;
     }
 
-    /**
-     * @param red   红色
-     * @param green 绿色
-     * @param blue  蓝色
-     * @param alpha 不透明度，值越低模型越透明
-     */
-    private record Color(float red, float green, float blue, float alpha) {
-    }
 }

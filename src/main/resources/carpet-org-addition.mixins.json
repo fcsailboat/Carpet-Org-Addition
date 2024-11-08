@@ -17,6 +17,7 @@
     "logger.FishingBobberEntityMixin",
     "logger.HUDControllerMixin",
     "logger.LoggerAccessor",
+    "logger.VillagerEntityMixin",
     "logger.WanderingTraderManagerMixin",
     "rule.AbstractBlockStateMixin",
     "rule.AbstractPiglinEntityMixin",

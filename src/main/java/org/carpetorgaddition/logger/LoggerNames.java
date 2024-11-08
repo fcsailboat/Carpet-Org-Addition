@@ -16,6 +16,10 @@ public class LoggerNames {
      * 信标范围记录器
      */
     public static final String BEACON_RANGE = "beaconRange";
+    /**
+     * 村民兴趣点记录器
+     */
+    public static final String VILLAGER = "villager";
 
     /**
      * @return 指定名称的记录器
