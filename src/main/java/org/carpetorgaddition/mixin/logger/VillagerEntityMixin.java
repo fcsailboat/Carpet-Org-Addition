@@ -57,28 +57,4 @@ public abstract class VillagerEntityMixin {
         }
         return set;
     }
-
-    // 同步村民兴趣点
-    @Unique
-    private void syncVillagerPoi(MemoryModuleType<GlobalPos> type, VillagerInfo villagerInfo) {
-        thisVillager.getBrain().getOptionalRegisteredMemory(type).ifPresent(globalPos -> villagerInfo.setGlobalPos(type, globalPos));
-/*        thisVillager.getBrain().getOptionalRegisteredMemory(type)
-                .ifPresent(globalPos -> {
-                    BlockPos pos = globalPos.pos();
-                    MinecraftServer server = thisVillager.getServer();
-                    if (server == null) {
-                        return;
-                    }
-                    ServerWorld world = server.getWorld(globalPos.dimension());
-                    if (world == null) {
-                        return;
-                    }
-                    // 获取所有兴趣点
-                    Optional<RegistryEntry<PointOfInterestType>> optional = world.getPointOfInterestStorage().getType(pos);
-                    BiPredicate<VillagerEntity, RegistryEntry<PointOfInterestType>> biPredicate = VillagerEntity.POINTS_OF_INTEREST.get(type);
-                    if (optional.isPresent() && biPredicate.test(thisVillager, optional.get())) {
-                        villagerInfo.setGlobalPos(type, globalPos);
-                    }
-                });*/
-    }
 }
