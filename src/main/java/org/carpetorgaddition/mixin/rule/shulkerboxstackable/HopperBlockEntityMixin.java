@@ -1,5 +1,6 @@
 package org.carpetorgaddition.mixin.rule.shulkerboxstackable;
 
+import carpet.CarpetSettings;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.block.BlockState;
@@ -99,11 +100,12 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
         if (CarpetOrgAddition.LITHIUM) {
             return original.call(world, pos, state, blockEntity, booleanSupplier);
         }
+        boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
         try {
             CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
             return original.call(world, pos, state, blockEntity, booleanSupplier);
         } finally {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(true);
+            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
         }
     }
 
@@ -112,12 +114,18 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
      */
     @Unique
     private static void compatible(Runnable runnable) {
+        // TODO 阻止与漏斗计数器同时启用
+        // 保持与漏斗计数器的兼容
+        if (CarpetSettings.hopperCounters) {
+            return;
+        }
         if (CarpetOrgAdditionSettings.shulkerBoxStackable && CarpetOrgAddition.LITHIUM) {
+            boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
             try {
                 CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
                 runnable.run();
             } finally {
-                CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(true);
+                CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
             }
         }
     }
@@ -135,7 +143,6 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
     @Inject(method = "extract(Lnet/minecraft/world/World;Lnet/minecraft/block/entity/Hopper;)Z", at = @At("HEAD"), cancellable = true)
     private static void extract(World world, Hopper hopper, CallbackInfoReturnable<Boolean> cir) {
         compatible(() -> cir.setReturnValue(tryExtract(world, hopper)));
-
     }
 
     @Unique

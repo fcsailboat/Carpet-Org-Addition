@@ -43,6 +43,7 @@ public class VillagerPOIRender {
             // 渲染床位置
             World world = this.villagerEntity.getWorld();
             BlockState blockState = world.getBlockState(this.bedPos.pos());
+            // TODO 床的渲染不明显
             new LineRender(leashPos, bedPos.pos().toCenterPos()).render(matrixStack);
             // 渲染床轮廓
             if (blockState.getBlock() instanceof BedBlock && blockState.get(BedBlock.PART) == BedPart.HEAD) {

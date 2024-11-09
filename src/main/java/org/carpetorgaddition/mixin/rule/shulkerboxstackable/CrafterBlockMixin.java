@@ -14,11 +14,12 @@ import org.spongepowered.asm.mixin.injection.At;
 public class CrafterBlockMixin {
     @WrapOperation(method = "transferOrSpawnStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/HopperBlockEntity;transfer(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/math/Direction;)Lnet/minecraft/item/ItemStack;"))
     private ItemStack transfer(Inventory from, Inventory to, ItemStack stack, Direction side, Operation<ItemStack> original) {
+        boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
         try {
             CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
             return original.call(from, to, stack, side);
         } finally {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(true);
+            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
         }
     }
 }
