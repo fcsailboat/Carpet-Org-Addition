@@ -1,4 +1,4 @@
-package org.carpetorgaddition.client.renderer.villagerinfo;
+package org.carpetorgaddition.client.renderer.villagerpoi;
 
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
@@ -21,6 +21,9 @@ import org.carpetorgaddition.client.renderer.LineRender;
 
 import java.util.Objects;
 
+// TODO 性能问题：1.不渲染线段两段都不在视线内的村民。2.设置最大渲染距离
+// TODO 添加性能分析器
+// TODO 调成床的高亮方式
 public class VillagerPOIRender {
     private final VillagerEntity villagerEntity;
     private final GlobalPos bedPos;

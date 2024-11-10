@@ -1,4 +1,4 @@
-package org.carpetorgaddition.client.renderer.villagerinfo;
+package org.carpetorgaddition.client.renderer.villagerpoi;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
