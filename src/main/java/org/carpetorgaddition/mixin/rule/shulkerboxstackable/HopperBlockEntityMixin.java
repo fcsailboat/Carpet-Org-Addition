@@ -114,7 +114,9 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
      */
     @Unique
     private static void compatible(Runnable runnable) {
-        // TODO 保持与漏斗计数器的兼容
+        // TODO 兼容性问题：
+        //  1.漏斗计数器
+        //  2.Carpet TIS Addition漏斗计数器无限速度；漏斗不消耗物品
         if (CarpetSettings.hopperCounters) {
             return;
         }

@@ -308,6 +308,11 @@ public class FakePlayerSerial {
     public static void autoLogin(MinecraftServer server) {
         ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
         try {
+            /* TODO
+            *   避免玩家重复登录（GCA假人驻留）
+            *   避免因为登录玩家过多占满服务器上线
+            *   玩家登录时记录日志
+            * */
             tryAutoLogin(server, instance);
         } catch (RuntimeException e) {
             CarpetOrgAddition.LOGGER.error("玩家自动登录出现意外错误", e);
@@ -329,6 +334,7 @@ public class FakePlayerSerial {
                 try {
                     instance.addTask(new DelayedLoginTask(server, fakePlayerSerial, 1));
                 } catch (RuntimeException e) {
+                    // TODO 提前判断玩家是否存在；此处日志记录是否正确？
                     CarpetOrgAddition.LOGGER.warn("玩家{}已存在", fakePlayerSerial.fakePlayerName, e);
                 }
             }
