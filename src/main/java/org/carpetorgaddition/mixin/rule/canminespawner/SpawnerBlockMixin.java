@@ -12,12 +12,14 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.util.EnchantmentUtils;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -49,11 +51,27 @@ public abstract class SpawnerBlockMixin extends BlockWithEntity {
                 NbtCompound nbtCompound = blockEntity.createComponentlessNbtWithIdentifyingData(player.getWorld().getRegistryManager());
                 BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), nbtCompound);
                 itemStack.applyComponentsFrom(blockEntity.getComponents());
-                ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
-                itemEntity.setToDefaultPickupDelay();
-                world.spawnEntity(itemEntity);
+                if (tryCollect(itemStack)) {
+                    ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
+                    itemEntity.setToDefaultPickupDelay();
+                    world.spawnEntity(itemEntity);
+                }
             }
         }
         return super.onBreak(world, pos, state, player);
+    }
+
+    // 方块掉落物直接进入物品栏
+    @Unique
+    private boolean tryCollect(ItemStack itemStack) {
+        if (CarpetOrgAdditionSettings.blockDropsDirectlyEnterInventory) {
+            ServerPlayerEntity player = CarpetOrgAdditionSettings.blockBreaking.get();
+            if (player == null) {
+                return true;
+            }
+            player.getInventory().insertStack(itemStack);
+            return !itemStack.isEmpty();
+        }
+        return true;
     }
 }

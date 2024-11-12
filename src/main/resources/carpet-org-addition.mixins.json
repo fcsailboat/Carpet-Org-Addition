@@ -67,7 +67,7 @@
     "rule.VillagerEntityMixin",
     "rule.WetSpongeBlockMixin",
     "rule.blockdropsdirectlyenterinventory.BlockMixin",
-    "rule.blockdropsdirectlyenterinventory.TallPlantBlockMixin",
+    "rule.blockdropsdirectlyenterinventory.ServerPlayerInteractionManagerMixin",
     "rule.canminespawner.MobSpawnerBlockEntityMixin",
     "rule.canminespawner.SpawnerBlockMixin",
     "rule.carpet.EntityPlayerMPFakeMixin",

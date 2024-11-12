@@ -1,7 +1,7 @@
 package org.carpetorgaddition.mixin.rule.blockdropsdirectlyenterinventory;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -10,37 +10,31 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.List;
 
 @Mixin(Block.class)
 public abstract class BlockMixin {
-    // 方块被采集后直接进入物品栏
-    @WrapOperation(method = "afterBreak", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;dropStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"))
-    private void drops(BlockState state, World world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack tool, Operation<Void> original) {
+    // 方块掉落物直接进入物品栏
+    @WrapMethod(method = "getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Ljava/util/List;")
+    private static List<ItemStack> getDroppedStacks(BlockState state, ServerWorld world, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack stack, Operation<List<ItemStack>> original) {
         if (CarpetOrgAdditionSettings.blockDropsDirectlyEnterInventory) {
-            if (world instanceof ServerWorld serverWorld && entity instanceof ServerPlayerEntity player) {
-                List<ItemStack> list = Block.getDroppedStacks(state, (ServerWorld) world, pos, blockEntity, entity, tool);
-                if (list == null) {
-                    original.call(state, world, pos, blockEntity, entity, tool);
-                    return;
-                }
-                for (ItemStack itemStack : list) {
-                    // 将物品直接放入物品栏
-                    if (player.getInventory().insertStack(itemStack)) {
-                        continue;
-                    }
-                    // 将部分物品放入物品栏后，剩下的物品直接掉落
-                    Block.dropStack(world, pos, itemStack);
-                }
-                state.onStacksDropped(serverWorld, pos, tool, true);
+            ServerPlayerEntity player = CarpetOrgAdditionSettings.blockBreaking.get();
+            if (player == null) {
+                return original.call(state, world, pos, blockEntity, entity, stack);
             }
-        } else {
-            original.call(state, world, pos, blockEntity, entity, tool);
+            // 获取本来要掉落的物品
+            List<ItemStack> list = original.call(state, world, pos, blockEntity, entity, stack);
+            // 将物品直接插入玩家物品栏
+            for (ItemStack itemStack : list) {
+                player.getInventory().insertStack(itemStack);
+            }
+            // 如果物品完全插入玩家物品栏，返回空集合，否则将剩余物品返回，然后掉落
+            return list.isEmpty() ? List.of() : list.stream().filter(itemStack -> !itemStack.isEmpty()).toList();
         }
+        return original.call(state, world, pos, blockEntity, entity, stack);
     }
 }

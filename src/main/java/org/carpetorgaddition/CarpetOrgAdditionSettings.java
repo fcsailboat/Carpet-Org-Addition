@@ -2,6 +2,7 @@ package org.carpetorgaddition;
 
 import carpet.api.settings.Rule;
 import carpet.api.settings.RuleCategory;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.carpetorgaddition.rule.HideRule;
 import org.carpetorgaddition.rule.validator.*;
 import org.carpetorgaddition.rule.value.*;
@@ -16,6 +17,10 @@ public class CarpetOrgAdditionSettings {
      * 潜影盒是否允许被堆叠，这还需要同时启用{@link CarpetOrgAdditionSettings#shulkerBoxStackable}
      */
     public static final ThreadLocal<Boolean> shulkerBoxStackCountChanged = ThreadLocal.withInitial(() -> true);
+    /**
+     * 当前方块的破坏者，启用{@link CarpetOrgAdditionSettings#blockDropsDirectlyEnterInventory}后，方块掉落物会直接进入玩家物品栏
+     */
+    public static final ThreadLocal<ServerPlayerEntity> blockBreaking = new ThreadLocal<>();
 
     private CarpetOrgAdditionSettings() {
     }
