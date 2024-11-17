@@ -25,6 +25,7 @@ public class RegisterEvent {
             }
         });
         LoggerSubscribeEvent.UNSUBSCRIBE.register((player, logName) -> {
+            // TODO 直接通过记录器的Map集合替代这些网络包
             // 信标渲染框清除数据包
             if (LoggerNames.BEACON_RANGE.equals(logName)) {
                 ServerPlayNetworking.send(player, new BeaconBoxClearS2CPacket());

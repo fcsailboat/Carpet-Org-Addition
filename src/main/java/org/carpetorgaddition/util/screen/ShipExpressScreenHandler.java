@@ -108,6 +108,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             onlyOneKind = 1;
             // 只比较物品
             if (firstStack.isOf(stack.getItem())) {
+                // TODO 可以改成break吗？
                 continue;
             }
             onlyOneKind = 2;

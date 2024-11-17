@@ -129,6 +129,7 @@ public class WaypointRender {
         Tessellator tessellator = Tessellator.getInstance();
         // 绘制图标纹理
         BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+        // TODO 冗余的overlay和normal
         bufferBuilder.vertex(matrix4f, -1F, -1F, 0F).texture(0, 0).overlay(OverlayTexture.DEFAULT_UV).normal(entry, 0F, 1F, 0F);
         bufferBuilder.vertex(matrix4f, -1F, 1F, 0F).texture(0, 1).overlay(OverlayTexture.DEFAULT_UV).normal(entry, 0F, 1F, 0F);
         bufferBuilder.vertex(matrix4f, 1F, 1F, 0F).texture(1, 1).overlay(OverlayTexture.DEFAULT_UV).normal(entry, 0F, 1F, 0F);
