@@ -4,18 +4,16 @@ import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.GlobalPos;
-import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.network.PacketFactory;
 import org.jetbrains.annotations.Nullable;
 
 // 村民信息同步数据包
-public record VillagerPOISyncS2CPacket(VillagerInfo info) implements CustomPayload {
-    private static final Identifier VILLAGER_POI_SYNC = Identifier.of(CarpetOrgAddition.MOD_ID, "villager_poi_sync");
-    public static final Id<VillagerPOISyncS2CPacket> ID = new Id<>(VILLAGER_POI_SYNC);
-    public static PacketCodec<RegistryByteBuf, VillagerPOISyncS2CPacket> CODEC = new PacketCodec<>() {
+public record VillagerPoiSyncS2CPacket(VillagerInfo info) implements CustomPayload {
+    public static final Id<VillagerPoiSyncS2CPacket> ID = PacketFactory.createId("villager_poi_sync");
+    public static PacketCodec<RegistryByteBuf, VillagerPoiSyncS2CPacket> CODEC = new PacketCodec<>() {
         @Override
-        public void encode(RegistryByteBuf buf, VillagerPOISyncS2CPacket value) {
+        public void encode(RegistryByteBuf buf, VillagerPoiSyncS2CPacket value) {
             VillagerInfo villagerInfo = value.info;
             buf.writeInt(villagerInfo.geVillagerId());
             if (villagerInfo.getBedPos() == null) {
@@ -39,7 +37,7 @@ public record VillagerPOISyncS2CPacket(VillagerInfo info) implements CustomPaylo
         }
 
         @Override
-        public VillagerPOISyncS2CPacket decode(RegistryByteBuf buf) {
+        public VillagerPoiSyncS2CPacket decode(RegistryByteBuf buf) {
             VillagerInfo villagerInfo = new VillagerInfo(buf.readInt());
             if (buf.readBoolean()) {
                 villagerInfo.setBedPos(buf.readGlobalPos());
@@ -50,7 +48,7 @@ public record VillagerPOISyncS2CPacket(VillagerInfo info) implements CustomPaylo
             if (buf.readBoolean()) {
                 villagerInfo.setPotentialJobSite(buf.readGlobalPos());
             }
-            return new VillagerPOISyncS2CPacket(villagerInfo);
+            return new VillagerPoiSyncS2CPacket(villagerInfo);
         }
     };
 

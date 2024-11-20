@@ -3,18 +3,16 @@ package org.carpetorgaddition.network.s2c;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.network.PacketFactory;
 
 /**
  * 信标范围更新数据包
  */
 public record BeaconBoxUpdateS2CPacket(BlockPos blockPos, Box box) implements CustomPayload {
     public static final Box ZERO = new Box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    private static final Identifier BEACON_BOX_UPDATE = Identifier.of(CarpetOrgAddition.MOD_ID, "beacon_box_update");
-    public static final Id<BeaconBoxUpdateS2CPacket> ID = new Id<>(BEACON_BOX_UPDATE);
+    public static final Id<BeaconBoxUpdateS2CPacket> ID = PacketFactory.createId("beacon_box_update");
     public static PacketCodec<RegistryByteBuf, BeaconBoxUpdateS2CPacket> CODEC = new PacketCodec<>() {
         @Override
         public BeaconBoxUpdateS2CPacket decode(RegistryByteBuf buf) {

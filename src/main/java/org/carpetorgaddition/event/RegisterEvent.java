@@ -5,7 +5,7 @@ import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
 import org.carpetorgaddition.network.s2c.BeaconBoxClearS2CPacket;
 import org.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
-import org.carpetorgaddition.network.s2c.VillagerPOIRenderClearS2CPacket;
+import org.carpetorgaddition.network.s2c.VillagerPoiRenderClearS2CPacket;
 import org.carpetorgaddition.util.screen.BackgroundSpriteSyncServer;
 import org.carpetorgaddition.util.screen.UnavailableSlotSyncInterface;
 
@@ -32,13 +32,13 @@ public class RegisterEvent {
             }
             // 清除村民兴趣点渲染器
             if (LoggerNames.VILLAGER.equals(logName)) {
-                ServerPlayNetworking.send(player, new VillagerPOIRenderClearS2CPacket());
+                ServerPlayNetworking.send(player, new VillagerPoiRenderClearS2CPacket());
             }
         });
         LoggerSubscribeEvent.SUBSCRIBE.register((player, logName, option) -> {
             // 切换选项时，清除之前的渲染器
             if (LoggerNames.VILLAGER.equals(logName)) {
-                ServerPlayNetworking.send(player, new VillagerPOIRenderClearS2CPacket());
+                ServerPlayNetworking.send(player, new VillagerPoiRenderClearS2CPacket());
             }
         });
     }

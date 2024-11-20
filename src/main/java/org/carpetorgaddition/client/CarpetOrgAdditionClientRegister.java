@@ -80,17 +80,17 @@ public class CarpetOrgAdditionClientRegister {
         // 信标渲染框清除数据包
         ClientPlayNetworking.registerGlobalReceiver(BeaconBoxClearS2CPacket.ID, (payload, context) -> BeaconBoxManager.clearRender());
         // 村民信息同步数据包
-        ClientPlayNetworking.registerGlobalReceiver(VillagerPOISyncS2CPacket.ID, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(VillagerPoiSyncS2CPacket.ID, (payload, context) -> {
             // noinspection all
             if (context.client().world.getEntityById(payload.info().geVillagerId()) instanceof VillagerEntity villagerEntity) {
-                VillagerPOISyncS2CPacket.VillagerInfo villagerInfo = payload.info();
+                VillagerPoiSyncS2CPacket.VillagerInfo villagerInfo = payload.info();
                 VillagerPOIRender render = new VillagerPOIRender(villagerEntity, villagerInfo.getBedPos(), villagerInfo.getJobSitePos(), villagerInfo.getPotentialJobSite());
                 VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.remove(render);
                 VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.add(render);
             }
         });
         // 村民信息渲染器清除数据包
-        ClientPlayNetworking.registerGlobalReceiver(VillagerPOIRenderClearS2CPacket.ID, (payload, context) -> VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.clear());
+        ClientPlayNetworking.registerGlobalReceiver(VillagerPoiRenderClearS2CPacket.ID, (payload, context) -> VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.clear());
     }
 
     /**

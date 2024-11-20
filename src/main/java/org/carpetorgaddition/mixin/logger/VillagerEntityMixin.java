@@ -6,8 +6,8 @@ import net.minecraft.util.math.GlobalPos;
 import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.logger.LoggerRegister;
 import org.carpetorgaddition.logger.NetworkPacketLogger;
-import org.carpetorgaddition.network.s2c.VillagerPOISyncS2CPacket;
-import org.carpetorgaddition.network.s2c.VillagerPOISyncS2CPacket.VillagerInfo;
+import org.carpetorgaddition.network.s2c.VillagerPoiSyncS2CPacket;
+import org.carpetorgaddition.network.s2c.VillagerPoiSyncS2CPacket.VillagerInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,7 +35,7 @@ public abstract class VillagerEntityMixin {
                             .getOptionalRegisteredMemory(type)
                             .ifPresent(globalPos -> villagerInfo.setGlobalPos(type, globalPos));
                 }
-                return new VillagerPOISyncS2CPacket(villagerInfo);
+                return new VillagerPoiSyncS2CPacket(villagerInfo);
             });
         }
     }

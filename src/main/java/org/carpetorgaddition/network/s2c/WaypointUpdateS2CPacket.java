@@ -3,10 +3,9 @@ package org.carpetorgaddition.network.s2c;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.network.PacketFactory;
 import org.carpetorgaddition.util.WorldUtils;
 
 /**
@@ -16,8 +15,7 @@ import org.carpetorgaddition.util.WorldUtils;
  * @param worldId 导航点所在维度
  */
 public record WaypointUpdateS2CPacket(Vec3d target, String worldId) implements CustomPayload {
-    private static final Identifier WAYPOINT_UPDATE = Identifier.of(CarpetOrgAddition.MOD_ID, "waypoint_update");
-    public static final Id<WaypointUpdateS2CPacket> ID = new Id<>(WAYPOINT_UPDATE);
+    public static final Id<WaypointUpdateS2CPacket> ID = PacketFactory.createId("waypoint_update");
     public static PacketCodec<RegistryByteBuf, WaypointUpdateS2CPacket> CODEC = new PacketCodec<>() {
         @Override
         public WaypointUpdateS2CPacket decode(RegistryByteBuf buf) {
