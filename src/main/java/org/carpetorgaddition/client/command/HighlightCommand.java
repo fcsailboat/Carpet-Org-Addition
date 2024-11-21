@@ -8,9 +8,10 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
-import org.carpetorgaddition.client.renderer.waypoint.WaypointRender;
-import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderManager;
-import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderType;
+import org.carpetorgaddition.client.renderer.WorldRendererManager;
+import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderer;
+import org.carpetorgaddition.client.renderer.waypoint.WaypointRendererType;
+import org.jetbrains.annotations.Nullable;
 
 public class HighlightCommand {
     public static void register() {
@@ -27,26 +28,31 @@ public class HighlightCommand {
         Vec3d vec3d = ClientBlockPosArgumentType.getBlockPos(context, "blockPos").toCenterPos();
         ClientWorld world = context.getSource().getWorld();
         // 获取旧路径点
-        WaypointRender oldRender = WaypointRenderManager.getRender(WaypointRenderType.HIGHLIGHT);
+        WaypointRenderer oldRender = getWaypointRenderer();
         // 创建新路径点
-        WaypointRender newRender = new WaypointRender(WaypointRenderType.HIGHLIGHT, vec3d, world);
+        WaypointRenderer newRender = new WaypointRenderer(WaypointRendererType.HIGHLIGHT, vec3d, world);
         // 如果两个路径点指向同一个位置，就让玩家看向该路径点
-        if (newRender.equals(oldRender)) {
+        if (oldRender != null && newRender.getPos().equals(oldRender.getPos())) {
             // if语句结束后仍要设置新路径点，因为要重置持续时间
             context.getSource().getEntity().lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, oldRender.getPos());
         }
         // 设置新的路径点
-        WaypointRenderManager.setRender(newRender);
+        WorldRendererManager.addOrUpdate(newRender);
         return 1;
     }
 
     // 取消高亮路径点
     private static int clear() {
-        WaypointRender render = WaypointRenderManager.getRender(WaypointRenderType.HIGHLIGHT);
+        WaypointRenderer render = getWaypointRenderer();
         if (render == null) {
             return 0;
         }
         render.setFade();
         return 1;
+    }
+
+    @Nullable
+    private static WaypointRenderer getWaypointRenderer() {
+        return WorldRendererManager.getOnlyRenderer(WaypointRenderer.class, renderer -> renderer.getRenderType() == WaypointRendererType.HIGHLIGHT);
     }
 }

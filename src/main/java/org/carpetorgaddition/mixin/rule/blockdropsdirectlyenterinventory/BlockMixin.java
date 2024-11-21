@@ -18,6 +18,7 @@ import java.util.List;
 
 @Mixin(Block.class)
 public abstract class BlockMixin {
+    // TODO 方块可能不会掉落，例如放置在方块上的中继器不会因为支持方块破坏而进入物品栏
     // 方块掉落物直接进入物品栏
     @WrapMethod(method = "getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Ljava/util/List;")
     private static List<ItemStack> getDroppedStacks(BlockState state, ServerWorld world, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack stack, Operation<List<ItemStack>> original) {

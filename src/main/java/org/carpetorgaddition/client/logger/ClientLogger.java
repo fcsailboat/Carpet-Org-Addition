@@ -1,8 +1,9 @@
 package org.carpetorgaddition.client.logger;
 
 
-import org.carpetorgaddition.client.renderer.beaconbox.BeaconBoxManager;
-import org.carpetorgaddition.client.renderer.villagerpoi.VillagerPOIRenderingManager;
+import org.carpetorgaddition.client.renderer.WorldRendererManager;
+import org.carpetorgaddition.client.renderer.beaconbox.BeaconBoxRenderer;
+import org.carpetorgaddition.client.renderer.villagerpoi.VillagerPoiRenderer;
 import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.network.s2c.LoggerUpdateS2CPacket;
 
@@ -31,8 +32,8 @@ public class ClientLogger {
 
     private static void onRemove(String logger) {
         switch (logger) {
-            case LoggerNames.BEACON_RANGE -> BeaconBoxManager.clearRender();
-            case LoggerNames.VILLAGER -> VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.clear();
+            case LoggerNames.BEACON_RANGE -> WorldRendererManager.remove(BeaconBoxRenderer.class);
+            case LoggerNames.VILLAGER -> WorldRendererManager.remove(VillagerPoiRenderer.class);
             default -> {
             }
         }

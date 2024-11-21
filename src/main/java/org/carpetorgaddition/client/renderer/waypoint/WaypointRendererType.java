@@ -1,9 +1,12 @@
 package org.carpetorgaddition.client.renderer.waypoint;
 
 import net.minecraft.util.Identifier;
+import org.carpetorgaddition.client.renderer.WorldRendererManager;
 import org.carpetorgaddition.client.util.ClientCommandUtils;
 
-public enum WaypointRenderType {
+import java.util.function.Consumer;
+
+public enum WaypointRendererType {
     /**
      * 高亮
      */
@@ -25,7 +28,7 @@ public enum WaypointRenderType {
      */
     private static final long VANISHING_TIME = 800L;
 
-    WaypointRenderType(Identifier identifier, long durationTime) {
+    WaypointRendererType(Identifier identifier, long durationTime) {
         this.icon = identifier;
         this.durationTime = durationTime;
     }
@@ -91,13 +94,13 @@ public enum WaypointRenderType {
      * 清除高亮路径点
      */
     public void clear() {
+        Consumer<WaypointRendererType> consumer = type -> WorldRendererManager.remove(WaypointRenderer.class, renderer -> renderer.getRenderType() == type);
         switch (this) {
-            // 直接删除，EnumMap不会引发并发修改异常
-            case HIGHLIGHT -> WaypointRenderManager.clearRender(HIGHLIGHT);
+            case HIGHLIGHT -> consumer.accept(HIGHLIGHT);
             // 请求服务器停止发送路径点更新数据包
             case NAVIGATOR -> {
                 ClientCommandUtils.sendCommand("navigate stop");
-                WaypointRenderManager.clearRender(NAVIGATOR);
+                consumer.accept(NAVIGATOR);
             }
         }
     }

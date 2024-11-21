@@ -52,6 +52,7 @@ public abstract class BeaconBlockEntityMixin {
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/List;isEmpty()Z", ordinal = 1))
     private static boolean tick(List<?> list, Operation<Boolean> original, @Local(argsOnly = true) BeaconBlockEntity blockEntity) {
         BlockPos pos = blockEntity.getPos();
+        // 信标不完整或者被遮挡
         if (LoggerRegister.beaconRange && (list.isEmpty() || updateLevel(blockEntity.getWorld(), pos.getX(), pos.getY(), pos.getZ()) == 0)) {
             NetworkPacketLogger logger = (NetworkPacketLogger) LoggerNames.getLogger(LoggerNames.BEACON_RANGE);
             logger.sendPacket(() -> new BeaconBoxUpdateS2CPacket(pos, BeaconBoxUpdateS2CPacket.ZERO));

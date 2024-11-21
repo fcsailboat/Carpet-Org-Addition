@@ -1,22 +1,32 @@
 package org.carpetorgaddition.client.renderer.beaconbox;
 
-import net.minecraft.client.util.math.MatrixStack;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import org.carpetorgaddition.client.renderer.BoxRender;
+import org.carpetorgaddition.client.renderer.WorldRenderer;
 import org.carpetorgaddition.util.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
-public class BeaconBoxRender extends BoxRender {
-    private SizeModifier sizeModifier;
+import java.util.Objects;
 
-    public BeaconBoxRender(@NotNull Box box) {
+public class BeaconBoxRenderer extends BoxRender implements WorldRenderer {
+    private SizeModifier sizeModifier;
+    private final BlockPos blockPos;
+
+    public BeaconBoxRenderer(BlockPos blockPos, @NotNull Box box) {
         super(box);
+        this.blockPos = blockPos;
     }
 
     @Override
-    public void render(MatrixStack matrixStack) {
+    public void render(WorldRenderContext context) {
         this.resize();
-        super.render(matrixStack);
+        super.render(Objects.requireNonNull(context.matrixStack()));
     }
 
     /**
@@ -48,10 +58,33 @@ public class BeaconBoxRender extends BoxRender {
     }
 
     public void setSizeModifier(Box targetBox) {
+        if (this.sizeModifier != null && targetBox.equals(this.sizeModifier.targetBox)) {
+            return;
+        }
         this.sizeModifier = new SizeModifier(targetBox, this.getBox());
     }
 
-    public boolean noNeedToModify(Box box) {
-        return this.sizeModifier != null && box.equals(this.sizeModifier.targetBox);
+    @Override
+    public boolean shouldStop() {
+        ClientWorld world = MinecraftClient.getInstance().world;
+        if (world == null) {
+            return true;
+        }
+        BlockState blockState = world.getBlockState(this.blockPos);
+        return blockState == null || !blockState.isOf(Blocks.BEACON);
+    }
+
+    public BlockPos getBlockPos() {
+        return blockPos;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null && this.getClass() == o.getClass() && this.blockPos.equals(((BeaconBoxRenderer) o).blockPos);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.blockPos.hashCode();
     }
 }

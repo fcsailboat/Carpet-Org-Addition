@@ -1,11 +1,11 @@
 package org.carpetorgaddition.client.renderer.villagerpoi;
 
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.enums.BedPart;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.passive.VillagerEntity;
@@ -18,27 +18,33 @@ import net.minecraft.world.World;
 import org.carpetorgaddition.client.renderer.BlockOutlineRender;
 import org.carpetorgaddition.client.renderer.Color;
 import org.carpetorgaddition.client.renderer.LineRender;
+import org.carpetorgaddition.client.renderer.WorldRenderer;
 
 import java.util.Objects;
 
 // TODO 性能问题：1.不渲染线段两段都不在视线内的村民。2.设置最大渲染距离
 // TODO 添加性能分析器
 // TODO 调成床的高亮方式
-public class VillagerPOIRender {
+public class VillagerPoiRenderer implements WorldRenderer {
     private final VillagerEntity villagerEntity;
     private final GlobalPos bedPos;
     private final GlobalPos jobSitePos;
     private final GlobalPos potentialJobSite;
 
-    public VillagerPOIRender(VillagerEntity villagerEntity, GlobalPos bedPos, GlobalPos jobSitePos, GlobalPos potentialJobSite) {
+    public VillagerPoiRenderer(VillagerEntity villagerEntity, GlobalPos bedPos, GlobalPos jobSitePos, GlobalPos potentialJobSite) {
         this.villagerEntity = villagerEntity;
         this.bedPos = bedPos;
         this.jobSitePos = jobSitePos;
         this.potentialJobSite = potentialJobSite;
     }
 
-    public void render(MatrixStack matrixStack, RenderTickCounter tickCounter) {
-        float tickDelta = tickCounter.getTickDelta(true);
+    @Override
+    public void render(WorldRenderContext context) {
+        MatrixStack matrixStack = context.matrixStack();
+        if (matrixStack == null) {
+            return;
+        }
+        float tickDelta = context.tickCounter().getTickDelta(true);
         Vec3d leashPos = this.villagerEntity
                 .getLerpedPos(tickDelta)
                 .add(new Vec3d(0.0, this.villagerEntity.getHeight() * 0.6, 0.0));
@@ -96,7 +102,7 @@ public class VillagerPOIRender {
     @Override
     public boolean equals(Object obj) {
         if (this.getClass() == obj.getClass()) {
-            return this.villagerEntity.equals(((VillagerPOIRender) obj).villagerEntity);
+            return this.villagerEntity.equals(((VillagerPoiRenderer) obj).villagerEntity);
         }
         return false;
     }

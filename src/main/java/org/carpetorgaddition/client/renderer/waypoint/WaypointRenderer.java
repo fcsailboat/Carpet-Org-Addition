@@ -15,6 +15,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.client.renderer.WorldRenderer;
 import org.carpetorgaddition.client.util.ClientMessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.WorldUtils;
@@ -22,10 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
-import java.util.Objects;
-
-public class WaypointRender {
-    private final WaypointRenderType renderType;
+public class WaypointRenderer implements WorldRenderer {
+    private final WaypointRendererType renderType;
     private final Vec3d target;
     private final String worldId;
     private final long startTime = System.currentTimeMillis();
@@ -33,20 +32,21 @@ public class WaypointRender {
     private long fadeTime = -1L;
     private boolean stop = false;
 
-    public WaypointRender(WaypointRenderType renderType, Vec3d target, String worldId) {
+    public WaypointRenderer(WaypointRendererType renderType, Vec3d target, String worldId) {
         this.renderType = renderType;
         this.target = target;
         this.worldId = worldId;
     }
 
-    public WaypointRender(WaypointRenderType renderType, Vec3d target, World world) {
+    public WaypointRenderer(WaypointRendererType renderType, Vec3d target, World world) {
         this(renderType, target, WorldUtils.getDimensionId(world));
     }
 
     /**
      * 绘制路径点
      */
-    public void drawWaypoint(WorldRenderContext renderContext) {
+    @Override
+    public void render(WorldRenderContext renderContext) {
         MatrixStack matrixStack = renderContext.matrixStack();
         MinecraftClient client = MinecraftClient.getInstance();
         Camera camera = client.gameRenderer.getCamera();
@@ -129,11 +129,10 @@ public class WaypointRender {
         Tessellator tessellator = Tessellator.getInstance();
         // 绘制图标纹理
         BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        // TODO 冗余的overlay和normal
-        bufferBuilder.vertex(matrix4f, -1F, -1F, 0F).texture(0, 0).overlay(OverlayTexture.DEFAULT_UV).normal(entry, 0F, 1F, 0F);
-        bufferBuilder.vertex(matrix4f, -1F, 1F, 0F).texture(0, 1).overlay(OverlayTexture.DEFAULT_UV).normal(entry, 0F, 1F, 0F);
-        bufferBuilder.vertex(matrix4f, 1F, 1F, 0F).texture(1, 1).overlay(OverlayTexture.DEFAULT_UV).normal(entry, 0F, 1F, 0F);
-        bufferBuilder.vertex(matrix4f, 1F, -1F, 0F).texture(1, 0).overlay(OverlayTexture.DEFAULT_UV).normal(entry, 0F, 1F, 0F);
+        bufferBuilder.vertex(matrix4f, -1F, -1F, 0F).texture(0, 0);
+        bufferBuilder.vertex(matrix4f, -1F, 1F, 0F).texture(0, 1);
+        bufferBuilder.vertex(matrix4f, 1F, 1F, 0F).texture(1, 1);
+        bufferBuilder.vertex(matrix4f, 1F, -1F, 0F).texture(1, 0);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, renderType.getIcon());
         // 将缓冲区绘制到屏幕上。
@@ -199,7 +198,7 @@ public class WaypointRender {
         return target;
     }
 
-    public WaypointRenderType getRenderType() {
+    public WaypointRendererType getRenderType() {
         return this.renderType;
     }
 
@@ -220,18 +219,14 @@ public class WaypointRender {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        WaypointRender that = (WaypointRender) o;
-        return renderType == that.renderType && Objects.equals(target, that.target) && Objects.equals(worldId, that.worldId);
+        return renderType == ((WaypointRenderer) o).renderType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(renderType, target, worldId);
+        return renderType.hashCode();
     }
 }
