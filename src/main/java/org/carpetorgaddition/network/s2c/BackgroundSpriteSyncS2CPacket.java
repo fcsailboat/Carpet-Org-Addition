@@ -4,13 +4,13 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
-import org.carpetorgaddition.network.PacketFactory;
+import org.carpetorgaddition.network.PacketUtils;
 
 /**
  * 背景精灵同步数据包
  */
 public record BackgroundSpriteSyncS2CPacket(int syncId, int slotIndex, Identifier identifier) implements CustomPayload {
-    public static final Id<BackgroundSpriteSyncS2CPacket> ID = PacketFactory.createId("background_sprite_sync");
+    public static final Id<BackgroundSpriteSyncS2CPacket> ID = PacketUtils.createId("background_sprite_sync");
 
     public static PacketCodec<RegistryByteBuf, BackgroundSpriteSyncS2CPacket> CODEC = new PacketCodec<>() {
         @Override

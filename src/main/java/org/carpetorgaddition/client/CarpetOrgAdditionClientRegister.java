@@ -7,6 +7,7 @@ import net.minecraft.screen.ScreenHandler;
 import org.carpetorgaddition.client.command.DictionaryCommand;
 import org.carpetorgaddition.client.command.HighlightCommand;
 import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
+import org.carpetorgaddition.client.logger.ClientLogger;
 import org.carpetorgaddition.client.renderer.beaconbox.BeaconBoxManager;
 import org.carpetorgaddition.client.renderer.villagerpoi.VillagerPOIRender;
 import org.carpetorgaddition.client.renderer.villagerpoi.VillagerPOIRenderingManager;
@@ -77,20 +78,18 @@ public class CarpetOrgAdditionClientRegister {
         });
         // 信标范围更新数据包
         ClientPlayNetworking.registerGlobalReceiver(BeaconBoxUpdateS2CPacket.ID, (payload, context) -> BeaconBoxManager.setBeaconRender(payload.blockPos(), payload.box()));
-        // 信标渲染框清除数据包
-        ClientPlayNetworking.registerGlobalReceiver(BeaconBoxClearS2CPacket.ID, (payload, context) -> BeaconBoxManager.clearRender());
         // 村民信息同步数据包
         ClientPlayNetworking.registerGlobalReceiver(VillagerPoiSyncS2CPacket.ID, (payload, context) -> {
             // noinspection all
-            if (context.client().world.getEntityById(payload.info().geVillagerId()) instanceof VillagerEntity villagerEntity) {
+            if (context.client().world.getEntityById(payload.info().geVillagerId()) instanceof VillagerEntity villager) {
                 VillagerPoiSyncS2CPacket.VillagerInfo villagerInfo = payload.info();
-                VillagerPOIRender render = new VillagerPOIRender(villagerEntity, villagerInfo.getBedPos(), villagerInfo.getJobSitePos(), villagerInfo.getPotentialJobSite());
+                VillagerPOIRender render = new VillagerPOIRender(villager, villagerInfo.getBedPos(), villagerInfo.getJobSitePos(), villagerInfo.getPotentialJobSite());
                 VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.remove(render);
                 VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.add(render);
             }
         });
-        // 村民信息渲染器清除数据包
-        ClientPlayNetworking.registerGlobalReceiver(VillagerPoiRenderClearS2CPacket.ID, (payload, context) -> VillagerPOIRenderingManager.VILLAGER_INFO_RENDERS.clear());
+        // 记录器更新数据包
+        ClientPlayNetworking.registerGlobalReceiver(LoggerUpdateS2CPacket.ID, (packet, context) -> ClientLogger.onPacketReceive(packet));
     }
 
     /**

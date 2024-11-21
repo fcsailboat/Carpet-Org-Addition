@@ -3,7 +3,7 @@ package org.carpetorgaddition.network.s2c;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
-import org.carpetorgaddition.network.PacketFactory;
+import org.carpetorgaddition.network.PacketUtils;
 
 /**
  * 不可用槽位同步数据包
@@ -13,7 +13,7 @@ import org.carpetorgaddition.network.PacketFactory;
  * @param to     槽位的结束索引
  */
 public record UnavailableSlotSyncS2CPacket(int syncId, int from, int to) implements CustomPayload {
-    public static final Id<UnavailableSlotSyncS2CPacket> ID = PacketFactory.createId("unavailable_slot_sync");
+    public static final Id<UnavailableSlotSyncS2CPacket> ID = PacketUtils.createId("unavailable_slot_sync");
     public static PacketCodec<RegistryByteBuf, UnavailableSlotSyncS2CPacket> CODEC = new PacketCodec<>() {
         @Override
         public UnavailableSlotSyncS2CPacket decode(RegistryByteBuf buf) {

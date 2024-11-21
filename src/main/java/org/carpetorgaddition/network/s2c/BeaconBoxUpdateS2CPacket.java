@@ -5,14 +5,14 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import org.carpetorgaddition.network.PacketFactory;
+import org.carpetorgaddition.network.PacketUtils;
 
 /**
  * 信标范围更新数据包
  */
 public record BeaconBoxUpdateS2CPacket(BlockPos blockPos, Box box) implements CustomPayload {
     public static final Box ZERO = new Box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    public static final Id<BeaconBoxUpdateS2CPacket> ID = PacketFactory.createId("beacon_box_update");
+    public static final Id<BeaconBoxUpdateS2CPacket> ID = PacketUtils.createId("beacon_box_update");
     public static PacketCodec<RegistryByteBuf, BeaconBoxUpdateS2CPacket> CODEC = new PacketCodec<>() {
         @Override
         public BeaconBoxUpdateS2CPacket decode(RegistryByteBuf buf) {
