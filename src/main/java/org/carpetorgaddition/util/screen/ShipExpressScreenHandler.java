@@ -108,10 +108,10 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             onlyOneKind = 1;
             // 只比较物品
             if (firstStack.isOf(stack.getItem())) {
-                // TODO 可以改成break吗？
                 continue;
             }
             onlyOneKind = 2;
+            // TODO 可以添加break吗？
         }
         Text playerName = this.targetPlayer.getDisplayName();
         MutableText command = TextConstants.clickRun("/mail cancel");
