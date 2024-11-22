@@ -6,6 +6,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.enums.BedPart;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.Frustum;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.passive.VillagerEntity;
@@ -16,7 +17,6 @@ import org.carpetorgaddition.client.renderer.*;
 
 import java.util.Objects;
 
-// TODO 性能问题：1.不渲染线段两段都不在视线内的村民。2.设置最大渲染距离
 public class VillagerPoiRenderer implements WorldRenderer {
     private final VillagerEntity villagerEntity;
     private final GlobalPos bedPos;
@@ -36,30 +36,45 @@ public class VillagerPoiRenderer implements WorldRenderer {
         if (matrixStack == null) {
             return;
         }
+        // 相机距离村民过远时不渲染
+        if (MinecraftClient.getInstance().gameRenderer.getCamera().getPos().distanceTo(villagerEntity.getPos()) > 96) {
+            return;
+        }
         float tickDelta = context.tickCounter().getTickDelta(true);
         Vec3d leashPos = this.villagerEntity
                 .getLerpedPos(tickDelta)
                 .add(new Vec3d(0.0, this.villagerEntity.getHeight() * 0.6, 0.0));
-        if (this.bedPos != null) {
+        Frustum frustum = context.frustum();
+        if (frustum == null) {
+            return;
+        }
+        // 渲染床位置
+        if (canRender(this.bedPos, frustum)) {
             new LineRenderer(leashPos, bedPos.pos().toCenterPos()).render(matrixStack);
             BoxRenderer renderer = createBedRenderer();
             renderer.setSeeThroughLine(false);
             renderer.setFaceColor(1F, 0.9F, 0.2F, 0.4F);
             renderer.render(matrixStack);
         }
-        if (this.jobSitePos != null) {
+        if (canRender(this.jobSitePos, frustum)) {
             // 渲染工作方块位置
             LineRenderer lineRenderer = new LineRenderer(leashPos, this.jobSitePos.pos().toCenterPos());
             lineRenderer.setColor(new Color(0.1F, 0.75F, 0.4F, 1F));
             lineRenderer.render(matrixStack);
             this.getBlockOutlineRender(this.jobSitePos.pos()).render(matrixStack);
-        } else if (this.potentialJobSite != null) {
+        } else if (canRender(this.potentialJobSite, frustum)) {
             // 渲染正在绑定的工作方块位置
             LineRenderer lineRenderer = new LineRenderer(leashPos, this.potentialJobSite.pos().toCenterPos());
             lineRenderer.setColor(new Color(0.8F, 0.4F, 0.9F, 1F));
             lineRenderer.render(matrixStack);
             this.getBlockOutlineRender(this.potentialJobSite.pos()).render(matrixStack);
         }
+    }
+
+    // 是否可以渲染
+    private boolean canRender(GlobalPos globalPos, Frustum frustum) {
+        // 村民和兴趣点至少有一个在渲染范围内时才渲染
+        return globalPos != null && (frustum.isVisible(villagerEntity.getBoundingBox()) || frustum.isVisible(new Box(globalPos.pos())));
     }
 
     // 创建床渲染器
