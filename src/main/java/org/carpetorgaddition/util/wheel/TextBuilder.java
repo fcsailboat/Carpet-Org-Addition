@@ -32,6 +32,10 @@ public class TextBuilder {
         return this.append(TextUtils.createText(text));
     }
 
+    public TextBuilder appendNumber(Number number) {
+        return this.append(TextUtils.createText(number.toString()));
+    }
+
     /**
      * 追加文本
      */
