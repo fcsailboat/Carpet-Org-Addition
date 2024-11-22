@@ -7,14 +7,14 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import org.carpetorgaddition.client.renderer.BoxRender;
+import org.carpetorgaddition.client.renderer.BoxRenderer;
 import org.carpetorgaddition.client.renderer.WorldRenderer;
 import org.carpetorgaddition.util.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class BeaconBoxRenderer extends BoxRender implements WorldRenderer {
+public class BeaconBoxRenderer extends BoxRenderer implements WorldRenderer {
     private SizeModifier sizeModifier;
     private final BlockPos blockPos;
 

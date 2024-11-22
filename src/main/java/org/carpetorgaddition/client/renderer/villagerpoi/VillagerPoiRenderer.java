@@ -9,22 +9,14 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
-import org.carpetorgaddition.client.renderer.BlockOutlineRender;
-import org.carpetorgaddition.client.renderer.Color;
-import org.carpetorgaddition.client.renderer.LineRender;
-import org.carpetorgaddition.client.renderer.WorldRenderer;
+import org.carpetorgaddition.client.renderer.*;
 
 import java.util.Objects;
 
 // TODO 性能问题：1.不渲染线段两段都不在视线内的村民。2.设置最大渲染距离
-// TODO 添加性能分析器
-// TODO 调成床的高亮方式
 public class VillagerPoiRenderer implements WorldRenderer {
     private final VillagerEntity villagerEntity;
     private final GlobalPos bedPos;
@@ -49,38 +41,64 @@ public class VillagerPoiRenderer implements WorldRenderer {
                 .getLerpedPos(tickDelta)
                 .add(new Vec3d(0.0, this.villagerEntity.getHeight() * 0.6, 0.0));
         if (this.bedPos != null) {
-            // 渲染床位置
-            World world = this.villagerEntity.getWorld();
-            BlockState blockState = world.getBlockState(this.bedPos.pos());
-            // TODO 床的渲染不明显
-            new LineRender(leashPos, bedPos.pos().toCenterPos()).render(matrixStack);
-            // 渲染床轮廓
-            if (blockState.getBlock() instanceof BedBlock && blockState.get(BedBlock.PART) == BedPart.HEAD) {
-                // 渲染床头轮廓
-                new BlockOutlineRender(this.bedPos.pos()).render(matrixStack);
-                // 渲染床尾轮廓
-                Direction direction = blockState.get(HorizontalFacingBlock.FACING).getOpposite();
-                BlockPos offset = this.bedPos.pos().offset(direction);
-                BlockState bedTailBlockState = world.getBlockState(offset);
-                if (bedTailBlockState.getBlock() instanceof BedBlock && bedTailBlockState.get(BedBlock.PART) == BedPart.FOOT) {
-                    new BlockOutlineRender(offset).render(matrixStack);
-                }
-            } else {
-                this.getBlockOutlineRender(this.bedPos.pos()).render(matrixStack);
-            }
+            new LineRenderer(leashPos, bedPos.pos().toCenterPos()).render(matrixStack);
+            BoxRenderer renderer = createBedRenderer();
+            renderer.setSeeThroughLine(false);
+            renderer.setFaceColor(1F, 0.9F, 0.2F, 0.4F);
+            renderer.render(matrixStack);
         }
         if (this.jobSitePos != null) {
             // 渲染工作方块位置
-            LineRender lineRender = new LineRender(leashPos, this.jobSitePos.pos().toCenterPos());
-            lineRender.setColor(new Color(0.1F, 0.75F, 0.4F, 1F));
-            lineRender.render(matrixStack);
+            LineRenderer lineRenderer = new LineRenderer(leashPos, this.jobSitePos.pos().toCenterPos());
+            lineRenderer.setColor(new Color(0.1F, 0.75F, 0.4F, 1F));
+            lineRenderer.render(matrixStack);
             this.getBlockOutlineRender(this.jobSitePos.pos()).render(matrixStack);
         } else if (this.potentialJobSite != null) {
             // 渲染正在绑定的工作方块位置
-            LineRender lineRender = new LineRender(leashPos, this.potentialJobSite.pos().toCenterPos());
-            lineRender.setColor(new Color(0.8F, 0.4F, 0.9F, 1F));
-            lineRender.render(matrixStack);
+            LineRenderer lineRenderer = new LineRenderer(leashPos, this.potentialJobSite.pos().toCenterPos());
+            lineRenderer.setColor(new Color(0.8F, 0.4F, 0.9F, 1F));
+            lineRenderer.render(matrixStack);
             this.getBlockOutlineRender(this.potentialJobSite.pos()).render(matrixStack);
+        }
+    }
+
+    // 创建床渲染器
+    private BoxRenderer createBedRenderer() {
+        // 渲染床位置
+        World world = this.villagerEntity.getWorld();
+        BlockPos bedPos = this.bedPos.pos();
+        BlockState blockState = world.getBlockState(bedPos);
+        // 渲染床轮廓
+        if (blockState.getBlock() instanceof BedBlock && blockState.get(BedBlock.PART) == BedPart.HEAD) {
+            // 检查是否有床尾
+            Direction direction = blockState.get(HorizontalFacingBlock.FACING).getOpposite();
+            BlockPos offset = bedPos.offset(direction);
+            BlockState bedTailBlockState = world.getBlockState(offset);
+            Box box;
+            if (bedTailBlockState.getBlock() instanceof BedBlock && bedTailBlockState.get(BedBlock.PART) == BedPart.FOOT) {
+                // 有床尾
+                box = new Box(
+                        Math.min(bedPos.getX(), offset.getX()) + 0.0,
+                        Math.min(bedPos.getY(), offset.getY()) + 0.18,
+                        Math.min(bedPos.getZ(), offset.getZ()) + 0.0,
+                        Math.max(bedPos.getX(), offset.getX()) + 1.0,
+                        Math.max(bedPos.getY(), offset.getY()) + 0.625,
+                        Math.max(bedPos.getZ(), offset.getZ()) + 1.0
+                );
+            } else {
+                // 无床尾
+                box = new Box(
+                        bedPos.getX() + 0.0,
+                        bedPos.getY() + 0.18,
+                        bedPos.getZ() + 0.0,
+                        bedPos.getX() + 1.0,
+                        bedPos.getY() + 0.625,
+                        bedPos.getZ() + 1.0
+                );
+            }
+            return new BoxRenderer(box.expand(0.001));
+        } else {
+            return new BoxRenderer(new Box(bedPos).expand(-0.001));
         }
     }
 

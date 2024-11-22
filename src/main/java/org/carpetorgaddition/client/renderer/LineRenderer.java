@@ -8,7 +8,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
-public class LineRender {
+public class LineRenderer {
     private final Tessellator tessellator = Tessellator.getInstance();
     /**
      * 线的颜色
@@ -20,7 +20,7 @@ public class LineRender {
     @NotNull
     private Vec3d to;
 
-    public LineRender(@NotNull Vec3d from, @NotNull Vec3d to) {
+    public LineRenderer(@NotNull Vec3d from, @NotNull Vec3d to) {
         this.from = from;
         this.to = to;
     }

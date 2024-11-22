@@ -8,11 +8,12 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 
 /**
  * 立方体模型渲染器
  */
-public class BoxRender {
+public class BoxRenderer {
     private final Tessellator tessellator = Tessellator.getInstance();
     /**
      * 用于确定模型的大小和位置
@@ -38,7 +39,7 @@ public class BoxRender {
      */
     private boolean seeThroughLine = true;
 
-    public BoxRender(@NotNull Box box) {
+    public BoxRenderer(@NotNull Box box) {
         this.box = box;
     }
 
@@ -239,5 +240,4 @@ public class BoxRender {
     public void setSeeThroughLine(boolean seeThroughLine) {
         this.seeThroughLine = seeThroughLine;
     }
-
 }
