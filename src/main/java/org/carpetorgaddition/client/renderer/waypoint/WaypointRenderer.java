@@ -194,6 +194,10 @@ public class WaypointRenderer implements WorldRenderer {
         return e > 0.999 - (0.025 / d);
     }
 
+    public boolean equalsTarget(WaypointRenderer renderer) {
+        return this.target.equals(renderer.target) && WorldUtils.equalsWorld(this.worldId, renderer.worldId);
+    }
+
     public Vec3d getPos() {
         return target;
     }

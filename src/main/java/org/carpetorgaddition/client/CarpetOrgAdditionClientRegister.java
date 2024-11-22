@@ -78,7 +78,8 @@ public class CarpetOrgAdditionClientRegister {
                         WorldRendererManager.getOnlyRenderer(
                                 WaypointRenderer.class,
                                 renderer -> renderer.getRenderType() == WaypointRendererType.NAVIGATOR)
-                ).ifPresent(WaypointRenderer::setFade)));
+                ).ifPresent(WaypointRenderer::setFade))
+        );
         // 容器不可用槽位同步数据包
         ClientPlayNetworking.registerGlobalReceiver(UnavailableSlotSyncS2CPacket.ID, (payload, context) -> {
             ScreenHandler screen = context.player().currentScreenHandler;

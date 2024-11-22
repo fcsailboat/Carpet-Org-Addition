@@ -32,9 +32,9 @@ public class HighlightCommand {
         // 创建新路径点
         WaypointRenderer newRender = new WaypointRenderer(WaypointRendererType.HIGHLIGHT, vec3d, world);
         // 如果两个路径点指向同一个位置，就让玩家看向该路径点
-        if (oldRender != null && newRender.getPos().equals(oldRender.getPos())) {
+        if (oldRender != null && oldRender.equalsTarget(newRender)) {
             // if语句结束后仍要设置新路径点，因为要重置持续时间
-            context.getSource().getEntity().lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, oldRender.getPos());
+            context.getSource().getEntity().lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d);
         }
         // 设置新的路径点
         WorldRendererManager.addOrUpdate(newRender);
