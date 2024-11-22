@@ -99,6 +99,7 @@ public class CarpetOrgAdditionClientRegister {
             // 清除单个信标渲染
             if (BeaconBoxUpdateS2CPacket.ZERO.equals(payload.box())) {
                 WorldRendererManager.remove(BeaconBoxRenderer.class, renderer -> renderer.getBlockPos().equals(payload.blockPos()));
+                return;
             }
             // 添加或更新信标范围
             BeaconBoxRenderer beaconBoxRenderer = WorldRendererManager.getOrCreate(
