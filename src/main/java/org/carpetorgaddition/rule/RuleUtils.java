@@ -32,7 +32,7 @@ public class RuleUtils {
     /**
      * 获取Carpet Org Addition设置的玩家最大交互距离并进行判断，小于0的值会被视为6.0，超过256的值会被视为256.0
      *
-     * @return 当前设置的最大交互距离，最大不超过128
+     * @return 当前设置的最大交互距离，最大不超过256.0
      */
     public static double getPlayerMaxInteractionDistance() {
         double distance = CarpetOrgAdditionSettings.maxBlockPlaceDistance;
