@@ -444,11 +444,6 @@ public class CarpetOrgAdditionSettings {
     )
     public static boolean syncNavigateWaypoint = true;
 
-    // TODO 隐藏或移除本条规则
-    // 显示假玩家召唤者
-    @Rule(categories = {ORG, RuleCategory.FEATURE})
-    public static boolean displayFakePlayerSummoner = false;
-
     // TODO 实验性改为特性
     // 潜影盒堆叠
     @Rule(categories = {ORG, RuleCategory.EXPERIMENTAL})

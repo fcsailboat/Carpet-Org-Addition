@@ -168,7 +168,7 @@ public abstract class AbstractTradeFindTask extends ServerTask implements FindTa
     }
 
     /**
-     * @param list 一只村民所以符合条件交易的索引
+     * @param list 一只村民所有符合条件交易的索引
      * @return 索引拼接后的字符串
      */
     protected static String getIndexArray(ArrayList<Integer> list) {

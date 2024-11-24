@@ -72,7 +72,6 @@
     "rule.canminespawner.SpawnerBlockMixin",
     "rule.carpet.EntityPlayerMPFakeMixin",
     "rule.carpet.LoggerAccessor",
-    "rule.carpet.PlayerCommandMixin",
     "rule.carpet.SettingsManagerAccessor",
     "rule.carpet.SettingsManagerMixin",
     "rule.cceupdatesuppression.BlockPlacementDispenserBehaviorMixin",
