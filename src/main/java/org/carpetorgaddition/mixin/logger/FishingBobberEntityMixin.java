@@ -2,8 +2,11 @@ package org.carpetorgaddition.mixin.logger;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
+import org.carpetorgaddition.logger.FunctionLogger;
+import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.logger.LoggerRegister;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -33,19 +36,19 @@ public abstract class FishingBobberEntityMixin {
     private void tick(CallbackInfo ci) {
         if (LoggerRegister.fishing) {
             PlayerEntity player = this.getPlayerOwner();
-            if (player == null) {
-                return;
-            }
-            if (this.waitCountdown != 0) {
-                // 鱼出现
-                MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.logger.fishing.appear", this.waitCountdown));
-            } else if (this.fishTravelCountdown != 0) {
-                // 鱼上钩
-                MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.logger.fishing.bite", this.fishTravelCountdown));
-            } else if (this.hookCountdown != 0) {
-                // 鱼挣脱
-                MutableText translate = TextUtils.translate("carpet.logger.fishing.break_free", this.hookCountdown);
-                MessageUtils.sendMessageToHud(player, TextUtils.setColor(translate, Formatting.GREEN));
+            FunctionLogger logger = (FunctionLogger) LoggerNames.getLogger(LoggerNames.FISHING);
+            if (player instanceof ServerPlayerEntity && logger.isSubscribed((ServerPlayerEntity) player)) {
+                if (this.waitCountdown != 0) {
+                    // 鱼出现
+                    MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.logger.fishing.appear", this.waitCountdown));
+                } else if (this.fishTravelCountdown != 0) {
+                    // 鱼上钩
+                    MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.logger.fishing.bite", this.fishTravelCountdown));
+                } else if (this.hookCountdown != 0) {
+                    // 鱼挣脱
+                    MutableText translate = TextUtils.translate("carpet.logger.fishing.break_free", this.hookCountdown);
+                    MessageUtils.sendMessageToHud(player, TextUtils.setColor(translate, Formatting.GREEN));
+                }
             }
         }
     }

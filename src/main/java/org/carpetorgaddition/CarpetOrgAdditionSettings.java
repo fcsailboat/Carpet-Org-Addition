@@ -444,7 +444,6 @@ public class CarpetOrgAdditionSettings {
     )
     public static boolean syncNavigateWaypoint = true;
 
-    // TODO 实验性改为特性
     // 潜影盒堆叠
     @Rule(categories = {ORG, RuleCategory.EXPERIMENTAL})
     public static boolean shulkerBoxStackable = false;

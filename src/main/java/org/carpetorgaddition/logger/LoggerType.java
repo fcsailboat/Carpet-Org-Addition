@@ -12,5 +12,6 @@ public enum LoggerType {
     /**
      * 网络包记录器
      */
-    NETWORK
+    NETWORK,
+    FUNCTION
 }

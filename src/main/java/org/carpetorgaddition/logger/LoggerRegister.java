@@ -11,8 +11,7 @@ public class LoggerRegister {
     @LoggerConfig(name = LoggerNames.WANDERING_TRADER_SPAWN_COUNTDOWN, type = LoggerType.HUD)
     public static boolean wanderingTrader = false;
 
-    // TODO 检查是否只对订阅此记录器的玩家生效
-    @LoggerConfig(name = LoggerNames.FISHING, type = LoggerType.STANDARD)
+    @LoggerConfig(name = LoggerNames.FISHING, type = LoggerType.FUNCTION)
     public static boolean fishing = false;
 
     @LoggerConfig(name = LoggerNames.BEACON_RANGE, type = LoggerType.NETWORK)
@@ -55,6 +54,7 @@ public class LoggerRegister {
             case STANDARD -> new Logger(field, name, defaultOption, options, strictOptions);
             case HUD -> new HUDLogger(field, name, defaultOption, options, strictOptions);
             case NETWORK -> new NetworkPacketLogger(field, name, defaultOption, options, strictOptions);
+            case FUNCTION -> new FunctionLogger(field, name, defaultOption, options, strictOptions);
         };
     }
 }

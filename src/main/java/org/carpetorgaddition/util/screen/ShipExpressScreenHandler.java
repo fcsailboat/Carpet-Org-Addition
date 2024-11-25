@@ -111,7 +111,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
                 continue;
             }
             onlyOneKind = 2;
-            // TODO 可以添加break吗？
+            break;
         }
         Text playerName = this.targetPlayer.getDisplayName();
         MutableText command = TextConstants.clickRun("/mail cancel");
