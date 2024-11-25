@@ -15,10 +15,12 @@ public class ItemStackMixin {
     @Unique
     private final ItemStack thisStack = (ItemStack) (Object) this;
 
-    @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getMaxCount", at = @At("RETURN"), cancellable = true)
     private void getMaxCount(CallbackInfoReturnable<Integer> cir) {
         if (this.shulkerBoxStackableEnabled() && CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
-            cir.setReturnValue(64);
+            if (cir.getReturnValue() == 1) {
+                cir.setReturnValue(64);
+            }
         }
     }
 
