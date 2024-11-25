@@ -308,11 +308,6 @@ public class FakePlayerSerial {
     public static void autoLogin(MinecraftServer server) {
         ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
         try {
-            /* TODO
-            *   避免玩家重复登录（GCA假人驻留）
-            *   避免因为登录玩家过多占满服务器上线
-            *   玩家登录时记录日志
-            * */
             tryAutoLogin(server, instance);
         } catch (RuntimeException e) {
             CarpetOrgAddition.LOGGER.error("玩家自动登录出现意外错误", e);
@@ -322,6 +317,7 @@ public class FakePlayerSerial {
     private static void tryAutoLogin(MinecraftServer server, ServerTaskManagerInterface instance) {
         WorldFormat worldFormat = new WorldFormat(server, FakePlayerSerial.PLAYER_DATA);
         List<File> files = worldFormat.toImmutableFileList(WorldFormat.JSON_EXTENSIONS);
+        int count = server.getCurrentPlayerCount();
         for (File file : files) {
             FakePlayerSerial fakePlayerSerial;
             try {
@@ -331,11 +327,12 @@ public class FakePlayerSerial {
                 continue;
             }
             if (fakePlayerSerial.autologin) {
-                try {
-                    instance.addTask(new DelayedLoginTask(server, fakePlayerSerial, 1));
-                } catch (RuntimeException e) {
-                    // TODO 提前判断玩家是否存在；此处日志记录是否正确？
-                    CarpetOrgAddition.LOGGER.warn("玩家{}已存在", fakePlayerSerial.fakePlayerName, e);
+                instance.addTask(new DelayedLoginTask(server, fakePlayerSerial, 1));
+                count++;
+                // 阻止假玩家把玩家上线占满，至少为一名真玩家保留一个名额
+                if (count >= server.getMaxPlayerCount() - 1) {
+                    CarpetOrgAddition.LOGGER.warn("服务器玩家即将达到上限");
+                    return;
                 }
             }
         }
