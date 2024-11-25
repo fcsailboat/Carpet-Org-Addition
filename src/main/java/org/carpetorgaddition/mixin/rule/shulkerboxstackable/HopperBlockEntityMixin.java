@@ -109,6 +109,18 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
         }
     }
 
+    // 让漏斗一次只吸取一个潜影盒
+    @WrapOperation(method = "extract(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/ItemEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/HopperBlockEntity;transfer(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/math/Direction;)Lnet/minecraft/item/ItemStack;"))
+    private static ItemStack extract(Inventory from, Inventory to, ItemStack stack, Direction side, Operation<ItemStack> original) {
+        if (CarpetOrgAdditionSettings.shulkerBoxStackable && !CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
+            ItemStack split = stack.split(stack.getMaxCount());
+            ItemStack result = original.call(from, to, split.copy(), side);
+            stack.increment(result.getCount());
+            return stack;
+        }
+        return original.call(from, to, stack, side);
+    }
+
     /**
      * 保持与锂的兼容
      */
