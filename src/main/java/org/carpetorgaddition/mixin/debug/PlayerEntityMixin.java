@@ -22,7 +22,7 @@ public class PlayerEntityMixin {
     private void openInventory(Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         ProductionEnvironmentError.assertDevelopmentEnvironment();
         if (DebugSettings.openFakePlayerInventory && entity instanceof EntityPlayerMPFake fakePlayer) {
-            ServerCommandSource source = ((PlayerEntity) (Object) this).getCommandSource();
+            ServerCommandSource source = ((PlayerEntity) (Object) this).getCommandSource(fakePlayer.getServerWorld());
             CommandUtils.execute(source, "playerTools %s inventory".formatted(fakePlayer.getName().getString()));
             cir.setReturnValue(ActionResult.SUCCESS);
         }

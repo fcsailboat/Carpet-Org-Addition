@@ -107,11 +107,11 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
 
     @Override
     public int from() {
-        return this.getCraftingResultSlotIndex();
+        return 0;
     }
 
     @Override
     public int to() {
-        return this.getCraftingResultSlotIndex();
+        return 0;
     }
 }

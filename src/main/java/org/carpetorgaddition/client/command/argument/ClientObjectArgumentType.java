@@ -127,7 +127,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         protected Stream<EntityType<?>> getRegistry() {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                return player.networkHandler.getRegistryManager().get(RegistryKeys.ENTITY_TYPE).stream();
+                return player.networkHandler.getRegistryManager().getOrThrow(RegistryKeys.ENTITY_TYPE).stream();
             }
             return Stream.empty();
         }
@@ -146,7 +146,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         @Override
         protected Stream<Enchantment> getRegistry() {
             if (MinecraftClient.getInstance().player != null) {
-                Registry<Enchantment> registry = MinecraftClient.getInstance().player.networkHandler.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+                Registry<Enchantment> registry = MinecraftClient.getInstance().player.networkHandler.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
                 return registry.stream();
             }
             return Stream.empty();
@@ -167,7 +167,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         protected Stream<StatusEffect> getRegistry() {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                return player.networkHandler.getRegistryManager().get(RegistryKeys.STATUS_EFFECT).stream();
+                return player.networkHandler.getRegistryManager().getOrThrow(RegistryKeys.STATUS_EFFECT).stream();
             }
             return Stream.empty();
         }
@@ -178,7 +178,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         @Override
         protected String objectToString(Biome biome) {
             assert MinecraftClient.getInstance().player != null;
-            Registry<Biome> biomes = MinecraftClient.getInstance().player.networkHandler.getRegistryManager().get(RegistryKeys.BIOME);
+            Registry<Biome> biomes = MinecraftClient.getInstance().player.networkHandler.getRegistryManager().getOrThrow(RegistryKeys.BIOME);
             return TextUtils.translate(Objects.requireNonNull(biomes.getId(biome)).toTranslationKey("biome")).getString();
 
         }
@@ -189,7 +189,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
             if (player == null) {
                 return Stream.empty();
             }
-            return player.networkHandler.getRegistryManager().get(RegistryKeys.BIOME).stream();
+            return player.networkHandler.getRegistryManager().getOrThrow(RegistryKeys.BIOME).stream();
         }
     }
 }

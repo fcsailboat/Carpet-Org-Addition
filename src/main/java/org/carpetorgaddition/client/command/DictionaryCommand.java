@@ -126,15 +126,15 @@ public class DictionaryCommand {
                 case BLOCK -> Registries.BLOCK.getId((Block) obj).toString();
                 case ENTITY -> Registries.ENTITY_TYPE.getId((EntityType<?>) obj).toString();
                 case ENCHANTMENT -> {
-                    Identifier id = registry.get(RegistryKeys.ENCHANTMENT).getId((Enchantment) obj);
+                    Identifier id = registry.getOrThrow(RegistryKeys.ENCHANTMENT).getId((Enchantment) obj);
                     yield Objects.requireNonNull(id, "无法获取附魔id").toString();
                 }
                 case STATUS_EFFECT -> {
-                    Identifier id = registry.get(RegistryKeys.STATUS_EFFECT).getId((StatusEffect) obj);
+                    Identifier id = registry.getOrThrow(RegistryKeys.STATUS_EFFECT).getId((StatusEffect) obj);
                     yield Objects.requireNonNull(id, "无法获取状态效果id").toString();
                 }
                 case BIOME -> {
-                    Identifier id = registry.get(RegistryKeys.BIOME).getId((Biome) obj);
+                    Identifier id = registry.getOrThrow(RegistryKeys.BIOME).getId((Biome) obj);
                     yield Objects.requireNonNull(id, "无法获取生物群系id").toString();
                 }
             };
@@ -153,7 +153,7 @@ public class DictionaryCommand {
                 case ENCHANTMENT -> EnchantmentUtils.getName((Enchantment) obj);
                 case STATUS_EFFECT -> ((StatusEffect) obj).getName();
                 case BIOME -> {
-                    Identifier id = Objects.requireNonNull(registry.get(RegistryKeys.BIOME).getId((Biome) obj), "无法获取生物群系id");
+                    Identifier id = Objects.requireNonNull(registry.getOrThrow(RegistryKeys.BIOME).getId((Biome) obj), "无法获取生物群系id");
                     String key = id.toTranslationKey("biome");
                     yield TextUtils.translate(key);
                 }

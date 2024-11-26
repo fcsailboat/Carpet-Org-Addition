@@ -2,6 +2,7 @@ package org.carpetorgaddition.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
@@ -46,7 +47,8 @@ public class LineRenderer {
         RenderSystem.enableBlend();
         RenderSystem.depthMask(false);
         RenderSystem.lineWidth(3F);
-        RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
+        //noinspection resource
+        RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
         RenderSystem.lineWidth(1F);
         RenderSystem.depthMask(true);

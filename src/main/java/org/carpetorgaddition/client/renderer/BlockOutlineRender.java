@@ -3,6 +3,7 @@ package org.carpetorgaddition.client.renderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
@@ -48,7 +49,8 @@ public class BlockOutlineRender {
             bufferBuilder.vertex(matrix4f, (float) maxX, (float) maxY, (float) maxZ).color(0F, 0F, 1F, 1F);
         });
         RenderSystem.enableDepthTest();
-        RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
+        //noinspection resource
+        RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
         RenderSystem.disableDepthTest();
         matrixStack.pop();

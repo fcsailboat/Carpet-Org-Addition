@@ -2,6 +2,7 @@ package org.carpetorgaddition.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
@@ -75,7 +76,8 @@ public class BoxRenderer {
         // 渲染填充框
         BufferBuilder bufferBuilder = this.tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         this.drawFillBox(bufferBuilder, matrix4f, minX, minY, minZ, maxX, maxY, maxZ);
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        //noinspection resource
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
         RenderSystem.depthMask(true);
         if (this.seeThroughLine) {
@@ -90,7 +92,8 @@ public class BoxRenderer {
         this.drawLineBox(builder, entry, minX, minY, minZ, maxX, maxY, maxZ);
         // 加粗框线
         RenderSystem.lineWidth(2F);
-        RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
+        //noinspection resource
+        RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
         BufferRenderer.drawWithGlobalProgram(builder.end());
         // 将框线改回原本的粗细
         RenderSystem.lineWidth(1F);

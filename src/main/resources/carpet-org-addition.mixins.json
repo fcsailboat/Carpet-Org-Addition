@@ -89,7 +89,6 @@
     "rule.shulkerboxstackable.HopperBlockEntityMixin",
     "rule.shulkerboxstackable.ItemStackMixin",
     "rule.shulkerboxstackable.ScreenHandlerMixin",
-    "util.CraftingScreenHandlerMixin",
     "util.PlayerManagerMixin",
     "util.ServerPlayNetworkHandlerMixin"
   ],

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
@@ -133,7 +134,8 @@ public class WaypointRenderer implements WorldRenderer {
         bufferBuilder.vertex(matrix4f, -1F, 1F, 0F).texture(0, 1);
         bufferBuilder.vertex(matrix4f, 1F, 1F, 0F).texture(1, 1);
         bufferBuilder.vertex(matrix4f, 1F, -1F, 0F).texture(1, 0);
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        //noinspection resource
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX);
         RenderSystem.setShaderTexture(0, renderType.getIcon());
         // 将缓冲区绘制到屏幕上。
         BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());

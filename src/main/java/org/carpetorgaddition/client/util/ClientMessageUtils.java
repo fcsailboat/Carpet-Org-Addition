@@ -23,7 +23,7 @@ public class ClientMessageUtils {
             CarpetOrgAddition.LOGGER.error("尝试在游戏外发送聊天消息");
             return;
         }
-        player.sendMessage(message);
+        player.sendMessage(message, false);
     }
 
     /**
