@@ -49,32 +49,37 @@ public class VillagerPoiRenderer implements WorldRenderer {
             return;
         }
         // 渲染床位置
-        if (canRender(this.bedPos, frustum)) {
+        if (this.bedPos != null) {
             new LineRenderer(leashPos, bedPos.pos().toCenterPos()).render(matrixStack);
-            BoxRenderer renderer = createBedRenderer();
-            renderer.setSeeThroughLine(false);
-            renderer.setFaceColor(1F, 0.9F, 0.2F, 0.4F);
-            renderer.render(matrixStack);
+            if (canRender(this.bedPos, frustum)) {
+                BoxRenderer renderer = createBedRenderer();
+                renderer.setSeeThroughLine(false);
+                renderer.setFaceColor(1F, 0.9F, 0.2F, 0.4F);
+                renderer.render(matrixStack);
+            }
         }
-        if (canRender(this.jobSitePos, frustum)) {
+        if (this.jobSitePos != null) {
             // 渲染工作方块位置
             LineRenderer lineRenderer = new LineRenderer(leashPos, this.jobSitePos.pos().toCenterPos());
             lineRenderer.setColor(new Color(0.1F, 0.75F, 0.4F, 1F));
             lineRenderer.render(matrixStack);
-            this.getBlockOutlineRender(this.jobSitePos.pos()).render(matrixStack);
-        } else if (canRender(this.potentialJobSite, frustum)) {
+            if (this.canRender(this.jobSitePos, frustum)) {
+                this.getBlockOutlineRender(this.jobSitePos.pos()).render(matrixStack);
+            }
+        } else if (this.potentialJobSite != null) {
             // 渲染正在绑定的工作方块位置
             LineRenderer lineRenderer = new LineRenderer(leashPos, this.potentialJobSite.pos().toCenterPos());
             lineRenderer.setColor(new Color(0.8F, 0.4F, 0.9F, 1F));
             lineRenderer.render(matrixStack);
-            this.getBlockOutlineRender(this.potentialJobSite.pos()).render(matrixStack);
+            if (this.canRender(this.potentialJobSite, frustum)) {
+                this.getBlockOutlineRender(this.potentialJobSite.pos()).render(matrixStack);
+            }
         }
     }
 
-    // 是否可以渲染
+    // 兴趣点是否在渲染范围内
     private boolean canRender(GlobalPos globalPos, Frustum frustum) {
-        // 村民和兴趣点至少有一个在渲染范围内时才渲染
-        return globalPos != null && (frustum.isVisible(villagerEntity.getBoundingBox()) || frustum.isVisible(new Box(globalPos.pos())));
+        return frustum.isVisible(new Box(globalPos.pos()));
     }
 
     // 创建床渲染器
