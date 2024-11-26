@@ -24,7 +24,7 @@ public class PlayerEntityMixin {
     }
 
     // 假玩家死亡不掉落经验
-    @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getExperienceToDrop", at = @At("HEAD"), cancellable = true)
     private void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
         if (CarpetOrgAdditionSettings.fakePlayerKeepInventory && thisPlayer instanceof EntityPlayerMPFake) {
             cir.setReturnValue(0);

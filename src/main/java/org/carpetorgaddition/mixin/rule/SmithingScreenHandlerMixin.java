@@ -2,7 +2,6 @@ package org.carpetorgaddition.mixin.rule;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.SmithingScreenHandler;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,11 +30,7 @@ public abstract class SmithingScreenHandlerMixin {
                         ci.cancel();
                     }
                 }
-                case TRUE -> {
-                    if (itemStack.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE) || itemStack.isIn(ItemTags.TRIM_TEMPLATES)) {
-                        ci.cancel();
-                    }
-                }
+                case TRUE -> ci.cancel();
             }
         }
     }

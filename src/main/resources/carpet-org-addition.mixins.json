@@ -64,7 +64,7 @@
     "rule.WetSpongeBlockMixin",
     "rule.blockdropsdirectlyenterinventory.BlockMixin",
     "rule.blockdropsdirectlyenterinventory.TallPlantBlockMixin",
-    "rule.canminespawner.MobSpawnerBlockEntityMixin",
+    "rule.canminespawner.BlockItemMixin",
     "rule.canminespawner.SpawnerBlockMixin",
     "rule.carpet.EntityPlayerMPFakeMixin",
     "rule.carpet.SettingsManagerAccessor",

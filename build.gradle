@@ -2,7 +2,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.8-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -21,6 +21,9 @@ repositories {
     }
     maven {
         url 'https://jitpack.io'
+    }
+    maven {
+        url 'https://maven.fallenbreath.me/releases'
     }
 }
 
@@ -41,7 +44,7 @@ dependencies {
     // MixinExtras
     // include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
     // Conditional Mixin, for conditional compatability with other mods
-    include(modImplementation 'com.github.Fallen-Breath.conditional-mixin:conditional-mixin-fabric:0.6.2')
+    include(modImplementation 'me.fallenbreath:conditional-mixin-fabric:0.6.2')
     testImplementation(group: 'junit', name: 'junit', version: junit_version)
 }
 
