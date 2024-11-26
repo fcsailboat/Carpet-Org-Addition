@@ -1,110 +1,73 @@
 package org.carpetorgaddition;
 
-import carpet.CarpetExtension;
 import carpet.CarpetServer;
-import carpet.patches.EntityPlayerMPFake;
-import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
-import org.carpetorgaddition.command.PlayerManagerCommand;
-import org.carpetorgaddition.command.RegisterCarpetCommands;
-import org.carpetorgaddition.logger.WanderingTraderSpawnLogger;
-import org.carpetorgaddition.translate.Translate;
-import org.carpetorgaddition.util.express.ExpressManager;
-import org.carpetorgaddition.util.express.ExpressManagerInterface;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerSerial;
-import org.carpetorgaddition.util.wheel.Waypoint;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+import org.carpetorgaddition.debug.DebugRuleRegistrar;
+import org.carpetorgaddition.event.RegisterEvent;
+import org.carpetorgaddition.network.NetworkS2CPacketRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.lang.management.ManagementFactory;
+import java.util.Locale;
 
-public class CarpetOrgAddition implements ModInitializer, CarpetExtension {
+public class CarpetOrgAddition implements ModInitializer {
     /**
-     * 控制玩家登录登出的消息是否显示
+     * 日志
      */
-    public static boolean hiddenLoginMessages = false;
-    /**
-     * 是否同时安装了fabric-api
-     */
-    public static final boolean FABRIC_API = FabricLoader.getInstance().isModLoaded("fabric-api");
-    // 日志
     public static final Logger LOGGER = LoggerFactory.getLogger("CarpetOrgAddition");
-    public static final String MOD_NAME_LOWER_CASE = "carpetorgaddition";
+    /**
+     * 模组ID
+     */
+    public static final String MOD_ID = "carpet-org-addition";
+    /**
+     * 模组元数据
+     */
+    public static final ModMetadata METADATA = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
+    /**
+     * 模组名称
+     */
+    public static final String MOD_NAME = METADATA.getName();
+    /**
+     * 模组当前的版本
+     */
+    public static final String VERSION = METADATA.getVersion().getFriendlyString();
+    /**
+     * 模组名称小写
+     */
+    public static final String MOD_NAME_LOWER_CASE = MOD_NAME.replace(" ", "").toLowerCase(Locale.ROOT);
+    /**
+     * 当前jvm是否为调试模式
+     */
+    public static final boolean IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(s -> s.contains("jdwp"));
+    /**
+     * 是否同时加载了{@code Lithium}（锂）模组
+     */
+    public static final boolean LITHIUM = FabricLoader.getInstance().isModLoaded("lithium");
 
     /**
      * 模组初始化
      */
     @Override
     public void onInitialize() {
-        CarpetServer.manageExtension(new CarpetOrgAddition());
-    }
-
-    // 在游戏开始时
-    @Override
-    public void onGameStarted() {
-        // 解析Carpet设置
-        CarpetServer.settingsManager.parseSettingsClass(CarpetOrgAdditionSettings.class);
-    }
-
-    // 当玩家登录时
-    @Override
-    public void onPlayerLoggedIn(ServerPlayerEntity player) {
-        CarpetExtension.super.onPlayerLoggedIn(player);
-        // 假玩家生成时不保留上一次的击退，着火时间，摔落高度
-        if (CarpetOrgAdditionSettings.fakePlayerSpawnNoKnockback && player instanceof EntityPlayerMPFake) {
-            // 清除速度
-            player.setVelocity(Vec3d.ZERO);
-            // 清除着火时间
-            player.setFireTicks(0);
-            // 清除摔落高度
-            player.fallDistance = 0;
-            // 清除负面效果
-            player.getStatusEffects().removeIf(effect -> effect.getEffectType().value().getCategory() == StatusEffectCategory.HARMFUL);
+        LOGGER.info("%s已加载，版本：%s".formatted(MOD_NAME, VERSION));
+        CarpetServer.manageExtension(new CarpetOrgAdditionExtension());
+        // 注册网络数据包
+        NetworkS2CPacketRegister.register();
+        // 注册事件
+        RegisterEvent.register();
+        // 如果当前为调试模式的开发环境，注册测试规则
+        if (isDebugDevelopment()) {
+            DebugRuleRegistrar.getInstance().registrar();
         }
-        // 提示玩家接收快递
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(player.server);
-        expressManager.promptToReceive(player);
-        // 加载假玩家安全挂机
-        PlayerManagerCommand.loadSafeAfk(player);
     }
 
-    // 服务器启动时调用
-    @Override
-    public void onServerLoaded(MinecraftServer server) {
-        CarpetExtension.super.onServerLoaded(server);
-        // 服务器启动时自动将旧的路径点替换成新的
-        Waypoint.replaceWaypoint(server);
-    }
-
-    @Override
-    public void onServerLoadedWorlds(MinecraftServer server) {
-        // 玩家自动登录
-        FakePlayerSerial.autoLogin(server);
-    }
-
-    // 设置模组翻译
-    @Override
-    public Map<String, String> canHasTranslations(String lang) {
-        return Translate.getTranslate();
-    }
-
-    // 注册记录器
-    @Override
-    public void registerLoggers() {
-        CarpetExtension.super.registerLoggers();
-        WanderingTraderSpawnLogger.registerLoggers();
-    }
-
-    // 注册命令
-    @Override
-    public void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandBuildContext) {
-        RegisterCarpetCommands.registerCarpetCommands(dispatcher, commandBuildContext);
+    /**
+     * @return 当前环境是否为调试模式的开发环境
+     */
+    public static boolean isDebugDevelopment() {
+        return IS_DEBUG && FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 }

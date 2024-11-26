@@ -3,6 +3,8 @@ package org.docs.rule;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.carpetorgaddition.rule.HideRule;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -31,6 +33,9 @@ public class RuleDocument {
         writer.newLine();
         for (String rule : ruleDocument.rules) {
             RuleInformation ruleInfo = ruleDocument.readClass(rule);
+            if (ruleInfo == null) {
+                continue;
+            }
             writer.write(ruleInfo.toString());
             writer.newLine();
         }
@@ -52,16 +57,20 @@ public class RuleDocument {
 
     // 当前翻译键是否是规则的翻译键
     private boolean isRule(List<String> list) {
-        if (list.contains("rule")) {
+        if ("carpet".equals(list.get(0)) && "rule".equals(list.get(1))) {
             return !"message".equals(list.get(2)) && !"validate".equals(list.get(2));
         }
         return false;
     }
 
     // 读取字节码信息
+    @Nullable
     RuleInformation readClass(String rule) throws ClassNotFoundException, NoSuchFieldException {
         Class<?> clazz = Class.forName("org.carpetorgaddition.CarpetOrgAdditionSettings");
         Field field = clazz.getField(rule);
+        if (field.isAnnotationPresent(HideRule.class)) {
+            return null;
+        }
         return new RuleInformation(field, readRuleName(rule), readRuleDesc(rule), readRuleExtra(rule));
     }
 

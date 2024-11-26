@@ -2,7 +2,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.8-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -25,23 +25,16 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
     // Fabric API. This is technically optional, but you probably want it anyway.
-    // 不使用Fabric API
-    // 为了和Fabric API之间的一些兼容性，实际使用中使用conditional mixin，所以可以不使用Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     // fabric-carpet
     modImplementation("curse.maven:carpet-349239:${project.carpet_core_version}")
-    // MixinExtras
-    // include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
-    // Conditional Mixin, for conditional compatability with other mods
-    include(modImplementation 'com.github.Fallen-Breath.conditional-mixin:conditional-mixin-fabric:0.6.2')
+    // mixinextras
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")))
     testImplementation(group: 'junit', name: 'junit', version: junit_version)
 }
 
@@ -61,7 +54,7 @@ processResources {
 // 构建模组前自动单元测试
 remapJar.dependsOn test
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly

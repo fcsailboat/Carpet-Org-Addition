@@ -21,13 +21,16 @@ public class RuleSearchCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("ruleSearch")
                 .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandRuleSearch))
-                .then(CommandManager.argument("rule", StringArgumentType.string())
+                .then(CommandManager.argument("rule", StringArgumentType.greedyString())
                         .executes(RuleSearchCommand::listRule)));
     }
 
     // 列出符合条件的规则
     private static int listRule(CommandContext<ServerCommandSource> context) {
         String rule = StringArgumentType.getString(context, "rule");
+        if (rule.matches("\".*\"")) {
+            rule = rule.substring(1, rule.length() - 1);
+        }
         if (CarpetServer.settingsManager == null) {
             return 0;
         }
@@ -36,6 +39,10 @@ public class RuleSearchCommand {
         // 将文本设置为粗体
         text.styled(style -> style.withBold(true));
         context.getSource().sendFeedback(() -> text, false);
+        // 如果字符串为空，不搜索规则
+        if (rule.isEmpty()) {
+            return 0;
+        }
         int ruleCount = 0;
         for (CarpetRule<?> carpet : list) {
             if (RuleHelper.translatedName(carpet).contains(rule)) {

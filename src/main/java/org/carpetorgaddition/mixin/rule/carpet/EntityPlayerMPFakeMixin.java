@@ -18,7 +18,6 @@ public class EntityPlayerMPFakeMixin extends ServerPlayerEntity {
     @Unique
     private final EntityPlayerMPFake thisPlayer = (EntityPlayerMPFake) (Object) this;
 
-    //私有化构造方法，防止被创建对象
     private EntityPlayerMPFakeMixin(MinecraftServer server, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions) {
         super(server, world, profile, clientOptions);
     }

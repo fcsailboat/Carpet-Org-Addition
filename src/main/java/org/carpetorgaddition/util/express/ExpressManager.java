@@ -1,6 +1,7 @@
 package org.carpetorgaddition.util.express;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -15,14 +16,13 @@ import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
+import org.carpetorgaddition.util.wheel.Counter;
+import org.carpetorgaddition.util.wheel.TextBuilder;
 import org.carpetorgaddition.util.wheel.WorldFormat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -62,7 +62,10 @@ public class ExpressManager {
      * 提示玩家接收快递
      */
     public void promptToReceive(ServerPlayerEntity player) {
-        List<Express> list = this.expresses.stream().filter(express -> express.isRecipient(player)).toList();
+        List<Express> list = this.expresses.stream()
+                .filter(express -> express.isRecipient(player))
+                .filter(express -> !express.isCancel())
+                .toList();
         if (list.isEmpty()) {
             return;
         }
@@ -70,7 +73,7 @@ public class ExpressManager {
         for (Express express : list) {
             MutableText clickRun = TextConstants.clickRun("/mail receive " + express.getId());
             ItemStack stack = express.getExpress();
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.prompt_receive",
+            MessageUtils.sendMessage(source, "carpet.commands.mail.prompt_receive",
                     stack.getCount(), stack.toHoverableText(), clickRun);
         }
     }
@@ -123,14 +126,14 @@ public class ExpressManager {
         int total = 0;
         // 接收物品堆叠数
         int receive = 0;
-        HashSet<String> players = new HashSet<>();
+        HashMap<String, Counter<Item>> hashMap = new HashMap<>();
         for (Express express : list) {
-            players.add(express.getSender());
             // 物品插入物品栏之前的堆叠数
             int count = express.getExpress().getCount();
+            Item item = express.getExpress().getItem();
             total += count;
             Express.InsertResult each = express.receiveEach();
-            receive += switch (each) {
+            int result = switch (each) {
                 // 完全插入物品栏
                 case COMPLETE -> count;
                 // 部分插入物品栏
@@ -138,27 +141,36 @@ public class ExpressManager {
                 // 未插入物品栏
                 case FAIL -> 0;
             };
+            Counter<Item> counter = hashMap.get(express.getSender());
+            if (counter == null) {
+                Counter<Item> value = new Counter<>();
+                value.add(item, result);
+                hashMap.put(express.getSender(), value);
+            } else {
+                counter.add(item, result);
+            }
+            receive += result;
         }
         ServerCommandSource source = player.getCommandSource();
         if (receive == 0) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.receive.insufficient_capacity");
+            MessageUtils.sendMessage(source, "carpet.commands.mail.receive.insufficient_capacity");
         } else {
             if (receive == total) {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.receive.success", total, TextConstants.ITEM);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.receive.success", total, TextConstants.ITEM);
             } else {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.receive.partial_reception", receive, total - receive);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.receive.partial_reception", receive, total - receive);
             }
             // 播放物品拾取音效
             Express.playItemPickupSound(player);
-            // 通知发送者物品以接收
-            Text message = TextUtils.toGrayItalic(TextUtils.translate("carpet.commands.mail.sending.notice", player.getDisplayName()));
             PlayerManager playerManager = source.getServer().getPlayerManager();
-            for (String name : players) {
-                ServerPlayerEntity senderPlayer = playerManager.getPlayer(name);
-                if (senderPlayer == null) {
+            for (Map.Entry<String, Counter<Item>> entry : hashMap.entrySet()) {
+                // 通知发送者物品已接收
+                MutableText message = getReceiveNotice(player, entry.getValue());
+                ServerPlayerEntity playerEntity = playerManager.getPlayer(entry.getKey());
+                if (playerEntity == null) {
                     continue;
                 }
-                MessageUtils.sendCommandFeedback(senderPlayer.getCommandSource(), message);
+                MessageUtils.sendMessage(playerEntity, message);
             }
         }
         return receive;
@@ -191,12 +203,12 @@ public class ExpressManager {
         }
         ServerCommandSource source = player.getCommandSource();
         if (cancel == 0) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.cancel.insufficient_capacity");
+            MessageUtils.sendMessage(source, "carpet.commands.mail.cancel.insufficient_capacity");
         } else {
             if (cancel == total) {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.cancel.success", total, TextConstants.ITEM);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.cancel.success", total, TextConstants.ITEM);
             } else {
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.mail.cancel.partial_reception", cancel, total - cancel);
+                MessageUtils.sendMessage(source, "carpet.commands.mail.cancel.partial_reception", cancel, total - cancel);
             }
             // 播放物品拾取音效
             Express.playItemPickupSound(player);
@@ -207,10 +219,23 @@ public class ExpressManager {
                 if (receivePlayer == null) {
                     continue;
                 }
-                MessageUtils.sendCommandFeedback(receivePlayer.getCommandSource(), message);
+                MessageUtils.sendMessage(receivePlayer.getCommandSource(), message);
             }
         }
         return cancel;
+    }
+
+    /**
+     * @return 获取快递发送者的快递被接收者接收的消息
+     */
+    public static MutableText getReceiveNotice(ServerPlayerEntity player, Counter<Item> counter) {
+        TextBuilder builder = new TextBuilder();
+        for (Item item : counter) {
+            builder.append(TextUtils.appendAll(item.getName(), "*", counter.getCount(item)));
+        }
+        MutableText translate = TextUtils.translate("carpet.commands.mail.sending.notice", player.getDisplayName());
+        MutableText message = TextUtils.toGrayItalic(translate);
+        return TextUtils.hoverText(message, builder.toParagraph());
     }
 
     /**

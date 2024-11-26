@@ -8,7 +8,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
-import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.matcher.Matcher;
 
@@ -84,14 +83,18 @@ public class SortingData extends AbstractActionData {
         // 将假玩家正在分拣物品的消息添加到集合中
         list.add(TextUtils.translate("carpet.commands.playerAction.info.sorting.item", fakeName, itemName));
         // 获取分拣物品要丢出的方向
-        MutableText thisPos = Text.literal(MathUtils.keepTwoDecimalPlaces(thisVec.getX(), thisVec.getY(), thisVec.getZ()));
+        MutableText thisPos = posText(thisVec.getX(), thisVec.getY(), thisVec.getZ());
         // 获取非分拣物品要丢出的方向
-        MutableText otherPos = Text.literal(MathUtils.keepTwoDecimalPlaces(otherVec.getX(), otherVec.getY(), otherVec.getZ()));
+        MutableText otherPos = posText(otherVec.getX(), otherVec.getY(), otherVec.getZ());
         // 将丢要分拣物品的方向的信息添加到集合
         list.add(TextUtils.translate("carpet.commands.playerAction.info.sorting.this", itemName, thisPos));
         // 将丢其他物品的方向的信息添加到集合
         list.add(TextUtils.translate("carpet.commands.playerAction.info.sorting.other", otherPos));
         return list;
+    }
+
+    private MutableText posText(double x, double y, double z) {
+        return TextUtils.createText(String.format("%.2f %.2f %.2f", x, y, z));
     }
 
     public Item getItem() {

@@ -6,6 +6,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.carpetorgaddition.translate.Translate;
+import org.carpetorgaddition.util.wheel.TextBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -200,21 +201,21 @@ public class TextUtils {
     /**
      * 将一堆零散的字符串和可变文本拼接成一个大的可变文本
      *
-     * @param objects 要拼接的文本，可以是字符串，也可以是文本，但不能是其他类型，否则抛出非法参数异常
+     * @param args 要拼接的文本，可以是字符串，也可以是文本，但不能是其他类型，否则抛出非法参数异常
      * @return 拼接后的可变文本对象
      */
-    public static MutableText appendAll(Object... objects) {
-        MutableText mutableText = TextUtils.createEmpty();
-        for (Object object : objects) {
-            if (object instanceof String str) {
-                mutableText.append(Text.literal(str));
-            } else if (object instanceof Text text) {
-                mutableText.append(text);
-            } else {
-                throw new IllegalArgumentException(object + "即不是可变文本对象，也不是字符串对象");
+    public static MutableText appendAll(Object... args) {
+        TextBuilder textBuilder = new TextBuilder();
+        for (Object obj : args) {
+            switch (obj) {
+                case String str -> textBuilder.appendString(str);
+                case Text text -> textBuilder.append(text);
+                case Number number -> textBuilder.append(String.valueOf(number));
+                case null -> throw new NullPointerException();
+                default -> throw new IllegalArgumentException(obj + "即不是可变文本对象，也不是字符串对象");
             }
         }
-        return mutableText;
+        return textBuilder.toLine();
     }
 
     /**

@@ -35,7 +35,7 @@ public class RegisterCarpetCommands {
         LocationsCommand.register(dispatcher);
 
         // 绘制粒子线命令
-        ParticleLineCommand.register(dispatcher);
+        // ParticleLineCommand.register(dispatcher);
 
         // 假玩家动作命令
         PlayerActionCommand.register(dispatcher, commandBuildContext);

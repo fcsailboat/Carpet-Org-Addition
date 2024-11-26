@@ -2,6 +2,7 @@ package org.docs.rule;
 
 import carpet.api.settings.Rule;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.rule.HideRule;
 
 import java.lang.reflect.Field;
 
@@ -10,6 +11,9 @@ public class RuleCount {
         Field[] fields = CarpetOrgAdditionSettings.class.getFields();
         int count = 0;
         for (Field field : fields) {
+            if (field.isAnnotationPresent(HideRule.class)) {
+                continue;
+            }
             if (field.isAnnotationPresent(Rule.class)) {
                 count++;
             }

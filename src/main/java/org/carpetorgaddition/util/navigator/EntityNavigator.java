@@ -8,6 +8,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -36,11 +37,12 @@ public class EntityNavigator extends AbstractNavigator {
 
     public void tick() {
         if (this.terminate()) {
+            this.clear();
             return;
         }
         if (this.targetDeath()) {
             // 如果目标实体死亡，就清除玩家的追踪器
-            MessageUtils.sendTextMessageToHud(this.player, TextUtils.translate("carpet.commands.navigate.hud.target_death"));
+            MessageUtils.sendMessageToHud(this.player, TextUtils.translate("carpet.commands.navigate.hud.target_death"));
             this.clear();
             return;
         }
@@ -59,7 +61,8 @@ public class EntityNavigator extends AbstractNavigator {
                     TextUtils.appendAll(WorldUtils.getDimensionName(entity.getWorld()),
                             TextConstants.simpleBlockPos(entity.getBlockPos())));
         }
-        MessageUtils.sendTextMessageToHud(this.player, text);
+        MessageUtils.sendMessageToHud(this.player, text);
+        this.syncWaypoint(new WaypointUpdateS2CPacket(this.entity.getEyePos(), world));
     }
 
     /**
@@ -73,7 +76,7 @@ public class EntityNavigator extends AbstractNavigator {
         if (this.player.getServerWorld().equals(this.entity.getWorld())
                 && MathUtils.getBlockDistance(player.getBlockPos(), entity.getBlockPos()) <= 8) {
             // 停止追踪
-            MessageUtils.sendTextMessageToHud(this.player, TextUtils.translate(REACH));
+            MessageUtils.sendMessageToHud(this.player, TextUtils.translate(REACH));
             this.clear();
             return true;
         }
@@ -86,50 +89,55 @@ public class EntityNavigator extends AbstractNavigator {
      * @return 是否需要停止追踪这个实体
      */
     private boolean targetDeath() {
-        if (this.entity == null) {
-            return true;
-        }
-        if (this.entity instanceof ServerPlayerEntity serverPlayerEntity) {
-            if (serverPlayerEntity.isRemoved()) {
-                // 如果目标实体是玩家，并且玩家已被删除
-                // 就从服务器的玩家管理器中查找新的玩家实体对象，如果找到了，设置目标为新玩家，如果找不到，玩家的追踪器对象不变
-                // 只要这个玩家在线，就不需要清除这个追踪器，因为玩家可以复活
-                MinecraftServer server = serverPlayerEntity.getServerWorld().getServer();
-                UUID uuid = serverPlayerEntity.getUuid();
-                ServerPlayerEntity newPlayer = server.getPlayerManager().getPlayer(uuid);
-                if (newPlayer == null) {
-                    // 如果玩家已经下线，返回true
-                    return true;
-                }
-                this.navigatorInterface.setNavigator(newPlayer, this.isContinue);
-            }
-            return false;
-        }
-        if (this.entity instanceof LivingEntity livingEntity) {
-            Entity.RemovalReason removalReason = livingEntity.getRemovalReason();
-            // 生物已死亡，或者生物被不可逆的清除
-            if (livingEntity.isDead() || (removalReason != null && removalReason.shouldDestroy())) {
+        switch (this.entity) {
+            case null -> {
                 return true;
             }
-            // 目标实体被可逆的清除，就尝试在维度找到重新目标实体，如果找到，重新设置玩家的追踪器对象，然后返回false
-            MinecraftServer server = livingEntity.getWorld().getServer();
-            if (server == null) {
-                return true;
-            }
-            // 从服务器查找新实体对象
-            UUID uuid = entity.getUuid();
-            // 从服务器查找新实体对象
-            for (ServerWorld world : server.getWorlds()) {
-                Entity newEntity = world.getEntity(uuid);
-                if (newEntity == null || newEntity.isRemoved()) {
-                    continue;
+            case ServerPlayerEntity serverPlayerEntity -> {
+                if (serverPlayerEntity.isRemoved()) {
+                    // 如果目标实体是玩家，并且玩家已被删除
+                    // 就从服务器的玩家管理器中查找新的玩家实体对象，如果找到了，设置目标为新玩家，如果找不到，玩家的追踪器对象不变
+                    // 只要这个玩家在线，就不需要清除这个追踪器，因为玩家可以复活
+                    MinecraftServer server = serverPlayerEntity.getServerWorld().getServer();
+                    UUID uuid = serverPlayerEntity.getUuid();
+                    ServerPlayerEntity newPlayer = server.getPlayerManager().getPlayer(uuid);
+                    if (newPlayer == null) {
+                        // 如果玩家已经下线，返回true
+                        return true;
+                    }
+                    this.navigatorInterface.setNavigator(newPlayer, this.isContinue);
                 }
-                // 将玩家的追踪器目标设置为这个新实体
-                this.navigatorInterface.setNavigator(newEntity, this.isContinue);
                 return false;
             }
-            // 目标活着，没有被清除，返回false
-            return false;
+            case LivingEntity livingEntity -> {
+                Entity.RemovalReason removalReason = livingEntity.getRemovalReason();
+                // 生物已死亡，或者生物被不可逆的清除
+                if (livingEntity.isDead() || (removalReason != null && removalReason.shouldDestroy())) {
+                    return true;
+                }
+                // 目标实体被可逆的清除，就尝试在维度找到重新目标实体，如果找到，重新设置玩家的追踪器对象，然后返回false
+                MinecraftServer server = livingEntity.getWorld().getServer();
+                if (server == null) {
+                    return true;
+                }
+                UUID uuid = entity.getUuid();
+                // 从服务器查找新实体对象
+                for (ServerWorld world : server.getWorlds()) {
+                    Entity newEntity = world.getEntity(uuid);
+                    if (newEntity == null || newEntity.isRemoved()) {
+                        continue;
+                    }
+                    if (this.entity != newEntity) {
+                        // 将玩家的追踪器目标设置为这个新实体
+                        this.navigatorInterface.setNavigator(newEntity, this.isContinue);
+                    }
+                    return false;
+                }
+                // 目标活着，没有被清除，返回false
+                return false;
+            }
+            default -> {
+            }
         }
         return this.entity.isRemoved();
     }

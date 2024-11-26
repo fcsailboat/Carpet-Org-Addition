@@ -187,7 +187,7 @@ public class Waypoint {
             default -> TextUtils.translate("carpet.commands.locations.show.custom_dimension",
                     this.formatName(), this.dimension, TextConstants.blockPos(this.blockPos, Formatting.GREEN));
         };
-        MessageUtils.sendCommandFeedback(source, text);
+        MessageUtils.sendMessage(source, text);
     }
 
     // 将路径点名称改为带有方括号和悬停样式的文本组件对象

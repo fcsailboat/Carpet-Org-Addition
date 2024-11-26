@@ -1,10 +1,9 @@
 package org.carpetorgaddition.util.wheel;
 
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -13,10 +12,9 @@ import java.util.stream.Stream;
  * @param <E> 计数器要统计数量的类
  */
 public class Counter<E> implements Iterable<E> {
-    private final HashMap<E, Integer> COUNTER;
+    private final HashMap<E, Integer> counter = new HashMap<>();
 
     public Counter() {
-        this.COUNTER = new HashMap<>();
     }
 
     /**
@@ -46,8 +44,8 @@ public class Counter<E> implements Iterable<E> {
      */
     @SuppressWarnings("Java8MapApi")
     public void add(E element, int count) {
-        Integer i = this.COUNTER.get(element);
-        this.COUNTER.put(element, i == null ? count : i + count);
+        Integer i = this.counter.get(element);
+        this.counter.put(element, i == null ? count : i + count);
     }
 
     /**
@@ -57,7 +55,7 @@ public class Counter<E> implements Iterable<E> {
      * @param count   修改后的数量
      */
     public void set(E element, int count) {
-        this.COUNTER.put(element, count);
+        this.counter.put(element, count);
     }
 
     /**
@@ -67,7 +65,7 @@ public class Counter<E> implements Iterable<E> {
      * @return 此元素在计数器内的数量
      */
     public int getCount(E element) {
-        Integer i = this.COUNTER.get(element);
+        Integer i = this.counter.get(element);
         return i == null ? 0 : i;
     }
 
@@ -77,7 +75,14 @@ public class Counter<E> implements Iterable<E> {
      * @return 集合的大小
      */
     public int size() {
-        return COUNTER.size();
+        return counter.size();
+    }
+
+    /**
+     * @return 当前集合是否为空
+     */
+    public boolean isEmpty() {
+        return this.counter.isEmpty();
     }
 
     /**
@@ -92,14 +97,22 @@ public class Counter<E> implements Iterable<E> {
     }
 
     public Stream<E> stream() {
-        return this.COUNTER.keySet().stream();
+        return this.counter.keySet().stream();
+    }
+
+    @SuppressWarnings("unused")
+    public List<Pair<E, Integer>> sort() {
+        return this.stream()
+                .sorted(Comparator.comparingInt(element -> -Counter.this.getCount(element)))
+                .map(e -> new Pair<>(e, this.getCount(e)))
+                .toList();
     }
 
     @NotNull
     @Override
     public Iterator<E> iterator() {
         return new Iterator<>() {
-            private final Iterator<Map.Entry<E, Integer>> iterator = COUNTER.entrySet().iterator();
+            private final Iterator<Map.Entry<E, Integer>> iterator = counter.entrySet().iterator();
 
             @Override
             public boolean hasNext() {
@@ -115,7 +128,7 @@ public class Counter<E> implements Iterable<E> {
 
     @Override
     public String toString() {
-        return COUNTER.toString();
+        return counter.toString();
     }
 
     /**

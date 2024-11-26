@@ -1,8 +1,6 @@
 package org.carpetorgaddition.util.task.findtask;
 
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.block.Block;
-import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
@@ -21,11 +19,11 @@ import org.carpetorgaddition.util.wheel.SelectionArea;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class BlockFindTask extends ServerTask {
-    private final ServerWorld world;
+public class BlockFindTask extends ServerTask implements FindTask {
+    protected final ServerWorld world;
     private final SelectionArea selectionArea;
-    private final CommandContext<ServerCommandSource> context;
-    private final BlockPos sourctePos;
+    protected final CommandContext<ServerCommandSource> context;
+    private final BlockPos sourcePos;
     private Iterator<BlockPos> iterator;
     private FindState findState;
     /**
@@ -36,15 +34,15 @@ public class BlockFindTask extends ServerTask {
      * 任务被执行的总游戏刻数
      */
     private int tickCount;
-    private final BlockStateArgument argument;
+    private final FinderCommand.BlockPredicate blockPredicate;
     private final ArrayList<Result> results = new ArrayList<>();
 
-    public BlockFindTask(ServerWorld world, BlockPos sourctePos, SelectionArea selectionArea, CommandContext<ServerCommandSource> context, BlockStateArgument blockStateArgument) {
+    public BlockFindTask(ServerWorld world, BlockPos sourcePos, SelectionArea selectionArea, CommandContext<ServerCommandSource> context, FinderCommand.BlockPredicate blockPredicate) {
         this.world = world;
-        this.sourctePos = sourctePos;
+        this.sourcePos = sourcePos;
         this.selectionArea = selectionArea;
         this.context = context;
-        this.argument = blockStateArgument;
+        this.blockPredicate = blockPredicate;
         this.findState = FindState.SEARCH;
         this.tickCount = 0;
     }
@@ -55,7 +53,7 @@ public class BlockFindTask extends ServerTask {
         this.tickCount++;
         if (this.tickCount > FinderCommand.MAX_TICK_COUNT) {
             // 任务超时
-            MessageUtils.sendCommandErrorFeedback(context, FinderCommand.TIME_OUT);
+            MessageUtils.sendErrorMessage(context, FinderCommand.TIME_OUT);
             this.findState = FindState.END;
             return;
         }
@@ -95,14 +93,16 @@ public class BlockFindTask extends ServerTask {
             int chunkZ = ChunkSectionPos.getSectionCoord(blockPos.getZ());
             // 判断区块是否已加载
             if (this.world.isChunkLoaded(chunkX, chunkZ)) {
-                if (this.argument.test(world, blockPos)) {
-                    this.results.add(new Result(this.sourctePos, blockPos));
+                if (this.blockPredicate.test(world, blockPos)) {
+                    this.results.add(new Result(this.sourcePos, blockPos));
                 }
                 if (this.results.size() > FinderCommand.MAXIMUM_STATISTICAL_COUNT) {
                     // 方块过多，无法统计
-                    Runnable function = () -> MessageUtils.sendCommandErrorFeedback(this.context,
+                    Runnable function = () -> MessageUtils.sendErrorMessage(
+                            this.context,
                             "carpet.commands.finder.block.too_much_blocks",
-                            this.argument.getBlockState().getBlock().getName());
+                            this.blockPredicate.getName()
+                    );
                     throw new TaskExecutionException(function);
                 }
             }
@@ -114,30 +114,29 @@ public class BlockFindTask extends ServerTask {
     private void sort() {
         if (this.results.isEmpty()) {
             // 从周围没有找到指定方块
-            MutableText name = this.argument.getBlockState().getBlock().getName();
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.block.not_found_block", name);
+            MutableText name = this.blockPredicate.getName();
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.block.not_found_block", name);
             this.findState = FindState.END;
             return;
         }
-        this.results.sort((o1, o2) -> MathUtils.compareBlockPos(this.sourctePos, o1.blockPos(), o2.blockPos()));
+        this.results.sort((o1, o2) -> MathUtils.compareBlockPos(this.sourcePos, o1.blockPos(), o2.blockPos()));
         this.findState = FindState.FEEDBACK;
     }
 
     // 发送反馈
-    private void sendFeedback() {
+    protected void sendFeedback() {
         int count = this.results.size();
-        Block block = this.argument.getBlockState().getBlock();
+        MutableText name = this.blockPredicate.getName();
         if (count <= FinderCommand.MAX_FEEDBACK_COUNT) {
-            MessageUtils.sendCommandFeedback(context.getSource(),
-                    "carpet.commands.finder.block.find", count,
-                    block.getName());
+            MessageUtils.sendMessage(context.getSource(),
+                    "carpet.commands.finder.block.find", count, name);
         } else {
             // 数量过多，只输出距离最近的前十个
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.block.find.limit",
-                    count, block.getName(), FinderCommand.MAX_FEEDBACK_COUNT);
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.block.find.limit",
+                    count, name, FinderCommand.MAX_FEEDBACK_COUNT);
         }
         for (int i = 0; i < this.results.size() && i < FinderCommand.MAX_FEEDBACK_COUNT; i++) {
-            MessageUtils.sendTextMessage(context.getSource(), this.results.get(i).toText());
+            MessageUtils.sendMessage(context.getSource(), this.results.get(i).toText());
         }
         this.findState = FindState.END;
     }
@@ -152,12 +151,36 @@ public class BlockFindTask extends ServerTask {
         return this.findState == FindState.END;
     }
 
-    private record Result(BlockPos sourcteBlockPos, BlockPos blockPos) {
-        public MutableText toText() {
-            return TextUtils.translate("carpet.commands.finder.block.feedback",
-                    MathUtils.getBlockIntegerDistance(sourcteBlockPos, blockPos),
-                    TextConstants.blockPos(blockPos, Formatting.GREEN));
+    private class Result {
+        private final BlockPos sourcteBlockPos;
+        private final BlockPos blockPos;
+
+        private Result(BlockPos sourcteBlockPos, BlockPos blockPos) {
+            this.sourcteBlockPos = sourcteBlockPos;
+            this.blockPos = blockPos;
         }
+
+        public MutableText toText() {
+            return getResultMessage(sourcteBlockPos, blockPos);
+        }
+
+        public BlockPos blockPos() {
+            return blockPos;
+        }
+    }
+
+    protected MutableText getResultMessage(BlockPos sourcteBlockPos, BlockPos blockPos) {
+        return TextUtils.translate("carpet.commands.finder.block.feedback",
+                MathUtils.getBlockIntegerDistance(sourcteBlockPos, blockPos),
+                TextConstants.blockPos(blockPos, Formatting.GREEN));
+    }
+
+    @Override
+    public boolean taskExist(FindTask task) {
+        if (this.getClass() == task.getClass()) {
+            return this.context.getSource().getEntity() == ((BlockFindTask) task).context.getSource().getEntity();
+        }
+        return false;
     }
 
     private enum FindState {
