@@ -1,6 +1,5 @@
 package org.carpetorgaddition.mixin.rule.shulkerboxstackable;
 
-import carpet.CarpetSettings;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.block.BlockState;
@@ -18,6 +17,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.rule.RuleUtils;
+import org.carpetorgaddition.util.InventoryUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -94,25 +95,29 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
     @Shadow
     protected abstract void setTransferCooldown(int transferCooldown);
 
-    // 漏斗
     @WrapOperation(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/HopperBlockEntity;insertAndExtract(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/entity/HopperBlockEntity;Ljava/util/function/BooleanSupplier;)Z"))
     private static boolean insert(World world, BlockPos pos, BlockState state, HopperBlockEntity blockEntity, BooleanSupplier booleanSupplier, Operation<Boolean> original) {
         if (CarpetOrgAddition.LITHIUM) {
             return original.call(world, pos, state, blockEntity, booleanSupplier);
         }
-        boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
-        try {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
-            return original.call(world, pos, state, blockEntity, booleanSupplier);
-        } finally {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
-        }
+        return RuleUtils.shulkerBoxStackableWrap(() -> original.call(world, pos, state, blockEntity, booleanSupplier));
     }
 
-    // 让漏斗一次只吸取一个潜影盒
+    @WrapOperation(method = "onEntityCollided", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/HopperBlockEntity;insertAndExtract(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/entity/HopperBlockEntity;Ljava/util/function/BooleanSupplier;)Z"))
+    private static boolean onEntityCollided(World world, BlockPos pos, BlockState state, HopperBlockEntity blockEntity, BooleanSupplier booleanSupplier, Operation<Boolean> original) {
+        if (CarpetOrgAddition.LITHIUM) {
+            return original.call(world, pos, state, blockEntity, booleanSupplier);
+        }
+        return RuleUtils.shulkerBoxStackableWrap(() -> original.call(world, pos, state, blockEntity, booleanSupplier));
+    }
+
+    // 让漏斗一次从一堆掉落物中只吸取一个潜影盒
     @WrapOperation(method = "extract(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/ItemEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/HopperBlockEntity;transfer(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/math/Direction;)Lnet/minecraft/item/ItemStack;"))
     private static ItemStack extract(Inventory from, Inventory to, ItemStack stack, Direction side, Operation<ItemStack> original) {
-        if (CarpetOrgAdditionSettings.shulkerBoxStackable && !CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
+        if (CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
+            return original.call(from, to, stack, side);
+        }
+        if (CarpetOrgAdditionSettings.shulkerBoxStackable && InventoryUtils.isShulkerBoxItem(stack)) {
             ItemStack split = stack.split(stack.getMaxCount());
             ItemStack result = original.call(from, to, split.copy(), side);
             stack.increment(result.getCount());
@@ -126,10 +131,6 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
      */
     @Unique
     private static void compatible(Runnable runnable) {
-        // TODO 阻止与漏斗计数器同时启用
-        if (CarpetSettings.hopperCounters) {
-            return;
-        }
         if (CarpetOrgAdditionSettings.shulkerBoxStackable && CarpetOrgAddition.LITHIUM) {
             boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
             try {

@@ -5,6 +5,7 @@ import org.carpetorgaddition.rule.validator.MaxBlockPlaceDistanceValidator;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class RuleUtils {
 
@@ -40,5 +41,15 @@ public class RuleUtils {
             return 6.0;
         }
         return Math.min(distance, MaxBlockPlaceDistanceValidator.MAX_VALUE);
+    }
+
+    public static <T> T shulkerBoxStackableWrap(Supplier<T> supplier) {
+        boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
+        try {
+            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
+            return supplier.get();
+        } finally {
+            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
+        }
     }
 }

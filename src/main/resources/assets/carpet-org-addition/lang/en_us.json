@@ -115,6 +115,7 @@
   "carpet.rule.syncNavigateWaypoint.desc": "When enabled, the waypoint position of the current navigator can be rendered on the client side",
   "carpet.rule.shulkerBoxStackable.desc": "Allow empty shulker box to stack up to 64",
   "carpet.rule.shulkerBoxStackable.extra.0": "This will not changing the behavior of hopper, dropper, crafter, and comparator",
+  "carpet.rule.shulkerBoxStackable.extra.1": "When Lithium is installed at the same time, this rule is not compatible with the hopper counters",
   "carpet.rule.maxBlockPlaceDistanceSyncClient.desc": "Whether it is allowed to change the distance of the client block placement",
   "carpet.rule.message.disableRespawnBlocksExplode": "Respawn blocks explosion is disabled",
   "carpet.rule.message.CCEUpdateSuppression": "You cannot open the shulkerbox for update surpression",
