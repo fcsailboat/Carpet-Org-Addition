@@ -57,7 +57,7 @@ public class PlayerToolsCommand {
         // 回复饥饿值
         fakePlayer.getHungerManager().setFoodLevel(20);
         // 发送血量回复完后的命令反馈
-        MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.playerTools.heal", fakePlayer.getDisplayName());
+        MessageUtils.sendMessage(context.getSource(), "carpet.commands.playerTools.heal", fakePlayer.getDisplayName());
         return (int) health;
     }
 
@@ -91,7 +91,7 @@ public class PlayerToolsCommand {
         Text fakePlayerName = fakePlayer.getDisplayName();
         Text playerName = player.getDisplayName();
         // 在聊天栏显示命令反馈
-        MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.playerTools.tp.success", fakePlayerName, playerName);
+        MessageUtils.sendMessage(context.getSource(), "carpet.commands.playerTools.tp.success", fakePlayerName, playerName);
         return 1;
     }
 
@@ -101,10 +101,10 @@ public class PlayerToolsCommand {
         // 获取玩家名
         Text playerName = player.getDisplayName();
         if (player instanceof EntityPlayerMPFake) {
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerTools.is_fake_player", playerName);
+            MessageUtils.sendMessage(context, "carpet.commands.playerTools.is_fake_player", playerName);
             return 0;
         } else {
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerTools.is_player", playerName);
+            MessageUtils.sendMessage(context, "carpet.commands.playerTools.is_player", playerName);
             return 1;
         }
     }
@@ -114,7 +114,7 @@ public class PlayerToolsCommand {
         ServerPlayerEntity fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         ServerCommandSource source = context.getSource();
         // 发送命令反馈
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.playerTools.pos", fakePlayer.getDisplayName(),
+        MessageUtils.sendMessage(source, "carpet.commands.playerTools.pos", fakePlayer.getDisplayName(),
                 getDimensionText(fakePlayer.getWorld()).getString(),
                 TextConstants.blockPos(new BlockPos(fakePlayer.getBlockPos()), Formatting.GREEN));
         // 如果命令执行者是玩家，返回距离假玩家的位置

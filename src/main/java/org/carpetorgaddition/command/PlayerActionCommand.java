@@ -38,6 +38,7 @@ import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.carpetorgaddition.util.matcher.ItemPredicateMatcher;
 import org.carpetorgaddition.util.matcher.Matcher;
 import org.carpetorgaddition.util.screen.CraftingSetRecipeScreenHandler;
+import org.carpetorgaddition.util.screen.StonecutterSetRecipeScreenHandler;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -89,9 +90,12 @@ public class PlayerActionCommand {
                                         .then(CommandManager.argument("name", StringArgumentType.string())
                                                 .executes(PlayerActionCommand::setRename))))
                         .then(CommandManager.literal("stonecutting")
-                                .then(CommandManager.argument("item", ItemStackArgumentType.itemStack(commandBuildContext))
-                                        .then(CommandManager.argument("button", IntegerArgumentType.integer(1))
-                                                .executes(PlayerActionCommand::setStonecutting))))
+                                .then(CommandManager.literal("item")
+                                        .then(CommandManager.argument("item", ItemStackArgumentType.itemStack(commandBuildContext))
+                                                .then(CommandManager.argument("button", IntegerArgumentType.integer(1))
+                                                        .executes(PlayerActionCommand::setStonecutting))))
+                                .then(CommandManager.literal("gui")
+                                        .executes(PlayerActionCommand::useGuiSetStonecutting)))
                         .then(CommandManager.literal("fishing")
                                 .executes(PlayerActionCommand::setFishing))));
     }
@@ -242,6 +246,18 @@ public class PlayerActionCommand {
         return 1;
     }
 
+    // 使用GUI设置使用切石机
+    private static int useGuiSetStonecutting(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        SimpleNamedScreenHandlerFactory screen = new SimpleNamedScreenHandlerFactory((i, inventory, playerEntity) -> {
+            ScreenHandlerContext screenHandlerContext = ScreenHandlerContext.create(player.getWorld(), player.getBlockPos());
+            return new StonecutterSetRecipeScreenHandler(i, inventory, screenHandlerContext, fakePlayer);
+        }, TextUtils.translate("carpet.commands.playerAction.info.stonecutter.gui"));
+        player.openHandledScreen(screen);
+        return 1;
+    }
+
     // 设置自动钓鱼
     private static int setFishing(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
@@ -298,7 +314,7 @@ public class PlayerActionCommand {
         // [这里]的悬停提示
         MutableText hoverText = TextConstants.clickInput(command);
         MutableText suggest = TextUtils.suggest(TextConstants.CLICK_HERE.copy(), command, hoverText, Formatting.AQUA);
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.playerAction.set", suggest);
+        MessageUtils.sendMessage(source, "carpet.commands.playerAction.set", suggest);
     }
 
     // 在设置假玩家合成时获取动作管理器并提示启用合成修复

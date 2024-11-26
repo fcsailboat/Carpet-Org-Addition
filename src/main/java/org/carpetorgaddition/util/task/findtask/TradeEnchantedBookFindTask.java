@@ -81,8 +81,9 @@ public class TradeEnchantedBookFindTask extends AbstractTradeFindTask {
 
     @Override
     protected void notFound() {
-        MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.finder.trade.find.not_trade",
-                TextUtils.appendAll(this.getTradeName(), Items.ENCHANTED_BOOK.getName()), FinderCommand.VILLAGER);
+        MessageUtils.sendMessage(context.getSource(),
+                "carpet.commands.finder.trade.find.not_trade",
+                this.getTradeName(), FinderCommand.VILLAGER);
     }
 
     @Override
@@ -104,8 +105,7 @@ public class TradeEnchantedBookFindTask extends AbstractTradeFindTask {
         @Override
         public MutableText toText() {
             // 村民或流浪商人的名称
-            MutableText villagerName = TextUtils.command(merchant.getName().copy(),
-                    "/particleLine ~ ~1 ~ " + merchant.getUuid(), null, null, true);
+            MutableText villagerName = merchant.getName().copy();
             // 获取交易名称
             MutableText enchantmentName = EnchantmentUtils.getName(enchantment, level);
             return TextUtils.translate("carpet.commands.finder.trade.enchanted_book.each",

@@ -80,6 +80,6 @@ public class BeaconRangeBox extends Box {
 
     // 将信标范围调整为整个世界高度
     public BeaconRangeBox worldHeight(World world) {
-        return new BeaconRangeBox(minX, world.getBottomY(), minZ, maxX, world.getTopY(), maxZ);
+        return new BeaconRangeBox(minX, world.getBottomY(), minZ, maxX, world.getTopY() + 1, maxZ);
     }
 }

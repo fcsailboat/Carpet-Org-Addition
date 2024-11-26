@@ -37,15 +37,6 @@
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
 
-### 幽匿尖啸体可生成监守者(sculkShriekerCanSummon)
-
-让玩家放置的幽匿尖啸体默认可以生成监守者
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
-
 ### 创造玩家免疫/kill(creativeImmuneKill)
 
 创造模式的玩家不会被/kill命令杀死
@@ -54,15 +45,6 @@
 - 默认值：`false`
 - 参考选项：`true`，`false`
 - 分类：`Org`，`创造`
-
-### 掉落物不消失(itemNeverDespawn)
-
-物品实体会一直留着世界中
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
 
 ### 滑翔时不能在方块上使用烟花(flyingUseOnBlockFirework)
 
@@ -127,33 +109,6 @@ _对方块的破坏和交互同样有效_<br/>
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
 
-### 禁用伤害免疫(disableDamageImmunity)
-
-阻止游戏限制生物受到伤害的频率
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
-
-### 干草捆完全抵消摔落伤害(hayBlockCompleteOffsetFall)
-
-落在干草捆上时不会受到摔落伤害
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
-
-### 蓝冰上不能刷怪(blueIceCanSpawn)
-
-生物不能在蓝冰上生成
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
-
 ### 禁止蝙蝠生成(disableBatCanSpawn)
 
 阻止蝙蝠自然生成
@@ -207,33 +162,6 @@ _对方块的破坏和交互同样有效_<br/>
 - 默认值：`false`
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
-
-### 禁止猪灵僵尸化(disablePiglinZombify)
-
-阻止猪灵位于下界以外的维度时被僵尸化
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
-
-### 阻止村民女巫化(disableVillagerWitch)
-
-村民被闪电劈中时不会变成女巫
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
-
-### 禁止铁傀儡攻击玩家(disableIronGolemAttackPlayer)
-
-所有铁傀儡都不会试图反击玩家
-
-- 类型：`布尔值`
-- 默认值：`false`
-- 参考选项：`true`，`false`
-- 分类：`Org`，`特性`
 
 ### 将镐作为基岩的有效采集工具(pickaxeMinedBedrock)
 
@@ -300,9 +228,9 @@ _对方块的破坏和交互同样有效_<br/>
 
 ### CCE更新抑制器(CCEUpdateSuppression)
 
-通过将潜影盒命名为“更新抑制器”或“updateSuppression”来制作基于"ClassCastException"的更新抑制器
+通过将潜影盒命名为指定名称来制作基于“ClassCastException”的更新抑制器
 
-- 类型：`布尔值`
+- 类型：`字符串`
 - 默认值：`false`
 - 参考选项：`true`，`false`
 - 分类：`Org`，`特性`
@@ -583,18 +511,6 @@ _true：总是可以右键打开_<br/>
 - 默认值：`false`
 - 分类：`Org`，`生存`
 
-### 湿海绵立即蒸干(wetSpongeImmediatelyDry)
-
-指定湿海绵是否在下界以外的干旱的生物群系里也可以立即蒸干<br/>
-_false：禁用本条规则_<br/>
-_arid：在不会降水的生物群系可以立即蒸干_<br/>
-_all：在所有群系都可以立即蒸干_<br/>
-_disable：湿海绵即使在下界也不会立即蒸干_<br/>
-
-- 类型：`枚举`
-- 默认值：`false`
-- 分类：`Org`，`生存`
-
 ### 假玩家死亡不掉落(fakePlayerKeepInventory)
 
 假玩家死亡后保留物品栏物品和经验
@@ -658,22 +574,9 @@ _值可以为负数，表示向内收缩指定格数_<br/>
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
 
-### 生物是否可以捡起物品(mobWhetherOrNotCanPickItem)
-
-设置掉落物是否可以被生物捡起<br/>
-_no：任何生物都不能捡起掉落物_<br/>
-_vanilla：原版行为_<br/>
-_yes：任何生物都能捡起掉落物_<br/>
-_yes_only_hostile：任何敌对都能捡起掉落物，其它生物为原版行为_<br/>
-_no_only_hostile：任何敌对生物都不能捡起掉落物，其它生物为原版行为_<br/>
-
-- 类型：`枚举`
-- 默认值：`vanilla`
-- 分类：`Org`，`特性`
-
 ### 可高亮方块坐标(canHighlightBlockPos)
 
-在方块坐标文本右侧添加一个按钮用来单击高亮路径点，此功能需要在客户端安装OMMC作为前置
+在方块坐标文本右侧添加一个按钮用来单击高亮方块坐标
 
 - 类型：`布尔值`
 - 默认值：`true`
@@ -734,4 +637,31 @@ _-1表示无限制_<br/>
 - 默认值：`3`
 - 参考选项：`1`，`3`，`5`，`-1`
 - 分类：`Org`，`生存`
+
+### 假玩家生成内存泄漏修复(fakePlayerSpawnMemoryLeakFix)
+
+修复在同时安装fabric api时生成假玩家导致的内存泄漏问题
+
+- 类型：`布尔值`
+- 默认值：`false`
+- 参考选项：`true`，`false`
+- 分类：`Org`，`漏洞修复`
+
+### 快递命令(commandMail)
+
+启用/mail命令用来向其他玩家发送物品
+
+- 类型：`字符串`
+- 默认值：`ops`
+- 参考选项：`true`，`false`，`ops`，`0`，`1`，`2`，`3`，`4`
+- 分类：`Org`，`命令`
+
+### 抑制方块破坏位置不匹配警告(suppressionMismatchInDestroyBlockPosWarn)
+
+阻止在日志中输出“Mismatch in destroy block pos: {} {}”警告
+
+- 类型：`布尔值`
+- 默认值：`false`
+- 参考选项：`true`，`false`
+- 分类：`Org`，`试验性`
 

@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.rulevalue.WetSpongeImmediatelyDry;
+import org.carpetorgaddition.rule.value.WetSpongeImmediatelyDry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

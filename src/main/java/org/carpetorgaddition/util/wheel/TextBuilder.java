@@ -32,6 +32,10 @@ public class TextBuilder {
         return this.append(TextUtils.createText(text));
     }
 
+    public TextBuilder appendNumber(Number number) {
+        return this.append(TextUtils.createText(number.toString()));
+    }
+
     /**
      * 追加文本
      */
@@ -64,16 +68,28 @@ public class TextBuilder {
     /**
      * 将当前对象转换为文本对象，每个元素之间不换行
      */
-    public Text build() {
-        MutableText text = list.get(0).copy();
-        for (int i = 1; i < this.list.size(); i++) {
-            text.append(this.list.get(i));
+    public MutableText toLine() {
+        MutableText result = TextUtils.createEmpty();
+        this.list.forEach(result::append);
+        return result;
+    }
+
+    /**
+     * @return 将当前对象转换为文本对象，每个元素之间换行
+     */
+    public MutableText toParagraph() {
+        MutableText result = TextUtils.createEmpty();
+        for (int i = 0; i < this.list.size(); i++) {
+            result.append(this.list.get(i));
+            if (i < this.list.size() - 1) {
+                result.append(NEW_LINE);
+            }
         }
-        return text;
+        return result;
     }
 
     @Override
     public String toString() {
-        return this.build().getString();
+        return this.toLine().getString();
     }
 }

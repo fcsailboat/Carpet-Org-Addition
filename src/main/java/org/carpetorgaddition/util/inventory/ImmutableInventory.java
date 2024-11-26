@@ -1,11 +1,13 @@
 package org.carpetorgaddition.util.inventory;
 
+import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
@@ -30,6 +32,18 @@ public final class ImmutableInventory extends SimpleInventory implements Iterabl
             this.setStack(i, list.get(i));
         }
         this.lock = true;
+    }
+
+    public ImmutableInventory(Inventory inventory) {
+        this(asList(inventory));
+    }
+
+    private static ArrayList<ItemStack> asList(Inventory inventory) {
+        ArrayList<ItemStack> list = new ArrayList<>();
+        for (int i = 0; i < inventory.size(); i++) {
+            list.add(inventory.getStack(i));
+        }
+        return list;
     }
 
     @Override

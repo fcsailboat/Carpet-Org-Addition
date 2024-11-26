@@ -1,11 +1,15 @@
 package org.carpetorgaddition.util.navigator;
 
+import carpet.utils.CommandHelper;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
+import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import org.carpetorgaddition.util.TextUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +20,14 @@ public abstract class AbstractNavigator {
     @NotNull
     protected final ServerPlayerEntity player;
     protected final NavigatorInterface navigatorInterface;
+    /**
+     * 上一个坐标
+     */
+    private Vec3d previousPosition;
+    /**
+     * 上一个维度
+     */
+    private String previousWorldId;
 
     public AbstractNavigator(@NotNull ServerPlayerEntity player) {
         this.player = player;
@@ -62,7 +74,7 @@ public abstract class AbstractNavigator {
      * @param target 玩家看向的位置
      * @see net.minecraft.client.gui.hud.SubtitlesHud#render(DrawContext)
      */
-    public static int forwardAngle(PlayerEntity player, Vec3d target) {
+    private static int forwardAngle(PlayerEntity player, Vec3d target) {
         double x = target.getX() - player.getX();
         double y = target.getZ() - player.getZ();
         // 将直角坐标转换为极坐标，然后获取角度
@@ -89,7 +101,7 @@ public abstract class AbstractNavigator {
     }
 
     // 玩家视角是否指向目标位置（仅考虑高度）
-    public static int verticalAngle(PlayerEntity player, Vec3d target) {
+    private static int verticalAngle(PlayerEntity player, Vec3d target) {
         double x = Math.sqrt(Math.pow(player.getX() - target.getX(), 2) + Math.pow(player.getZ() - target.getZ(), 2));
         double y = target.getY() - player.getEyeY();
         double result = player.getPitch() + Math.toDegrees(Math.atan2(y, x));
@@ -100,6 +112,45 @@ public abstract class AbstractNavigator {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * 同步路径点
+     */
+    protected void syncWaypoint(WaypointUpdateS2CPacket pack) {
+        // 更新上一个坐标
+        if (this.updatePrevious(pack)) {
+            // 要求玩家有执行/navigate命令的权限
+            boolean hasPermission = CommandHelper.canUseCommand(this.player.getCommandSource(), CarpetOrgAdditionSettings.commandNavigate);
+            if (CarpetOrgAdditionSettings.syncNavigateWaypoint && hasPermission) {
+                ServerPlayNetworking.send(this.player, pack);
+            }
+        }
+    }
+
+    /**
+     * 更新上一个坐标
+     *
+     * @return 坐标是否更新了
+     */
+    private boolean updatePrevious(WaypointUpdateS2CPacket pack) {
+        // 目标未移动，不需要更新
+        if (pack.target().equals(this.previousPosition) && pack.worldId().equals(this.previousWorldId)) {
+            return false;
+        }
+        this.previousPosition = pack.target();
+        this.previousWorldId = pack.worldId();
+        return true;
+    }
+
+    /**
+     * 发送路径点更新
+     */
+    public void sendWaypointUpdate() {
+        if (this.previousPosition == null || this.previousWorldId == null) {
+            return;
+        }
+        ServerPlayNetworking.send(this.player, new WaypointUpdateS2CPacket(this.previousPosition, this.previousWorldId));
     }
 
     /**

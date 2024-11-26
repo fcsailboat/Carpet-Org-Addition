@@ -96,7 +96,7 @@ public class SpectatorCommand {
             player.teleport(dimension, player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
         }
         // 发送命令反馈
-        MessageUtils.sendCommandFeedback(context, "carpet.commands.spectator.teleport.success.dimension",
+        MessageUtils.sendMessage(context, "carpet.commands.spectator.teleport.success.dimension",
                 player.getDisplayName(), WorldUtils.getDimensionId(dimension));
         return 1;
     }
@@ -110,7 +110,7 @@ public class SpectatorCommand {
         Vec3d location = Vec3ArgumentType.getVec3(context, "location");
         player.teleport(dimension, location.getX(), location.getY(), location.getZ(), player.getYaw(), player.getPitch());
         // 发送命令反馈
-        MessageUtils.sendCommandFeedback(context, "commands.teleport.success.location.single",
+        MessageUtils.sendMessage(context, "commands.teleport.success.location.single",
                 player.getDisplayName(), formatFloat(location.getX()), formatFloat(location.getY()), formatFloat(location.getZ()));
         return 1;
     }
@@ -123,7 +123,7 @@ public class SpectatorCommand {
         Entity entity = EntityArgumentType.getEntity(context, "entity");
         player.teleport((ServerWorld) entity.getWorld(), entity.getX(), entity.getY(), entity.getZ(), entity.getYaw(), entity.getPitch());
         // 发送命令反馈
-        MessageUtils.sendCommandFeedback(context, "commands.teleport.success.entity.single",
+        MessageUtils.sendMessage(context, "commands.teleport.success.entity.single",
                 player.getDisplayName(), entity.getDisplayName());
         return 1;
     }
@@ -141,11 +141,11 @@ public class SpectatorCommand {
     private static void savePlayerPos(MinecraftServer server, ServerPlayerEntity player) {
         WorldFormat worldFormat = new WorldFormat(server, SPECTATOR);
         JsonObject json = new JsonObject();
-        json.addProperty("x", MathUtils.keepTwoDecimalPlaces(player.getX()));
-        json.addProperty("y", MathUtils.keepTwoDecimalPlaces(player.getY()));
-        json.addProperty("z", MathUtils.keepTwoDecimalPlaces(player.getZ()));
-        json.addProperty("yaw", MathUtils.keepTwoDecimalPlaces(player.getYaw()));
-        json.addProperty("pitch", MathUtils.keepTwoDecimalPlaces(player.getPitch()));
+        json.addProperty("x", MathUtils.numberToTwoDecimalString(player.getX()));
+        json.addProperty("y", MathUtils.numberToTwoDecimalString(player.getY()));
+        json.addProperty("z", MathUtils.numberToTwoDecimalString(player.getZ()));
+        json.addProperty("yaw", MathUtils.numberToTwoDecimalString(player.getYaw()));
+        json.addProperty("pitch", MathUtils.numberToTwoDecimalString(player.getPitch()));
         json.addProperty("dimension", WorldUtils.getDimensionId(player.getWorld()));
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonString = gson.toJson(json, JsonObject.class);

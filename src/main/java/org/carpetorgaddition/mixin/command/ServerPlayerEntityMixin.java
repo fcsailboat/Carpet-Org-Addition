@@ -1,6 +1,7 @@
 package org.carpetorgaddition.mixin.command;
 
 import carpet.patches.EntityPlayerMPFake;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerInventory;
@@ -16,6 +17,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
@@ -25,6 +27,7 @@ import org.carpetorgaddition.util.fakeplayer.FakePlayerSafeAfkInterface;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.carpetorgaddition.util.navigator.*;
 import org.carpetorgaddition.util.wheel.Waypoint;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,6 +43,7 @@ import java.util.Optional;
 public abstract class ServerPlayerEntityMixin implements NavigatorInterface, FakePlayerSafeAfkInterface {
     @Unique
     private final ServerPlayerEntity thisPlayer = (ServerPlayerEntity) (Object) this;
+    @Nullable
     @Unique
     private AbstractNavigator navigator;
     @Unique
@@ -53,7 +57,7 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
         try {
             this.navigator.tick();
         } catch (RuntimeException e) {
-            MessageUtils.sendCommandErrorFeedback(thisPlayer.getCommandSource(), e, "carpet.commands.navigate.exception");
+            MessageUtils.sendErrorMessage(thisPlayer.getCommandSource(), e, "carpet.commands.navigate.exception");
             CarpetOrgAddition.LOGGER.error("导航器没有按照预期工作", e);
             // 清除导航器
             this.clearNavigator();
@@ -97,19 +101,19 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
             message = TextUtils.setColor(message, Formatting.RED);
             // 添加悬停提示
             message = TextUtils.hoverText(message, report(source, amount));
-            MessageUtils.broadcastTextMessage(thisPlayer, message);
+            MessageUtils.broadcastMessage(thisPlayer, message);
             return;
         }
         // 玩家安全挂机触发成功
         if (thisPlayer.getHealth() <= this.safeAfkThreshold) {
             // 假玩家剩余血量
-            String health = MathUtils.keepTwoDecimalPlaces(thisPlayer.getHealth());
+            String health = MathUtils.numberToTwoDecimalString(thisPlayer.getHealth());
             MutableText message = TextUtils.translate("carpet.commands.playerManager.safeafk.trigger.success",
                     thisPlayer.getDisplayName(), health);
             // 添加悬停提示
             message = TextUtils.hoverText(message, report(source, amount));
             // 广播触发消息，斜体淡灰色
-            MessageUtils.broadcastTextMessage(thisPlayer, TextUtils.toGrayItalic(message));
+            MessageUtils.broadcastMessage(thisPlayer, TextUtils.toGrayItalic(message));
             // 恢复饥饿值
             thisPlayer.getHungerManager().setFoodLevel(20);
             // 退出假人
@@ -191,6 +195,7 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
         return this.safeAfkThreshold;
     }
 
+    @Nullable
     @Override
     public AbstractNavigator getNavigator() {
         return this.navigator;
@@ -219,6 +224,7 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
     @Override
     public void clearNavigator() {
         this.navigator = null;
+        ServerPlayNetworking.send(thisPlayer, new WaypointClearS2CPacket());
     }
 
     @Override

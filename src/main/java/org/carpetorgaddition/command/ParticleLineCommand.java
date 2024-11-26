@@ -24,6 +24,7 @@ import org.carpetorgaddition.util.task.DrawParticleLineTask;
 import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
 import org.joml.Vector3f;
 
+@Deprecated(forRemoval = true)
 public class ParticleLineCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("particleLine")
@@ -87,9 +88,9 @@ public class ParticleLineCommand {
         double f = -vec3d2.dotProduct(vec3d5);
         if (f <= 0.5) {
             if (verticalAngle > 0.0) {
-                MessageUtils.sendTextMessageToHud(player, Text.literal("-->"));
+                MessageUtils.sendMessageToHud(player, Text.literal("-->"));
             } else if (verticalAngle < 0.0) {
-                MessageUtils.sendTextMessageToHud(player, Text.literal("<--"));
+                MessageUtils.sendMessageToHud(player, Text.literal("<--"));
             }
         }
     }
