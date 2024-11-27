@@ -17,6 +17,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
+import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.CommandExecuteIOException;
 import org.carpetorgaddition.util.CommandUtils;
@@ -166,7 +167,7 @@ public class MailCommand {
         List<Express> list = expressManager.stream().toList();
         if (list.isEmpty()) {
             // 没有快递被列出
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.mail.list.empty");
+            MessageUtils.sendMessage(context, "carpet.commands.mail.list.empty");
         }
         list.forEach(express -> list(player, express));
         return list.size();
@@ -198,7 +199,7 @@ public class MailCommand {
         list.add(TextUtils.translate("carpet.commands.mail.list.time", express.getTime()));
         // 拼接字符串
         text = TextUtils.hoverText(text, TextUtils.appendList(list));
-        MessageUtils.sendCommandFeedback(player.getCommandSource(), "carpet.commands.mail.list.each",
+        MessageUtils.sendMessage(player.getCommandSource(), "carpet.commands.mail.list.each",
                 express.getId(), express.getExpress().toHoverableText(), express.getSender(), express.getRecipient(), text);
     }
 
@@ -218,6 +219,10 @@ public class MailCommand {
 
     // 检查玩家是否是自己或假玩家
     private static void checkPlayer(ServerPlayerEntity sourcePlayer, ServerPlayerEntity targetPlayer) throws CommandSyntaxException {
+        // 允许在开发环境下发送给自己
+        if (CarpetOrgAddition.isDebugDevelopment()) {
+            return;
+        }
         if (sourcePlayer == targetPlayer || targetPlayer instanceof EntityPlayerMPFake) {
             throw CommandUtils.createException("carpet.commands.mail.check_player");
         }

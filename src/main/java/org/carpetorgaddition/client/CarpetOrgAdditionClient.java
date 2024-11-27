@@ -8,5 +8,6 @@ public class CarpetOrgAdditionClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
+        CarpetOrgAdditionClientRegister.register();
     }
 }

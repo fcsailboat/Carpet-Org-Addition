@@ -2,19 +2,15 @@ package org.carpetorgaddition.mixin.compat.fabricapi;
 
 import carpet.patches.FakeClientConnection;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import me.fallenbreath.conditionalmixin.api.annotation.Condition;
-import me.fallenbreath.conditionalmixin.api.annotation.Restriction;
 import net.fabricmc.fabric.impl.networking.AbstractChanneledNetworkAddon;
 import net.fabricmc.fabric.impl.networking.AbstractNetworkAddon;
 import net.fabricmc.fabric.impl.networking.GlobalReceiverRegistry;
 import net.minecraft.network.ClientConnection;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.util.constant.ModIds;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @SuppressWarnings("UnstableApiUsage")
-@Restriction(require = @Condition(ModIds.FABRIC_NETWORKING_API))
 @Mixin(value = AbstractNetworkAddon.class, priority = 998, remap = false)
 public abstract class AbstractNetworkAddonMixin {
     @SuppressWarnings("RedundantIfStatement")

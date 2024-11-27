@@ -7,7 +7,9 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public interface Matcher extends SimpleMatcher {
+import java.util.function.Predicate;
+
+public interface Matcher extends Predicate<ItemStack> {
 
     /**
      * 当前物品是否与空气物品匹配

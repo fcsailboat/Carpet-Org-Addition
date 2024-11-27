@@ -56,13 +56,21 @@ public class TextConstants {
             //修改文本颜色
             pos.styled(style -> style.withColor(color));
         }
-        if (CarpetOrgAdditionSettings.canHighlightBlockPos) {
-            MutableText highlight = TextUtils.createText(" [H]");
-            TextUtils.command(highlight, "/highlightWaypoint " + WorldUtils.toPosString(blockPos),
-                    TextUtils.translate("ommc.highlight_waypoint.tooltip"), color, false);
-            return TextUtils.appendAll(pos, highlight);
-        }
-        return pos;
+        return switch (CarpetOrgAdditionSettings.canHighlightBlockPos) {
+            case FALSE -> pos;
+            case OMMC -> {
+                MutableText highlight = TextUtils.createText(" [H]");
+                TextUtils.command(highlight, "/highlightWaypoint " + WorldUtils.toPosString(blockPos),
+                        TextUtils.translate("ommc.highlight_waypoint.tooltip"), color, false);
+                yield TextUtils.appendAll(pos, highlight);
+            }
+            case DEFAULT -> {
+                MutableText highlight = TextUtils.createText(" [H]");
+                TextUtils.command(highlight, "/highlight " + WorldUtils.toPosString(blockPos),
+                        TextUtils.translate("carpet.client.commands.highlight"), color, false);
+                yield TextUtils.appendAll(pos, highlight);
+            }
+        };
     }
 
     /**

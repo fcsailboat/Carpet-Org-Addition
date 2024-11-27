@@ -93,7 +93,7 @@ public class LocationsCommand {
             // 将路径点写入本地文件
             waypoint.save(server);
             // 成功添加路径点
-            MessageUtils.sendCommandFeedback(context.getSource(), "carpet.commands.locations.add.success", name, WorldUtils.toPosString(blockPos));
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.locations.add.success", name, WorldUtils.toPosString(blockPos));
         } catch (IOException e) {
             CarpetOrgAddition.LOGGER.error("{}在尝试将路径点写入本地文件时出现意外问题:", GameUtils.getPlayerName(player), e);
         }
@@ -106,12 +106,12 @@ public class LocationsCommand {
         WorldFormat worldFormat = new WorldFormat(server, Waypoint.WAYPOINT);
         List<File> list = worldFormat.toImmutableFileList();
         if (list.isEmpty()) {
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.locations.list.no_waypoint");
+            MessageUtils.sendMessage(context, "carpet.commands.locations.list.no_waypoint");
             return 0;
         }
         MutableText dividerLine = TextUtils.createText("------------------------------");
         // 显示分隔线
-        MessageUtils.sendTextMessage(context.getSource(), dividerLine);
+        MessageUtils.sendMessage(context.getSource(), dividerLine);
         int count = 0;
         // 遍历文件夹下的所有文件
         for (File file : list) {
@@ -134,7 +134,7 @@ public class LocationsCommand {
                 count++;
             }
         }
-        MessageUtils.sendTextMessage(context.getSource(), dividerLine);
+        MessageUtils.sendMessage(context.getSource(), dividerLine);
         return count;
     }
 
@@ -159,10 +159,10 @@ public class LocationsCommand {
                 waypoint.save(server);
                 if (remove) {
                     // 移除路径点的说明文本
-                    MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.illustrate.remove", name);
+                    MessageUtils.sendMessage(source, "carpet.commands.locations.illustrate.remove", name);
                 } else {
                     // 为路径点添加说明文本
-                    MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.illustrate.add", illustrate, name);
+                    MessageUtils.sendMessage(source, "carpet.commands.locations.illustrate.add", illustrate, name);
                 }
             }
         } catch (IOException | NullPointerException e) {
@@ -198,7 +198,7 @@ public class LocationsCommand {
                 // 将修改后的路径点重新写入本地文件
                 waypoint.save(server);
                 //添加对向坐标
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.another.add");
+                MessageUtils.sendMessage(source, "carpet.commands.locations.another.add");
             }
         } catch (IOException | NullPointerException e) {
             CarpetOrgAddition.LOGGER.error("无法解析路径点[{}]:", name, e);
@@ -219,7 +219,7 @@ public class LocationsCommand {
         //从本地文件删除路径点
         if (file.delete()) {
             // 成功删除
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.remove.success", name);
+            MessageUtils.sendMessage(source, "carpet.commands.locations.remove.success", name);
         } else {
             // 删除失败
             throw CommandUtils.createException("carpet.commands.locations.remove.fail", name);
@@ -243,7 +243,7 @@ public class LocationsCommand {
                 // 将修改完坐标的路径点对象重新写入本地文件
                 waypoint.save(context.getSource().getServer());
                 //发送命令执行后的反馈
-                MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.set", fileName);
+                MessageUtils.sendMessage(source, "carpet.commands.locations.set", fileName);
             }
         } catch (IOException | NullPointerException e) {
             throw CommandUtils.createException("carpet.commands.locations.set.io", fileName);

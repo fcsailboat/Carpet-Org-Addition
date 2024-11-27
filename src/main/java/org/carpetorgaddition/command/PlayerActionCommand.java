@@ -34,6 +34,7 @@ import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.carpetorgaddition.util.matcher.ItemPredicateMatcher;
 import org.carpetorgaddition.util.matcher.Matcher;
 import org.carpetorgaddition.util.screen.CraftingSetRecipeScreenHandler;
+import org.carpetorgaddition.util.screen.StonecutterSetRecipeScreenHandler;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -85,9 +86,12 @@ public class PlayerActionCommand {
                                         .then(CommandManager.argument("name", StringArgumentType.string())
                                                 .executes(PlayerActionCommand::setRename))))
                         .then(CommandManager.literal("stonecutting")
-                                .then(CommandManager.argument("item", ItemStackArgumentType.itemStack(commandBuildContext))
-                                        .then(CommandManager.argument("button", IntegerArgumentType.integer(1))
-                                                .executes(PlayerActionCommand::setStonecutting))))
+                                .then(CommandManager.literal("item")
+                                        .then(CommandManager.argument("item", ItemStackArgumentType.itemStack(commandBuildContext))
+                                                .then(CommandManager.argument("button", IntegerArgumentType.integer(1))
+                                                        .executes(PlayerActionCommand::setStonecutting))))
+                                .then(CommandManager.literal("gui")
+                                        .executes(PlayerActionCommand::useGuiSetStonecutting)))
                         .then(CommandManager.literal("fishing")
                                 .executes(PlayerActionCommand::setFishing))));
     }
@@ -235,6 +239,18 @@ public class PlayerActionCommand {
         Item item = ItemStackArgumentType.getItemStackArgument(context, "item").getItem();
         int buttonIndex = IntegerArgumentType.getInteger(context, "button") - 1;
         actionManager.setAction(FakePlayerAction.STONECUTTING, new StonecuttingData(item, buttonIndex));
+        return 1;
+    }
+
+    // 使用GUI设置使用切石机
+    private static int useGuiSetStonecutting(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        SimpleNamedScreenHandlerFactory screen = new SimpleNamedScreenHandlerFactory((i, inventory, playerEntity) -> {
+            ScreenHandlerContext screenHandlerContext = ScreenHandlerContext.create(player.getWorld(), player.getBlockPos());
+            return new StonecutterSetRecipeScreenHandler(i, inventory, screenHandlerContext, fakePlayer);
+        }, TextUtils.translate("carpet.commands.playerAction.info.stonecutter.gui"));
+        player.openHandledScreen(screen);
         return 1;
     }
 

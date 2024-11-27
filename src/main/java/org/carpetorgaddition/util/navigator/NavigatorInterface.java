@@ -6,8 +6,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.carpetorgaddition.util.wheel.Waypoint;
+import org.jetbrains.annotations.Nullable;
 
 public interface NavigatorInterface {
+    @Nullable
     AbstractNavigator getNavigator();
 
     void setNavigator(Entity entity, boolean isContinue);

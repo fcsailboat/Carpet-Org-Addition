@@ -6,9 +6,11 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.fakeplayer.actiondata.StopData;
+import org.carpetorgaddition.util.inventory.AutoGrowInventory;
 
 public class FakePlayerUtils {
 
@@ -70,7 +72,7 @@ public class FakePlayerUtils {
      */
     public static void stopAction(ServerCommandSource source, EntityPlayerMPFake playerMPFake, String key, Object... obj) {
         ((FakePlayerActionInterface) playerMPFake).getActionManager().setAction(FakePlayerAction.STOP, StopData.STOP);
-        MessageUtils.broadcastTextMessage(source, TextUtils.appendAll(playerMPFake.getDisplayName(), ": ",
+        MessageUtils.broadcastMessage(source, TextUtils.appendAll(playerMPFake.getDisplayName(), ": ",
                 TextUtils.translate(key, obj)));
     }
 
@@ -161,6 +163,23 @@ public class FakePlayerUtils {
     public static void loopThrowItem(ScreenHandler screenHandler, int slotIndex, EntityPlayerMPFake player) {
         while (screenHandler.getSlot(slotIndex).hasStack()) {
             screenHandler.onSlotClick(slotIndex, THROW_Q, SlotActionType.THROW, player);
+        }
+    }
+
+    /**
+     * 收集槽位上的物品
+     *
+     * @throws IllegalStateException 如果调用时光标上存在物品
+     */
+    public static void collectItem(ScreenHandler screenHandler, int slotIndex, AutoGrowInventory inventory, EntityPlayerMPFake fakePlayer) {
+        InventoryUtils.assertEmptyStack(screenHandler.getCursorStack(), () -> "光标上物品非空");
+        while (screenHandler.getSlot(slotIndex).hasStack()) {
+            // 拿取槽位上的物品
+            screenHandler.onSlotClick(slotIndex, PICKUP_RIGHT_CLICK, SlotActionType.PICKUP, fakePlayer);
+            // 将槽位上的物品放入物品栏并清空光标上的物品
+            inventory.addStack(screenHandler.getCursorStack());
+            screenHandler.setCursorStack(ItemStack.EMPTY);
+            InventoryUtils.assertEmptyStack(screenHandler.getCursorStack(), () -> "物品未完全收集");
         }
     }
 

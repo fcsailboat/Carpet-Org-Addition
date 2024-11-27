@@ -179,27 +179,27 @@ public class Location {
 
     //显示详细信息
     public void showInfo(ServerCommandSource source, PlayerEntity player, String name) {
-        MessageUtils.sendTextMessage(player, getText("[" + name + "]"));
+        MessageUtils.sendMessage((ServerPlayerEntity) player, getText("[" + name + "]"));
         if (illustrate != null) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.text.info.illustrate", illustrate);
+            MessageUtils.sendMessage(source, "carpet.commands.locations.text.info.illustrate", illustrate);
         }
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.text.info.creator_player_name", creatorPlayerName);
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.text.info.creator_time", creatorTime);
+        MessageUtils.sendMessage(source, "carpet.commands.locations.text.info.creator_player_name", creatorPlayerName);
+        MessageUtils.sendMessage(source, "carpet.commands.locations.text.info.creator_time", creatorTime);
         Identifier value = player.getWorld().getDimension().effects();
         if (value.equals(DimensionTypes.OVERWORLD_ID)
                 && (locType == LocationType.OVERWORLD
                 || locType == LocationType.OVERWORLD_AND_THE_NETHER
                 || locType == LocationType.THE_NETHER_AND_OVERWORLD)) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.text.info.distance",
+            MessageUtils.sendMessage(source, "carpet.commands.locations.text.info.distance",
                     (int) MathUtils.getBlockDistance(player.getBlockPos(), getOverworldPos()));
         } else if (value.equals(DimensionTypes.THE_NETHER_ID)
                 && (locType == LocationType.THE_NETHER
                 || locType == LocationType.THE_NETHER_AND_OVERWORLD
                 || locType == LocationType.OVERWORLD_AND_THE_NETHER)) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.text.info.distance",
+            MessageUtils.sendMessage(source, "carpet.commands.locations.text.info.distance",
                     (int) MathUtils.getBlockDistance(player.getBlockPos(), getTheNetherPos()));
         } else if (value.equals(DimensionTypes.THE_END_ID) && locType == LocationType.THE_END) {
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.locations.text.info.distance",
+            MessageUtils.sendMessage(source, "carpet.commands.locations.text.info.distance",
                     (int) MathUtils.getBlockDistance(player.getBlockPos(), getTheEndPos()));
         }
     }

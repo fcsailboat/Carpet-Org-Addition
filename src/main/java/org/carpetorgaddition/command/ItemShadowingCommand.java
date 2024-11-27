@@ -35,7 +35,7 @@ public class ItemShadowingCommand {
             // 制作物品分身
             player.setStackInHand(Hand.OFF_HAND, main);
             // 广播制作物品分身的消息
-            MessageUtils.broadcastTextMessage(context.getSource(),
+            MessageUtils.broadcastMessage(context.getSource(),
                     TextUtils.translate("carpet.commands.itemshadowing.broadcast",
                             player.getDisplayName(), main.toHoverableText()));
             // 将玩家制作物品分身的消息写入日志

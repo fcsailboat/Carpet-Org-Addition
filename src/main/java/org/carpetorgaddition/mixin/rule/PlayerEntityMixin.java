@@ -16,8 +16,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.rule.RuleUtils;
 import org.carpetorgaddition.util.CommandUtils;
-import org.carpetorgaddition.util.MathUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,11 +26,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
     @Shadow
     public abstract HungerManager getHungerManager();
+
+    @Shadow
+    public abstract boolean isSpectator();
 
     @Unique
     private final PlayerEntity thisPlayer = (PlayerEntity) (Object) this;
@@ -47,43 +51,78 @@ public abstract class PlayerEntityMixin {
     // 快速设置假玩家合成
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
     private void interact(Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if (thisPlayer instanceof ServerPlayerEntity serverPlayer && !thisPlayer.isSpectator()
-                && CommandHelper.canUseCommand(thisPlayer.getCommandSource(serverPlayer.getServerWorld()),
-                CarpetOrgAdditionSettings.commandPlayerAction)) {
-            switch (CarpetOrgAdditionSettings.quickSettingFakePlayerCraft) {
-                case FALSE:
+        if (this.isSpectator()) {
+            return;
+        }
+        switch (CarpetOrgAdditionSettings.quickSettingFakePlayerCraft) {
+            case FALSE:
+                break;
+            case SNEAKING:
+                if (!thisPlayer.isSneaking()) {
                     break;
-                case SNEAKING:
-                    if (!thisPlayer.isSneaking()) {
-                        break;
-                    }
-                case TRUE:
-                    if (serverPlayer.getMainHandStack().isOf(Items.CRAFTING_TABLE)) {
-                        if (entity instanceof EntityPlayerMPFake fakePlayer) {
-                            CommandUtils.execute(serverPlayer, "/playerAction " + fakePlayer.getName().getString() + " craft gui");
-                            cir.setReturnValue(ActionResult.SUCCESS);
-                        }
-                    }
-                default: {
                 }
+            case TRUE:
+                if (openQuickCraftGui(entity)) {
+                    return;
+                }
+                cir.setReturnValue(ActionResult.SUCCESS);
+            default: {
             }
         }
+    }
+
+    // 打开合成配方设置GUI
+    @Unique
+    private boolean openQuickCraftGui(Entity entity) {
+        Optional<String> optional = getOpenQuickCraftGuiCommand(thisPlayer);
+        if (optional.isEmpty()) {
+            return true;
+        }
+        if (entity instanceof EntityPlayerMPFake fakePlayer && thisPlayer instanceof ServerPlayerEntity player) {
+            // 玩家有执行命令的权限
+            boolean hasPermission = CommandHelper.canUseCommand(player.getCommandSource(), CarpetOrgAdditionSettings.commandPlayerAction);
+            if (hasPermission) {
+                CommandUtils.execute(player, optional.get().formatted(fakePlayer.getName().getString()));
+            }
+        }
+        return false;
+    }
+
+    // 获取打开GUI所需要的命令
+    @Unique
+    private Optional<String> getOpenQuickCraftGuiCommand(PlayerEntity player) {
+        ItemStack itemStack = player.getMainHandStack();
+        if (itemStack.isEmpty()) {
+            return Optional.empty();
+        }
+        // 工作台
+        if (itemStack.isOf(Items.CRAFTING_TABLE)) {
+            return Optional.of("/playerAction %s craft gui");
+        }
+        // 切石机
+        if (itemStack.isOf(Items.STONECUTTER)) {
+            return Optional.of("/playerAction %s stonecutting gui");
+        }
+        return Optional.empty();
     }
 
     // 最大方块交互距离
     @Inject(method = "getBlockInteractionRange", at = @At("HEAD"), cancellable = true)
     private void getBlockInteractionRange(CallbackInfoReturnable<Double> cir) {
-        if (MathUtils.isDefaultDistance()) {
+        if (thisPlayer.getWorld().isClient && !CarpetOrgAdditionSettings.maxBlockPlaceDistanceSyncClient) {
             return;
         }
-        cir.setReturnValue(MathUtils.getPlayerMaxInteractionDistance());
+        if (RuleUtils.isDefaultDistance()) {
+            return;
+        }
+        cir.setReturnValue(RuleUtils.getPlayerMaxInteractionDistance());
     }
 
     // 实体交互距离
     @Inject(method = "getEntityInteractionRange", at = @At("HEAD"), cancellable = true)
     private void getEntityInteractionRange(CallbackInfoReturnable<Double> cir) {
         if (CarpetOrgAdditionSettings.maxBlockPlaceDistanceReferToEntity) {
-            cir.setReturnValue(MathUtils.getPlayerMaxInteractionDistance());
+            cir.setReturnValue(RuleUtils.getPlayerMaxInteractionDistance());
         }
     }
 
