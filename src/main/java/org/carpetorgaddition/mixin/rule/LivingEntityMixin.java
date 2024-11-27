@@ -20,7 +20,7 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.rulevalue.BetterTotemOfUndying;
+import org.carpetorgaddition.rule.value.BetterTotemOfUndying;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;

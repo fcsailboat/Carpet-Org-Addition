@@ -151,7 +151,7 @@ public class FakePlayerSerial {
             }
             // 单击执行命令
             MutableText clickResave = TextConstants.clickRun(command);
-            MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.save.file_already_exist", clickResave);
+            MessageUtils.sendMessage(context, "carpet.commands.playerManager.save.file_already_exist", clickResave);
             return -1;
         }
         IOUtils.saveJson(file, this.toJson());
@@ -176,13 +176,15 @@ public class FakePlayerSerial {
     public Text info() {
         TextBuilder build = new TextBuilder();
         // 玩家位置
+        String pos = MathUtils.numberToTwoDecimalString(this.playerPos.getX()) + " "
+                + MathUtils.numberToTwoDecimalString(this.playerPos.getY()) + " "
+                + MathUtils.numberToTwoDecimalString(this.playerPos.getZ());
         build.appendLine("carpet.commands.playerManager.info.pos",
-                MathUtils.keepTwoDecimalPlaces(this.playerPos.getX(),
-                        this.playerPos.getY(), this.playerPos.getZ()));
+                pos);
         // 获取朝向
         build.appendLine("carpet.commands.playerManager.info.direction",
-                MathUtils.keepTwoDecimalPlaces(this.yaw),
-                MathUtils.keepTwoDecimalPlaces(this.pitch));
+                MathUtils.numberToTwoDecimalString(this.yaw),
+                MathUtils.numberToTwoDecimalString(this.pitch));
         // 维度
         build.appendLine("carpet.commands.playerManager.info.dimension", switch (this.dimension) {
             case "minecraft:overworld", "overworld" -> TextConstants.OVERWORLD;
@@ -208,7 +210,7 @@ public class FakePlayerSerial {
             // 添加注释
             build.newLine().append("carpet.commands.playerManager.info.annotation", this.annotation.getText());
         }
-        return build.build();
+        return build.toLine();
     }
 
     public JsonObject toJson() {
@@ -297,7 +299,7 @@ public class FakePlayerSerial {
                 // 如果有注释，在列出的玩家的名字上也添加注释
                 serial.annotation.hasContent() ? TextUtils.hoverText(playerName, serial.annotation.getText()) : playerName);
         // 发送消息
-        MessageUtils.sendCommandFeedback(context.getSource(), mutableText);
+        MessageUtils.sendMessage(context.getSource(), mutableText);
     }
 
     /**
@@ -315,6 +317,7 @@ public class FakePlayerSerial {
     private static void tryAutoLogin(MinecraftServer server, ServerTaskManagerInterface instance) {
         WorldFormat worldFormat = new WorldFormat(server, FakePlayerSerial.PLAYER_DATA);
         List<File> files = worldFormat.toImmutableFileList(WorldFormat.JSON_EXTENSIONS);
+        int count = server.getCurrentPlayerCount();
         for (File file : files) {
             FakePlayerSerial fakePlayerSerial;
             try {
@@ -324,10 +327,12 @@ public class FakePlayerSerial {
                 continue;
             }
             if (fakePlayerSerial.autologin) {
-                try {
-                    instance.addTask(new DelayedLoginTask(server, fakePlayerSerial, 1));
-                } catch (RuntimeException e) {
-                    CarpetOrgAddition.LOGGER.warn("玩家{}已存在", fakePlayerSerial.fakePlayerName, e);
+                instance.addTask(new DelayedLoginTask(server, fakePlayerSerial, 1));
+                count++;
+                // 阻止假玩家把玩家上线占满，至少为一名真玩家保留一个名额
+                if (count >= server.getMaxPlayerCount() - 1) {
+                    CarpetOrgAddition.LOGGER.warn("服务器玩家即将达到上限");
+                    return;
                 }
             }
         }

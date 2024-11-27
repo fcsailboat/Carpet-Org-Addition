@@ -110,7 +110,7 @@ public class EntityPlayerActionPackSerial {
                 builder.newLine().indentation().append("carpet.commands.playerManager.info.interval", use.interval);
             }
         }
-        return builder.build();
+        return builder.toLine();
     }
 
     public JsonObject toJson() {

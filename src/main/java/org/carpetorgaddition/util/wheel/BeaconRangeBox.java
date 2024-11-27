@@ -3,7 +3,6 @@ package org.carpetorgaddition.util.wheel;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MathUtils;
 
@@ -82,7 +81,6 @@ public class BeaconRangeBox extends Box {
     // 将信标范围调整为整个世界高度
     public BeaconRangeBox worldHeight(World world) {
         int topY = world.getBottomY() + world.getHeight();
-        CarpetOrgAddition.LOGGER.info("信标世界高度：{}", topY);
         return new BeaconRangeBox(minX, world.getBottomY(), minZ, maxX, topY, maxZ);
     }
 }

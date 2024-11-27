@@ -55,7 +55,7 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
 
     @Override
     public void onCancel(CommandContext<ServerCommandSource> context) {
-        MessageUtils.sendCommandFeedback(context, "carpet.commands.playerManager.schedule.logout.cancel",
+        MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.logout.cancel",
                 this.fakePlayer.getDisplayName(), this.getDisplayTime());
     }
 
@@ -65,7 +65,7 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
 
     @Override
     public void sendEachMessage(ServerCommandSource source) {
-        MessageUtils.sendCommandFeedback(source, "carpet.commands.playerManager.schedule.logout",
+        MessageUtils.sendMessage(source, "carpet.commands.playerManager.schedule.logout",
                 this.fakePlayer.getDisplayName(), this.getDisplayTime());
     }
 

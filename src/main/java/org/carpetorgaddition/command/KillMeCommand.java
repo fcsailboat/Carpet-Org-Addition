@@ -24,7 +24,7 @@ public class KillMeCommand {
     private static int killMe(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         //广播自杀消息
-        MessageUtils.broadcastTextMessage(context.getSource(), TextUtils.translate("carpet.commands.killMe", player.getDisplayName()));
+        MessageUtils.broadcastMessage(context.getSource(), TextUtils.translate("carpet.commands.killMe", player.getDisplayName()));
         player.kill(player.getServerWorld());
         return 1;
     }

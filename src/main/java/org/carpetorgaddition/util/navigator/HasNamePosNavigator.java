@@ -23,6 +23,7 @@ public class HasNamePosNavigator extends BlockPosNavigator {
     @Override
     public void tick() {
         if (this.terminate()) {
+            this.clear();
             return;
         }
         MutableText text;
@@ -34,7 +35,7 @@ public class HasNamePosNavigator extends BlockPosNavigator {
         } else {
             text = TextUtils.translate(IN, this.name, TextUtils.appendAll(WorldUtils.getDimensionName(this.world), posText));
         }
-        MessageUtils.sendTextMessageToHud(this.player, text);
+        MessageUtils.sendMessageToHud(this.player, text);
     }
 
     @Override

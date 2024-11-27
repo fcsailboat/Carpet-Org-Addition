@@ -4,6 +4,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -32,6 +33,7 @@ public class WaypointNavigator extends AbstractNavigator {
     @Override
     public void tick() {
         if (terminate()) {
+            this.clear();
             return;
         }
         // 路径点的目标位置
@@ -43,24 +45,29 @@ public class WaypointNavigator extends AbstractNavigator {
         if (playerDimension.equals(waypointDimension)) {
             // 玩家和路径点在相同的维度
             Text text = this.getHUDText(blockPos.toCenterPos(), getIn(blockPos), getDistance(playerBlockPos, blockPos));
-            MessageUtils.sendTextMessageToHud(this.player, text);
-        } else if (((playerDimension.equals(WorldUtils.OVERWORLD) && waypointDimension.equals(WorldUtils.THE_NETHER))
-                || (playerDimension.equals(WorldUtils.THE_NETHER) && waypointDimension.equals(WorldUtils.OVERWORLD)))
-                && this.waypoint.getAnotherBlockPos() != null) {
-            // 玩家和路径点在不同的维度，但是维度可以互相转换
-            // 将坐标设置为斜体
-            Text in = TextUtils.translate(IN, waypoint.getName(),
-                    TextUtils.toItalic(TextConstants.simpleBlockPos(blockPos)));
-            Text text = this.getHUDText(this.waypoint.getAnotherBlockPos().toCenterPos(), in,
-                    getDistance(playerBlockPos, this.waypoint.getAnotherBlockPos()));
-            MessageUtils.sendTextMessageToHud(this.player, text);
+            MessageUtils.sendMessageToHud(this.player, text);
+            this.syncWaypoint(new WaypointUpdateS2CPacket(blockPos.toCenterPos(), waypointDimension));
         } else {
-            // 玩家和路径点在不同维度
-            Text dimensionName = WorldUtils.getDimensionName(WorldUtils.getWorld(this.player.getServer(),
-                    this.waypoint.getDimension()));
-            MutableText in = TextUtils.translate(IN, waypoint.getName(),
-                    TextUtils.appendAll(dimensionName, TextConstants.simpleBlockPos(blockPos)));
-            MessageUtils.sendTextMessageToHud(this.player, in);
+            BlockPos anotherBlockPos = this.waypoint.getAnotherBlockPos();
+            if (((playerDimension.equals(WorldUtils.OVERWORLD) && waypointDimension.equals(WorldUtils.THE_NETHER))
+                    || (playerDimension.equals(WorldUtils.THE_NETHER) && waypointDimension.equals(WorldUtils.OVERWORLD)))
+                    && anotherBlockPos != null) {
+                // 玩家和路径点在不同的维度，但是维度可以互相转换
+                // 将坐标设置为斜体
+                Text in = TextUtils.translate(IN, waypoint.getName(),
+                        TextUtils.toItalic(TextConstants.simpleBlockPos(blockPos)));
+                Text text = this.getHUDText(anotherBlockPos.toCenterPos(), in,
+                        getDistance(playerBlockPos, anotherBlockPos));
+                MessageUtils.sendMessageToHud(this.player, text);
+                this.syncWaypoint(new WaypointUpdateS2CPacket(anotherBlockPos.toCenterPos(), playerDimension));
+            } else {
+                // 玩家和路径点在不同维度
+                Text dimensionName = WorldUtils.getDimensionName(WorldUtils.getWorld(this.player.getServer(),
+                        this.waypoint.getDimension()));
+                MutableText in = TextUtils.translate(IN, waypoint.getName(),
+                        TextUtils.appendAll(dimensionName, TextConstants.simpleBlockPos(blockPos)));
+                MessageUtils.sendMessageToHud(this.player, in);
+            }
         }
     }
 
@@ -69,7 +76,7 @@ public class WaypointNavigator extends AbstractNavigator {
         if (Objects.equals(WorldUtils.getDimensionId(this.player.getWorld()), this.waypointDimension)
                 && MathUtils.getBlockIntegerDistance(this.player.getBlockPos(), this.waypoint.getBlockPos()) <= 8) {
             // 到达目的地，停止追踪
-            MessageUtils.sendTextMessageToHud(this.player, TextUtils.translate(REACH));
+            MessageUtils.sendMessageToHud(this.player, TextUtils.translate(REACH));
             this.clear();
             return true;
         }

@@ -35,12 +35,12 @@ public abstract class AbstractCustomSizeInventory implements Inventory {
     protected abstract Inventory getInventory();
 
     @Override
-    public final boolean isEmpty() {
+    public boolean isEmpty() {
         return this.getInventory().isEmpty();
     }
 
     @Override
-    public final ItemStack getStack(int slot) {
+    public ItemStack getStack(int slot) {
         if (slot < this.getActualSize()) {
             return this.getInventory().getStack(slot);
         }
@@ -48,7 +48,7 @@ public abstract class AbstractCustomSizeInventory implements Inventory {
     }
 
     @Override
-    public final ItemStack removeStack(int slot, int amount) {
+    public ItemStack removeStack(int slot, int amount) {
         if (slot < this.getActualSize()) {
             return this.getInventory().removeStack(slot, amount);
         }
@@ -60,7 +60,7 @@ public abstract class AbstractCustomSizeInventory implements Inventory {
     }
 
     @Override
-    public final ItemStack removeStack(int slot) {
+    public ItemStack removeStack(int slot) {
         if (slot < this.getActualSize()) {
             return this.getInventory().removeStack(slot);
         }
@@ -73,7 +73,7 @@ public abstract class AbstractCustomSizeInventory implements Inventory {
     }
 
     @Override
-    public final void setStack(int slot, ItemStack stack) {
+    public void setStack(int slot, ItemStack stack) {
         if (slot < this.getActualSize()) {
             this.getInventory().setStack(slot, stack);
             return;
@@ -86,18 +86,18 @@ public abstract class AbstractCustomSizeInventory implements Inventory {
     }
 
     @Override
-    public final void markDirty() {
+    public void markDirty() {
         this.getInventory().markDirty();
     }
 
     @Override
-    public final void clear() {
+    public void clear() {
         // 只清空物品栏即可，不需要清空用来占位的stacks
         this.getInventory().clear();
     }
 
     @Override
-    public final boolean isValid(int slot, ItemStack stack) {
+    public boolean isValid(int slot, ItemStack stack) {
         return slot < this.getActualSize();
     }
 

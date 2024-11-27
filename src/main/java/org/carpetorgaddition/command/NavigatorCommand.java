@@ -75,9 +75,9 @@ public class NavigatorCommand {
         ((NavigatorInterface) player).setNavigator(entity, isContinue);
         if (shouldBeBroadcasted(entity, player)) {
             // 设置为斜体淡灰色
-            MessageUtils.broadcastTextMessage(context.getSource(), TextUtils.toGrayItalic(text));
+            MessageUtils.broadcastMessage(context.getSource(), TextUtils.toGrayItalic(text));
         } else {
-            MessageUtils.sendCommandFeedback(context.getSource(), text);
+            MessageUtils.sendMessage(context.getSource(), text);
         }
         return 1;
     }
@@ -91,7 +91,7 @@ public class NavigatorCommand {
             Optional<Waypoint> optional = Waypoint.load(server, waypoint);
             if (optional.isPresent()) {
                 ((NavigatorInterface) player).setNavigator(optional.get());
-                MessageUtils.sendCommandFeedback(context, START_NAVIGATION, player.getDisplayName(), "[" + waypoint + "]");
+                MessageUtils.sendMessage(context, START_NAVIGATION, player.getDisplayName(), "[" + waypoint + "]");
                 return 1;
             } else {
                 throw new NullPointerException();
@@ -123,9 +123,9 @@ public class NavigatorCommand {
             if (shouldBeBroadcasted(entity, player)) {
                 // 将字体设置为灰色斜体
                 text = TextUtils.toItalic(TextUtils.setColor(text, Formatting.GRAY));
-                MessageUtils.broadcastTextMessage(context.getSource(), text);
+                MessageUtils.broadcastMessage(context.getSource(), text);
             } else {
-                MessageUtils.sendCommandFeedback(context.getSource(), text);
+                MessageUtils.sendMessage(context.getSource(), text);
             }
             return 1;
         }
@@ -145,7 +145,7 @@ public class NavigatorCommand {
     private static int stopNavigate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         ((NavigatorInterface) player).clearNavigator();
-        MessageUtils.sendTextMessageToHud(player, TextUtils.translate("carpet.commands.navigate.hud.stop"));
+        MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.commands.navigate.hud.stop"));
         return 1;
     }
 
@@ -158,7 +158,7 @@ public class NavigatorCommand {
         // 设置导航器，维度为玩家当前所在维度
         instance.setNavigator(blockPos, world);
         // 发送命令反馈
-        MessageUtils.sendCommandFeedback(context, START_NAVIGATION, player.getDisplayName(),
+        MessageUtils.sendMessage(context, START_NAVIGATION, player.getDisplayName(),
                 TextConstants.blockPos(blockPos, WorldUtils.getColor(world)));
         return 1;
     }
@@ -173,7 +173,7 @@ public class NavigatorCommand {
         } catch (NullPointerException e) {
             throw CommandUtils.createException("carpet.commands.navigate.unable_to_find", player.getDisplayName(), spawnPoint);
         }
-        MessageUtils.sendCommandFeedback(context, START_NAVIGATION, player.getDisplayName(), spawnPoint);
+        MessageUtils.sendMessage(context, START_NAVIGATION, player.getDisplayName(), spawnPoint);
         return 1;
     }
 
@@ -196,9 +196,9 @@ public class NavigatorCommand {
                 context.getSource().getServer().getWorld(globalPos.dimension()), name);
         MutableText message = TextUtils.translate(START_NAVIGATION, player.getDisplayName(), name);
         if (self || player == target) {
-            MessageUtils.sendTextMessage(player, message);
+            MessageUtils.sendMessage(player, message);
         } else {
-            MessageUtils.broadcastTextMessage(context.getSource(), TextUtils.setColor(TextUtils.toItalic(message), Formatting.GRAY));
+            MessageUtils.broadcastMessage(context.getSource(), TextUtils.setColor(TextUtils.toItalic(message), Formatting.GRAY));
         }
         return 1;
     }

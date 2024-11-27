@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.StringJoiner;
 
-public abstract class AbstractTradeFindTask extends ServerTask {
+public abstract class AbstractTradeFindTask extends ServerTask implements FindTask {
     protected final World world;
     protected final SelectionArea selectionArea;
     protected final BlockPos sourcePos;
@@ -56,7 +56,7 @@ public abstract class AbstractTradeFindTask extends ServerTask {
         this.tickCount++;
         if (tickCount > FinderCommand.MAX_TICK_COUNT) {
             // 任务超时
-            MessageUtils.sendCommandErrorFeedback(context, FinderCommand.TIME_OUT);
+            MessageUtils.sendErrorMessage(context, FinderCommand.TIME_OUT);
             this.findState = FindState.END;
             return;
         }
@@ -135,10 +135,10 @@ public abstract class AbstractTradeFindTask extends ServerTask {
             key = "carpet.commands.finder.trade.result";
         }
         // 发送消息：在周围找到了<交易选项数量>个出售<出售的物品名称>的<村民>或<流浪商人>
-        MessageUtils.sendCommandFeedback(context.getSource(), key, list.toArray(Object[]::new));
+        MessageUtils.sendMessage(context.getSource(), key, list.toArray(Object[]::new));
         // 发送每一条（或前10条）结果
         for (int i = 0; i < this.results.size() && i < FinderCommand.MAX_FEEDBACK_COUNT; i++) {
-            MessageUtils.sendTextMessage(this.context.getSource(), this.results.get(i).toText());
+            MessageUtils.sendMessage(this.context.getSource(), this.results.get(i).toText());
         }
         this.findState = FindState.END;
     }
@@ -168,14 +168,14 @@ public abstract class AbstractTradeFindTask extends ServerTask {
     }
 
     /**
-     * @param list 一只村民所以符合条件交易的索引
+     * @param list 一只村民所有符合条件交易的索引
      * @return 索引拼接后的字符串
      */
     protected static String getIndexArray(ArrayList<Integer> list) {
         String indexArray;
         // 如果只有一个索引，直接返回元素字符串
         if (list.size() == 1) {
-            return list.get(0).toString();
+            return list.getFirst().toString();
         }
         // 如果多个索引，将索引拼接后返回
         StringJoiner stringJoiner = new StringJoiner(", ", "[", "]");
@@ -184,6 +184,14 @@ public abstract class AbstractTradeFindTask extends ServerTask {
         }
         indexArray = stringJoiner.toString();
         return indexArray;
+    }
+
+    @Override
+    public boolean taskExist(FindTask task) {
+        if (this.getClass() == task.getClass()) {
+            return this.context.getSource().getEntity() == ((AbstractTradeFindTask) task).context.getSource().getEntity();
+        }
+        return false;
     }
 
     private enum FindState {

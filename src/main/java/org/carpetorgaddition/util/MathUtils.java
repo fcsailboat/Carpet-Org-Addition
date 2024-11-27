@@ -2,11 +2,8 @@ package org.carpetorgaddition.util;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.rulevalidator.MaxBlockPlaceDistanceValidator;
 
 import java.util.Random;
-import java.util.StringJoiner;
 
 public class MathUtils {
     /**
@@ -72,23 +69,6 @@ public class MathUtils {
         return Double.compare(distance1, distance2);
     }
 
-    public static boolean isDefaultDistance() {
-        return CarpetOrgAdditionSettings.maxBlockPlaceDistance == -1;
-    }
-
-    /**
-     * 获取Carpet Org Addition设置的玩家最大交互距离并进行判断，小于0的值会被视为6.0，超过256的值会被视为256.0
-     *
-     * @return 当前设置的最大交互距离，最大不超过128
-     */
-    public static double getPlayerMaxInteractionDistance() {
-        double distance = CarpetOrgAdditionSettings.maxBlockPlaceDistance;
-        if (distance < 0) {
-            return 6.0;
-        }
-        return Math.min(distance, MaxBlockPlaceDistanceValidator.MAX_VALUE);
-    }
-
     /**
      * 根据在主世界的指定位置获取下界的方块位置坐标
      */
@@ -143,20 +123,17 @@ public class MathUtils {
     }
 
     /**
-     * 判断一个整数是否介于两个整数之间，包括最大最小值，最大最小值反过来传递不影响结果
+     * 判断一个整数是否介于两个整数之间
      *
-     * @param max    范围的最大值
      * @param min    范围的最小值
+     * @param max    范围的最大值
      * @param number 要检查是否介于这两个数之间的数
      */
-    public static boolean betweenTwoNumbers(int max, int min, int number) {
+    public static boolean isInRange(int min, int max, int number) {
         if (min > max) {
-            // 如果最小值大于最大值，交换最大最小值
-            int temp = max;
-            max = min;
-            min = temp;
+            return false;
         }
-        return max >= number && min <= number;
+        return max >= number && number >= min;
     }
 
     /**
@@ -174,16 +151,21 @@ public class MathUtils {
     }
 
     /**
-     * 将一个浮点数数组中的每一个元素格式化为保留两位小数的字符串，然后拼接成一个大字符串，每个元素用空格隔开
-     *
-     * @param args 要格式化的浮点数数组
-     * @return 每一个元素拼接后的大字符串
+     * 将一个浮点数格式化为保留两位小数的字符串
      */
-    public static String keepTwoDecimalPlaces(double... args) {
-        StringJoiner sj = new StringJoiner(" ");
-        for (double arg : args) {
-            sj.add(String.format("%.2f", arg));
-        }
-        return sj.toString();
+    public static String numberToTwoDecimalString(double number) {
+        return String.format("%.2f", number);
+    }
+
+    /**
+     * 根据比例因子使一个数逐渐趋近于另一个数
+     *
+     * @param start  起始数值
+     * @param target 目标数值
+     * @param factor {@code start}趋近于{@code target}的程度，需要在0到1之间
+     * @return {@code start}趋近于{@code target}后的新数值
+     */
+    public static double approach(double start, double target, double factor) {
+        return start + (target - start) * factor;
     }
 }

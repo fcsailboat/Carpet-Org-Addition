@@ -7,14 +7,17 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.math.MathHelper;
+import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
+import org.carpetorgaddition.util.TextUtils;
+import org.carpetorgaddition.util.wheel.TextBuilder;
 import org.jetbrains.annotations.Nullable;
 
 public class XpTransferCommand {
@@ -48,6 +51,9 @@ public class XpTransferCommand {
         ServerPlayerEntity inputPlayer = getInputPlayer(context);
         // 输出经验的玩家必须是假玩家或者是命令执行者自己
         if (outputPlayer instanceof EntityPlayerMPFake || outputPlayer == sourcePlayer) {
+            // 获取转移之前玩家的经验
+            int outputBeforeLevel = outputPlayer.experienceLevel;
+            int inputBeforeLevel = inputPlayer.experienceLevel;
             // 获取玩家当前的经验值
             int points = MathHelper.floor(outputPlayer.experienceProgress * (float) outputPlayer.getNextLevelExperience());
             // 获取玩家的总经验值
@@ -57,8 +63,18 @@ public class XpTransferCommand {
             outputPlayer.setExperiencePoints(0);
             // 把经验给输入玩家
             inputPlayer.addExperience(totalExperience);
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.xpTransfer.all",
-                    outputPlayer.getDisplayName(), totalExperience, inputPlayer.getDisplayName());
+            // 获取转移之后玩家的经验
+            int outputCurrentLevel = outputPlayer.experienceLevel;
+            int inputCurrentLevel = inputPlayer.experienceLevel;
+            MutableText message = TextUtils.translate(
+                    "carpet.commands.xpTransfer.all",
+                    outputPlayer.getDisplayName(),
+                    totalExperience,
+                    inputPlayer.getDisplayName()
+            );
+            MutableText hover = getHover(inputPlayer, inputCurrentLevel, inputBeforeLevel, outputPlayer, outputBeforeLevel, outputCurrentLevel);
+            MessageUtils.sendMessage(source, TextUtils.hoverText(message, hover));
+            writeLog(source, inputPlayer, outputPlayer, totalExperience);
             return totalExperience;
         } else {
             // 发送需要目标是自己或假玩家消息
@@ -77,6 +93,9 @@ public class XpTransferCommand {
         ServerPlayerEntity inputPlayer = getInputPlayer(context);
         // 只能操作自己或假玩家
         if (outputPlayer instanceof EntityPlayerMPFake || outputPlayer == sourcePlayer) {
+            // 获取转移之前玩家的经验
+            int outputBeforeLevel = outputPlayer.experienceLevel;
+            int inputBeforeLevel = inputPlayer.experienceLevel;
             // 获取玩家当前的经验值
             int points = MathHelper.floor(outputPlayer.experienceProgress * (float) outputPlayer.getNextLevelExperience());
             // 获取玩家的总经验值
@@ -90,8 +109,18 @@ public class XpTransferCommand {
             inputPlayer.addExperience(halfExperience);
             // 将另一半经验再转移回输出玩家身上
             outputPlayer.addExperience(totalExperience - halfExperience);
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.xpTransfer.half",
-                    outputPlayer.getDisplayName(), halfExperience, inputPlayer.getDisplayName());
+            // 获取转移之后玩家的经验
+            int outputCurrentLevel = outputPlayer.experienceLevel;
+            int inputCurrentLevel = inputPlayer.experienceLevel;
+            MutableText hover = getHover(inputPlayer, inputCurrentLevel, inputBeforeLevel, outputPlayer, outputBeforeLevel, outputCurrentLevel);
+            MutableText message = TextUtils.translate(
+                    "carpet.commands.xpTransfer.half",
+                    outputPlayer.getDisplayName(),
+                    halfExperience,
+                    inputPlayer.getDisplayName()
+            );
+            MessageUtils.sendMessage(source, TextUtils.hoverText(message, hover));
+            writeLog(source, inputPlayer, outputPlayer, halfExperience);
             return halfExperience;
         } else {
             // 发送消息：只允许操作自己或假玩家
@@ -108,11 +137,14 @@ public class XpTransferCommand {
         // 获取输出经验的玩家
         ServerPlayerEntity outputPlayer = getOutputPlayer(context);
         // 获取输入经验的玩家
-        PlayerEntity inputPlayer = getInputPlayer(context);
+        ServerPlayerEntity inputPlayer = getInputPlayer(context);
         // 获取要转移的经验数量
         int xpNumber = number == null ? IntegerArgumentType.getInteger(context, "number") : number;
         // 只能操作自己或假玩家
         if (outputPlayer instanceof EntityPlayerMPFake || outputPlayer == serverCommandSourcePlayer) {
+            // 获取转移之前玩家的经验
+            int outputBeforeLevel = outputPlayer.experienceLevel;
+            int inputBeforeLevel = inputPlayer.experienceLevel;
             // 获取玩家当前的经验值，不考虑经验等级
             int points = MathHelper.floor(outputPlayer.experienceProgress
                     * (float) outputPlayer.getNextLevelExperience());
@@ -130,8 +162,17 @@ public class XpTransferCommand {
             inputPlayer.addExperience(xpNumber);
             // 将剩余的经验再添加回输出玩家
             outputPlayer.addExperience(totalExperience - xpNumber);
-            MessageUtils.sendCommandFeedback(source, "carpet.commands.xpTransfer.point",
-                    outputPlayer.getDisplayName(), xpNumber, inputPlayer.getDisplayName());
+            // 获取转移之后玩家的经验
+            int outputCurrentLevel = outputPlayer.experienceLevel;
+            int inputCurrentLevel = inputPlayer.experienceLevel;
+            MutableText message = TextUtils.translate("carpet.commands.xpTransfer.point",
+                    outputPlayer.getDisplayName(),
+                    xpNumber,
+                    inputPlayer.getDisplayName()
+            );
+            MutableText hover = getHover(inputPlayer, inputCurrentLevel, inputBeforeLevel, outputPlayer, outputBeforeLevel, outputCurrentLevel);
+            MessageUtils.sendMessage(source, TextUtils.hoverText(message, hover));
+            writeLog(source, inputPlayer, outputPlayer, xpNumber);
             return xpNumber;
         } else {
             // 发送消息：只允许操作自己或假玩家
@@ -147,6 +188,49 @@ public class XpTransferCommand {
     // 获取要输入经验的玩家
     private static ServerPlayerEntity getInputPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         return EntityArgumentType.getPlayer(context, "inputPlayer");
+    }
+
+    // 记录日志
+    private static void writeLog(
+            ServerCommandSource source,
+            ServerPlayerEntity inputPlayer,
+            ServerPlayerEntity outputPlayer,
+            int point
+    ) {
+        ServerPlayerEntity player = source.getPlayer();
+        String output = player == outputPlayer ? "自己" : outputPlayer.getName().getString();
+        String input = player == inputPlayer ? "自己" : inputPlayer.getName().getString();
+        CarpetOrgAddition.LOGGER.info("{}将{}的{}点经验转移给{}", source.getName(), output, point, input);
+    }
+
+    // 获取悬停提示
+    private static MutableText getHover(
+            ServerPlayerEntity inputPlayer,
+            int inputCurrentLevel,
+            int inputBeforeLevel,
+            ServerPlayerEntity outputPlayer,
+            int outputBeforeLevel,
+            int outputCurrentLevel
+    ) {
+        TextBuilder builder = new TextBuilder();
+        builder.append(inputPlayer.getDisplayName())
+                .appendString(" (+")
+                .appendNumber(inputCurrentLevel - inputBeforeLevel)
+                .appendString(") [")
+                .appendNumber(inputBeforeLevel)
+                .appendString("->")
+                .appendNumber(inputCurrentLevel)
+                .appendString("]")
+                .newLine()
+                .append(outputPlayer.getDisplayName())
+                .appendString(" (-")
+                .appendNumber(outputBeforeLevel - outputCurrentLevel)
+                .appendString(") [")
+                .appendNumber(outputBeforeLevel)
+                .appendString("->")
+                .appendNumber(outputCurrentLevel)
+                .appendString("]");
+        return builder.toLine();
     }
 
     /**

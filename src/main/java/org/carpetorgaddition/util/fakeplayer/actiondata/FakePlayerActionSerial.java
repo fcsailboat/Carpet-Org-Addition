@@ -85,7 +85,7 @@ public class FakePlayerActionSerial {
                 .newLine()
                 .indentation()
                 .append(this.action.getDisplayName());
-        return builder.build();
+        return builder.toLine();
     }
 
     public JsonObject toJson() {
