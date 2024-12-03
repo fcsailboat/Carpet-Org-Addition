@@ -132,7 +132,10 @@ public class CarpetOrgAdditionClientRegister {
      */
     private static void registerRender() {
         // 注册路径点渲染器
-        WorldRenderEvents.LAST.register(context -> WorldRendererManager.getRenderer(WaypointRenderer.class).forEach(renderer -> renderer.render(context))
+        WorldRenderEvents.LAST.register(
+                context -> WorldRendererManager
+                        .getRenderer(WaypointRenderer.class)
+                        .forEach(renderer -> renderer.render(context))
         );
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(context -> {
                     // 信标范围渲染器
