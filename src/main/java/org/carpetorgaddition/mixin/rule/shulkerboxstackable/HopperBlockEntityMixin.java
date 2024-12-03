@@ -2,6 +2,8 @@ package org.carpetorgaddition.mixin.rule.shulkerboxstackable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HopperBlock;
 import net.minecraft.block.entity.BlockEntity;
@@ -113,14 +115,18 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
 
     // 让漏斗一次从一堆掉落物中只吸取一个潜影盒
     @WrapOperation(method = "extract(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/ItemEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/HopperBlockEntity;transfer(Lnet/minecraft/inventory/Inventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/math/Direction;)Lnet/minecraft/item/ItemStack;"))
-    private static ItemStack extract(Inventory from, Inventory to, ItemStack stack, Direction side, Operation<ItemStack> original) {
+    private static ItemStack extract(Inventory from, Inventory to, ItemStack stack, Direction side, Operation<ItemStack> original, @Local LocalBooleanRef bl) {
         if (CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
             return original.call(from, to, stack, side);
         }
         if (CarpetOrgAdditionSettings.shulkerBoxStackable && InventoryUtils.isShulkerBoxItem(stack)) {
             ItemStack split = stack.split(stack.getMaxCount());
+            int count = split.getCount();
             ItemStack result = original.call(from, to, split.copy(), side);
             stack.increment(result.getCount());
+            if (count != result.getCount()) {
+                bl.set(true);
+            }
             return stack;
         }
         return original.call(from, to, stack, side);
