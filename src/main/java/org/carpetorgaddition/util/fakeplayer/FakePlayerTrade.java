@@ -73,8 +73,13 @@ public class FakePlayerTrade {
     }
 
     // 尝试交易物品
-    private static void tryTrade(ServerCommandSource source, EntityPlayerMPFake fakePlayer,
-                                 MerchantScreenHandler merchantScreenHandler, int index, boolean voidTrade) {
+    private static void tryTrade(
+            ServerCommandSource source,
+            EntityPlayerMPFake fakePlayer,
+            MerchantScreenHandler merchantScreenHandler,
+            int index,
+            boolean voidTrade
+    ) {
         int loopCount = 0;
         // 如果村民无限交易未启用或当前交易不是虚空交易，则只循环一次
         do {
@@ -127,8 +132,13 @@ public class FakePlayerTrade {
      * @param list                  当前交易界面的物品栏
      * @return 槽位上的物品是否已经足够参与交易
      */
-    private static boolean fillTradeSlot(EntityPlayerMPFake fakePlayer, MerchantScreenHandler merchantScreenHandler,
-                                         ItemStack buyItem, int slotIndex, DefaultedList<Slot> list) {
+    private static boolean fillTradeSlot(
+            EntityPlayerMPFake fakePlayer,
+            MerchantScreenHandler merchantScreenHandler,
+            ItemStack buyItem,
+            int slotIndex,
+            DefaultedList<Slot> list
+    ) {
         // 获取交易槽上的物品
         ItemStack slotItem = merchantScreenHandler.getSlot(slotIndex).getStack();
         // 如果交易槽上的物品不是需要的物品，就丢弃槽位中的物品

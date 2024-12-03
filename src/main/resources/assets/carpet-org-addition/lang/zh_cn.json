@@ -200,7 +200,7 @@
   "carpet.rule.shulkerBoxStackable.name": "潜影盒可堆叠",
   "carpet.rule.shulkerBoxStackable.desc": "允许空潜影盒物品堆叠到64",
   "carpet.rule.shulkerBoxStackable.extra.0": "这不会改变漏斗、投掷器，合成器和比较器的行为",
-  "carpet.rule.shulkerBoxStackable.extra.1": "同时安装锂（Lithium）时，此规则与漏斗计数器不兼容",
+  "carpet.rule.shulkerBoxStackable.extra.1": "同时安装锂（Lithium）时，此规则与漏斗计数器等功能不兼容",
   "carpet.rule.maxBlockPlaceDistanceSyncClient.name": "最大方块放置距离同步客户端",
   "carpet.rule.maxBlockPlaceDistanceSyncClient.desc": "是否允许修改客户端的方块放置距离",
   "carpet.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",

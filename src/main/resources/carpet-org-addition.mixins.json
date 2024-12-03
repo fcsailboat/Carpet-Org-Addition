@@ -87,6 +87,7 @@
     "rule.shulkerboxstackable.CrafterBlockMixin",
     "rule.shulkerboxstackable.DropperBlockMixin",
     "rule.shulkerboxstackable.HopperBlockEntityMixin",
+    "rule.shulkerboxstackable.HopperMinecartEntityMixin",
     "rule.shulkerboxstackable.ItemStackMixin",
     "rule.shulkerboxstackable.ScreenHandlerMixin",
     "util.PlayerManagerMixin",
