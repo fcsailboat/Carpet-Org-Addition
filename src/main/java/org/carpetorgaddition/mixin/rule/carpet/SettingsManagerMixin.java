@@ -4,7 +4,6 @@ import carpet.api.settings.Rule;
 import carpet.api.settings.SettingsManager;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.rule.HideRule;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
