@@ -203,6 +203,8 @@
   "carpet.rule.shulkerBoxStackable.extra.1": "同时安装锂（Lithium）时，此规则与漏斗计数器等功能不兼容",
   "carpet.rule.maxBlockPlaceDistanceSyncClient.name": "最大方块放置距离同步客户端",
   "carpet.rule.maxBlockPlaceDistanceSyncClient.desc": "是否允许修改客户端的方块放置距离",
+  "carpet.rule.limitPhantomSpawn.name": "限制幻翼生成",
+  "carpet.rule.limitPhantomSpawn.desc": "幻翼生成会受到刷怪上限影响",
   "carpet.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",
   "carpet.rule.message.CCEUpdateSuppression": "你不能打开用于更新抑制的潜影盒",
   "carpet.rule.validate.invalid_value": "规则“%s”值无效：%s",
