@@ -324,6 +324,7 @@ public class PlayerManagerCommand {
     }
 
     // 列出每一个玩家
+    // TODO 列出名称中包含指定字符串的玩家
     private static int list(CommandContext<ServerCommandSource> context, Predicate<String> filter) {
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), FakePlayerSerial.PLAYER_DATA);
         int count = FakePlayerSerial.list(context, worldFormat, filter);
