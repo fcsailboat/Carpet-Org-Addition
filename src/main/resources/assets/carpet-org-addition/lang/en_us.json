@@ -118,6 +118,7 @@
   "carpet.rule.shulkerBoxStackable.extra.1": "When Lithium is installed at the same time, this rule is not compatible with features such as hopper counters",
   "carpet.rule.maxBlockPlaceDistanceSyncClient.desc": "Whether it is allowed to change the distance of the client block placement",
   "carpet.rule.limitPhantomSpawn.desc": "The generation of Phantoms is affected by the spawn limit",
+  "carpet.rule.applyToolEffectsImmediately.desc": "Fix that the mining speed will not take effect immediately after switching tools",
   "carpet.rule.message.disableRespawnBlocksExplode": "Respawn blocks explosion is disabled",
   "carpet.rule.message.CCEUpdateSuppression": "You cannot open the shulkerbox for update surpression",
   "carpet.rule.validate.invalid_value": "Wrong value %s for: %s",

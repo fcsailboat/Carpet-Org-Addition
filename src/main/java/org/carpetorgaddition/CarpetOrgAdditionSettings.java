@@ -455,4 +455,8 @@ public class CarpetOrgAdditionSettings {
     // 限制幻翼生成
     @Rule(categories = {ORG, RuleCategory.SURVIVAL})
     public static boolean limitPhantomSpawn = false;
+
+    // 立即应用工具效果
+    @Rule(categories = {ORG, RuleCategory.SURVIVAL})
+    public static boolean applyToolEffectsImmediately = false;
 }
