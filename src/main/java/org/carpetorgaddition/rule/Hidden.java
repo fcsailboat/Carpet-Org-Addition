@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 带有此注解的规则为隐藏规则，隐藏规则不会在游戏中显示，不会被写入文档，不会计入规则数量
+ * 带有此注解的规则默认是隐藏的，只有在启动时加上jvm参数{@code -DCarpetOrgAddition.ShowHiddenRule=true}才会显示
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface HideRule {
+public @interface Hidden {
 }

@@ -48,7 +48,7 @@ public class CarpetOrgAddition implements ModInitializer {
      * 是否同时加载了{@code Lithium}（锂）模组
      */
     public static final boolean LITHIUM = FabricLoader.getInstance().isModLoaded("lithium");
-    public static final boolean ENABLE_CUSTOMIZED_RULE = Boolean.getBoolean("CarpetOrgAddition.EnableCustomizedRule");
+    public static final boolean ENABLE_CUSTOMIZED_RULE = Boolean.getBoolean("CarpetOrgAddition.ShowHiddenRule");
 
     /**
      * 模组初始化

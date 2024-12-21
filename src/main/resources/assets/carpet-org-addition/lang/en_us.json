@@ -1,6 +1,6 @@
 {
   "carpet.category.ORG": "Org",
-  "carpet.category.Customized": "Customized",
+  "carpet.category.Hidden": "Hidden",
   "carpet.rule.commandItemShadowing.desc": "Enable /itemshadowing command to create a shadow of the item in the main hand",
   "carpet.rule.setBedrockHardness.desc": "Set the hardness of bedrock",
   "carpet.rule.bindingCurseInvalidation.desc": "Enable player to take off armors with binding curse enchantments",

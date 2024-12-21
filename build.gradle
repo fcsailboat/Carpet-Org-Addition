@@ -86,7 +86,7 @@ jar {
 }
 
 runClient {
-    jvmArgs("-DCarpetOrgAddition.EnableCustomizedRule=true")
+    jvmArgs("-DCarpetOrgAddition.ShowHiddenRule=true")
 }
 
 // configure the maven publication

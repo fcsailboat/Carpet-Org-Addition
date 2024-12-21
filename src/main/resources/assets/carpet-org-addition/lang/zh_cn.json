@@ -1,6 +1,6 @@
 {
   "carpet.category.ORG": "Org",
-  "carpet.category.Customized": "定制",
+  "carpet.category.Hidden": "隐藏",
   "carpet.rule.commandItemShadowing.name": "制作物品分身",
   "carpet.rule.commandItemShadowing.desc": "启用/itemshadowing命令以制作物品分身",
   "carpet.rule.setBedrockHardness.name": "修改基岩硬度",
