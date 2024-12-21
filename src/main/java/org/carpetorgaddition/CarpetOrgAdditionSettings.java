@@ -3,6 +3,7 @@ package org.carpetorgaddition;
 import carpet.api.settings.Rule;
 import carpet.api.settings.RuleCategory;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.carpetorgaddition.rule.Customized;
 import org.carpetorgaddition.rule.HideRule;
 import org.carpetorgaddition.rule.validator.*;
 import org.carpetorgaddition.rule.value.*;
@@ -26,6 +27,7 @@ public class CarpetOrgAdditionSettings {
     }
 
     public static final String ORG = "Org";
+    public static final String CUSTOMIZED = "Customized";
 
     // 制作物品分身
     @Rule(
@@ -459,4 +461,14 @@ public class CarpetOrgAdditionSettings {
     // 立即应用工具效果
     @Rule(categories = {ORG, RuleCategory.SURVIVAL})
     public static boolean applyToolEffectsImmediately = false;
+
+    // 强制补货
+    @Customized
+    @Rule(categories = {ORG, CUSTOMIZED})
+    public static boolean forceRestock = false;
+
+    // 自动同步玩家状态
+    @Customized
+    @Rule(categories = {ORG, CUSTOMIZED})
+    public static boolean autoSyncPlayerStatus = false;
 }

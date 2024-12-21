@@ -85,6 +85,10 @@ jar {
     }
 }
 
+runClient {
+    jvmArgs("-DCarpetOrgAddition.EnableCustomizedRule=true")
+}
+
 // configure the maven publication
 publishing {
     publications {
