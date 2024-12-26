@@ -115,7 +115,7 @@ public class FinderCommand {
         // 获取玩家所在的位置，这是命令开始执行的坐标
         BlockPos sourceBlockPos = player.getBlockPos();
         // 查找周围容器中的物品
-        Matcher matcher = new ItemStackMatcher(itemStack);
+        Matcher matcher = new ItemMatcher(itemStack);
         World world = player.getWorld();
         ItemFindTask task = new ItemFindTask(world, matcher, new SelectionArea(world, sourceBlockPos, range), context);
         tryAddTask(context, task);
@@ -129,7 +129,7 @@ public class FinderCommand {
         BlockPos to = BlockPosArgumentType.getBlockPos(context, "to");
         // 获取要查找的物品
         ItemStack itemStack = ItemStackArgumentType.getItemStackArgument(context, "itemStack").createStack(1, false);
-        Matcher matcher = new ItemStackMatcher(itemStack);
+        Matcher matcher = new ItemMatcher(itemStack);
         // 计算要查找的区域
         SelectionArea selectionArea = new SelectionArea(from, to);
         ItemFindTask task = new ItemFindTask(player.getWorld(), matcher, selectionArea, context);

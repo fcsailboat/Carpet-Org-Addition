@@ -61,7 +61,7 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
                 .getItemStackArgument(context, "itemStack")
                 .createStack(1, false);
         this.targetStack = itemStack;
-        this.predicate = stack -> ItemStack.areItemsAndComponentsEqual(itemStack, stack);
+        this.predicate = stack -> itemStack.isOf(stack.getItem());
         this.userCache = userCache;
         this.player = player;
         this.files = files;

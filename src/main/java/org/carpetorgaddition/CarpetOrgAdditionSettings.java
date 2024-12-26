@@ -26,6 +26,7 @@ public class CarpetOrgAdditionSettings {
     private CarpetOrgAdditionSettings() {
     }
 
+    // TODO 不支持翻译
     public static final String ORG = "Org";
     public static final String Hidden = "Hidden";
 

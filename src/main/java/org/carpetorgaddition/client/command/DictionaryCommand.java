@@ -71,6 +71,7 @@ public class DictionaryCommand {
     }
 
     private static void sendFeedback(int count) {
+        // TODO 指定字符串对应%s个对象： -> 字符串匹配%s个对象：
         ClientMessageUtils.sendMessage("carpet.client.commands.dictionary.multiple.id", count);
     }
 
