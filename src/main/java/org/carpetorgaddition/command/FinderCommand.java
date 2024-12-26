@@ -87,7 +87,7 @@ public class FinderCommand {
                                                 .then(CommandManager.literal("to")
                                                         .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
                                                                 .executes(FinderCommand::areaItemFinder))))
-                                        .then(CommandManager.literal("player")
+                                        .then(CommandManager.literal("offline_player")
                                                 .executes(FinderCommand::findItemFromOfflinePlayer)))))
                 .then(CommandManager.literal("trade")
                         .then(CommandManager.literal("item")
@@ -142,11 +142,11 @@ public class FinderCommand {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         File[] files = player.server.getSavePath(WorldSavePath.PLAYERDATA).toFile().listFiles();
         if (files == null) {
-            return 0;
+            throw CommandUtils.createException("carpet.commands.finder.item.offline_player.unable_read_files");
         }
         UserCache userCache = player.server.getUserCache();
         if (userCache == null) {
-            return 0;
+            throw CommandUtils.createException("carpet.commands.finder.item.offline_player.unable_read_usercache");
         }
         FindItemFromOfflinePlayerTask task = new FindItemFromOfflinePlayerTask(context, userCache, player, files);
         ServerTaskManagerInterface.getInstance(player.getServer()).addTask(task);

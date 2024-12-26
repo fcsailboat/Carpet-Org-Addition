@@ -200,20 +200,20 @@ public class ItemFindTask extends ServerTask implements FindTask {
 
     // 发送命令反馈
     private void feedback() {
-        MutableText itemOrTagName;
+        MutableText itemCount;
         boolean isItem = matcher.isItem();
         if (isItem) {
             // 为数量添加鼠标悬停效果
-            itemOrTagName = FinderCommand.showCount(matcher.getItem().getDefaultStack(), this.count, this.shulkerBox);
+            itemCount = FinderCommand.showCount(matcher.getItem().getDefaultStack(), this.count, this.shulkerBox);
         } else {
-            itemOrTagName = TextUtils.regularStyle(String.valueOf(count), null, false, this.shulkerBox, false, false);
+            itemCount = TextUtils.regularStyle(String.valueOf(count), null, false, this.shulkerBox, false, false);
         }
         if (this.results.size() <= FinderCommand.MAX_FEEDBACK_COUNT) {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find",
-                    this.results.size(), itemOrTagName, matcher.toText());
+                    this.results.size(), itemCount, matcher.toText());
         } else {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.limit",
-                    this.results.size(), itemOrTagName, matcher.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
+                    this.results.size(), itemCount, matcher.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
         }
         for (int i = 0; i < this.results.size() && i <= FinderCommand.MAX_FEEDBACK_COUNT; i++) {
             MutableText message = this.results.get(i).toText();
