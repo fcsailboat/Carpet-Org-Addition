@@ -45,7 +45,8 @@ import java.util.function.Predicate;
 
 public class PlayerActionCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandBuildContext) {
-        dispatcher.register(CommandManager.literal("playerAction").requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandPlayerAction))
+        dispatcher.register(CommandManager.literal("playerAction")
+                .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandPlayerAction))
                 .then(CommandManager.argument("player", EntityArgumentType.player())
                         .then(CommandManager.literal("sorting")
                                 .then(CommandManager.argument("item", ItemStackArgumentType.itemStack(commandBuildContext))

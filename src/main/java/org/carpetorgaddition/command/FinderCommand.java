@@ -20,6 +20,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
+import net.minecraft.util.UserCache;
+import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
@@ -33,6 +35,8 @@ import org.carpetorgaddition.util.task.ServerTask;
 import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
 import org.carpetorgaddition.util.task.findtask.*;
 import org.carpetorgaddition.util.wheel.SelectionArea;
+
+import java.io.File;
 
 public class FinderCommand {
     /**
@@ -82,7 +86,9 @@ public class FinderCommand {
                                         .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
                                                 .then(CommandManager.literal("to")
                                                         .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
-                                                                .executes(FinderCommand::areaItemFinder)))))))
+                                                                .executes(FinderCommand::areaItemFinder))))
+                                        .then(CommandManager.literal("player")
+                                                .executes(FinderCommand::findItemFromOfflinePlayer)))))
                 .then(CommandManager.literal("trade")
                         .then(CommandManager.literal("item")
                                 .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
@@ -128,6 +134,22 @@ public class FinderCommand {
         SelectionArea selectionArea = new SelectionArea(from, to);
         ItemFindTask task = new ItemFindTask(player.getWorld(), matcher, selectionArea, context);
         tryAddTask(context, task);
+        return 1;
+    }
+
+    // 从离线玩家身上查找物品
+    private static int findItemFromOfflinePlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
+        File[] files = player.server.getSavePath(WorldSavePath.PLAYERDATA).toFile().listFiles();
+        if (files == null) {
+            return 0;
+        }
+        UserCache userCache = player.server.getUserCache();
+        if (userCache == null) {
+            return 0;
+        }
+        FindItemFromOfflinePlayerTask task = new FindItemFromOfflinePlayerTask(context, userCache, player, files);
+        ServerTaskManagerInterface.getInstance(player.getServer()).addTask(task);
         return 1;
     }
 
