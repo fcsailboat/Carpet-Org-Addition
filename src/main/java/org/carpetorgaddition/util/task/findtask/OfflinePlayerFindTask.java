@@ -35,13 +35,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
-public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTask {
+public class OfflinePlayerFindTask extends ServerTask implements FindTask {
     private final AtomicInteger threadCount = new AtomicInteger();
     private final AtomicInteger itemCount = new AtomicInteger();
     private final AtomicBoolean shulkerBox = new AtomicBoolean(false);
     private final CommandContext<ServerCommandSource> context;
     private final UserCache userCache;
-    private final ServerPlayerEntity player;
+    protected final ServerPlayerEntity player;
     private final File[] files;
     private final Predicate<ItemStack> predicate;
     private final ItemStack targetStack;
@@ -50,7 +50,7 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
     private final ReentrantLock lock = new ReentrantLock();
     private final ArrayList<Result> list = new ArrayList<>();
 
-    public FindItemFromOfflinePlayerTask(
+    public OfflinePlayerFindTask(
             CommandContext<ServerCommandSource> context,
             UserCache userCache,
             ServerPlayerEntity player,
@@ -125,7 +125,7 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
             try {
                 // 从玩家NBT读取物品栏
                 NbtCompound nbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
-                SimulatePlayerInventory inventory = SimulatePlayerInventory.of(nbt, this.player.getServer());
+                Inventory inventory = getInventory(nbt);
                 // 统计物品栏物品
                 result = count(inventory, gameProfile);
             } catch (IOException e) {
@@ -142,6 +142,11 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
                 this.lock.unlock();
             }
         }
+    }
+
+    // 获取玩家物品栏
+    protected Inventory getInventory(NbtCompound nbt) {
+        return SimulatePlayerInventory.of(nbt, this.player.getServer());
     }
 
     // 统计物品数量
@@ -182,18 +187,23 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
             MessageUtils.sendMessage(
                     this.context,
                     "carpet.commands.finder.item.offline_player.not_found",
+                    this.getInventoryName(),
                     this.targetStack.getItem().getName()
             );
             return;
         }
         this.list.sort((o1, o2) -> o2.count() - o1.count());
-        MutableText hoverPrompt = TextUtils.translate("carpet.commands.finder.item.offline_player.prompt");
+        MutableText hoverPrompt = TextUtils.translate(
+                "carpet.commands.finder.item.offline_player.prompt",
+                this.getInventoryName()
+        );
         MutableText message;
         Text count = FinderCommand.showCount(this.targetStack, this.itemCount.get(), this.shulkerBox.get());
         if (this.list.size() > FinderCommand.MAX_FEEDBACK_COUNT) {
             message = TextUtils.translate(
                     "carpet.commands.finder.item.offline_player.limit",
                     this.list.size(),
+                    this.getInventoryName(),
                     count,
                     this.targetStack.getItem().getName(),
                     FinderCommand.MAX_FEEDBACK_COUNT
@@ -202,6 +212,7 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
             message = TextUtils.translate(
                     "carpet.commands.finder.item.offline_player",
                     this.list.size(),
+                    this.getInventoryName(),
                     count,
                     this.targetStack.getItem().getName()
             );
@@ -221,7 +232,17 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
         playerName = TextUtils.setColor(playerName, Formatting.GRAY);
         // 获取物品数量，如果包含在潜影盒中找到的物品，就设置物品为斜体
         Text count = FinderCommand.showCount(this.targetStack, result.count, result.shulkerBox);
-        MessageUtils.sendMessage(this.context, "carpet.commands.finder.item.offline_player.each", playerName, count);
+        MessageUtils.sendMessage(
+                this.context,
+                "carpet.commands.finder.item.offline_player.each",
+                playerName,
+                this.getInventoryName(),
+                count
+        );
+    }
+
+    protected Text getInventoryName() {
+        return TextUtils.translate("container.inventory");
     }
 
     @Override
@@ -237,7 +258,7 @@ public class FindItemFromOfflinePlayerTask extends ServerTask implements FindTas
     @Override
     public boolean taskExist(FindTask task) {
         if (this.getClass() == task.getClass()) {
-            return this.context.getSource().getEntity() == ((FindItemFromOfflinePlayerTask) task).context.getSource().getEntity();
+            return this.context.getSource().getEntity() == ((OfflinePlayerFindTask) task).context.getSource().getEntity();
         }
         return false;
     }

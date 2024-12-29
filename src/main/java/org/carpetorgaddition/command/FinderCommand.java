@@ -29,7 +29,6 @@ import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
-import org.carpetorgaddition.util.matcher.ItemStackMatcher;
 import org.carpetorgaddition.util.matcher.Matcher;
 import org.carpetorgaddition.util.task.ServerTask;
 import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
@@ -88,7 +87,11 @@ public class FinderCommand {
                                                         .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
                                                                 .executes(FinderCommand::areaItemFinder))))
                                         .then(CommandManager.literal("offline_player")
-                                                .executes(FinderCommand::findItemFromOfflinePlayer)))))
+                                                .executes(FinderCommand::findItemFromOfflinePlayer)
+                                                .then(CommandManager.literal("inventory")
+                                                        .executes(FinderCommand::findItemFromOfflinePlayer))
+                                                .then(CommandManager.literal("ender_chest")
+                                                        .executes(FinderCommand::findItemFromOfflinePlayerEnderChest))))))
                 .then(CommandManager.literal("trade")
                         .then(CommandManager.literal("item")
                                 .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
@@ -139,6 +142,16 @@ public class FinderCommand {
 
     // 从离线玩家身上查找物品
     private static int findItemFromOfflinePlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        findItemFromOfflinePlayer(context, false);
+        return 1;
+    }
+
+    private static int findItemFromOfflinePlayerEnderChest(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        findItemFromOfflinePlayer(context, true);
+        return 0;
+    }
+
+    private static void findItemFromOfflinePlayer(CommandContext<ServerCommandSource> context, boolean enderChest) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         File[] files = player.server.getSavePath(WorldSavePath.PLAYERDATA).toFile().listFiles();
         if (files == null) {
@@ -148,9 +161,13 @@ public class FinderCommand {
         if (userCache == null) {
             throw CommandUtils.createException("carpet.commands.finder.item.offline_player.unable_read_usercache");
         }
-        FindItemFromOfflinePlayerTask task = new FindItemFromOfflinePlayerTask(context, userCache, player, files);
+        ServerTask task;
+        if (enderChest) {
+            task = new OfflinePlayerEnderChestFindTask(context, userCache, player, files);
+        } else {
+            task = new OfflinePlayerFindTask(context, userCache, player, files);
+        }
         ServerTaskManagerInterface.getInstance(player.getServer()).addTask(task);
-        return 1;
     }
 
     // 方块查找
