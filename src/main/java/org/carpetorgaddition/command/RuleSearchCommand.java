@@ -45,7 +45,6 @@ public class RuleSearchCommand {
         }
         int ruleCount = 0;
         for (CarpetRule<?> carpet : list) {
-            // TODO 支持规则描述
             if (RuleHelper.translatedName(carpet).contains(rule)) {
                 Messenger.m(context.getSource(),
                         ((SettingsManagerAccessor) CarpetServer.settingsManager).displayInteractiveSettings(carpet));

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Predicate;
 
 public class FakePlayerSerial {
@@ -276,7 +277,7 @@ public class FakePlayerSerial {
         for (File file : jsonFileList) {
             try {
                 FakePlayerSerial serial = new FakePlayerSerial(worldFormat, file.getName());
-                if (filter.test(serial.annotation.getAnnotation())) {
+                if (filter.test(serial.annotation.getAnnotation()) || filter.test(serial.fakePlayerName.toLowerCase(Locale.ROOT))) {
                     eachPlayer(context, file, online, offline, serial);
                     count++;
                 }

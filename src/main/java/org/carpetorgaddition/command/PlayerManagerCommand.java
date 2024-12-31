@@ -90,7 +90,7 @@ public class PlayerManagerCommand {
                 .then(CommandManager.literal("list")
                         .executes(context -> list(context, s -> true))
                         .then(CommandManager.argument("filter", StringArgumentType.string())
-                                .executes(context -> list(context, s -> s.contains(StringArgumentType.getString(context, "filter"))))))
+                                .executes(context -> list(context, s -> s.contains(StringArgumentType.getString(context, "filter").toLowerCase(Locale.ROOT))))))
                 .then(CommandManager.literal("delete")
                         .then(CommandManager.argument("name", StringArgumentType.string())
                                 .suggests(defaultSuggests())
@@ -324,7 +324,6 @@ public class PlayerManagerCommand {
     }
 
     // 列出每一个玩家
-    // TODO 列出名称中包含指定字符串的玩家
     private static int list(CommandContext<ServerCommandSource> context, Predicate<String> filter) {
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), FakePlayerSerial.PLAYER_DATA);
         int count = FakePlayerSerial.list(context, worldFormat, filter);
