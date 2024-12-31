@@ -35,7 +35,6 @@ public class DictionaryCommand {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommandManager.literal("dictionary");
             // 注册每一项子命令
-            // TODO 获取手上的物品id
             for (DictionaryType value : DictionaryType.values()) {
                 builder.then(ClientCommandManager.literal(value.name)
                         .then(ClientCommandManager.argument(value.name, value.getArgumentType())

@@ -118,8 +118,8 @@ public class ReLoginTask extends PlayerScheduleTask {
             }
         }
         // 退出游戏
-        TextContent var3 = reason.getContent();
-        if (var3 instanceof TranslatableTextContent text) {
+        TextContent content = reason.getContent();
+        if (content instanceof TranslatableTextContent text) {
             if (text.getKey().equals("multiplayer.disconnect.duplicate_login")) {
                 try {
                     CarpetOrgAdditionSettings.hiddenLoginMessages = true;
@@ -133,6 +133,9 @@ public class ReLoginTask extends PlayerScheduleTask {
         this.server.send(new ServerTask(this.server.getTicks(), () -> {
             try {
                 CarpetOrgAdditionSettings.hiddenLoginMessages = true;
+                if (fakePlayer.isRemoved()) {
+                    return;
+                }
                 fakePlayer.networkHandler.onDisconnected(new DisconnectionInfo(reason));
             } finally {
                 CarpetOrgAdditionSettings.hiddenLoginMessages = false;

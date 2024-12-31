@@ -58,6 +58,7 @@ public class SelectionArea implements Iterable<BlockPos> {
      * @return 与当前对象等效的Box对象
      */
     public Box toBox() {
+        // TODO maxXYZ是否应该+1
         return new Box(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
     }
 
