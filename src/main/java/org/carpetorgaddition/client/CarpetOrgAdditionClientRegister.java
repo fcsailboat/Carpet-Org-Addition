@@ -14,6 +14,7 @@ import org.carpetorgaddition.client.renderer.beaconbox.BeaconBoxRenderer;
 import org.carpetorgaddition.client.renderer.villagerpoi.VillagerPoiRenderer;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderer;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRendererType;
+import org.carpetorgaddition.debug.client.command.SelectionAreaCommand;
 import org.carpetorgaddition.debug.client.render.BlockBreakingSpeedRenderer;
 import org.carpetorgaddition.debug.client.render.ComparatorLevelRender;
 import org.carpetorgaddition.debug.client.render.SoulSandItemCountRender;
@@ -155,6 +156,7 @@ public class CarpetOrgAdditionClientRegister {
             SoulSandItemCountRender.render();
             ComparatorLevelRender.render();
             BlockBreakingSpeedRenderer.render();
+            SelectionAreaCommand.register();
         }
     }
 }

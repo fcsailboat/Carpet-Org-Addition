@@ -68,15 +68,21 @@ public class SelectionArea implements Iterable<BlockPos> {
     @Override
     public Iterator<BlockPos> iterator() {
         return new Iterator<>() {
+            /**
+             * 当前迭代次数
+             */
+            private int iterations = 0;
+            /**
+             * 最大迭代次数
+             */
+            private final int maxIterations = SelectionArea.this.size();
             // 迭代器当前遍历到的位置
-            private BlockPos currentPos = new BlockPos(SelectionArea.this.minX, SelectionArea.this.minY, SelectionArea.this.minZ);
+            private BlockPos currentPos = new BlockPos(minX, minY, minZ);
 
             @Override
             public boolean hasNext() {
                 // 当前方块坐标是否在选区内
-                return currentPos.getX() <= SelectionArea.this.maxX
-                        && currentPos.getY() <= SelectionArea.this.maxY
-                        && currentPos.getZ() <= SelectionArea.this.maxZ;
+                return this.iterations < maxIterations;
             }
 
             @Override
@@ -85,6 +91,7 @@ public class SelectionArea implements Iterable<BlockPos> {
                     // 超出选区抛出异常
                     throw new NoSuchElementException();
                 }
+                this.iterations++;
                 // 当前遍历到的位置坐标的副本
                 BlockPos blockPos = this.currentPos;
                 this.currentPos = new BlockPos(this.currentPos.getX() + 1, this.currentPos.getY(), this.currentPos.getZ());
