@@ -25,7 +25,7 @@ import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.WorldUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.util.navigator.NavigatorInterface;
+import org.carpetorgaddition.periodic.navigator.NavigatorInterface;
 import org.carpetorgaddition.util.wheel.Waypoint;
 
 import java.io.IOException;

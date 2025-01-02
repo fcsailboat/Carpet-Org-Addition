@@ -7,10 +7,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.StonecutterScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionInterface;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.util.fakeplayer.actiondata.StonecuttingData;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionInterface;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
+import org.carpetorgaddition.periodic.fakeplayer.actiondata.StonecuttingData;
 
 public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler implements UnavailableSlotSyncInterface{
     private final EntityPlayerMPFake fakePlayer;

@@ -12,12 +12,12 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.command.PlayerActionCommand;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionInterface;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerCraftRecipeInterface;
-import org.carpetorgaddition.util.fakeplayer.actiondata.CraftingTableCraftData;
-import org.carpetorgaddition.util.fakeplayer.actiondata.InventoryCraftData;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionInterface;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerCraftRecipeInterface;
+import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
+import org.carpetorgaddition.periodic.fakeplayer.actiondata.InventoryCraftData;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
 
 public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implements UnavailableSlotSyncInterface {

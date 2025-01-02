@@ -21,8 +21,8 @@ import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MathUtils;
-import org.carpetorgaddition.util.task.ServerTask;
-import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
+import org.carpetorgaddition.periodic.task.ServerTask;
+import org.carpetorgaddition.periodic.task.ServerTaskManagerInterface;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.util.ArrayList;

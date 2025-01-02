@@ -5,7 +5,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
-import org.carpetorgaddition.util.navigator.NavigatorInterface;
+import org.carpetorgaddition.periodic.navigator.NavigatorInterface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
