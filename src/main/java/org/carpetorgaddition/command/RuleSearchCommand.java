@@ -38,6 +38,7 @@ public class RuleSearchCommand {
         MutableText text = TextUtils.translate("carpet.commands.ruleSearch.feedback", rule);
         // 将文本设置为粗体
         text.styled(style -> style.withBold(true));
+        // TODO 对所有玩家可见
         context.getSource().sendFeedback(() -> text, false);
         // 如果字符串为空，不搜索规则
         if (rule.isEmpty()) {
