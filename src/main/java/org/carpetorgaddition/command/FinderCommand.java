@@ -25,14 +25,14 @@ import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.task.ServerTask;
 import org.carpetorgaddition.periodic.task.findtask.*;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.carpetorgaddition.util.matcher.Matcher;
-import org.carpetorgaddition.periodic.task.ServerTask;
-import org.carpetorgaddition.periodic.task.ServerTaskManagerInterface;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.io.File;
@@ -121,7 +121,7 @@ public class FinderCommand {
         Matcher matcher = new ItemMatcher(itemStack);
         World world = player.getWorld();
         ItemFindTask task = new ItemFindTask(world, matcher, new SelectionArea(world, sourceBlockPos, range), context);
-        tryAddTask(context, task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
 
@@ -136,7 +136,7 @@ public class FinderCommand {
         // 计算要查找的区域
         SelectionArea selectionArea = new SelectionArea(from, to);
         ItemFindTask task = new ItemFindTask(player.getWorld(), matcher, selectionArea, context);
-        tryAddTask(context, task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
 
@@ -167,7 +167,7 @@ public class FinderCommand {
         } else {
             task = new OfflinePlayerFindTask(context, userCache, player, files);
         }
-        ServerTaskManagerInterface.getInstance(player.getServer()).addTask(task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
     }
 
     // 方块查找
@@ -182,7 +182,7 @@ public class FinderCommand {
         SelectionArea selectionArea = new SelectionArea(world, sourceBlockPos, range);
         ArgumentBlockPredicate predicate = new ArgumentBlockPredicate(argument);
         BlockFindTask task = new BlockFindTask(world, sourceBlockPos, selectionArea, context, predicate);
-        tryAddTask(context, task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
 
@@ -198,7 +198,7 @@ public class FinderCommand {
         SelectionArea selectionArea = new SelectionArea(from, to);
         BlockBlockPredicate predicate = new BlockBlockPredicate();
         MayAffectWorldEaterBlockFindTask task = new MayAffectWorldEaterBlockFindTask(world, sourceBlockPos, selectionArea, context, predicate);
-        tryAddTask(context, task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 0;
     }
 
@@ -214,7 +214,7 @@ public class FinderCommand {
         ArgumentBlockPredicate predicate = new ArgumentBlockPredicate(argument);
         // 添加查找任务
         BlockFindTask task = new BlockFindTask(player.getServerWorld(), player.getBlockPos(), selectionArea, context, predicate);
-        tryAddTask(context, task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
 
@@ -231,7 +231,7 @@ public class FinderCommand {
         SelectionArea area = new SelectionArea(world, sourcePos, range);
         TradeItemFindTask task = new TradeItemFindTask(world, area, sourcePos, context, matcher);
         // 向任务管理器添加任务
-        tryAddTask(context, task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
 
@@ -248,19 +248,11 @@ public class FinderCommand {
         SelectionArea area = new SelectionArea(world, sourcePos, range);
         TradeEnchantedBookFindTask task = new TradeEnchantedBookFindTask(world, area, sourcePos, context, enchantment);
         // 向任务管理器添加任务
-        tryAddTask(context, task);
+        ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
 
     // 尝试添加任务
-    private static void tryAddTask(CommandContext<ServerCommandSource> context, FindTask task) throws CommandSyntaxException {
-        ServerTaskManagerInterface manager = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
-        if (manager.findTask(FindTask.class, findTask -> findTask.taskExist(findTask)).isEmpty()) {
-            manager.addTask((ServerTask) task);
-            return;
-        }
-        throw CommandUtils.createException("carpet.commands.finder.add.exist");
-    }
 
     // 将物品数量转换为“多少组多少个”的形式
     public static MutableText showCount(ItemStack itemStack, int count, boolean inTheShulkerBox) {

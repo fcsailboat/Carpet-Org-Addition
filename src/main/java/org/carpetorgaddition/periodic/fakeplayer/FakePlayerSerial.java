@@ -13,11 +13,12 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.fakeplayer.actiondata.FakePlayerActionSerial;
+import org.carpetorgaddition.periodic.task.ServerTaskManager;
+import org.carpetorgaddition.periodic.task.playerscheduletask.DelayedLoginTask;
 import org.carpetorgaddition.util.*;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.FakePlayerActionSerial;
-import org.carpetorgaddition.periodic.task.ServerTaskManagerInterface;
-import org.carpetorgaddition.periodic.task.playerscheduletask.DelayedLoginTask;
 import org.carpetorgaddition.util.wheel.Annotation;
 import org.carpetorgaddition.util.wheel.TextBuilder;
 import org.carpetorgaddition.util.wheel.WorldFormat;
@@ -307,15 +308,15 @@ public class FakePlayerSerial {
      * 假玩家自动登录
      */
     public static void autoLogin(MinecraftServer server) {
-        ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(server).getServerTaskManager();
         try {
-            tryAutoLogin(server, instance);
-        } catch (RuntimeException e) {
+            tryAutoLogin(server, manager);
+        } catch (RuntimeException | CommandSyntaxException e) {
             CarpetOrgAddition.LOGGER.error("玩家自动登录出现意外错误", e);
         }
     }
 
-    private static void tryAutoLogin(MinecraftServer server, ServerTaskManagerInterface instance) {
+    private static void tryAutoLogin(MinecraftServer server, ServerTaskManager manager) throws CommandSyntaxException {
         WorldFormat worldFormat = new WorldFormat(server, FakePlayerSerial.PLAYER_DATA);
         List<File> files = worldFormat.toImmutableFileList(WorldFormat.JSON_EXTENSIONS);
         int count = server.getCurrentPlayerCount();
@@ -328,7 +329,7 @@ public class FakePlayerSerial {
                 continue;
             }
             if (fakePlayerSerial.autologin) {
-                instance.addTask(new DelayedLoginTask(server, fakePlayerSerial, 1));
+                manager.addTask(new DelayedLoginTask(server, fakePlayerSerial, 1));
                 count++;
                 // 阻止假玩家把玩家上线占满，至少为一名真玩家保留一个名额
                 if (count >= server.getMaxPlayerCount() - 1) {

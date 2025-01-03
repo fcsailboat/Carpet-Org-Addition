@@ -47,6 +47,10 @@ public class MessageUtils {
         broadcastMessage(playerManager, message);
     }
 
+    public static void broadcastMessage(MinecraftServer server, Text message) {
+        broadcastMessage(server.getPlayerManager(), message);
+    }
+
     /**
      * 广播一条带有特殊样式的文本消息
      *

@@ -101,7 +101,7 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
             message = TextUtils.setColor(message, Formatting.RED);
             // 添加悬停提示
             message = TextUtils.hoverText(message, report(source, amount));
-            MessageUtils.broadcastMessage(thisPlayer, message);
+            MessageUtils.broadcastMessage(thisPlayer.server, message);
             return;
         }
         // 玩家安全挂机触发成功
@@ -113,7 +113,7 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
             // 添加悬停提示
             message = TextUtils.hoverText(message, report(source, amount));
             // 广播触发消息，斜体淡灰色
-            MessageUtils.broadcastMessage(thisPlayer, TextUtils.toGrayItalic(message));
+            MessageUtils.broadcastMessage(thisPlayer.server, TextUtils.toGrayItalic(message));
             // 恢复饥饿值
             thisPlayer.getHungerManager().setFoodLevel(20);
             // 退出假人

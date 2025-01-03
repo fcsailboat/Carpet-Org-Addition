@@ -7,10 +7,10 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSerial;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSerial;
 import org.jetbrains.annotations.NotNull;
 
 public class DelayedLoginTask extends PlayerScheduleTask {
@@ -50,6 +50,7 @@ public class DelayedLoginTask extends PlayerScheduleTask {
 
     @Override
     public void onCancel(CommandContext<ServerCommandSource> context) {
+        this.markRemove();
         MutableText time = getDisplayTime();
         MutableText displayName = this.serial.getDisplayName().copy();
         MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.login.cancel", displayName, time);

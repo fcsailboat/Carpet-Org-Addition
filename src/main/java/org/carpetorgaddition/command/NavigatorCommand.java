@@ -20,12 +20,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.periodic.navigator.NavigatorInterface;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.WorldUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.periodic.navigator.NavigatorInterface;
 import org.carpetorgaddition.util.wheel.Waypoint;
 
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class NavigatorCommand {
         ((NavigatorInterface) player).setNavigator(entity, isContinue);
         if (shouldBeBroadcasted(entity, player)) {
             // 设置为斜体淡灰色
-            MessageUtils.broadcastMessage(context.getSource(), TextUtils.toGrayItalic(text));
+            MessageUtils.broadcastMessage(context.getSource().getServer(), TextUtils.toGrayItalic(text));
         } else {
             MessageUtils.sendMessage(context.getSource(), text);
         }
@@ -123,7 +123,7 @@ public class NavigatorCommand {
             if (shouldBeBroadcasted(entity, player)) {
                 // 将字体设置为灰色斜体
                 text = TextUtils.toItalic(TextUtils.setColor(text, Formatting.GRAY));
-                MessageUtils.broadcastMessage(context.getSource(), text);
+                MessageUtils.broadcastMessage(context.getSource().getServer(), text);
             } else {
                 MessageUtils.sendMessage(context.getSource(), text);
             }
@@ -198,7 +198,7 @@ public class NavigatorCommand {
         if (self || player == target) {
             MessageUtils.sendMessage(player, message);
         } else {
-            MessageUtils.broadcastMessage(context.getSource(), TextUtils.setColor(TextUtils.toItalic(message), Formatting.GRAY));
+            MessageUtils.broadcastMessage(context.getSource().getServer(), TextUtils.setColor(TextUtils.toItalic(message), Formatting.GRAY));
         }
         return 1;
     }

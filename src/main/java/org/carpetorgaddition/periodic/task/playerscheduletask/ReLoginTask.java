@@ -160,6 +160,7 @@ public class ReLoginTask extends PlayerScheduleTask {
 
     @Override
     public void onCancel(CommandContext<ServerCommandSource> context) {
+        this.markRemove();
         MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.relogin.cancel", this.playerName);
         ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(this.playerName);
         if (player == null) {

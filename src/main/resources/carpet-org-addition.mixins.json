@@ -94,6 +94,7 @@
     "rule.shulkerboxstackable.ItemStackMixin",
     "rule.shulkerboxstackable.ScreenHandlerMixin",
     "util.CraftingScreenHandlerMixin",
+    "util.MinecraftServerMixin",
     "util.PlayerManagerMixin",
     "util.ServerPlayNetworkHandlerMixin"
   ],

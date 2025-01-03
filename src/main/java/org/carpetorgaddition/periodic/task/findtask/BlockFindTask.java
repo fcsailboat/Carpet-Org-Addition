@@ -9,17 +9,18 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.exception.TaskExecutionException;
+import org.carpetorgaddition.periodic.task.ServerTask;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.periodic.task.ServerTask;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
-public class BlockFindTask extends ServerTask implements FindTask {
+public class BlockFindTask extends ServerTask {
     protected final ServerWorld world;
     private final SelectionArea selectionArea;
     protected final CommandContext<ServerCommandSource> context;
@@ -176,11 +177,16 @@ public class BlockFindTask extends ServerTask implements FindTask {
     }
 
     @Override
-    public boolean taskExist(FindTask task) {
-        if (this.getClass() == task.getClass()) {
-            return this.context.getSource().getEntity() == ((BlockFindTask) task).context.getSource().getEntity();
+    public boolean equals(Object obj) {
+        if (this.getClass() == obj.getClass()) {
+            return Objects.equals(this.context.getSource().getPlayer(), ((BlockFindTask) obj).context.getSource().getPlayer());
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.context.getSource().getPlayer());
     }
 
     private enum FindState {

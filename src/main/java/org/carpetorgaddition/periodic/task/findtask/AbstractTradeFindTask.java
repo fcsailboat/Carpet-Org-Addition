@@ -8,16 +8,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.exception.TaskExecutionException;
-import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.periodic.task.ServerTask;
+import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.StringJoiner;
+import java.util.*;
 
-public abstract class AbstractTradeFindTask extends ServerTask implements FindTask {
+public abstract class AbstractTradeFindTask extends ServerTask {
     protected final World world;
     protected final SelectionArea selectionArea;
     protected final BlockPos sourcePos;
@@ -187,11 +184,16 @@ public abstract class AbstractTradeFindTask extends ServerTask implements FindTa
     }
 
     @Override
-    public boolean taskExist(FindTask task) {
-        if (this.getClass() == task.getClass()) {
-            return this.context.getSource().getEntity() == ((AbstractTradeFindTask) task).context.getSource().getEntity();
+    public boolean equals(Object o) {
+        if (o instanceof AbstractTradeFindTask that) {
+            return Objects.equals(context, that.context);
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.context.getSource().getPlayer());
     }
 
     private enum FindState {

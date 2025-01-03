@@ -16,4 +16,14 @@ public abstract class PlayerScheduleTask extends ServerTask {
     public abstract void onCancel(CommandContext<ServerCommandSource> context);
 
     public abstract void sendEachMessage(ServerCommandSource source);
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.getClass() == obj.getClass() && this.getPlayerName().equals(((PlayerScheduleTask) obj).getPlayerName());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getPlayerName().hashCode();
+    }
 }

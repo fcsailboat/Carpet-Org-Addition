@@ -55,8 +55,13 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
 
     @Override
     public void onCancel(CommandContext<ServerCommandSource> context) {
-        MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.logout.cancel",
-                this.fakePlayer.getDisplayName(), this.getDisplayTime());
+        this.markRemove();
+        MessageUtils.sendMessage(
+                context,
+                "carpet.commands.playerManager.schedule.logout.cancel",
+                this.fakePlayer.getDisplayName(),
+                this.getDisplayTime()
+        );
     }
 
     private @NotNull MutableText getDisplayTime() {
@@ -65,8 +70,12 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
 
     @Override
     public void sendEachMessage(ServerCommandSource source) {
-        MessageUtils.sendMessage(source, "carpet.commands.playerManager.schedule.logout",
-                this.fakePlayer.getDisplayName(), this.getDisplayTime());
+        MessageUtils.sendMessage(
+                source,
+                "carpet.commands.playerManager.schedule.logout",
+                this.fakePlayer.getDisplayName(),
+                this.getDisplayTime()
+        );
     }
 
     @Override

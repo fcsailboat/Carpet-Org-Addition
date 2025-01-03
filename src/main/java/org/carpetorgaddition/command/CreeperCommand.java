@@ -19,10 +19,11 @@ import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.task.ServerTask;
+import org.carpetorgaddition.periodic.task.ServerTaskManager;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MathUtils;
-import org.carpetorgaddition.periodic.task.ServerTask;
-import org.carpetorgaddition.periodic.task.ServerTaskManagerInterface;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.util.ArrayList;
@@ -38,13 +39,16 @@ public class CreeperCommand {
     // 创建苦力怕并爆炸
     private static int creeperExplosion(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity targetPlayer = CommandUtils.getArgumentPlayer(context);
-        ServerTaskManagerInterface anInterface = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
         // 添加苦力怕爆炸任务
-        anInterface.addTask(new CreeperExplosionTask(targetPlayer));
+        manager.addTask(new CreeperExplosionTask(targetPlayer));
         ServerPlayerEntity sourcePlayer = context.getSource().getPlayer();
         if (sourcePlayer != null) {
-            CarpetOrgAddition.LOGGER.info("{}在{}周围制造了一场苦力怕爆炸",
-                    sourcePlayer.getName().getString(), targetPlayer.getName().getString());
+            CarpetOrgAddition.LOGGER.info(
+                    "{}在{}周围制造了一场苦力怕爆炸",
+                    sourcePlayer.getName().getString(),
+                    targetPlayer.getName().getString()
+            );
         }
         return 1;
     }
@@ -115,6 +119,19 @@ public class CreeperCommand {
         @Override
         public String getLogName() {
             return "苦力怕爆炸";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this.getClass() == obj.getClass()) {
+                return this.player.equals(((CreeperExplosionTask) obj).player);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.player.hashCode();
         }
     }
 }

@@ -22,25 +22,26 @@ import net.minecraft.util.Formatting;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.CommandExecuteIOException;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSafeAfkInterface;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSerial;
+import org.carpetorgaddition.periodic.task.ServerTaskManager;
+import org.carpetorgaddition.periodic.task.playerscheduletask.DelayedLoginTask;
+import org.carpetorgaddition.periodic.task.playerscheduletask.DelayedLogoutTask;
+import org.carpetorgaddition.periodic.task.playerscheduletask.PlayerScheduleTask;
+import org.carpetorgaddition.periodic.task.playerscheduletask.ReLoginTask;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.IOUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSafeAfkInterface;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSerial;
-import org.carpetorgaddition.periodic.task.ServerTask;
-import org.carpetorgaddition.periodic.task.ServerTaskManagerInterface;
-import org.carpetorgaddition.periodic.task.playerscheduletask.DelayedLoginTask;
-import org.carpetorgaddition.periodic.task.playerscheduletask.DelayedLogoutTask;
-import org.carpetorgaddition.periodic.task.playerscheduletask.PlayerScheduleTask;
-import org.carpetorgaddition.periodic.task.playerscheduletask.ReLoginTask;
 import org.carpetorgaddition.util.wheel.WorldFormat;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class PlayerManagerCommand {
 
@@ -137,14 +138,12 @@ public class PlayerManagerCommand {
     }
 
     // cancel子命令自动补全
-    private static @NotNull SuggestionProvider<ServerCommandSource> cancelSuggests() {
+    @NotNull
+    private static SuggestionProvider<ServerCommandSource> cancelSuggests() {
         return (context, builder) -> {
-            MinecraftServer server = context.getSource().getServer();
-            ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
-            ArrayList<String> list = new ArrayList<>();
-            // 将任务的玩家名添加到集合
-            instance.findTask(PlayerScheduleTask.class, task -> true).forEach(task -> list.add(task.getPlayerName()));
-            return CommandSource.suggestMatching(list, builder);
+            ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
+            Stream<String> stream = manager.stream(PlayerScheduleTask.class).map(PlayerScheduleTask::getPlayerName);
+            return CommandSource.suggestMatching(stream, builder);
         };
     }
 
@@ -158,17 +157,19 @@ public class PlayerManagerCommand {
     }
 
     // relogin子命令自动补全
-    public static @NotNull SuggestionProvider<ServerCommandSource> reLoginTaskSuggests() {
+    @NotNull
+    public static SuggestionProvider<ServerCommandSource> reLoginTaskSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
-            ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
+            ServerTaskManager manager = ServerPeriodicTaskManager.getManager(server).getServerTaskManager();
             // 所有正在周期性上下线的玩家
-            List<String> taskList = instance.getTaskList().stream()
-                    .filter(task -> task instanceof ReLoginTask)
-                    .map(task -> ((ReLoginTask) task).getPlayerName()).toList();
+            List<String> taskList = manager.stream(ReLoginTask.class).map(ReLoginTask::getPlayerName).toList();
             // 所有在线玩家
-            List<String> onlineList = server.getPlayerManager().getPlayerList().stream()
-                    .map(player -> player.getName().getString()).toList();
+            List<String> onlineList = server.getPlayerManager()
+                    .getPlayerList()
+                    .stream()
+                    .map(player -> player.getName().getString())
+                    .toList();
             HashSet<String> players = new HashSet<>();
             players.addAll(taskList);
             players.addAll(onlineList);
@@ -198,8 +199,13 @@ public class PlayerManagerCommand {
             }
         } else {
             String command = "/playerManager safeafk set " + fakePlayer.getName().getString() + " " + threshold + " true";
-            MessageUtils.sendMessage(context, "carpet.commands.playerManager.safeafk.successfully_set_up",
-                    fakePlayer.getDisplayName(), threshold, TextConstants.clickRun(command));
+            MessageUtils.sendMessage(
+                    context,
+                    "carpet.commands.playerManager.safeafk.successfully_set_up",
+                    fakePlayer.getDisplayName(),
+                    threshold,
+                    TextConstants.clickRun(command)
+            );
         }
         return (int) threshold;
     }
@@ -256,8 +262,11 @@ public class PlayerManagerCommand {
     }
 
     // 保存或删除安全挂机阈值
-    private static void saveSafeAfkThreshold(CommandContext<ServerCommandSource> context, float threshold,
-                                             EntityPlayerMPFake fakePlayer) throws IOException {
+    private static void saveSafeAfkThreshold(
+            CommandContext<ServerCommandSource> context,
+            float threshold,
+            EntityPlayerMPFake fakePlayer
+    ) throws IOException {
         String playerName = fakePlayer.getName().getString();
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), null);
         File file = worldFormat.file(SAFEAFK_PROPERTIES);
@@ -315,7 +324,7 @@ public class PlayerManagerCommand {
                     // 广播阈值设置的消息
                     String key = "carpet.commands.playerManager.safeafk.successfully_set_up.auto";
                     MutableText message = TextUtils.translate(key, player.getDisplayName(), threshold);
-                    MessageUtils.broadcastMessage(player, TextUtils.toGrayItalic(message));
+                    MessageUtils.broadcastMessage(player.server, TextUtils.toGrayItalic(message));
                 } catch (NumberFormatException e) {
                     CarpetOrgAddition.LOGGER.error("{}安全挂机阈值设置失败", player.getName().getString(), e);
                 }
@@ -465,10 +474,12 @@ public class PlayerManagerCommand {
             String name = StringArgumentType.getString(context, "name");
             int interval = IntegerArgumentType.getInteger(context, "interval");
             MinecraftServer server = context.getSource().getServer();
-            ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
+            ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
             // 如果任务存在，修改任务，否则添加任务
-            ReLoginTask task = getReLoginTask(instance, name);
-            if (task == null) {
+            Optional<ReLoginTask> optional = manager.stream(ReLoginTask.class)
+                    .filter(task -> Objects.equals(task.getPlayerName(), name))
+                    .findFirst();
+            if (optional.isEmpty()) {
                 // 添加任务
                 ServerPlayerEntity player = server.getPlayerManager().getPlayer(name);
                 if (player == null) {
@@ -478,10 +489,10 @@ public class PlayerManagerCommand {
                     // 目标玩家不是假玩家
                     CommandUtils.checkFakePlayer(player);
                 }
-                instance.addTask(new ReLoginTask(name, interval, server, player.getServerWorld().getRegistryKey(), context));
+                manager.addTask(new ReLoginTask(name, interval, server, player.getServerWorld().getRegistryKey(), context));
             } else {
                 // 修改周期时间
-                task.setInterval(interval);
+                optional.get().setInterval(interval);
                 MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.relogin.set_interval", name, interval);
             }
             return interval;
@@ -505,45 +516,33 @@ public class PlayerManagerCommand {
         return false;
     }
 
-    // 获取假玩家周期上下线任务
-    private static ReLoginTask getReLoginTask(ServerTaskManagerInterface instance, String name) {
-        List<ReLoginTask> list = instance.getTaskList().stream()
-                .filter(task -> task instanceof ReLoginTask)
-                .map(task -> (ReLoginTask) task).toList();
-        for (ReLoginTask task : list) {
-            if (Objects.equals(task.getPlayerName(), name)) {
-                return task;
-            }
-        }
-        return null;
-    }
-
     // 停止重新上线下线
     private static int stopReLogin(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // 获取目标假玩家名
         String name = StringArgumentType.getString(context, "name");
-        ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(context.getSource().getServer());
-        List<ReLoginTask> list = instance.findTask(ReLoginTask.class, task -> Objects.equals(task.getPlayerName(), name));
-        if (list.isEmpty()) {
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
+        Optional<ReLoginTask> optional = manager.stream(ReLoginTask.class)
+                .filter(task -> Objects.equals(task.getPlayerName(), name))
+                .findFirst();
+        if (optional.isEmpty()) {
             throw CommandUtils.createException("carpet.commands.playerManager.schedule.cancel.fail");
         }
-        list.forEach(task -> {
-            instance.getTaskList().remove(task);
-            task.onCancel(context);
-        });
+        optional.ifPresent(task -> task.onCancel(context));
         return 1;
     }
 
     // 延时上线
     private static int addDelayedLoginTask(CommandContext<ServerCommandSource> context, TimeUnit unit) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
-        ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
         String name = StringArgumentType.getString(context, "name");
+        Optional<DelayedLoginTask> optional = manager.stream(DelayedLoginTask.class)
+                .filter(task -> Objects.equals(name, task.getPlayerName()))
+                .findFirst();
         // 等待时间
         long tick = unit.getDelayed(context);
-        List<DelayedLoginTask> list = instance.findTask(DelayedLoginTask.class, loginTask -> Objects.equals(name, loginTask.getPlayerName()));
         MutableText time = TextUtils.hoverText(TextConstants.tickToTime(tick), TextConstants.tickToRealTime(tick));
-        if (list.isEmpty()) {
+        if (optional.isEmpty()) {
             // 添加上线任务
             WorldFormat worldFormat = new WorldFormat(server, FakePlayerSerial.PLAYER_DATA);
             FakePlayerSerial serial;
@@ -552,7 +551,7 @@ public class PlayerManagerCommand {
             } catch (IOException e) {
                 throw CommandUtils.createException("carpet.commands.playerManager.schedule.read_file");
             }
-            instance.addTask(new DelayedLoginTask(server, serial, tick));
+            manager.addTask(new DelayedLoginTask(server, serial, tick));
             String key = server.getPlayerManager().getPlayer(name) == null
                     // <玩家>将于<时间>后上线
                     ? "carpet.commands.playerManager.schedule.login"
@@ -562,7 +561,7 @@ public class PlayerManagerCommand {
             MessageUtils.sendMessage(context, key, serial.getDisplayName(), time);
         } else {
             // 修改上线时间
-            DelayedLoginTask task = list.getFirst();
+            DelayedLoginTask task = optional.get();
             // 为名称添加悬停文本
             MutableText info = TextUtils.hoverText(name, task.getInfo());
             task.setDelayed(tick);
@@ -578,17 +577,18 @@ public class PlayerManagerCommand {
         // 获取假玩家延时下线游戏刻数
         long tick = unit.getDelayed(context);
         MutableText time = TextUtils.hoverText(TextConstants.tickToTime(tick), TextConstants.tickToRealTime(tick));
-        ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
-        List<DelayedLogoutTask> list = instance.findTask(DelayedLogoutTask.class, logoutTask -> fakePlayer.equals(logoutTask.getFakePlayer()));
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(server).getServerTaskManager();
+        Optional<DelayedLogoutTask> optional = manager.stream(DelayedLogoutTask.class)
+                .filter(task -> fakePlayer.equals(task.getFakePlayer()))
+                .findFirst();
         // 添加新任务
-        if (list.isEmpty()) {
+        if (optional.isEmpty()) {
             // 添加延时下线任务
-            instance.addTask(new DelayedLogoutTask(server, fakePlayer, tick));
+            manager.addTask(new DelayedLogoutTask(server, fakePlayer, tick));
             MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.logout", fakePlayer.getDisplayName(), time);
         } else {
             // 修改退出时间
-            DelayedLogoutTask task = list.getFirst();
-            task.setDelayed(tick);
+            optional.get().setDelayed(tick);
             MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.logout.modify", fakePlayer.getDisplayName(), time);
         }
         return (int) tick;
@@ -596,28 +596,23 @@ public class PlayerManagerCommand {
 
     // 取消任务
     private static int cancelScheduleTask(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        MinecraftServer server = context.getSource().getServer();
-        ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
         String name = StringArgumentType.getString(context, "name");
         // 获取符合条件的任务列表
-        List<PlayerScheduleTask> list = instance.findTask(PlayerScheduleTask.class, task -> Objects.equals(task.getPlayerName(), name));
+        List<PlayerScheduleTask> list = manager.stream(PlayerScheduleTask.class)
+                .filter(task -> Objects.equals(task.getPlayerName(), name))
+                .toList();
         if (list.isEmpty()) {
             throw CommandUtils.createException("carpet.commands.playerManager.schedule.cancel.fail");
         }
-        ArrayList<ServerTask> tasks = instance.getTaskList();
-        list.forEach(task -> {
-            // 删除任务，发送命令反馈
-            tasks.remove(task);
-            task.onCancel(context);
-        });
+        list.forEach(task -> task.onCancel(context));
         return list.size();
     }
 
     // 列出所有任务
     private static int listScheduleTask(CommandContext<ServerCommandSource> context) {
-        MinecraftServer server = context.getSource().getServer();
-        ServerTaskManagerInterface instance = ServerTaskManagerInterface.getInstance(server);
-        List<PlayerScheduleTask> list = instance.findTask(PlayerScheduleTask.class, take -> true);
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
+        List<PlayerScheduleTask> list = manager.stream(PlayerScheduleTask.class).toList();
         if (list.isEmpty()) {
             MessageUtils.sendMessage(context, "carpet.commands.playerManager.schedule.list.empty");
         } else {

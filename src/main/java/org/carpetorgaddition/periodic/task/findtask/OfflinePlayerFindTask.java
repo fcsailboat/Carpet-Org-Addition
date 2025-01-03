@@ -17,17 +17,18 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.UserCache;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.command.FinderCommand;
+import org.carpetorgaddition.periodic.task.ServerTask;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.inventory.ImmutableInventory;
 import org.carpetorgaddition.util.inventory.SimulatePlayerInventory;
-import org.carpetorgaddition.periodic.task.ServerTask;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
-public class OfflinePlayerFindTask extends ServerTask implements FindTask {
+public class OfflinePlayerFindTask extends ServerTask {
     private final AtomicInteger threadCount = new AtomicInteger();
     private final AtomicInteger itemCount = new AtomicInteger();
     private final AtomicBoolean shulkerBox = new AtomicBoolean(false);
@@ -256,11 +257,16 @@ public class OfflinePlayerFindTask extends ServerTask implements FindTask {
     }
 
     @Override
-    public boolean taskExist(FindTask task) {
-        if (this.getClass() == task.getClass()) {
-            return this.context.getSource().getEntity() == ((OfflinePlayerFindTask) task).context.getSource().getEntity();
+    public boolean equals(Object o) {
+        if (getClass() == o.getClass()) {
+            return Objects.equals(player, ((OfflinePlayerFindTask) o).player);
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(player);
     }
 
     private record Result(GameProfile gameProfile, int count, boolean shulkerBox) {
