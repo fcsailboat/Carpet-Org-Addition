@@ -10,7 +10,7 @@
 |-------------|----|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
 | Carpet      | 必须 | [MC百科](https://www.mcmod.cn/class/2361.html) &#124; [Modrinth](https://modrinth.com/mod/carpet) &#124; [CurseForge](https://www.curseforge.com/minecraft/mc-mods/carpet) |             |
 | MixinExtras | 内置 | [MC百科](https://www.mcmod.cn/class/12750.html)                                                                                                                            |             |
-| Fabric API  | 可选 | [MC百科](https://www.mcmod.cn/class/3124.html) &#124; [官方](https://fabricmc.net/)                                                                                          | &gt;=1.20.4 |
+| Fabric API  | 必须 | [MC百科](https://www.mcmod.cn/class/3124.html) &#124; [官方](https://fabricmc.net/)                                                                                          | &gt;=1.20.4 |
 
 ## 版本支持
 
