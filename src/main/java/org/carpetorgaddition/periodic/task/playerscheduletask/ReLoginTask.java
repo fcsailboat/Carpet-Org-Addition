@@ -133,6 +133,15 @@ public class ReLoginTask extends PlayerScheduleTask {
         this.server.send(new ServerTask(this.server.getTicks(), () -> {
             try {
                 CarpetOrgAdditionSettings.hiddenLoginMessages = true;
+                /*
+                 * 如果不加这个判断并提前返回，可能导致玩家的骑乘实体消失，可能的原因如下：
+                 * 1. 玩家在下线后会保存一次数据，其中包括了当前骑乘的实体，下一次上线时，游戏就会从NBT中读取并生成骑乘实体。
+                 * 2. 保存完自身的实体数据后就会从正在骑乘的实体身上下来，这时如果再获取这个玩家的骑乘实体就会返回null。
+                 * 3. 接下来，如果这个玩家再触发一次保存，就会将null值写入玩家的骑乘实体，或者说，玩家就丢失了骑乘实体的数据。
+                 * 4. 再次上线就无法重新生成之前的骑乘实体，因此，如果这个玩家已经被删除，就不能让该玩家再次触发保存了。
+                 * 无法验证这样做是否能完全避免骑乘实体消失，因为并不知道问题是不是这个原因引起的，但这至少能保证在执行命令/tick sprint <time>时实体不会消失。
+                 * 如果真的是因为不正确的玩家数据保存，那么保存是如何触发的，是服务器的自动保存吗？为什么执行/tick sprint <time>也会导致骑乘实体消失？
+                 */
                 if (fakePlayer.isRemoved()) {
                     return;
                 }
