@@ -7,7 +7,6 @@
   "mixins": [
     "command.EntityPlayerMPFakeMixin",
     "command.FishingBobberEntityAccessor",
-    "command.MinecraftServerMixin",
     "command.ServerPlayerEntityMixin",
     "compat.fabricapi.AbstractChanneledNetworkAddonInvoker",
     "compat.fabricapi.AbstractNetworkAddonMixin",
