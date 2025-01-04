@@ -6,6 +6,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.StopData;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
@@ -71,7 +72,7 @@ public class FakePlayerUtils {
      * @param key          停止操作时在聊天栏输出的内容的翻译键
      */
     public static void stopAction(ServerCommandSource source, EntityPlayerMPFake playerMPFake, String key, Object... obj) {
-        ((FakePlayerActionInterface) playerMPFake).getActionManager().setAction(FakePlayerAction.STOP, StopData.STOP);
+        PeriodicTaskUtils.getFakePlayerActionManager(playerMPFake).setAction(FakePlayerAction.STOP, StopData.STOP);
         MessageUtils.broadcastMessage(
                 source.getServer(),
                 TextUtils.appendAll(playerMPFake.getDisplayName(), ": ", TextUtils.translate(key, obj))

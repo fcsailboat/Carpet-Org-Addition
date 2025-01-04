@@ -26,14 +26,14 @@ import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.periodic.PeriodicTaskUtils;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionInterface;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.carpetorgaddition.util.matcher.ItemPredicateMatcher;
 import org.carpetorgaddition.util.matcher.Matcher;
@@ -121,7 +121,7 @@ public class PlayerActionCommand {
     // 设置停止
     private static int setStop(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         actionManager.stop();
         return 1;
     }
@@ -129,7 +129,7 @@ public class PlayerActionCommand {
     // 设置物品分拣
     private static int setSorting(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         //获取要分拣的物品对象
         Item item = ItemStackArgumentType.getItemStackArgument(context, "item").getItem();
         //获取分拣物品要丢出的方向
@@ -143,7 +143,7 @@ public class PlayerActionCommand {
     // 设置清空潜影盒
     private static int setClean(CommandContext<ServerCommandSource> context, boolean allItem) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         if (allItem) {
             // 设置清空潜影盒内的所有物品，不需要获取Item对象
             actionManager.setAction(FakePlayerAction.CLEAN, CleanData.CLEAN_ALL);
@@ -157,7 +157,7 @@ public class PlayerActionCommand {
     // 设置填充潜影盒
     private static int setFIll(CommandContext<ServerCommandSource> context, boolean allItem) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         if (allItem) {
             // 向潜影盒内填充任意物品
             actionManager.setAction(FakePlayerAction.FILL, FillData.FILL_ALL);
@@ -218,7 +218,7 @@ public class PlayerActionCommand {
     // 设置交易
     private static int setTrade(CommandContext<ServerCommandSource> context, boolean voidTrade) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         // 获取按钮的索引，减去1
         int index = IntegerArgumentType.getInteger(context, "index") - 1;
         actionManager.setAction(FakePlayerAction.TRADE, new TradeData(index, voidTrade));
@@ -228,7 +228,7 @@ public class PlayerActionCommand {
     // 设置重命名
     private static int setRename(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         // 获取当前要操作的物品和要重命名的字符串
         Item item = ItemStackArgumentType.getItemStackArgument(context, "item").getItem();
         String newName = StringArgumentType.getString(context, "name");
@@ -239,7 +239,7 @@ public class PlayerActionCommand {
     // 设置使用切石机
     private static int setStonecutting(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         // 获取要切割的物品和按钮的索引
         Item item = ItemStackArgumentType.getItemStackArgument(context, "item").getItem();
         int buttonIndex = IntegerArgumentType.getInteger(context, "button") - 1;
@@ -262,7 +262,7 @@ public class PlayerActionCommand {
     // 设置自动钓鱼
     private static int setFishing(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         actionManager.setAction(FakePlayerAction.FISHING, new FishingData());
         return 1;
     }
@@ -288,7 +288,7 @@ public class PlayerActionCommand {
     //获取假玩家操作类型
     private static int getAction(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         MessageUtils.sendListMessage(context.getSource(), actionManager.getActionData().info(fakePlayer));
         return 1;
     }
@@ -323,6 +323,6 @@ public class PlayerActionCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         // 提示启用合成修复
         promptToEnableCtrlQCraftingFix(context.getSource());
-        return FakePlayerActionInterface.getManager(fakePlayer);
+        return PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
     }
 }

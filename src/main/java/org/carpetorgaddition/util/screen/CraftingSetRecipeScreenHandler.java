@@ -12,8 +12,8 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.command.PlayerActionCommand;
+import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionInterface;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerCraftRecipeInterface;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
@@ -70,7 +70,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             items[i] = inputInventory.getStack(i).getItem();
         }
         // 设置假玩家合成动作
-        setCraftAction(items, FakePlayerActionInterface.getManager(fakePlayer));
+        setCraftAction(items, PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer));
         // 关闭GUI后，使用父类的方法让物品回到玩家背包
         super.onClosed(player);
         // 提示启用Ctrl+Q合成修复

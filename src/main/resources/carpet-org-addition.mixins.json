@@ -95,6 +95,7 @@
     "util.CraftingScreenHandlerMixin",
     "util.MinecraftServerMixin",
     "util.PlayerManagerMixin",
+    "util.ServerPlayerEntityMixin",
     "util.ServerPlayNetworkHandlerMixin"
   ],
   "client": [

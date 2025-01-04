@@ -2,8 +2,13 @@ package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
+import net.minecraft.text.MutableText;
+import net.minecraft.util.Formatting;
 import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
+import org.carpetorgaddition.util.MessageUtils;
+import org.carpetorgaddition.util.TextUtils;
 
 public class FakePlayerActionManager {
     private final EntityPlayerMPFake fakePlayer;
@@ -11,6 +16,31 @@ public class FakePlayerActionManager {
 
     public FakePlayerActionManager(EntityPlayerMPFake fakePlayer) {
         this.fakePlayer = fakePlayer;
+    }
+
+    public void tick() {
+        try {
+            // 根据假玩家动作类型执行动作
+            this.executeAction();
+        } catch (RuntimeException e) {
+            // 将错误信息写入日志
+            CarpetOrgAddition.LOGGER.error(
+                    "{}在执行操作“{}”时遇到意外错误:",
+                    this.fakePlayer.getName().getString(),
+                    this.getAction().toString(),
+                    e
+            );
+            // 向聊天栏发送错误消息的反馈
+            MutableText message = TextUtils.translate(
+                    "carpet.commands.playerAction.exception.runtime",
+                    this.fakePlayer.getDisplayName(),
+                    this.getAction().getDisplayName()
+            );
+            MutableText errorMessage = TextUtils.hoverText(TextUtils.setColor(message, Formatting.RED), e.getMessage());
+            MessageUtils.broadcastMessage(this.fakePlayer.server, errorMessage);
+            // 让假玩家停止当前操作
+            this.stop();
+        }
     }
 
     // 执行动作
@@ -66,8 +96,8 @@ public class FakePlayerActionManager {
     }
 
     // 从另一个玩家浅拷贝此动作管理器
-    public void copyActionData(EntityPlayerMPFake oldPlayer) {
-        FakePlayerActionManager actionManager = ((FakePlayerActionInterface) oldPlayer).getActionManager();
+    public void setActionFromOldPlayer(EntityPlayerMPFake oldPlayer) {
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(oldPlayer);
         this.setAction(actionManager.getAction(), actionManager.getActionData());
     }
 

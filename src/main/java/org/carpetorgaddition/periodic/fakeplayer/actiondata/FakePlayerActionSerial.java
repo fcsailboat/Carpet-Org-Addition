@@ -4,9 +4,9 @@ import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.text.Text;
 import org.carpetorgaddition.CarpetOrgAddition;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionInterface;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
+import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.util.wheel.TextBuilder;
 
 
@@ -21,7 +21,7 @@ public class FakePlayerActionSerial {
     }
 
     public FakePlayerActionSerial(EntityPlayerMPFake fakePlayer) {
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         this.action = actionManager.getAction();
         this.actionData = actionManager.getActionData();
     }
@@ -71,7 +71,7 @@ public class FakePlayerActionSerial {
         if (this == NO_ACTION) {
             return;
         }
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         actionManager.setAction(this.action, this.actionData);
     }
 

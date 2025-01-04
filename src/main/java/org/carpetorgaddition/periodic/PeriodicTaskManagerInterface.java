@@ -1,5 +1,11 @@
 package org.carpetorgaddition.periodic;
 
 public interface PeriodicTaskManagerInterface {
-    ServerPeriodicTaskManager carpet_Org_Addition$getServerPeriodicTaskManager();
+    default ServerPeriodicTaskManager carpet_Org_Addition$getServerPeriodicTaskManager() {
+        throw new UnsupportedOperationException();
+    }
+
+    default PlayerPeriodicTaskManager carpet_Org_Addition$getPlayerPeriodicTaskManager() {
+        throw new UnsupportedOperationException();
+    }
 }

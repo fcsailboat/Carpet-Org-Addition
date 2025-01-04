@@ -18,7 +18,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionInterface;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSafeAfkInterface;
 import org.carpetorgaddition.periodic.navigator.*;
 import org.carpetorgaddition.util.InventoryUtils;
@@ -71,10 +70,6 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
         // 复制追踪器对象
         if (oldNavigator != null) {
             this.navigator = oldNavigator.copy(thisPlayer);
-        }
-        // 复制假玩家动作管理器对象
-        if (thisPlayer instanceof FakePlayerActionInterface actionInterface && oldPlayer instanceof EntityPlayerMPFake oldFakePlayer) {
-            actionInterface.copyActionManager(oldFakePlayer);
         }
     }
 
