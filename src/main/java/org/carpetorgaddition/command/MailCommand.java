@@ -20,12 +20,12 @@ import net.minecraft.util.Formatting;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.CommandExecuteIOException;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.express.Express;
+import org.carpetorgaddition.periodic.express.ExpressManager;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.periodic.express.Express;
-import org.carpetorgaddition.periodic.express.ExpressManager;
-import org.carpetorgaddition.periodic.express.ExpressManagerInterface;
 import org.carpetorgaddition.util.screen.ShipExpressScreenHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -65,12 +65,12 @@ public class MailCommand {
             if (player == null) {
                 return CommandSource.suggestMatching(List.of(), builder);
             }
-            MinecraftServer server = context.getSource().getServer();
-            ExpressManager expressManager = ExpressManagerInterface.getInstance(server);
+            ExpressManager manager = ServerPeriodicTaskManager.getManager(context).getExpressManager();
             // 获取所有发送给自己的快递（或所有自己发送的快递）
-            List<String> list = expressManager.stream()
+            List<String> list = manager.stream()
                     .filter(express -> recipient ? express.isRecipient(player) : express.isSender(player))
-                    .map(express -> Integer.toString(express.getId())).toList();
+                    .map(express -> Integer.toString(express.getId()))
+                    .toList();
             return CommandSource.suggestMatching(list, builder);
         };
     }
@@ -82,10 +82,10 @@ public class MailCommand {
         // 限制只允许发送给其他真玩家
         checkPlayer(sourcePlayer, targetPlayer);
         MinecraftServer server = context.getSource().getServer();
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(server);
+        ExpressManager manager = ServerPeriodicTaskManager.getManager(context).getExpressManager();
         try {
             // 将快递信息添加到快递管理器
-            expressManager.put(new Express(server, sourcePlayer, targetPlayer, expressManager.generateNumber()));
+            manager.put(new Express(server, sourcePlayer, targetPlayer, manager.generateNumber()));
         } catch (IOException e) {
             throw CommandExecuteIOException.of(e);
         }
@@ -125,9 +125,8 @@ public class MailCommand {
     // 接收所有快递
     private static int receiveAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(context);
         try {
-            return expressManager.receiveAll(player);
+            return ServerPeriodicTaskManager.getManager(context).getExpressManager().receiveAll(player);
         } catch (IOException e) {
             throw CommandExecuteIOException.of(e);
         }
@@ -151,9 +150,8 @@ public class MailCommand {
     // 撤回所有快递
     private static int cancelAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(context);
         try {
-            return expressManager.cancelAll(player);
+            return ServerPeriodicTaskManager.getManager(context).getExpressManager().cancelAll(player);
         } catch (IOException e) {
             throw CommandExecuteIOException.of(e);
         }
@@ -162,9 +160,8 @@ public class MailCommand {
     // 列出快递
     private static int list(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         final ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
-        MinecraftServer server = context.getSource().getServer();
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(server);
-        List<Express> list = expressManager.stream().toList();
+        ExpressManager manager = ServerPeriodicTaskManager.getManager(context).getExpressManager();
+        List<Express> list = manager.stream().toList();
         if (list.isEmpty()) {
             // 没有快递被列出
             MessageUtils.sendMessage(context, "carpet.commands.mail.list.empty");
@@ -205,12 +202,11 @@ public class MailCommand {
 
     // 获取快递
     private static @NotNull Express getExpress(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        MinecraftServer server = context.getSource().getServer();
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(server);
+        ExpressManager manager = ServerPeriodicTaskManager.getManager(context).getExpressManager();
         // 获取快递单号
         int id = IntegerArgumentType.getInteger(context, "id");
         // 查找指定单号的快递
-        Optional<Express> optional = expressManager.binarySearch(id);
+        Optional<Express> optional = manager.binarySearch(id);
         if (optional.isEmpty()) {
             throw CommandUtils.createException("carpet.commands.mail.receive.non_existent", id);
         }

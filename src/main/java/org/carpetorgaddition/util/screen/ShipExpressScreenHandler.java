@@ -11,12 +11,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.express.Express;
+import org.carpetorgaddition.periodic.express.ExpressManager;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.periodic.express.Express;
-import org.carpetorgaddition.periodic.express.ExpressManager;
-import org.carpetorgaddition.periodic.express.ExpressManagerInterface;
 import org.carpetorgaddition.util.inventory.AutoGrowInventory;
 import org.carpetorgaddition.util.inventory.ImmutableInventory;
 
@@ -39,7 +39,7 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
         super(ScreenHandlerType.GENERIC_9X3, syncId, playerInventory, inventory, 3);
         this.inventory = inventory;
         this.server = targetPlayer.server;
-        this.expressManager = ExpressManagerInterface.getInstance(targetPlayer.server);
+        this.expressManager = ServerPeriodicTaskManager.getManager(this.server).getExpressManager();
         this.sourcePlayer = sourcePlayer;
         this.targetPlayer = targetPlayer;
     }

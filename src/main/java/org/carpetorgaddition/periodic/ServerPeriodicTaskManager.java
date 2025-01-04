@@ -25,12 +25,16 @@ public class ServerPeriodicTaskManager {
     }
 
     public void tick() {
-        //  this.expressManager.tick();
+        this.expressManager.tick();
         this.serverTaskManager.tick();
     }
 
+    public ExpressManager getExpressManager() {
+        return this.expressManager;
+    }
+
     public ServerTaskManager getServerTaskManager() {
-        return serverTaskManager;
+        return this.serverTaskManager;
     }
 
     @NotNull

@@ -13,10 +13,10 @@ import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.command.PlayerManagerCommand;
 import org.carpetorgaddition.command.RegisterCarpetCommands;
 import org.carpetorgaddition.logger.LoggerRegister;
-import org.carpetorgaddition.translate.Translate;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
 import org.carpetorgaddition.periodic.express.ExpressManager;
-import org.carpetorgaddition.periodic.express.ExpressManagerInterface;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSerial;
+import org.carpetorgaddition.translate.Translate;
 import org.carpetorgaddition.util.wheel.Waypoint;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
             player.getStatusEffects().removeIf(effect -> effect.getEffectType().value().getCategory() == StatusEffectCategory.HARMFUL);
         }
         // 提示玩家接收快递
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(player.server);
+        ExpressManager expressManager = ServerPeriodicTaskManager.getManager(player.server).getExpressManager();
         expressManager.promptToReceive(player);
         // 加载假玩家安全挂机
         PlayerManagerCommand.loadSafeAfk(player);
