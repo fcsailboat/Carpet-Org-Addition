@@ -110,7 +110,6 @@ public class InventoryUtils {
         if (isEmptyShulkerBox(shulkerBox)) {
             return ImmutableInventory.EMPTY;
         }
-        // 获取潜影盒NBT
         ContainerComponent component = shulkerBox.get(DataComponentTypes.CONTAINER);
         // 因为有空潜影盒的判断，shulkerBox.get(DataComponentTypes.CONTAINER)不会返回null
         //noinspection DataFlowIssue
