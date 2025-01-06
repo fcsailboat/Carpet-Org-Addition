@@ -16,7 +16,7 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     private final ServerPlayerEntity thisPlayer = (ServerPlayerEntity) (Object) this;
     @Unique
     @NotNull
-    private PlayerPeriodicTaskManager manager = new PlayerPeriodicTaskManager(thisPlayer);
+    private final PlayerPeriodicTaskManager manager = new PlayerPeriodicTaskManager(thisPlayer);
 
     @Override
     public PlayerPeriodicTaskManager carpet_Org_Addition$getPlayerPeriodicTaskManager() {
@@ -30,6 +30,6 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
     private void copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
-        this.manager = this.manager.copyFrom(thisPlayer, oldPlayer);
+        this.manager.copyFrom(oldPlayer);
     }
 }

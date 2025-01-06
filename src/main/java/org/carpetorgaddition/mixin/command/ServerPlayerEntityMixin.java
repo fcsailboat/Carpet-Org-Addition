@@ -1,8 +1,6 @@
 package org.carpetorgaddition.mixin.command;
 
 import carpet.patches.EntityPlayerMPFake;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -12,26 +10,18 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSafeAfkInterface;
-import org.carpetorgaddition.periodic.navigator.*;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.matcher.ItemMatcher;
-import org.carpetorgaddition.util.wheel.Waypoint;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
@@ -39,39 +29,12 @@ import java.util.Optional;
 
 @SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin implements NavigatorInterface, FakePlayerSafeAfkInterface {
+public abstract class ServerPlayerEntityMixin implements FakePlayerSafeAfkInterface {
     @Unique
     private final ServerPlayerEntity thisPlayer = (ServerPlayerEntity) (Object) this;
-    @Nullable
-    @Unique
-    private AbstractNavigator navigator;
+
     @Unique
     private float safeAfkThreshold = -1F;
-
-    @Inject(method = "tick", at = @At("HEAD"))
-    private void tick(CallbackInfo ci) {
-        if (this.navigator == null) {
-            return;
-        }
-        try {
-            this.navigator.tick();
-        } catch (RuntimeException e) {
-            MessageUtils.sendErrorMessage(thisPlayer.getCommandSource(), e, "carpet.commands.navigate.exception");
-            CarpetOrgAddition.LOGGER.error("导航器没有按照预期工作", e);
-            // 清除导航器
-            this.clearNavigator();
-        }
-    }
-
-    // 玩家穿越末地祭坛的传送门时复制身上的数据
-    @Inject(method = "copyFrom", at = @At("HEAD"))
-    private void copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
-        AbstractNavigator oldNavigator = ((NavigatorInterface) oldPlayer).getNavigator();
-        // 复制追踪器对象
-        if (oldNavigator != null) {
-            this.navigator = oldNavigator.copy(thisPlayer);
-        }
-    }
 
     @Inject(method = "damage", at = @At(value = "RETURN"))
     private void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
@@ -188,38 +151,6 @@ public abstract class ServerPlayerEntityMixin implements NavigatorInterface, Fak
     @Override
     public float getHealthThreshold() {
         return this.safeAfkThreshold;
-    }
-
-    @Nullable
-    @Override
-    public AbstractNavigator getNavigator() {
-        return this.navigator;
-    }
-
-    @Override
-    public void setNavigator(Entity entity, boolean isContinue) {
-        this.navigator = new EntityNavigator(thisPlayer, entity, isContinue);
-    }
-
-    @Override
-    public void setNavigator(Waypoint waypoint) {
-        this.navigator = new WaypointNavigator(thisPlayer, waypoint);
-    }
-
-    @Override
-    public void setNavigator(BlockPos blockPos, World world) {
-        this.navigator = new BlockPosNavigator(thisPlayer, blockPos, world);
-    }
-
-    @Override
-    public void setNavigator(BlockPos blockPos, World world, Text name) {
-        this.navigator = new HasNamePosNavigator(thisPlayer, blockPos, world, name);
-    }
-
-    @Override
-    public void clearNavigator() {
-        this.navigator = null;
-        ServerPlayNetworking.send(thisPlayer, new WaypointClearS2CPacket());
     }
 
     @Override

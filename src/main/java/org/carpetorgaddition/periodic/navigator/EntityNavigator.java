@@ -105,7 +105,7 @@ public class EntityNavigator extends AbstractNavigator {
                         // 如果玩家已经下线，返回true
                         return true;
                     }
-                    this.navigatorInterface.setNavigator(newPlayer, this.isContinue);
+                    this.manager.setNavigator(newPlayer, this.isContinue);
                 }
                 return false;
             }
@@ -129,7 +129,7 @@ public class EntityNavigator extends AbstractNavigator {
                     }
                     if (this.entity != newEntity) {
                         // 将玩家的追踪器目标设置为这个新实体
-                        this.navigatorInterface.setNavigator(newEntity, this.isContinue);
+                        this.manager.setNavigator(newEntity, this.isContinue);
                     }
                     return false;
                 }

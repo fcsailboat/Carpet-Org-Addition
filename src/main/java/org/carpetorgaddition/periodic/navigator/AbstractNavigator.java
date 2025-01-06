@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
+import org.carpetorgaddition.periodic.PlayerPeriodicTaskManager;
 import org.carpetorgaddition.util.TextUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +20,7 @@ public abstract class AbstractNavigator {
     protected static final String REACH = "carpet.commands.navigate.hud.reach";
     @NotNull
     protected final ServerPlayerEntity player;
-    protected final NavigatorInterface navigatorInterface;
+    protected final NavigatorManager manager;
     /**
      * 上一个坐标
      */
@@ -31,7 +32,7 @@ public abstract class AbstractNavigator {
 
     public AbstractNavigator(@NotNull ServerPlayerEntity player) {
         this.player = player;
-        this.navigatorInterface = (NavigatorInterface) this.player;
+        this.manager = PlayerPeriodicTaskManager.getManager(this.player).getNavigatorManager();
     }
 
     public abstract void tick();
@@ -157,6 +158,6 @@ public abstract class AbstractNavigator {
      * 让玩家清除这个导航器
      */
     public void clear() {
-        this.navigatorInterface.clearNavigator();
+        this.manager.clearNavigator();
     }
 }

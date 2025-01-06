@@ -1,15 +1,15 @@
 package org.carpetorgaddition.rule.validator;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
-import org.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
-import org.carpetorgaddition.periodic.navigator.NavigatorInterface;
+import org.carpetorgaddition.periodic.PlayerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.navigator.AbstractNavigator;
+import org.carpetorgaddition.periodic.navigator.NavigatorManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SyncNavigateWaypointObserver extends AbstractValidator<Boolean> {
     @Override
@@ -27,14 +27,18 @@ public class SyncNavigateWaypointObserver extends AbstractValidator<Boolean> {
         if (source == null || newValue == null) {
             return;
         }
-        List<ServerPlayerEntity> list = source.getServer().getPlayerManager().getPlayerList().stream()
-                .filter(player -> NavigatorInterface.getInstance(player).getNavigator() != null).toList();
+        List<AbstractNavigator> list = source.getServer().getPlayerManager().getPlayerList()
+                .stream()
+                .map(PlayerPeriodicTaskManager::getManager)
+                .map(PlayerPeriodicTaskManager::getNavigatorManager)
+                .map(NavigatorManager::getNavigator)
+                .filter(Objects::nonNull)
+                .toList();
         // 设置玩家路径点
         if (newValue) {
-            // noinspection DataFlowIssue getNavigator()方法不会为null，上面的stream流已经过滤了null值
-            list.forEach(player -> NavigatorInterface.getInstance(player).getNavigator().sendWaypointUpdate());
+            list.forEach(AbstractNavigator::sendWaypointUpdate);
         } else {
-            list.forEach(player -> ServerPlayNetworking.send(player, new WaypointClearS2CPacket()));
+            list.forEach(AbstractNavigator::clear);
         }
     }
 }
