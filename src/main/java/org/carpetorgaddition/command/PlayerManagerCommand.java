@@ -101,6 +101,7 @@ public class PlayerManagerCommand {
                                 .then(CommandManager.argument("name", StringArgumentType.string())
                                         .suggests(reLoginTaskSuggests())
                                         .then(CommandManager.argument("interval", IntegerArgumentType.integer(1))
+                                                .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"1", "3", "5"}, builder))
                                                 .executes(PlayerManagerCommand::setReLogin))
                                         .then(CommandManager.literal("stop")
                                                 .executes(PlayerManagerCommand::stopReLogin))))

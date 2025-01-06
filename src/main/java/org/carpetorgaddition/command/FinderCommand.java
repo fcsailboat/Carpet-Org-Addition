@@ -5,12 +5,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
@@ -70,6 +72,7 @@ public class FinderCommand {
                         .then(CommandManager.argument("blockState", BlockStateArgumentType.blockState(commandBuildContext))
                                 .executes(context -> blockFinder(context, 64))
                                 .then(CommandManager.argument("range", IntegerArgumentType.integer(0, 256))
+                                        .suggests(suggestionDefaultDistance())
                                         .executes(context -> blockFinder(context, IntegerArgumentType.getInteger(context, "range"))))
                                 .then(CommandManager.literal("from")
                                         .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
@@ -80,6 +83,7 @@ public class FinderCommand {
                         .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
                                 .executes(context -> findItem(context, 64))
                                 .then(CommandManager.argument("range", IntegerArgumentType.integer(0, 256))
+                                        .suggests(suggestionDefaultDistance())
                                         .executes(context -> findItem(context, IntegerArgumentType.getInteger(context, "range"))))
                                 .then(CommandManager.literal("from")
                                         .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
@@ -97,16 +101,22 @@ public class FinderCommand {
                                 .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
                                         .executes(context -> findTradeItem(context, 64))
                                         .then(CommandManager.argument("range", IntegerArgumentType.integer(0, 256))
+                                                .suggests(suggestionDefaultDistance())
                                                 .executes(context -> findTradeItem(context, IntegerArgumentType.getInteger(context, "range"))))))
                         .then(CommandManager.literal("enchanted_book")
                                 .then(CommandManager.argument("enchantment", RegistryEntryReferenceArgumentType.registryEntry(commandBuildContext, RegistryKeys.ENCHANTMENT))
                                         .executes(context -> findEnchantedBookTrade(context, 64))
                                         .then(CommandManager.argument("range", IntegerArgumentType.integer(0, 256))
+                                                .suggests(suggestionDefaultDistance())
                                                 .executes(context -> findEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "range")))))))
                 .then(CommandManager.literal("worldEater")
                         .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
                                 .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
                                         .executes(FinderCommand::mayAffectWorldEater)))));
+    }
+
+    private static SuggestionProvider<ServerCommandSource> suggestionDefaultDistance() {
+        return (context, builder) -> CommandSource.suggestMatching(new String[]{"64", "128", "256"}, builder);
     }
 
     // 物品查找
