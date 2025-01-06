@@ -42,9 +42,14 @@ public class NavigatorCommand {
                 .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandNavigate))
                 .then(CommandManager.literal("entity")
                         .then(CommandManager.argument("entity", EntityArgumentType.entity())
-                                .executes(context -> navigateToEntity(context, false))
+                                .executes(context -> navigateToEntity(context, false, "entity"))
                                 .then(CommandManager.literal("continue")
-                                        .executes(context -> navigateToEntity(context, true)))))
+                                        .executes(context -> navigateToEntity(context, true, "entity")))))
+                .then(CommandManager.literal("player")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .executes(context -> navigateToEntity(context, false, "player"))
+                                .then(CommandManager.literal("continue")
+                                        .executes(context -> navigateToEntity(context, true, "player")))))
                 .then(CommandManager.literal("waypoint")
                         .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandLocations))
                         .then(CommandManager.argument("waypoint", StringArgumentType.string())
@@ -67,9 +72,9 @@ public class NavigatorCommand {
     }
 
     // 开始导航实体
-    private static int navigateToEntity(CommandContext<ServerCommandSource> context, boolean isContinue) throws CommandSyntaxException {
+    private static int navigateToEntity(CommandContext<ServerCommandSource> context, boolean isContinue, String arguments) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
-        Entity entity = EntityArgumentType.getEntity(context, "entity");
+        Entity entity = EntityArgumentType.getEntity(context, arguments);
         // 如果目标是玩家，广播消息
         MutableText text = TextUtils.translate(START_NAVIGATION, player.getDisplayName(), entity.getDisplayName());
         PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(entity, isContinue);
