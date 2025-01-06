@@ -60,7 +60,7 @@ public class NavigatorCommand {
                                 .executes(NavigatorCommand::navigateToBlock)))
                 .then(CommandManager.literal("spawnpoint")
                         .executes(NavigatorCommand::navigateToSpawnPoint))
-                .then(CommandManager.literal("lastDeathLocation")
+                .then(CommandManager.literal("death")
                         .executes(context -> navigateToLastDeathLocation(context, true))
                         .then(CommandManager.argument("player", EntityArgumentType.player())
                                 .executes(context -> navigateToLastDeathLocation(context, false)))));
