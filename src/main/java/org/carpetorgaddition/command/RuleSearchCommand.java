@@ -11,11 +11,12 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.mixin.rule.carpet.SettingsManagerAccessor;
 import org.carpetorgaddition.util.TextUtils;
 
-import java.util.List;
+import java.util.Collection;
 
 public class RuleSearchCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -34,24 +35,29 @@ public class RuleSearchCommand {
         if (CarpetServer.settingsManager == null) {
             return 0;
         }
-        List<CarpetRule<?>> list = CarpetServer.settingsManager.getCarpetRules().stream().toList();
         MutableText text = TextUtils.translate("carpet.commands.ruleSearch.feedback", rule);
         // 将文本设置为粗体
         text.styled(style -> style.withBold(true));
-        // TODO 对所有玩家可见
-        context.getSource().sendFeedback(() -> text, false);
+        context.getSource().sendFeedback(() -> text, true);
         // 如果字符串为空，不搜索规则
         if (rule.isEmpty()) {
             return 0;
         }
-        int ruleCount = 0;
-        for (CarpetRule<?> carpet : list) {
-            if (RuleHelper.translatedName(carpet).contains(rule)) {
-                Messenger.m(context.getSource(),
-                        ((SettingsManagerAccessor) CarpetServer.settingsManager).displayInteractiveSettings(carpet));
-                ruleCount++;
+        return listRule(context, rule);
+    }
+
+    private static int listRule(CommandContext<ServerCommandSource> context, String rule) {
+        MutableInt ruleCount = new MutableInt(0);
+        CarpetServer.forEachManager(settingsManager -> {
+            SettingsManagerAccessor accessor = (SettingsManagerAccessor) settingsManager;
+            Collection<CarpetRule<?>> rules = settingsManager.getCarpetRules();
+            for (CarpetRule<?> carpetRule : rules) {
+                if (RuleHelper.translatedName(carpetRule).contains(rule)) {
+                    Messenger.m(context.getSource(), accessor.displayInteractiveSettings(carpetRule));
+                    ruleCount.add(1);
+                }
             }
-        }
-        return ruleCount;
+        });
+        return ruleCount.getValue();
     }
 }
