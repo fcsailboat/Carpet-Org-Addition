@@ -22,4 +22,7 @@ public class DebugSettings {
 
     @DebugRule(name = "显示方块挖掘速度")
     public static boolean showBlockBreakingSpeed = false;
+
+    @DebugRule(name = "HUD信息显示")
+    public static boolean HUDInformationDisplay = false;
 }

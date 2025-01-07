@@ -10,6 +10,7 @@
     "command.ServerPlayerEntityMixin",
     "compat.fabricapi.AbstractChanneledNetworkAddonInvoker",
     "compat.fabricapi.AbstractNetworkAddonMixin",
+    "debug.HandledScreenAccessor",
     "debug.PhantomSpawnerMixin",
     "debug.PlayerEntityMixin",
     "event.ServerPlayerEntityMixin",
@@ -99,6 +100,7 @@
     "util.ServerPlayNetworkHandlerMixin"
   ],
   "client": [
+    "debug.ScreenAccessor",
     "network.backgroundspritesync.SlotMixin",
     "network.unavailableslotsync.ScreenHandlerMixin",
     "rule.client.carpet.SettingsManagerMixin"
