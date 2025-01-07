@@ -88,8 +88,8 @@ public class FakePlayerUtils {
      * @param slotIndex     要操作的槽位的索引
      * @param player        当前操作的玩家
      */
-    public static void quickMove(ScreenHandler screenHandler, int slotIndex, EntityPlayerMPFake player) {
-        screenHandler.quickMove(player, slotIndex);
+    public static ItemStack quickMove(ScreenHandler screenHandler, int slotIndex, EntityPlayerMPFake player) {
+        return screenHandler.quickMove(player, slotIndex);
     }
 
     /**
