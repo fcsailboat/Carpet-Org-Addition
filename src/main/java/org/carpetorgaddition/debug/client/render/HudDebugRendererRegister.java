@@ -19,10 +19,13 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.Registries;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -158,6 +161,15 @@ public class HudDebugRendererRegister {
                 list.add("鼠标X：" + (int) mouseX);
                 list.add("鼠标Y：" + (int) mouseY);
                 if (screen instanceof HandledScreen<?> handledScreen) {
+                    try {
+                        ScreenHandlerType<?> type = handledScreen.getScreenHandler().getType();
+                        Identifier id = Registries.SCREEN_HANDLER.getId(type);
+                        if (id != null) {
+                            list.add("屏幕类型id：" + id);
+                        }
+                    } catch (UnsupportedOperationException e) {
+                        list.add("屏幕类型id：null");
+                    }
                     HandledScreenAccessor accessor = (HandledScreenAccessor) handledScreen;
                     Window window = client.getWindow();
                     Slot slot = accessor.invokerGetSlotAt(
@@ -166,6 +178,7 @@ public class HudDebugRendererRegister {
                     );
                     if (slot != null) {
                         list.add("槽位索引：" + slot.id);
+                        list.add("槽位物品栏：" + slot.inventory.getClass().getSimpleName());
                     }
                 }
                 context.drawTooltip(client.textRenderer, list.stream().map(Text::of).toList(), 3, 25);

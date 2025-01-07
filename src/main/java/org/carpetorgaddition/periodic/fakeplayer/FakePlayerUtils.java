@@ -1,6 +1,8 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -211,5 +213,16 @@ public class FakePlayerUtils {
      */
     public static void pickupCursorStack(ScreenHandler screenHandler, int index, EntityPlayerMPFake fakePlayer) {
         screenHandler.onSlotClick(index, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, fakePlayer);
+    }
+
+    /**
+     * 保持与GCA（假人背包）的兼容，防止丢出GCA的物品
+     */
+    public static boolean isGcaItem(ItemStack itemStack) {
+        NbtComponent component = itemStack.get(DataComponentTypes.CUSTOM_DATA);
+        if (component == null) {
+            return false;
+        }
+        return component.copyNbt().get("GcaClear") != null;
     }
 }
