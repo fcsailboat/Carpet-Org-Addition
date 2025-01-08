@@ -19,6 +19,8 @@ public class FakePlayerClean {
             return;
         }
         for (int index = 0; index < screenHandler.slots.size(); index++) {
+            // 如果遍历到了玩家物品栏槽位，直接结束循环，因为后面一般不会再有容器槽位了
+            // 合成器的输出槽位虽然在玩家物品栏槽位后面，但是这个槽位的物品无法取出，因此可以忽略
             if (screenHandler.getSlot(index).inventory instanceof PlayerInventory) {
                 break;
             }

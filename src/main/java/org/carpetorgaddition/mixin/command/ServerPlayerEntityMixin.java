@@ -17,7 +17,6 @@ import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.matcher.ItemMatcher;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -119,8 +118,11 @@ public abstract class ServerPlayerEntityMixin implements FakePlayerSafeAfkInterf
                     ItemStack itemStack = inventory.getStack(i);
                     if (InventoryUtils.isShulkerBoxItem(itemStack)) {
                         MutableBoolean bool = new MutableBoolean(false);
-                        ItemMatcher matcher = new ItemMatcher(Items.TOTEM_OF_UNDYING);
-                        InventoryUtils.shulkerBoxConsumer(itemStack, matcher, (stack) -> bool.setTrue());
+                        InventoryUtils.shulkerBoxConsumer(
+                                itemStack,
+                                stack -> stack.isOf(Items.TOTEM_OF_UNDYING),
+                                (stack) -> bool.setTrue()
+                        );
                         if (bool.getValue()) {
                             return true;
                         }

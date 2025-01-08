@@ -472,4 +472,5 @@ public class CarpetOrgAdditionSettings {
     @Hidden
     @Rule(categories = {ORG, Hidden})
     public static boolean autoSyncPlayerStatus = false;
+    // TODO 记录玩家命令规则
 }

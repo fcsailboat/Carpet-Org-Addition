@@ -13,10 +13,10 @@ import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.InventoryCraftData;
 import org.carpetorgaddition.util.inventory.AutoGrowInventory;
-import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 public class FakePlayerCraft {
-    //最大循环次数
+    // 最大循环次数
     private static final int MAX_LOOP_COUNT = 1200;
 
     private FakePlayerCraft() {
@@ -46,7 +46,7 @@ public class FakePlayerCraft {
             AutoGrowInventory inventory,
             CraftingScreenHandler craftingScreenHandler
     ) {
-        Matcher[] items = craftData.getMatchers();
+        ItemStackPredicate[] items = craftData.getPredicates();
         // 定义变量记录成功完成合成的次数
         int craftCount = 0;
         // 记录循环次数用来在游戏可能进入死循环时抛出异常
@@ -62,7 +62,7 @@ public class FakePlayerCraft {
             // 依次获取每一个合成材料和遍历合成格
             for (int index = 1; index <= 9; index++) {
                 //依次获取每一个合成材料
-                Matcher matcher = items[index - 1];
+                ItemStackPredicate matcher = items[index - 1];
                 Slot slot = craftingScreenHandler.getSlot(index);
                 // 如果合成格的指定槽位不是所需要合成材料，则丢出该物品
                 if (slot.hasStack()) {
@@ -143,7 +143,7 @@ public class FakePlayerCraft {
 
     private static void inventoryCraft(InventoryCraftData craftData, EntityPlayerMPFake fakePlayer, AutoGrowInventory inventory) {
         PlayerScreenHandler playerScreenHandler = fakePlayer.playerScreenHandler;
-        Matcher[] items = craftData.getMatchers();
+        ItemStackPredicate[] items = craftData.getPredicates();
         // 定义变量记录成功完成合成的次数
         int craftCount = 0;
         // 记录循环次数用来在游戏可能进入死循环时抛出异常
@@ -159,7 +159,7 @@ public class FakePlayerCraft {
             // 遍历4x4合成格
             for (int craftIndex = 1; craftIndex <= 4; craftIndex++) {
                 // 获取每一个合成材料
-                Matcher matcher = items[craftIndex - 1];
+                ItemStackPredicate matcher = items[craftIndex - 1];
                 Slot slot = playerScreenHandler.getSlot(craftIndex);
                 // 检查合成格上是否已经有物品
                 if (slot.hasStack()) {

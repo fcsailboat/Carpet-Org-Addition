@@ -16,7 +16,6 @@ import net.minecraft.command.argument.ItemPredicateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.command.CommandManager;
@@ -34,14 +33,11 @@ import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.util.matcher.ItemMatcher;
-import org.carpetorgaddition.util.matcher.ItemPredicateMatcher;
-import org.carpetorgaddition.util.matcher.Matcher;
 import org.carpetorgaddition.util.screen.CraftingSetRecipeScreenHandler;
 import org.carpetorgaddition.util.screen.StonecutterSetRecipeScreenHandler;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.Arrays;
-import java.util.function.Predicate;
 
 public class PlayerActionCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandBuildContext) {
@@ -171,26 +167,32 @@ public class PlayerActionCommand {
     // 单个物品合成
     private static int setOneCraft(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         FakePlayerActionManager actionManager = prepareTheCrafting(context);
-        Predicate<ItemStack> item = ItemPredicateArgumentType.getItemStackPredicate(context, "item");
-        actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, new InventoryCraftData(fillArray(new ItemPredicateMatcher(item), new Matcher[4], false)));
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        actionManager.setAction(
+                FakePlayerAction.INVENTORY_CRAFT,
+                new InventoryCraftData(fillArray(predicate, new ItemStackPredicate[4], false))
+        );
         return 1;
     }
 
     // 四个物品合成
     private static int setFourCraft(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         FakePlayerActionManager actionManager = prepareTheCrafting(context);
-        Predicate<ItemStack> item = ItemPredicateArgumentType.getItemStackPredicate(context, "item");
-        actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, new InventoryCraftData(fillArray(new ItemPredicateMatcher(item), new Matcher[4], true)));
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        actionManager.setAction(
+                FakePlayerAction.INVENTORY_CRAFT,
+                new InventoryCraftData(fillArray(predicate, new ItemStackPredicate[4], true))
+        );
         return 1;
     }
 
     // 设置物品栏合成
     private static int setInventoryCraft(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         FakePlayerActionManager actionManager = prepareTheCrafting(context);
-        ItemPredicateMatcher[] items = new ItemPredicateMatcher[4];
+        ItemStackPredicate[] items = new ItemStackPredicate[4];
         for (int i = 1; i <= 4; i++) {
             // 获取每一个合成材料
-            items[i - 1] = new ItemPredicateMatcher(ItemPredicateArgumentType.getItemStackPredicate(context, "item" + i));
+            items[i - 1] = new ItemStackPredicate(context, "item" + i);
         }
         actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, new InventoryCraftData(items));
         return 1;
@@ -199,17 +201,20 @@ public class PlayerActionCommand {
     // 九个物品合成
     private static int setNineCraft(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         FakePlayerActionManager actionManager = prepareTheCrafting(context);
-        Predicate<ItemStack> item = ItemPredicateArgumentType.getItemStackPredicate(context, "item");
-        actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftData(fillArray(new ItemPredicateMatcher(item), new Matcher[9], true)));
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        actionManager.setAction(
+                FakePlayerAction.CRAFTING_TABLE_CRAFT,
+                new CraftingTableCraftData(fillArray(predicate, new ItemStackPredicate[9], true))
+        );
         return 1;
     }
 
     // 设置工作台合成
     private static int setCraftingTableCraft(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         FakePlayerActionManager actionManager = prepareTheCrafting(context);
-        ItemPredicateMatcher[] items = new ItemPredicateMatcher[9];
+        ItemStackPredicate[] items = new ItemStackPredicate[9];
         for (int i = 1; i <= 9; i++) {
-            items[i - 1] = new ItemPredicateMatcher(ItemPredicateArgumentType.getItemStackPredicate(context, "item" + i));
+            items[i - 1] = new ItemStackPredicate(context, "item" + i);
         }
         actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftData(items));
         return 1;
@@ -268,7 +273,7 @@ public class PlayerActionCommand {
     }
 
     // 填充数组
-    private static Matcher[] fillArray(Matcher matcher, Matcher[] matchers, boolean directFill) {
+    private static ItemStackPredicate[] fillArray(ItemStackPredicate matcher, ItemStackPredicate[] matchers, boolean directFill) {
         if (directFill) {
             // 直接使用元素填满整个数组
             Arrays.fill(matchers, matcher);
@@ -278,7 +283,7 @@ public class PlayerActionCommand {
                 if (i == 0) {
                     matchers[i] = matcher;
                 } else {
-                    matchers[i] = ItemMatcher.AIR_ITEM_MATCHER;
+                    matchers[i] = ItemStackPredicate.EMPTY;
                 }
             }
         }

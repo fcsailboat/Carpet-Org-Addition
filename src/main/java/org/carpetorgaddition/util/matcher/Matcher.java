@@ -9,8 +9,8 @@ import net.minecraft.util.Identifier;
 
 import java.util.function.Predicate;
 
+@Deprecated(forRemoval = true)
 public interface Matcher extends Predicate<ItemStack> {
-
     /**
      * 当前物品是否与空气物品匹配
      *
@@ -38,13 +38,6 @@ public interface Matcher extends Predicate<ItemStack> {
      * @return 如果是物品，返回物品的名称，如果是物品标签，返回物品标签的字符串
      */
     Text getName();
-
-    /**
-     * 获取匹配器默认的物品堆栈
-     *
-     * @return 如果是物品，返回该物品的默认物品堆栈，如果是物品堆栈，直接返回，如果是物品标签，返回所有物品中第一个匹配的物品，如果没有匹配，返回空物品堆栈
-     */
-    ItemStack getDefaultStack();
 
     /**
      * 返回此匹配器的可变文本形式

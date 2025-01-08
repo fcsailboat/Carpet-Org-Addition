@@ -66,6 +66,13 @@ public class TextBuilder {
     }
 
     /**
+     * 追加空格
+     */
+    public TextBuilder blank() {
+        return this.appendString(" ");
+    }
+
+    /**
      * 将当前对象转换为文本对象，每个元素之间不换行
      */
     public MutableText toLine() {

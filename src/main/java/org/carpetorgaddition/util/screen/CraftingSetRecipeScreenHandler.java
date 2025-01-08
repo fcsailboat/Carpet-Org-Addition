@@ -18,7 +18,7 @@ import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerCraftRecipeInterface;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.InventoryCraftData;
-import org.carpetorgaddition.util.matcher.ItemMatcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implements UnavailableSlotSyncInterface {
     /**
@@ -90,11 +90,11 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 4, 5, 7, 8));
         } else {
             //将假玩家动作设置为3x3合成
-            ItemMatcher[] itemMatchersArr = new ItemMatcher[9];
-            for (int i = 0; i < itemMatchersArr.length; i++) {
-                itemMatchersArr[i] = new ItemMatcher(items[i]);
+            ItemStackPredicate[] predicates = new ItemStackPredicate[9];
+            for (int i = 0; i < predicates.length; i++) {
+                predicates[i] = new ItemStackPredicate(items[i]);
             }
-            actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftData(itemMatchersArr));
+            actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftData(predicates));
         }
     }
 
@@ -111,12 +111,12 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
 
     // 创建合成数据
     private InventoryCraftData createData(Item[] items, int... indices) {
-        ItemMatcher[] matchers = new ItemMatcher[4];
+        ItemStackPredicate[] predicates = new ItemStackPredicate[4];
         // 这里的index并不是indices里保存的元素
         for (int index = 0; index < 4; index++) {
-            matchers[index] = new ItemMatcher(items[indices[index]]);
+            predicates[index] = new ItemStackPredicate(items[indices[index]]);
         }
-        return new InventoryCraftData(matchers);
+        return new InventoryCraftData(predicates);
     }
 
     @Override

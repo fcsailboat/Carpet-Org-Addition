@@ -24,6 +24,7 @@ public class FakePlayerFill {
         Item item = allItem ? null : fillData.getItem();
         for (int index = 0; index < screenHandler.slots.size(); index++) {
             Slot slot = screenHandler.getSlot(index);
+            // TODO 只支持常用容器
             if (slot.inventory instanceof PlayerInventory) {
                 ItemStack itemStack = slot.getStack();
                 if (itemStack.isEmpty()) {
