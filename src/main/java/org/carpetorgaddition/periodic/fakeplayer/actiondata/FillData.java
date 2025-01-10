@@ -7,7 +7,7 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.ArrayList;
 
@@ -34,7 +34,7 @@ public class FillData extends AbstractActionData {
         if (allItem) {
             return new FillData(null, true);
         }
-        Item item = Matcher.asItem(json.get(ITEM).getAsString());
+        Item item = ItemStackPredicate.stringAsItem(json.get(ITEM).getAsString());
         return new FillData(item, false);
     }
 

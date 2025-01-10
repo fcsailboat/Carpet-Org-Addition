@@ -9,7 +9,7 @@ import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.ArrayList;
 
@@ -31,7 +31,7 @@ public class RenameData extends AbstractActionData {
     }
 
     public static RenameData load(JsonObject json) {
-        Item item = Matcher.asItem(json.get(ITEM).getAsString());
+        Item item = ItemStackPredicate.stringAsItem(json.get(ITEM).getAsString());
         String newName = json.get(NEW_NAME).getAsString();
         return new RenameData(item, newName);
     }

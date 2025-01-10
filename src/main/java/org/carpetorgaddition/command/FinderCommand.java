@@ -33,8 +33,7 @@ import org.carpetorgaddition.periodic.task.findtask.*;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.util.matcher.ItemMatcher;
-import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.io.File;
@@ -80,7 +79,7 @@ public class FinderCommand {
                                                         .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
                                                                 .executes(FinderCommand::areaBlockFinder)))))))
                 .then(CommandManager.literal("item")
-                        .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
+                        .then(CommandManager.argument("itemStack", ItemPredicateArgumentType.itemPredicate(commandBuildContext))
                                 .executes(context -> findItem(context, 64))
                                 .then(CommandManager.argument("range", IntegerArgumentType.integer(0, 256))
                                         .suggests(suggestionDefaultDistance())
@@ -98,7 +97,7 @@ public class FinderCommand {
                                                         .executes(FinderCommand::findItemFromOfflinePlayerEnderChest))))))
                 .then(CommandManager.literal("trade")
                         .then(CommandManager.literal("item")
-                                .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
+                                .then(CommandManager.argument("itemStack", ItemPredicateArgumentType.itemPredicate(commandBuildContext))
                                         .executes(context -> findTradeItem(context, 64))
                                         .then(CommandManager.argument("range", IntegerArgumentType.integer(0, 256))
                                                 .suggests(suggestionDefaultDistance())
@@ -123,14 +122,12 @@ public class FinderCommand {
     private static int findItem(CommandContext<ServerCommandSource> context, int range) throws CommandSyntaxException {
         // 获取执行命令的玩家并非空判断
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
-        // 获取要查找的物品堆栈
-        ItemStack itemStack = ItemStackArgumentType.getItemStackArgument(context, "itemStack").createStack(1, false);
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
         // 获取玩家所在的位置，这是命令开始执行的坐标
         BlockPos sourceBlockPos = player.getBlockPos();
         // 查找周围容器中的物品
-        Matcher matcher = new ItemMatcher(itemStack);
         World world = player.getWorld();
-        ItemFindTask task = new ItemFindTask(world, matcher, new SelectionArea(world, sourceBlockPos, range), context);
+        ItemFindTask task = new ItemFindTask(world, predicate, new SelectionArea(world, sourceBlockPos, range), context);
         ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
@@ -141,11 +138,10 @@ public class FinderCommand {
         BlockPos from = BlockPosArgumentType.getBlockPos(context, "from");
         BlockPos to = BlockPosArgumentType.getBlockPos(context, "to");
         // 获取要查找的物品
-        ItemStack itemStack = ItemStackArgumentType.getItemStackArgument(context, "itemStack").createStack(1, false);
-        Matcher matcher = new ItemMatcher(itemStack);
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
         // 计算要查找的区域
         SelectionArea selectionArea = new SelectionArea(from, to);
-        ItemFindTask task = new ItemFindTask(player.getWorld(), matcher, selectionArea, context);
+        ItemFindTask task = new ItemFindTask(player.getWorld(), predicate, selectionArea, context);
         ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
@@ -233,13 +229,13 @@ public class FinderCommand {
         // 获取执行命令的玩家对象
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         // 获取要匹配的物品
-        ItemMatcher matcher = new ItemMatcher(ItemStackArgumentType.getItemStackArgument(context, "itemStack").getItem());
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
         // 获取玩家所在的坐标
         BlockPos sourcePos = player.getBlockPos();
         World world = player.getWorld();
         // 查找范围
         SelectionArea area = new SelectionArea(world, sourcePos, range);
-        TradeItemFindTask task = new TradeItemFindTask(world, area, sourcePos, context, matcher);
+        TradeItemFindTask task = new TradeItemFindTask(world, area, sourcePos, predicate, context);
         // 向任务管理器添加任务
         ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;

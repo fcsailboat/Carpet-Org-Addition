@@ -14,7 +14,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.ArrayList;
 
@@ -36,7 +36,7 @@ public class StonecuttingData extends AbstractActionData {
     }
 
     public static StonecuttingData load(JsonObject json) {
-        Item item = Matcher.asItem(json.get(ITEM).getAsString());
+        Item item = ItemStackPredicate.stringAsItem(json.get(ITEM).getAsString());
         int index = json.get(BUTTON).getAsInt();
         return new StonecuttingData(item, index);
     }

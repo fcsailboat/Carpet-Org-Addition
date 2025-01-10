@@ -25,8 +25,8 @@ import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
 import org.carpetorgaddition.util.inventory.ImmutableInventory;
-import org.carpetorgaddition.util.matcher.Matcher;
 import org.carpetorgaddition.util.wheel.Counter;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,15 +52,15 @@ public class ItemFindTask extends ServerTask {
      * 任务被执行的总游戏刻数
      */
     private int tickCount;
-    private final Matcher matcher;
+    private final ItemStackPredicate predicate;
     private final ArrayList<Result> results = new ArrayList<>();
 
-    public ItemFindTask(World world, Matcher matcher, SelectionArea selectionArea, CommandContext<ServerCommandSource> context) {
+    public ItemFindTask(World world, ItemStackPredicate predicate, SelectionArea selectionArea, CommandContext<ServerCommandSource> context) {
         this.world = world;
         this.selectionArea = selectionArea;
         this.findState = FindState.BLOCK;
         this.tickCount = 0;
-        this.matcher = matcher;
+        this.predicate = predicate;
         this.context = context;
     }
 
@@ -156,13 +156,13 @@ public class ItemFindTask extends ServerTask {
         Counter<Item> counter = new Counter<>();
         for (int index = 0; index < inventory.size(); index++) {
             ItemStack itemStack = inventory.getStack(index);
-            if (this.matcher.test(itemStack)) {
+            if (this.predicate.test(itemStack)) {
                 // 统计符合条件的物品数量
                 counter.add(itemStack.getItem(), itemStack.getCount());
             } else if (InventoryUtils.isShulkerBoxItem(itemStack)) {
                 ImmutableInventory immutableInventory = InventoryUtils.getInventory(itemStack);
                 for (ItemStack stack : immutableInventory) {
-                    if (this.matcher.test(stack)) {
+                    if (this.predicate.test(stack)) {
                         counter.add(stack.getItem(), stack.getCount());
                         shulkerBox = true;
                     }
@@ -171,9 +171,11 @@ public class ItemFindTask extends ServerTask {
         }
         if (this.results.size() > FinderCommand.MAXIMUM_STATISTICAL_COUNT) {
             // 容器太多，无法统计
-            Runnable function = () -> MessageUtils.sendErrorMessage(context,
+            Runnable function = () -> MessageUtils.sendErrorMessage(
+                    context,
                     "carpet.commands.finder.item.too_much_container",
-                    this.matcher.toText());
+                    this.predicate.toText()
+            );
             throw new TaskExecutionException(function);
         }
         // 如果为物品标签，那么同一个容器中可能出现多中匹配的物品
@@ -191,7 +193,7 @@ public class ItemFindTask extends ServerTask {
     private void sort() {
         if (this.results.isEmpty()) {
             // 在周围的容器中找不到指定物品，直接将状态设置为结束，然后结束方法
-            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.not_item", matcher.toText());
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.not_item", predicate.toText());
             this.findState = FindState.END;
             return;
         }
@@ -202,23 +204,23 @@ public class ItemFindTask extends ServerTask {
     // 发送命令反馈
     private void feedback() {
         MutableText itemCount;
-        boolean isItem = matcher.isItem();
-        if (isItem) {
+        boolean canConvert = predicate.canConvertItem();
+        if (canConvert) {
             // 为数量添加鼠标悬停效果
-            itemCount = FinderCommand.showCount(matcher.getItem().getDefaultStack(), this.count, this.shulkerBox);
+            itemCount = FinderCommand.showCount(predicate.asItem().getDefaultStack(), this.count, this.shulkerBox);
         } else {
             itemCount = TextUtils.regularStyle(String.valueOf(count), null, false, this.shulkerBox, false, false);
         }
         if (this.results.size() <= FinderCommand.MAX_FEEDBACK_COUNT) {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find",
-                    this.results.size(), itemCount, matcher.toText());
+                    this.results.size(), itemCount, predicate.toText());
         } else {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.limit",
-                    this.results.size(), itemCount, matcher.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
+                    this.results.size(), itemCount, predicate.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
         }
         for (int i = 0; i < this.results.size() && i <= FinderCommand.MAX_FEEDBACK_COUNT; i++) {
             MutableText message = this.results.get(i).toText();
-            if (isItem) {
+            if (canConvert) {
                 MessageUtils.sendMessage(this.context.getSource(), message);
             } else {
                 MessageUtils.sendMessage(this.context.getSource(), TextUtils.appendAll(message, this.results.get(i).item().getName().copy()));

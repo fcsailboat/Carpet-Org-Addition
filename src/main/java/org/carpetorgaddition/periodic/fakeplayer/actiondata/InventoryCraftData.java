@@ -61,6 +61,7 @@ public class InventoryCraftData extends AbstractActionData {
         return list;
     }
 
+    // 添加合成配方文本
     private void addCraftRecipe(ArrayList<MutableText> list, ItemStack craftOutput) {
         // 配方第一排
         list.add(new TextBuilder()

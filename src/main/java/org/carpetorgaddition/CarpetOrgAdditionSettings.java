@@ -459,6 +459,7 @@ public class CarpetOrgAdditionSettings {
     @Rule(categories = {ORG, RuleCategory.SURVIVAL})
     public static boolean limitPhantomSpawn = false;
 
+    // TODO 改为漏洞修复
     // 立即应用工具效果
     @Rule(categories = {ORG, RuleCategory.SURVIVAL})
     public static boolean applyToolEffectsImmediately = false;

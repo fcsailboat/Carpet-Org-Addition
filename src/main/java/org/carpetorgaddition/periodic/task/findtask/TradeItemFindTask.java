@@ -13,19 +13,19 @@ import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.util.ArrayList;
 
 public class TradeItemFindTask extends AbstractTradeFindTask {
-    private final Matcher matcher;
+    private final ItemStackPredicate predicate;
     private final MutableText treadName;
 
-    public TradeItemFindTask(World world, SelectionArea selectionArea, BlockPos sourcePos, CommandContext<ServerCommandSource> context, Matcher matcher) {
+    public TradeItemFindTask(World world, SelectionArea selectionArea, BlockPos sourcePos, ItemStackPredicate predicate, CommandContext<ServerCommandSource> context) {
         super(world, selectionArea, sourcePos, context);
-        this.matcher = matcher;
-        this.treadName = matcher.getName().copy();
+        this.predicate = predicate;
+        this.treadName = predicate.toText().copy();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class TradeItemFindTask extends AbstractTradeFindTask {
         ArrayList<Integer> list = new ArrayList<>();
         for (int index = 0; index < offers.size(); index++) {
             // 检查每个出售的物品是否与匹配器匹配
-            if (this.matcher.test(offers.get(index).getSellItem())) {
+            if (this.predicate.test(offers.get(index).getSellItem())) {
                 list.add(index + 1);
                 this.tradeCount++;
             }

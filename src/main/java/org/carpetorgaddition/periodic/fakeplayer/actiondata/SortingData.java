@@ -9,7 +9,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.matcher.Matcher;
+import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.ArrayList;
 
@@ -39,7 +39,7 @@ public class SortingData extends AbstractActionData {
 
     public static SortingData load(JsonObject json) {
         String id = json.get(ITEM).getAsString();
-        Item item = Matcher.asItem(id);
+        Item item = ItemStackPredicate.stringAsItem(id);
         JsonArray thisVecArray = json.get(THIS_VEC).getAsJsonArray();
         Vec3d thisVec = new Vec3d(
                 thisVecArray.get(0).getAsDouble(),

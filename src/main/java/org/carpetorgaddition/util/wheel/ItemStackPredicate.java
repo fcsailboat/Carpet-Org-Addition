@@ -10,6 +10,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ItemPredicateArgumentType;
+import net.minecraft.command.argument.ItemPredicateArgumentType.ItemStackPredicateArgument;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -19,6 +20,7 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -38,11 +40,16 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
     public static final ItemStackPredicate EMPTY = new ItemStackPredicate(Items.AIR);
 
     public ItemStackPredicate(CommandContext<ServerCommandSource> context, String arguments) {
-        this.predicate = ItemPredicateArgumentType.getItemStackPredicate(context, arguments);
         for (ParsedCommandNode<ServerCommandSource> commandNode : context.getNodes()) {
             if (commandNode.getNode() instanceof ArgumentCommandNode<?, ?> node && Objects.equals(node.getName(), arguments)) {
                 StringRange range = commandNode.getRange();
                 this.input = context.getInput().substring(range.getStart(), range.getEnd());
+                ItemStackPredicateArgument predicate = ItemPredicateArgumentType.getItemStackPredicate(context, arguments);
+                if ("*".equals(this.input)) {
+                    this.predicate = itemStack -> !itemStack.isEmpty() && predicate.test(itemStack);
+                } else {
+                    this.predicate = predicate;
+                }
                 return;
             }
         }
@@ -124,7 +131,26 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
             Identifier identifier = Identifier.of(this.input);
             return Registries.ITEM.get(identifier).getName();
         }
+        if (this.input.length() > 30) {
+            String substring = this.input.substring(0, 30);
+            MutableText ellipsis = TextUtils.createText("...");
+            MutableText result = TextUtils.appendAll(substring, ellipsis);
+            return TextUtils.toGrayItalic(TextUtils.hoverText(result, this.input));
+        }
         return TextUtils.createText(this.input);
+    }
+
+    /**
+     * 将命令参数转换为对应物品
+     */
+    public Item asItem() {
+        if (this.isEmpty()) {
+            return Items.AIR;
+        }
+        if (this.canConvertItem()) {
+            return Registries.ITEM.get(Identifier.of(this.input));
+        }
+        throw new IllegalArgumentException();
     }
 
     /**
@@ -158,6 +184,13 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
             return optional.map(recipe -> recipe.value().craft(input, world.getRegistryManager())).orElse(ItemStack.EMPTY);
         }
         return ItemStack.EMPTY;
+    }
+
+    /**
+     * 将字符串ID转换为物品
+     */
+    public static Item stringAsItem(String id) {
+        return Registries.ITEM.get(Identifier.of(id));
     }
 
     public boolean canConvertItem() {
