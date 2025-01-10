@@ -1,7 +1,6 @@
 package org.carpetorgaddition.periodic.task.findtask;
 
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EnderChestInventory;
 import net.minecraft.inventory.Inventory;
@@ -18,7 +17,12 @@ import java.io.File;
 
 @SuppressWarnings("JavadocReference")
 public class OfflinePlayerEnderChestFindTask extends OfflinePlayerFindTask {
-    public OfflinePlayerEnderChestFindTask(CommandContext<ServerCommandSource> context, UserCache userCache, ServerPlayerEntity player, File[] files) throws CommandSyntaxException {
+    public OfflinePlayerEnderChestFindTask(
+            CommandContext<ServerCommandSource> context,
+            UserCache userCache,
+            ServerPlayerEntity player,
+            File[] files
+    ) {
         super(context, userCache, player, files);
     }
 
