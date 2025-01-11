@@ -110,6 +110,7 @@ public class FinderCommand {
                                                 .suggests(suggestionDefaultDistance())
                                                 .executes(context -> findEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "range")))))))
                 .then(CommandManager.literal("worldEater")
+                        .requires(source -> CarpetOrgAdditionSettings.finderCommandSearchWorldEater)
                         .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
                                 .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
                                         .executes(FinderCommand::mayAffectWorldEater)))));

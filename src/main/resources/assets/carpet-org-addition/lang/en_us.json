@@ -122,6 +122,7 @@
   "carpet.rule.applyToolEffectsImmediately.desc": "Fix that the mining speed will not take effect immediately after switching tools",
   "carpet.rule.forceRestock.desc": "Always auto-populate hotbar item as much as possible",
   "carpet.rule.autoSyncPlayerStatus.desc": "The status of the inventory and surrounding blocks is automatically synchronized every 30 game tick",
+  "carpet.rule.finderCommandSearchWorldEater.desc": "Allows /finder to find blocks that may affect the operation of the world",
   "carpet.rule.message.disableRespawnBlocksExplode": "Respawn blocks explosion is disabled",
   "carpet.rule.message.CCEUpdateSuppression": "You cannot open the shulkerbox for update surpression",
   "carpet.rule.validate.invalid_value": "Wrong value %s for: %s",
