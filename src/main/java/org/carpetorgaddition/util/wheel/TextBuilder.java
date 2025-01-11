@@ -73,6 +73,14 @@ public class TextBuilder {
     }
 
     /**
+     * 删除最后一个元素
+     */
+    public TextBuilder removeLast() {
+        this.list.removeLast();
+        return this;
+    }
+
+    /**
      * 将当前对象转换为文本对象，每个元素之间不换行
      */
     public MutableText toLine() {

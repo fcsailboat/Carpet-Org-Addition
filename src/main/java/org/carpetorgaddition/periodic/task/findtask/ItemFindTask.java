@@ -9,8 +9,6 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.vehicle.VehicleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
@@ -20,21 +18,18 @@ import net.minecraft.world.World;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.exception.TaskExecutionException;
 import org.carpetorgaddition.periodic.task.ServerTask;
-import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.util.inventory.ImmutableInventory;
-import org.carpetorgaddition.util.wheel.Counter;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
+import org.carpetorgaddition.util.wheel.ItemStackStatistics;
 import org.carpetorgaddition.util.wheel.SelectionArea;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.UUID;
 
+// TODO 需要测试命令反馈
 public class ItemFindTask extends ServerTask {
     private final World world;
     private final SelectionArea selectionArea;
@@ -113,7 +108,7 @@ public class ItemFindTask extends ServerTask {
                         = inventory instanceof LockableContainerBlockEntity lockableContainer
                         ? lockableContainer.getName().copy()
                         : this.world.getBlockState(blockPos).getBlock().getName();
-                this.count(inventory, null, blockPos, containerName);
+                this.count(inventory, blockPos, containerName);
             }
         }
         this.findState = FindState.ENTITY;
@@ -132,43 +127,33 @@ public class ItemFindTask extends ServerTask {
             Entity entity = this.entitySearchIterator.next();
             // 掉落物
             if (entity instanceof ItemEntity itemEntity) {
-                this.count(new SimpleInventory(itemEntity.getStack()), entity.getUuid(), itemEntity.getBlockPos(),
-                        TextUtils.translate("carpet.commands.finder.item.drops"));
+                MutableText drops = TextUtils.translate("carpet.commands.finder.item.drops");
+                this.count(new SimpleInventory(itemEntity.getStack()), itemEntity.getBlockPos(), drops);
                 continue;
             }
             // 假玩家
             if (entity instanceof EntityPlayerMPFake fakePlayer) {
-                this.count(fakePlayer.getInventory(), entity.getUuid(), fakePlayer.getBlockPos(), fakePlayer.getName().copy());
+                this.count(fakePlayer.getInventory(), fakePlayer.getBlockPos(), fakePlayer.getName().copy());
                 continue;
             }
             // 容器实体
             if (entity instanceof VehicleInventory inventory) {
-                this.count(inventory, entity.getUuid(), entity.getBlockPos(), entity.getName().copy());
+                this.count(inventory, entity.getBlockPos(), entity.getName().copy());
             }
         }
         this.findState = FindState.SORT;
     }
 
     // 统计符合条件的物品
-    private void count(Inventory inventory, @Nullable UUID uuid, BlockPos blockPos, MutableText containerName) {
+    private void count(Inventory inventory, BlockPos blockPos, MutableText containerName) {
         // 是否有物品是在潜影盒中找到的
-        boolean shulkerBox = false;
-        Counter<Item> counter = new Counter<>();
-        for (int index = 0; index < inventory.size(); index++) {
-            ItemStack itemStack = inventory.getStack(index);
-            if (this.predicate.test(itemStack)) {
-                // 统计符合条件的物品数量
-                counter.add(itemStack.getItem(), itemStack.getCount());
-            } else if (InventoryUtils.isShulkerBoxItem(itemStack)) {
-                ImmutableInventory immutableInventory = InventoryUtils.getInventory(itemStack);
-                for (ItemStack stack : immutableInventory) {
-                    if (this.predicate.test(stack)) {
-                        counter.add(stack.getItem(), stack.getCount());
-                        shulkerBox = true;
-                    }
-                }
-            }
+        ItemStackStatistics statistics = new ItemStackStatistics(this.predicate);
+        statistics.statistics(inventory);
+        this.count += statistics.getSum();
+        if (statistics.hasNestingItem()) {
+            this.shulkerBox = true;
         }
+        this.results.add(new Result(blockPos, containerName, statistics));
         if (this.results.size() > FinderCommand.MAXIMUM_STATISTICAL_COUNT) {
             // 容器太多，无法统计
             Runnable function = () -> MessageUtils.sendErrorMessage(
@@ -177,15 +162,6 @@ public class ItemFindTask extends ServerTask {
                     this.predicate.toText()
             );
             throw new TaskExecutionException(function);
-        }
-        // 如果为物品标签，那么同一个容器中可能出现多中匹配的物品
-        for (Item item : counter) {
-            int count = counter.getCount(item);
-            this.count += count;
-            if (shulkerBox) {
-                this.shulkerBox = true;
-            }
-            this.results.add(new Result(item, uuid, blockPos, containerName, count, shulkerBox));
         }
     }
 
@@ -197,7 +173,7 @@ public class ItemFindTask extends ServerTask {
             this.findState = FindState.END;
             return;
         }
-        this.results.sort((o1, o2) -> o2.count() - o1.count());
+        this.results.sort((o1, o2) -> o2.statistics().getSum() - o1.statistics().getSum());
         this.findState = FindState.FEEDBACK;
     }
 
@@ -209,22 +185,20 @@ public class ItemFindTask extends ServerTask {
             // 为数量添加鼠标悬停效果
             itemCount = FinderCommand.showCount(predicate.asItem().getDefaultStack(), this.count, this.shulkerBox);
         } else {
-            itemCount = TextUtils.regularStyle(String.valueOf(count), null, false, this.shulkerBox, false, false);
+            MutableText countText = TextUtils.createText(this.count);
+            itemCount = this.shulkerBox ? TextUtils.toItalic(countText) : countText;
         }
-        if (this.results.size() <= FinderCommand.MAX_FEEDBACK_COUNT) {
-            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find",
-                    this.results.size(), itemCount, predicate.toText());
-        } else {
+        int size = this.results.size();
+        if (size > FinderCommand.MAX_FEEDBACK_COUNT) {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.limit",
-                    this.results.size(), itemCount, predicate.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
+                    size, itemCount, predicate.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
+        } else {
+            MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find",
+                    size, itemCount, predicate.toText());
         }
-        for (int i = 0; i < this.results.size() && i <= FinderCommand.MAX_FEEDBACK_COUNT; i++) {
+        for (int i = 0; i < size && i <= FinderCommand.MAX_FEEDBACK_COUNT; i++) {
             MutableText message = this.results.get(i).toText();
-            if (canConvert) {
-                MessageUtils.sendMessage(this.context.getSource(), message);
-            } else {
-                MessageUtils.sendMessage(this.context.getSource(), TextUtils.appendAll(message, this.results.get(i).item().getName().copy()));
-            }
+            MessageUtils.sendMessage(this.context.getSource(), message);
         }
         this.findState = FindState.END;
     }
@@ -252,13 +226,14 @@ public class ItemFindTask extends ServerTask {
         return false;
     }
 
-    private record Result(Item item, @Nullable UUID uuid, BlockPos blockPos,
-                          MutableText containerName, int count, boolean shulkerBox) {
+    private record Result(BlockPos blockPos, MutableText containerName, ItemStackStatistics statistics) {
         private MutableText toText() {
-            return TextUtils.translate("carpet.commands.finder.item.each",
+            return TextUtils.translate(
+                    "carpet.commands.finder.item.each",
                     TextConstants.blockPos(blockPos, Formatting.GREEN),
                     containerName,
-                    FinderCommand.showCount(item.getDefaultStack(), count, shulkerBox));
+                    statistics.getCountText()
+            );
         }
     }
 

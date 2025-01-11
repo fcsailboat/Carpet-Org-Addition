@@ -3,8 +3,6 @@ package org.carpetorgaddition.periodic.task.findtask;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
@@ -17,24 +15,34 @@ import net.minecraft.util.UserCache;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.periodic.task.ServerTask;
-import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.inventory.ImmutableInventory;
 import org.carpetorgaddition.util.inventory.SimulatePlayerInventory;
-import org.carpetorgaddition.util.wheel.Counter;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
+import org.carpetorgaddition.util.wheel.ItemStackStatistics;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class OfflinePlayerFindTask extends ServerTask {
+    /**
+     * 当前虚拟线程的数量
+     */
     private final AtomicInteger threadCount = new AtomicInteger();
+    /**
+     * 已找到的物品数量
+     */
     private final AtomicInteger itemCount = new AtomicInteger();
+    /**
+     * 在已找到的物品中，是否包含在嵌套的容器中找到的物品
+     */
     private final AtomicBoolean shulkerBox = new AtomicBoolean(false);
     private final CommandContext<ServerCommandSource> context;
     private final UserCache userCache;
@@ -113,23 +121,23 @@ public class OfflinePlayerFindTask extends ServerTask {
             if (this.player.server.getPlayerManager().getPlayer(gameProfile.getName()) != null) {
                 return;
             }
-            ArrayList<Result> results = new ArrayList<>();
+            // 从玩家NBT读取物品栏
+            NbtCompound nbt;
             try {
-                // 从玩家NBT读取物品栏
-                NbtCompound nbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
-                Inventory inventory = getInventory(nbt);
-                // 统计物品栏物品
-                count(results, inventory, gameProfile);
+                nbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
             } catch (IOException e) {
                 CarpetOrgAddition.LOGGER.warn("无法从文件读取玩家数据：", e);
                 return;
             }
-            if (results.isEmpty()) {
+            // 统计物品栏物品
+            Inventory inventory = getInventory(nbt);
+            Result result = count(gameProfile, inventory);
+            if (result.statistics().getSum() == 0) {
                 return;
             }
             try {
                 this.lock.lock();
-                this.list.addAll(results);
+                this.list.add(result);
             } finally {
                 this.lock.unlock();
             }
@@ -142,37 +150,14 @@ public class OfflinePlayerFindTask extends ServerTask {
     }
 
     // 统计物品数量
-    private void count(ArrayList<Result> results, Inventory inventory, GameProfile gameProfile) {
-        Counter<Item> counter = new Counter<>();
-        HashSet<Item> nesting = new HashSet<>();
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack itemStack = inventory.getStack(i);
-            if (itemStack.isEmpty()) {
-                continue;
-            }
-            if (this.predicate.test(itemStack)) {
-                counter.add(itemStack.getItem(), itemStack.getCount());
-            } else if (InventoryUtils.isShulkerBoxItem(itemStack)) {
-                ImmutableInventory shulkerBoxInventory = InventoryUtils.getInventory(itemStack);
-                for (ItemStack stack : shulkerBoxInventory) {
-                    if (this.predicate.test(stack)) {
-                        counter.add(stack.getItem(), stack.getCount());
-                        nesting.add(stack.getItem());
-                    }
-                }
-            }
-        }
-        if (counter.isEmpty()) {
-            return;
-        }
-        if (!nesting.isEmpty()) {
+    private Result count(GameProfile gameProfile, Inventory inventory) {
+        ItemStackStatistics statistics = new ItemStackStatistics(this.predicate);
+        statistics.statistics(inventory);
+        this.itemCount.addAndGet(statistics.getSum());
+        if (statistics.hasNestingItem()) {
             this.shulkerBox.set(true);
         }
-        for (Item item : counter) {
-            int count = counter.getCount(item);
-            this.itemCount.addAndGet(count);
-            results.add(new Result(gameProfile, item, count, nesting.contains(item)));
-        }
+        return new Result(gameProfile, statistics);
     }
 
     // 发送命令反馈
@@ -186,7 +171,7 @@ public class OfflinePlayerFindTask extends ServerTask {
             );
             return;
         }
-        this.list.sort((o1, o2) -> o2.count() - o1.count());
+        this.list.sort((o1, o2) -> o2.statistics().getSum() - o1.statistics().getSum());
         MutableText hoverPrompt = TextUtils.translate(
                 "carpet.commands.finder.item.offline_player.prompt",
                 this.getInventoryName()
@@ -230,7 +215,7 @@ public class OfflinePlayerFindTask extends ServerTask {
         playerName = TextUtils.hoverText(playerName, TextUtils.createText("UUID:" + result.gameProfile.getId().toString()));
         playerName = TextUtils.setColor(playerName, Formatting.GRAY);
         // 获取物品数量，如果包含在潜影盒中找到的物品，就设置物品为斜体
-        Text count = FinderCommand.showCount(result.item().getDefaultStack(), result.count, result.shulkerBox);
+        Text count = result.statistics().getCountText();
         MessageUtils.sendMessage(
                 this.context,
                 "carpet.commands.finder.item.offline_player.each",
@@ -267,7 +252,7 @@ public class OfflinePlayerFindTask extends ServerTask {
         return Objects.hashCode(player);
     }
 
-    private record Result(GameProfile gameProfile, Item item, int count, boolean shulkerBox) {
+    private record Result(GameProfile gameProfile, ItemStackStatistics statistics) {
     }
 
     private enum State {

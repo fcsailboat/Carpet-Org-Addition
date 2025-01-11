@@ -323,7 +323,6 @@
   "carpet.commands.xpTransfer.point": "将%s的%s点经验转移给%s",
   "carpet.commands.playerAction.set": "快速合成物品需要启用“Ctrl+Q合成修复”，点击%s启用规则",
   "carpet.commands.playerAction.info.stop": "%s没有任何动作",
-  "carpet.commands.playerAction.info.craft.item_tag": "物品标签",
   "carpet.commands.playerAction.info.craft.no_crafting_table": "%s没有打开%s",
   "carpet.commands.playerAction.info.craft.result": "%s正在合成%s:",
   "carpet.commands.playerAction.info.craft.state": "%s当前合成物品的状态:",

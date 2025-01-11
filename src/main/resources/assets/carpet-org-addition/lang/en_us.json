@@ -233,7 +233,6 @@
   "carpet.commands.xpTransfer.point": "Transfer experience from %1$s to%3$s, %2$s in total",
   "carpet.commands.playerAction.set": "Quick crafting needs ctrlQCraftingFix, click %s to activate",
   "carpet.commands.playerAction.info.stop": "%s has no actions",
-  "carpet.commands.playerAction.info.craft.item_tag": "Item tags",
   "carpet.commands.playerAction.info.craft.no_crafting_table": "%s isn't openning %s",
   "carpet.commands.playerAction.info.craft.result": "%s is crafting %s:",
   "carpet.commands.playerAction.info.craft.state": "Crafting status of %s:",

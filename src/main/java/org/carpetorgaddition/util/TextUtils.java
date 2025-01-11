@@ -170,6 +170,10 @@ public class TextUtils {
         return Text.literal(text);
     }
 
+    public static MutableText createText(Number number) {
+        return Text.literal(number.toString());
+    }
+
     /**
      * 创建一个不包含任何内容的可变文本对象
      */
