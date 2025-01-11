@@ -1,6 +1,7 @@
 package org.carpetorgaddition.periodic;
 
 import carpet.patches.EntityPlayerMPFake;
+import net.minecraft.server.ServerTickManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.periodic.navigator.NavigatorManager;
@@ -11,8 +12,10 @@ public class PlayerPeriodicTaskManager {
     @Nullable
     private final FakePlayerActionManager fakePlayerActionManager;
     private final NavigatorManager navigatorManager;
+    private final ServerPlayerEntity player;
 
     public PlayerPeriodicTaskManager(ServerPlayerEntity player) {
+        this.player = player;
         if (player instanceof EntityPlayerMPFake fakePlayer) {
             this.fakePlayerActionManager = new FakePlayerActionManager(fakePlayer);
         } else {
@@ -23,7 +26,10 @@ public class PlayerPeriodicTaskManager {
 
     public void tick() {
         if (this.fakePlayerActionManager != null) {
-            this.fakePlayerActionManager.tick();
+            ServerTickManager tickManager = this.player.server.getTickManager();
+            if (tickManager.shouldTick()) {
+                this.fakePlayerActionManager.tick();
+            }
         }
         this.navigatorManager.tick();
     }

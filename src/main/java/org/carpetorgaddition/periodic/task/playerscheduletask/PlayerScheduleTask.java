@@ -23,6 +23,11 @@ public abstract class PlayerScheduleTask extends ServerTask {
     }
 
     @Override
+    public boolean constantSpeed() {
+        return false;
+    }
+
+    @Override
     public int hashCode() {
         return this.getPlayerName().hashCode();
     }

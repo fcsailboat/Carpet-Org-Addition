@@ -2,6 +2,7 @@ package org.carpetorgaddition.periodic;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerTickManager;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.periodic.express.ExpressManager;
 import org.carpetorgaddition.periodic.task.ServerTaskManager;
@@ -15,6 +16,7 @@ public class ServerPeriodicTaskManager {
      * 快递管理器
      */
     private final ExpressManager expressManager;
+    private final MinecraftServer server;
     /**
      * 服务器任务管理器
      */
@@ -22,11 +24,13 @@ public class ServerPeriodicTaskManager {
 
     public ServerPeriodicTaskManager(@NotNull MinecraftServer server) {
         this.expressManager = new ExpressManager(server);
+        this.server = server;
     }
 
     public void tick() {
         this.expressManager.tick();
-        this.serverTaskManager.tick();
+        ServerTickManager tickManager = this.server.getTickManager();
+        this.serverTaskManager.tick(tickManager);
     }
 
     public ExpressManager getExpressManager() {

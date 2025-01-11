@@ -1,6 +1,7 @@
 package org.carpetorgaddition.periodic.task;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.server.ServerTickManager;
 import org.carpetorgaddition.util.CommandUtils;
 
 import java.util.HashSet;
@@ -30,8 +31,8 @@ public class ServerTaskManager {
     /**
      * 执行每一条任务，并删除已经结束的任务
      */
-    public void tick() {
-        this.tasks.removeIf(ServerTask::execute);
+    public void tick(ServerTickManager tickManager) {
+        this.tasks.removeIf(task -> task.execute(tickManager));
     }
 
     public Stream<ServerTask> stream() {

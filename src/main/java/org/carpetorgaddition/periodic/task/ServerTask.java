@@ -1,5 +1,6 @@
 package org.carpetorgaddition.periodic.task;
 
+import net.minecraft.server.ServerTickManager;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.exception.TaskExecutionException;
 
@@ -24,13 +25,17 @@ public abstract class ServerTask {
      *
      * @return 当前任务是否已经执行结束
      */
-    public final boolean execute() {
+    public final boolean execute(ServerTickManager tickManager) {
         if (this.remove) {
             return true;
         }
         try {
-            this.tick();
-            return this.stopped();
+            if (tickManager.shouldTick() || this.constantSpeed()) {
+                this.tick();
+                return this.stopped();
+            } else {
+                return false;
+            }
         } catch (TaskExecutionException e) {
             e.disposal();
         } catch (RuntimeException e) {
@@ -49,6 +54,13 @@ public abstract class ServerTask {
 
     @Override
     public abstract int hashCode();
+
+    /**
+     * @return 此任务是否不受/tick命令影响
+     */
+    public boolean constantSpeed() {
+        return true;
+    }
 
     /**
      * 将当前任务标记为已删除
