@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 
-// TODO 需要测试命令反馈
 public class ItemFindTask extends ServerTask {
     private final World world;
     private final SelectionArea selectionArea;
@@ -149,6 +148,9 @@ public class ItemFindTask extends ServerTask {
         // 是否有物品是在潜影盒中找到的
         ItemStackStatistics statistics = new ItemStackStatistics(this.predicate);
         statistics.statistics(inventory);
+        if (statistics.getSum() == 0) {
+            return;
+        }
         this.count += statistics.getSum();
         if (statistics.hasNestingItem()) {
             this.shulkerBox = true;

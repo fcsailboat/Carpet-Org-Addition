@@ -181,27 +181,27 @@ public class FakePlayerSerial {
         String pos = MathUtils.numberToTwoDecimalString(this.playerPos.getX()) + " "
                 + MathUtils.numberToTwoDecimalString(this.playerPos.getY()) + " "
                 + MathUtils.numberToTwoDecimalString(this.playerPos.getZ());
-        build.appendLine("carpet.commands.playerManager.info.pos",
+        build.appendTranslateLine("carpet.commands.playerManager.info.pos",
                 pos);
         // 获取朝向
-        build.appendLine("carpet.commands.playerManager.info.direction",
+        build.appendTranslateLine("carpet.commands.playerManager.info.direction",
                 MathUtils.numberToTwoDecimalString(this.yaw),
                 MathUtils.numberToTwoDecimalString(this.pitch));
         // 维度
-        build.appendLine("carpet.commands.playerManager.info.dimension", switch (this.dimension) {
+        build.appendTranslateLine("carpet.commands.playerManager.info.dimension", switch (this.dimension) {
             case "minecraft:overworld", "overworld" -> TextConstants.OVERWORLD;
             case "minecraft:the_nether", "the_nether" -> TextConstants.THE_NETHER;
             case "minecraft:the_end", "the_end" -> TextConstants.THE_END;
             default -> TextUtils.createText(dimension);
         });
         // 游戏模式
-        build.appendLine("carpet.commands.playerManager.info.gamemode", this.gameMode.getTranslatableName());
+        build.appendTranslateLine("carpet.commands.playerManager.info.gamemode", this.gameMode.getTranslatableName());
         // 是否飞行
-        build.appendLine("carpet.commands.playerManager.info.flying", TextConstants.getBoolean(this.flying));
+        build.appendTranslateLine("carpet.commands.playerManager.info.flying", TextConstants.getBoolean(this.flying));
         // 是否潜行
-        build.appendLine("carpet.commands.playerManager.info.sneaking", TextConstants.getBoolean(this.sneaking));
+        build.appendTranslateLine("carpet.commands.playerManager.info.sneaking", TextConstants.getBoolean(this.sneaking));
         // 是否自动登录
-        build.append("carpet.commands.playerManager.info.autologin", TextConstants.getBoolean(this.autologin));
+        build.appendTranslate("carpet.commands.playerManager.info.autologin", TextConstants.getBoolean(this.autologin));
         if (this.interactiveAction.hasAction()) {
             build.newLine().append(this.interactiveAction.toText());
         }
@@ -210,7 +210,7 @@ public class FakePlayerSerial {
         }
         if (this.annotation.hasContent()) {
             // 添加注释
-            build.newLine().append("carpet.commands.playerManager.info.annotation", this.annotation.getText());
+            build.newLine().appendTranslate("carpet.commands.playerManager.info.annotation", this.annotation.getText());
         }
         return build.toLine();
     }

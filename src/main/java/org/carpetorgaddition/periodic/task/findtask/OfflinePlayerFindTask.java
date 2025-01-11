@@ -131,10 +131,16 @@ public class OfflinePlayerFindTask extends ServerTask {
             }
             // 统计物品栏物品
             Inventory inventory = getInventory(nbt);
-            Result result = count(gameProfile, inventory);
-            if (result.statistics().getSum() == 0) {
+            ItemStackStatistics statistics = new ItemStackStatistics(this.predicate);
+            statistics.statistics(inventory);
+            if (statistics.getSum() == 0) {
                 return;
             }
+            this.itemCount.addAndGet(statistics.getSum());
+            if (statistics.hasNestingItem()) {
+                this.shulkerBox.set(true);
+            }
+            Result result = new Result(gameProfile, statistics);
             try {
                 this.lock.lock();
                 this.list.add(result);
@@ -150,15 +156,6 @@ public class OfflinePlayerFindTask extends ServerTask {
     }
 
     // 统计物品数量
-    private Result count(GameProfile gameProfile, Inventory inventory) {
-        ItemStackStatistics statistics = new ItemStackStatistics(this.predicate);
-        statistics.statistics(inventory);
-        this.itemCount.addAndGet(statistics.getSum());
-        if (statistics.hasNestingItem()) {
-            this.shulkerBox.set(true);
-        }
-        return new Result(gameProfile, statistics);
-    }
 
     // 发送命令反馈
     private void sendFeedback() {

@@ -85,13 +85,13 @@ public class EntityPlayerActionPackSerial {
         // 左键行为
         Action attack = this.actionMap.get(ActionType.ATTACK);
         if (attack != null) {
-            builder.append("carpet.commands.playerManager.info.left_click");
+            builder.appendTranslate("carpet.commands.playerManager.info.left_click");
             if (((ActionAccessor) attack).isContinuous()) {
                 // 左键长按
-                builder.newLine().indentation().append("carpet.commands.playerManager.info.continuous");
+                builder.newLine().indentation().appendTranslate("carpet.commands.playerManager.info.continuous");
             } else {
                 // 左键单击
-                builder.newLine().indentation().append("carpet.commands.playerManager.info.interval", attack.interval);
+                builder.newLine().indentation().appendTranslate("carpet.commands.playerManager.info.interval", attack.interval);
             }
         }
         // 右键行为
@@ -101,13 +101,13 @@ public class EntityPlayerActionPackSerial {
                 // 如果左键动作不为null，则在添加右键动作时换行，判断不应该在if(attack != null)内，因为可能没有右键动作
                 builder.newLine();
             }
-            builder.append("carpet.commands.playerManager.info.right_click");
+            builder.appendTranslate("carpet.commands.playerManager.info.right_click");
             if (((ActionAccessor) use).isContinuous()) {
                 // 右键长按
-                builder.newLine().indentation().append("carpet.commands.playerManager.info.continuous");
+                builder.newLine().indentation().appendTranslate("carpet.commands.playerManager.info.continuous");
             } else {
                 // 右键单击
-                builder.newLine().indentation().append("carpet.commands.playerManager.info.interval", use.interval);
+                builder.newLine().indentation().appendTranslate("carpet.commands.playerManager.info.interval", use.interval);
             }
         }
         return builder.toLine();

@@ -81,7 +81,7 @@ public class FakePlayerActionSerial {
 
     public Text toText() {
         TextBuilder builder = new TextBuilder();
-        builder.append("carpet.commands.playerManager.info.action")
+        builder.appendTranslate("carpet.commands.playerManager.info.action")
                 .newLine()
                 .indentation()
                 .append(this.action.getDisplayName());

@@ -39,14 +39,14 @@ public class TextBuilder {
     /**
      * 追加文本
      */
-    public TextBuilder append(String key, Object... args) {
+    public TextBuilder appendTranslate(String key, Object... args) {
         return this.append(TextUtils.translate(key, args));
     }
 
     /**
      * 追加文本并换行
      */
-    public TextBuilder appendLine(String key, Object... args) {
+    public TextBuilder appendTranslateLine(String key, Object... args) {
         this.append(TextUtils.translate(key, args));
         return this.append(NEW_LINE);
     }

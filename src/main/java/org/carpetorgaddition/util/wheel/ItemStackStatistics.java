@@ -108,13 +108,20 @@ public class ItemStackStatistics {
     public Text getCountText() {
         TextBuilder builder = new TextBuilder();
         for (Item item : this.counter) {
-            MutableText text = itemCount(this.counter.getCount(item), item.getMaxCount());
-            text = this.nestingItem.contains(item) ? TextUtils.toItalic(text) : text;
-            builder.append("container.shulkerBox.itemCount", item.getName(), text).newLine();
+            MutableText itemCount = itemCount(this.counter.getCount(item), item.getMaxCount());
+            if (this.nestingItem.contains(item)) {
+                MutableText line = new TextBuilder().append(item.getName()).blank().append(itemCount).toLine();
+                builder.append(TextUtils.toItalic(line));
+            } else {
+                builder.append(item.getName()).blank().append(itemCount);
+            }
+            builder.newLine();
         }
         builder.removeLast();
         MutableText text = TextUtils.createText(Integer.toString(this.getSum()));
-        return TextUtils.hoverText(text, builder.toLine());
+        MutableText result = TextUtils.hoverText(text, builder.toLine());
+        return this.nestingItem.isEmpty() ? result : TextUtils.toItalic(result);
+
     }
 
     private MutableText itemCount(int count, int maxCount) {
