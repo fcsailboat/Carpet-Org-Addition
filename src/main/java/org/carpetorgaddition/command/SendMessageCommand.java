@@ -21,7 +21,7 @@ import org.carpetorgaddition.util.constant.TextConstants;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class SendMessageCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandBuildContext) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
         dispatcher.register(CommandManager.literal("sendMessage")
                 .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandSendMessage))
                 .then(CommandManager.literal("copy")
@@ -44,7 +44,7 @@ public class SendMessageCommand {
                                 .executes(SendMessageCommand::sendFormattingText)))
                 .then(CommandManager.literal("item")
                         .executes(context -> SendMessageCommand.sendItemHoverableText(context, true))
-                        .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
+                        .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandRegistryAccess))
                                 .executes(context -> sendItemHoverableText(context, false)))));
     }
 

@@ -32,7 +32,6 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     // 当玩家登录时
     @Override
     public void onPlayerLoggedIn(ServerPlayerEntity player) {
-        CarpetExtension.super.onPlayerLoggedIn(player);
         // 假玩家生成时不保留上一次的击退，着火时间，摔落高度
         if (CarpetOrgAdditionSettings.fakePlayerSpawnNoKnockback && player instanceof EntityPlayerMPFake) {
             // 清除速度
@@ -54,7 +53,6 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     // 服务器启动时调用
     @Override
     public void onServerLoaded(MinecraftServer server) {
-        CarpetExtension.super.onServerLoaded(server);
         // 服务器启动时自动将旧的路径点替换成新的
         Waypoint.replaceWaypoint(server);
     }
@@ -79,7 +77,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
 
     // 注册命令
     @Override
-    public void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandBuildContext) {
-        RegisterCarpetCommands.registerCarpetCommands(dispatcher, commandBuildContext);
+    public void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
+        RegisterCarpetCommands.registerCarpetCommands(dispatcher, commandRegistryAccess);
     }
 }
