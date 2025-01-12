@@ -62,12 +62,12 @@ public class FakePlayerCraft {
             // 依次获取每一个合成材料和遍历合成格
             for (int index = 1; index <= 9; index++) {
                 //依次获取每一个合成材料
-                ItemStackPredicate matcher = items[index - 1];
+                ItemStackPredicate predicate = items[index - 1];
                 Slot slot = craftingScreenHandler.getSlot(index);
                 // 如果合成格的指定槽位不是所需要合成材料，则丢出该物品
                 if (slot.hasStack()) {
                     ItemStack itemStack = slot.getStack();
-                    if (matcher.test(itemStack)) {
+                    if (predicate.test(itemStack)) {
                         // 合成表格上已经有正确的合成材料，找到正确的合成材料次数自增
                         successCount++;
                     } else {
@@ -75,7 +75,7 @@ public class FakePlayerCraft {
                     }
                 } else {
                     // 如果指定合成材料是空气，则不需要遍历物品栏，直接跳过该物品，并增加找到正确合成材料的次数
-                    if (matcher.isEmpty()) {
+                    if (predicate.isEmpty()) {
                         successCount++;
                         continue;
                     }
@@ -83,7 +83,7 @@ public class FakePlayerCraft {
                     int size = craftingScreenHandler.slots.size();
                     for (int inventoryIndex = 10; inventoryIndex < size; inventoryIndex++) {
                         ItemStack itemStack = craftingScreenHandler.getSlot(inventoryIndex).getStack();
-                        if (matcher.test(itemStack)) {
+                        if (predicate.test(itemStack)) {
                             // 光标拾取和移动物品
                             if (FakePlayerUtils.withKeepPickupAndMoveItemStack(craftingScreenHandler,
                                     inventoryIndex, index, fakePlayer)) {
@@ -93,7 +93,7 @@ public class FakePlayerCraft {
                             }
                         } else if (CarpetOrgAdditionSettings.fakePlayerCraftPickItemFromShulkerBox
                                 && InventoryUtils.isShulkerBoxItem(itemStack)) {
-                            ItemStack contentItemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, matcher);
+                            ItemStack contentItemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, predicate);
                             if (!contentItemStack.isEmpty()) {
                                 // 丢弃光标上的物品（如果有）
                                 FakePlayerUtils.dropCursorStack(craftingScreenHandler, fakePlayer);

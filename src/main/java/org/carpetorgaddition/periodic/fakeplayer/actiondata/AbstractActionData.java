@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public abstract class AbstractActionData {
     public abstract ArrayList<MutableText> info(EntityPlayerMPFake fakePlayer);
 
-    // 获取物品堆栈的可变文本形式：物品名称x堆叠数量
+    // 获取物品堆栈的可变文本形式：物品名称*堆叠数量
     protected static MutableText getWithCountHoverText(ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return TextUtils.hoverText(Text.literal("[A]"), TextUtils.appendAll(Items.AIR.getName()), Formatting.DARK_GRAY);
