@@ -67,8 +67,7 @@ public class MessageUtils {
      * @param player  要发送文本消息的玩家
      * @param message 发送文本消息的内容
      */
-    // TODO 改为服务器玩家
-    public static void sendMessage(PlayerEntity player, Text message) {
+    public static void sendMessage(ServerPlayerEntity player, Text message) {
         player.sendMessage(message);
     }
 
@@ -130,7 +129,6 @@ public class MessageUtils {
      * @param player  要发送文本消息的玩家
      * @param message 发送文本消息的内容
      */
-    // TODO 改为服务器玩家
     public static void sendMessageToHud(PlayerEntity player, Text message) {
         player.sendMessage(message, true);
     }

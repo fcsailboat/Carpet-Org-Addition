@@ -78,7 +78,7 @@ public class NavigatorCommand {
         // 如果目标是玩家，广播消息
         MutableText text = TextUtils.translate(START_NAVIGATION, player.getDisplayName(), entity.getDisplayName());
         PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(entity, isContinue);
-        if (shouldBeBroadcasted(entity, player)) {
+        if (shouldBeBroadcast(entity, player)) {
             // 设置为斜体淡灰色
             MessageUtils.broadcastMessage(context.getSource().getServer(), TextUtils.toGrayItalic(text));
         } else {
@@ -125,7 +125,7 @@ public class NavigatorCommand {
             }
             PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(entity, false);
             MutableText text = TextUtils.translate(START_NAVIGATION, player.getDisplayName(), entity.getDisplayName());
-            if (shouldBeBroadcasted(entity, player)) {
+            if (shouldBeBroadcast(entity, player)) {
                 // 将字体设置为灰色斜体
                 text = TextUtils.toItalic(TextUtils.setColor(text, Formatting.GRAY));
                 MessageUtils.broadcastMessage(context.getSource().getServer(), text);
@@ -139,7 +139,7 @@ public class NavigatorCommand {
     }
 
     // 是否应该广播导航消息
-    private static boolean shouldBeBroadcasted(Entity entity, ServerPlayerEntity player) {
+    private static boolean shouldBeBroadcast(Entity entity, ServerPlayerEntity player) {
         if (entity == player || entity instanceof EntityPlayerMPFake) {
             return false;
         }
