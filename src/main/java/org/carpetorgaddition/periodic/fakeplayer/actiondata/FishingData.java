@@ -3,13 +3,13 @@ package org.carpetorgaddition.periodic.fakeplayer.actiondata;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.text.MutableText;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.wheel.SingleThingCounter;
 
 import java.util.ArrayList;
 
 public class FishingData extends AbstractActionData {
-    private final SingleThingCounter timer = new SingleThingCounter();
+    private final MutableInt timer = new MutableInt();
 
     public FishingData() {
     }
@@ -26,7 +26,7 @@ public class FishingData extends AbstractActionData {
         return new JsonObject();
     }
 
-    public SingleThingCounter getTimer() {
+    public MutableInt getTimer() {
         return timer;
     }
 }

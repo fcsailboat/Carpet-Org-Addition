@@ -7,23 +7,23 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.carpetorgaddition.mixin.command.FishingBobberEntityAccessor;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.FishingData;
-import org.carpetorgaddition.util.wheel.SingleThingCounter;
 
 public class FakePlayerFishing {
     private FakePlayerFishing() {
     }
 
     public static void fishing(FishingData fishingData, EntityPlayerMPFake fakePlayer) {
-        SingleThingCounter timer = fishingData.getTimer();
+        MutableInt timer = fishingData.getTimer();
         // 检查玩家是否持有钓鱼竿
         if (pickFishingRod(fakePlayer)) {
             // 检查玩家是否抛出钓竿
             FishingBobberEntity fishHook = fakePlayer.fishHook;
             if (fishHook == null) {
                 // 检查计时器是否清零
-                if (timer.isZero()) {
+                if (timer.getValue() == 0) {
                     // 右键抛出钓鱼竿
                     use(fakePlayer);
                 } else {
@@ -39,7 +39,7 @@ public class FakePlayerFishing {
                     // 右键收杆
                     use(fakePlayer);
                     // 设置5个游戏刻后重新抛竿
-                    timer.set(5);
+                    timer.setValue(5);
                 }
             }
         }

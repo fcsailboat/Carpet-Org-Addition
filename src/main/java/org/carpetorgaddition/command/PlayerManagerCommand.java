@@ -92,6 +92,7 @@ public class PlayerManagerCommand {
                         .executes(context -> list(context, s -> true))
                         .then(CommandManager.argument("filter", StringArgumentType.string())
                                 .executes(context -> list(context, s -> s.contains(StringArgumentType.getString(context, "filter").toLowerCase(Locale.ROOT))))))
+                // TODO 改为remove
                 .then(CommandManager.literal("delete")
                         .then(CommandManager.argument("name", StringArgumentType.string())
                                 .suggests(defaultSuggests())

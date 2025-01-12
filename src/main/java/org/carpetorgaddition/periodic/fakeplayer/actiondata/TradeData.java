@@ -5,9 +5,9 @@ import com.google.gson.JsonObject;
 import net.minecraft.screen.MerchantScreenHandler;
 import net.minecraft.text.MutableText;
 import net.minecraft.village.TradeOffer;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerTrade;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.wheel.SingleThingCounter;
 
 import java.util.ArrayList;
 
@@ -25,12 +25,12 @@ public class TradeData extends AbstractActionData {
     /**
      * 虚空交易的计时器
      */
-    private final SingleThingCounter timer = new SingleThingCounter();
+    private final MutableInt timer = new MutableInt();
 
     public TradeData(int index, boolean voidTrade) {
         this.index = index;
         this.voidTrade = voidTrade;
-        timer.set(FakePlayerTrade.TRADE_WAIT_TIME);
+        timer.setValue(FakePlayerTrade.TRADE_WAIT_TIME);
     }
 
     public static TradeData load(JsonObject json) {
@@ -86,7 +86,7 @@ public class TradeData extends AbstractActionData {
         return voidTrade;
     }
 
-    public SingleThingCounter getTimer() {
+    public MutableInt getTimer() {
         return timer;
     }
 }

@@ -50,6 +50,7 @@ public class LocationsCommand {
                                         .executes(context -> addAnotherPos(context, null))
                                         .then(CommandManager.argument("anotherPos", BlockPosArgumentType.blockPos())
                                                 .executes(context -> addAnotherPos(context, BlockPosArgumentType.getBlockPos(context, "anotherPos")))))))
+                // TODO 改为remove
                 .then(CommandManager.literal("delete")
                         .then(CommandManager.argument("name", StringArgumentType.string())
                                 .suggests(suggestion())

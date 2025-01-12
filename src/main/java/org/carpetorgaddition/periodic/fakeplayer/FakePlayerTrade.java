@@ -12,11 +12,11 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.village.Merchant;
 import net.minecraft.village.TradeOffer;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.InfiniteLoopException;
 import org.carpetorgaddition.mixin.rule.MerchantScreenHandlerAccessor;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.TradeData;
-import org.carpetorgaddition.util.wheel.SingleThingCounter;
 
 import java.util.UUID;
 
@@ -34,7 +34,7 @@ public class FakePlayerTrade {
         if (fakePlayer.currentScreenHandler instanceof MerchantScreenHandler merchantScreenHandler) {
             boolean voidTrade = tradeData.isVoidTrade();
             // 获取计数器，记录村民距离上次被加载的时间是否超过了5游戏刻（区块卸载后村民似乎不会立即卸载）
-            SingleThingCounter timer = tradeData.getTimer();
+            MutableInt timer = tradeData.getTimer();
             if (voidTrade) {
                 // 获取正在接受交易的村民
                 MerchantScreenHandlerAccessor accessor = (MerchantScreenHandlerAccessor) merchantScreenHandler;
@@ -42,18 +42,18 @@ public class FakePlayerTrade {
                 if (merchant instanceof MerchantEntity merchantEntity) {
                     // 是否应该等待区块卸载
                     if (shouldWait(merchantEntity)) {
-                        timer.set(TRADE_WAIT_TIME);
+                        timer.setValue(TRADE_WAIT_TIME);
                         return;
                     }
                 }
                 // 检查计数器是否归零
-                if (timer.nonZero()) {
+                if (timer.getValue() != 0) {
                     // 如果没有归零，计数器递减，然后结束方法
                     timer.decrement();
                     return;
                 } else {
                     // 如果归零，重置计数器，然后开始交易
-                    timer.set(TRADE_WAIT_TIME);
+                    timer.setValue(TRADE_WAIT_TIME);
                 }
             }
             ServerCommandSource source = fakePlayer.getCommandSource();
