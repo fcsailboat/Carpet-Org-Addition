@@ -25,7 +25,6 @@ import java.util.Optional;
 public class CarpetOrgAdditionClientRegister {
     public static void register() {
         registerCommand();
-        registerCommandArgument();
         registerC2SNetworkPack();
         registerNetworkPackReceiver();
         registerRender();
@@ -40,14 +39,6 @@ public class CarpetOrgAdditionClientRegister {
         HighlightCommand.register();
         // 字典命令
         DictionaryCommand.register();
-    }
-
-    /**
-     * 注册客户端命令参数
-     */
-    private static void registerCommandArgument() {
-        // 客户端方块坐标命令参数
-        ClientBlockPosArgumentType.register();
     }
 
     /**

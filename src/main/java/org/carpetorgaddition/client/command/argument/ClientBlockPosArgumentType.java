@@ -22,14 +22,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ClientBlockPosArgumentType implements ArgumentType<BlockPos> {
-    private static final Identifier IDENTIFIER = Identifier.of(CarpetOrgAddition.MOD_ID, "client_block_pos");
-
-    public static void register() {
-        ArgumentTypeRegistry.registerArgumentType(IDENTIFIER,
-                ClientBlockPosArgumentType.class,
-                ConstantArgumentSerializer.of(ClientBlockPosArgumentType::new));
-    }
-
     private static final Collection<String> EXAMPLES = List.of("0 0 0");
 
     private ClientBlockPosArgumentType() {
