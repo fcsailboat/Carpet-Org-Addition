@@ -214,6 +214,8 @@
   "carpet.rule.autoSyncPlayerStatus.desc": "每30游戏刻自动同步一次物品栏和周围方块的状态",
   "carpet.rule.finderCommandSearchWorldEater.name": "查找可能影响世吞运行的方块",
   "carpet.rule.finderCommandSearchWorldEater.desc": "允许/finder查找可能影响世吞运行的方块",
+  "carpet.rule.recordPlayerCommand.name": "记录玩家命令",
+  "carpet.rule.recordPlayerCommand.desc": "在服务器控制台输出玩家执行的命令",
   "carpet.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",
   "carpet.rule.message.CCEUpdateSuppression": "你不能打开用于更新抑制的潜影盒",
   "carpet.rule.validate.invalid_value": "规则“%s”值无效：%s",

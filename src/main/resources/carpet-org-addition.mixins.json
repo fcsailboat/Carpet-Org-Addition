@@ -25,6 +25,7 @@
     "rule.BatEntityMixin",
     "rule.BeaconBlockEntityMixin",
     "rule.BiomeMixin",
+    "rule.CommandManagerMixin",
     "rule.ComparatorBlockMixin",
     "rule.ContainerComponentAccessor",
     "rule.ContainerComponentMixin",

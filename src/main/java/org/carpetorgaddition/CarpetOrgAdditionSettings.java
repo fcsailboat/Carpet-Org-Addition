@@ -478,5 +478,8 @@ public class CarpetOrgAdditionSettings {
     @Hidden
     @Rule(categories = {ORG, RuleCategory.COMMAND, Hidden})
     public static boolean finderCommandSearchWorldEater = false;
-    // TODO 记录玩家命令规则
+
+    // 记录玩家命令
+    @Rule(categories = {ORG, RuleCategory.COMMAND, RuleCategory.FEATURE})
+    public static boolean recordPlayerCommand = false;
 }

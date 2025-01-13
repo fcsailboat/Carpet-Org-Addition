@@ -54,9 +54,9 @@ public class PlayerActionCommand {
                                 .then(CommandManager.argument("filter", ItemStackArgumentType.itemStack(commandRegistryAccess))
                                         .executes(context -> setClean(context, false))))
                         .then(CommandManager.literal("fill")
-                                .executes(context -> setFIll(context, true))
+                                .executes(context -> setFill(context, true))
                                 .then(CommandManager.argument("filter", ItemStackArgumentType.itemStack(commandRegistryAccess))
-                                        .executes(context -> setFIll(context, false))))
+                                        .executes(context -> setFill(context, false))))
                         .then(CommandManager.literal("stop")
                                 .executes(PlayerActionCommand::setStop))
                         .then(CommandManager.literal("craft")
@@ -151,7 +151,7 @@ public class PlayerActionCommand {
     }
 
     // 设置填充潜影盒
-    private static int setFIll(CommandContext<ServerCommandSource> context, boolean allItem) throws CommandSyntaxException {
+    private static int setFill(CommandContext<ServerCommandSource> context, boolean allItem) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         if (allItem) {
