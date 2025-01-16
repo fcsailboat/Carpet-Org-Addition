@@ -10,6 +10,8 @@ import org.carpetorgaddition.util.wheel.TextBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class TextUtils {
@@ -27,11 +29,11 @@ public class TextUtils {
     public static MutableText suggest(@NotNull MutableText text, @Nullable String input, @Nullable Text hoverText, @Nullable Formatting color) {
         if (input != null) {
             //添加单击事件
-            text.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, input)));
+            text.styled(style -> style.withClickEvent(new ClickEvent.SuggestCommand(input)));
         }
         if (hoverText != null) {
             //添加鼠标悬停事件
-            text.styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+            text.styled(style -> style.withHoverEvent(new HoverEvent.ShowText(hoverText)));
         }
         if (color != null) {
             text.styled(style -> style.withColor(color));
@@ -51,10 +53,10 @@ public class TextUtils {
     public static MutableText copy(@NotNull String original, @Nullable String copy, @Nullable Text hoverText, @Nullable Formatting color) {
         MutableText text = Text.literal(original);
         if (copy != null) {
-            text.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copy)));
+            text.styled(style -> style.withClickEvent(new ClickEvent.CopyToClipboard(copy)));
         }
         if (hoverText != null) {
-            text.styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+            text.styled(style -> style.withHoverEvent(new HoverEvent.ShowText(hoverText)));
         }
         if (color != null) {
             text.styled(style -> style.withColor(color));
@@ -76,10 +78,16 @@ public class TextUtils {
         //添加下划线
         text.styled(style -> style.withUnderline(true));
         if (url != null) {
-            text.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
+            try {
+                URI uRI = new URI(url);
+                text.styled(style -> style.withClickEvent(new ClickEvent.OpenUrl(uRI)));
+            } catch (URISyntaxException e) {
+                MutableText translate = TextUtils.translate("carpet.text.url.invalid");
+                text.styled(style -> style.withHoverEvent(new HoverEvent.ShowText(translate)));
+            }
         }
         if (hoverText != null) {
-            text.styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(hoverText))));
+            text.styled(style -> style.withHoverEvent(new HoverEvent.ShowText(Text.literal(hoverText))));
         }
         if (color != null) {
             text.styled(style -> style.withColor(color));
@@ -101,9 +109,9 @@ public class TextUtils {
         // 添加下划线
         text.styled(style -> style.withUnderline(underline));
         // 点击后执行命令
-        text.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)));
+        text.styled(style -> style.withClickEvent(new ClickEvent.RunCommand(command)));
         if (hoverText != null) {
-            text.styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+            text.styled(style -> style.withHoverEvent(new HoverEvent.ShowText(hoverText)));
         }
         if (color != null) {
             text.styled(style -> style.withColor(color));
@@ -118,7 +126,7 @@ public class TextUtils {
      * @param hover 显示在文本上的悬浮文字
      */
     public static MutableText hoverText(String text, String hover) {
-        return Text.literal(text).styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(hover))));
+        return Text.literal(text).styled(style -> style.withHoverEvent(new HoverEvent.ShowText(Text.literal(hover))));
     }
 
     public static MutableText hoverText(MutableText text, String hover) {
@@ -126,7 +134,7 @@ public class TextUtils {
     }
 
     public static MutableText hoverText(String str, Text hover) {
-        return createText(str).styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
+        return createText(str).styled(style -> style.withHoverEvent(new HoverEvent.ShowText(hover)));
     }
 
     public static MutableText hoverText(Text text, Text hover) {
@@ -134,7 +142,7 @@ public class TextUtils {
     }
 
     public static MutableText hoverText(MutableText initialText, Text hover, @Nullable Formatting color) {
-        initialText.styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
+        initialText.styled(style -> style.withHoverEvent(new HoverEvent.ShowText(hover)));
         if (color != null) {
             initialText.styled(style -> style.withColor(color));
         }

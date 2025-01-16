@@ -20,7 +20,7 @@ public class FarmlandBlockMixin extends Block {
 
     //耕地防踩踏
     @Inject(method = "onLandedUpon", at = @At("HEAD"), cancellable = true)
-    private void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance, CallbackInfo ci) {
+    private void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, double fallDistance, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.farmlandPreventStepping) {
             super.onLandedUpon(world, state, pos, entity, fallDistance);
             ci.cancel();

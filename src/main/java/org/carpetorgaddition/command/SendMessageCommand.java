@@ -2,12 +2,14 @@ package org.carpetorgaddition.command;
 
 import carpet.utils.CommandHelper;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ColorArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
+import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -29,7 +31,7 @@ public class SendMessageCommand {
                                 .executes(SendMessageCommand::sendReplicableText)))
                 .then(CommandManager.literal("url")
                         .then(CommandManager.argument("url", StringArgumentType.string())
-                                .executes(SendMessageCommand::sendClickableLink)))
+                                .executes(context -> sendClickableLink(context, commandBuildContext))))
                 .then(CommandManager.literal("location")
                         .executes(SendMessageCommand::sendSelfLocation))
                 .then(CommandManager.literal("color")
@@ -61,11 +63,19 @@ public class SendMessageCommand {
     }
 
     //发送可点击链接
-    private static int sendClickableLink(CommandContext<ServerCommandSource> context) {
+    private static int sendClickableLink(CommandContext<ServerCommandSource> context, CommandRegistryAccess commandBuildContext) throws CommandSyntaxException {
         //获取命令来源，并非空判断
         ServerCommandSource source = context.getSource();
         //创建可变文本对象
         String text = StringArgumentType.getString(context, "url");
+        TextArgumentType textArgumentType = TextArgumentType.text(commandBuildContext);
+        StringReader reader = new StringReader("{text:'',click_event:{action:'open_url',url:'%s'}}".formatted(text));
+        // 阻止发送无法解析的网页链接文本
+        try {
+            textArgumentType.parse(reader);
+        } catch (CommandSyntaxException e) {
+            throw CommandUtils.createException(e, "carpet.text.url.invalid");
+        }
         MutableText url = TextUtils.url(text, text, TextUtils.translate("carpet.commands.sendMessage.url.click_open_url").getString(), null);
         MessageUtils.broadcastMessage(source, appendPlayerName(source, url));
         return 1;

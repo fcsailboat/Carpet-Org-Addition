@@ -49,9 +49,9 @@ public class TextConstants {
     public static MutableText blockPos(BlockPos blockPos, @Nullable Formatting color) {
         MutableText pos = simpleBlockPos(blockPos);
         //添加单击事件，复制方块坐标
-        pos.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, WorldUtils.toPosString(blockPos))));
+        pos.styled(style -> style.withClickEvent(new ClickEvent.CopyToClipboard(WorldUtils.toPosString(blockPos))));
         //添加光标悬停事件：单击复制到剪贴板
-        pos.styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.translate("chat.copy.click"))));
+        pos.styled(style -> style.withHoverEvent(new HoverEvent.ShowText(TextUtils.translate("chat.copy.click"))));
         if (color != null) {
             //修改文本颜色
             pos.styled(style -> style.withColor(color));

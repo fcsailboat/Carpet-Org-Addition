@@ -80,7 +80,7 @@ public class PlayerToolsCommand {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         ServerPlayerEntity fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         // 在假玩家位置播放潜影贝传送音效
-        fakePlayer.getWorld().playSound(null, fakePlayer.prevX, fakePlayer.prevY, fakePlayer.prevZ,
+        fakePlayer.getWorld().playSound(null, fakePlayer.getX(), fakePlayer.getY(), fakePlayer.getZ(),
                 SoundEvents.ENTITY_SHULKER_TELEPORT, fakePlayer.getSoundCategory(), 1.0f, 1.0f);
 
         // 传送玩家
