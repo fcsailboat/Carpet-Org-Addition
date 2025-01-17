@@ -29,14 +29,6 @@ import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionInterface;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.util.fakeplayer.actiondata.*;
-import org.carpetorgaddition.util.matcher.ItemMatcher;
-import org.carpetorgaddition.util.matcher.ItemPredicateMatcher;
-import org.carpetorgaddition.util.matcher.Matcher;
-import org.carpetorgaddition.util.constant.TextConstants;
 import org.carpetorgaddition.util.screen.CraftingSetRecipeScreenHandler;
 import org.carpetorgaddition.util.screen.StonecutterSetRecipeScreenHandler;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
@@ -318,7 +310,6 @@ public class PlayerActionCommand {
     // 在设置假玩家合成时获取动作管理器并提示启用合成修复
     private static FakePlayerActionManager prepareTheCrafting(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        // 提示启用合成修复
         return PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
     }
 }

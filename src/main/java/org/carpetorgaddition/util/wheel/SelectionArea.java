@@ -3,7 +3,6 @@ package org.carpetorgaddition.util.wheel;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import org.carpetorgaddition.CarpetOrgAddition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;

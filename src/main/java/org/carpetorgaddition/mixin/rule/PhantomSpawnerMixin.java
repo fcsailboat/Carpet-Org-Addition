@@ -24,8 +24,9 @@ public abstract class PhantomSpawnerMixin {
                 return;
             }
             SpawnHelperInfoAccessor accessor = (SpawnHelperInfoAccessor) spawnInfo;
-            boolean canSpawn = accessor.invokerIsBelowCap(EntityType.PHANTOM.getSpawnGroup(), new ChunkPos(blockPos));
-            if (canSpawn) {
+            boolean isBelowCap = accessor.invokerIsBelowCap(EntityType.PHANTOM.getSpawnGroup());
+            boolean canSpawn = accessor.invokerCanSpawn(EntityType.PHANTOM.getSpawnGroup(), new ChunkPos(blockPos));
+            if (isBelowCap && canSpawn) {
                 return;
             }
             cir.setReturnValue(0);

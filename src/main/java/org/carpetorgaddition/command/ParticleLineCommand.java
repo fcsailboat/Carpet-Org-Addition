@@ -23,9 +23,6 @@ import org.carpetorgaddition.periodic.task.ServerTaskManager;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.WorldUtils;
-import org.carpetorgaddition.util.task.DrawParticleLineTask;
-import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
-import org.joml.Vector3f;
 
 @Deprecated(forRemoval = true)
 public class ParticleLineCommand {
