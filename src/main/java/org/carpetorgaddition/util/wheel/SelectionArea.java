@@ -26,9 +26,7 @@ public class SelectionArea implements Iterable<BlockPos> {
         this.minY = world.getBottomY();
         this.minZ = sourcePos.getZ() - Math.abs(range);
         this.maxX = sourcePos.getX() + Math.abs(range);
-        int topY = world.getBottomY() + world.getHeight();
-        CarpetOrgAddition.LOGGER.info("世界顶部：{}", topY);
-        this.maxY = topY;
+        this.maxY = world.getBottomY() + world.getHeight();
         this.maxZ = sourcePos.getZ() + Math.abs(range);
     }
 
