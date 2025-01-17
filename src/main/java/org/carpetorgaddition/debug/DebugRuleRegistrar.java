@@ -17,10 +17,8 @@ import java.util.Map;
 
 public class DebugRuleRegistrar implements CarpetExtension {
     private final SettingsManager settingsManager;
-
     private static DebugRuleRegistrar instance;
-
-    public static final HashMap<String, String> TRANSLATIONS = new HashMap<>();
+    private static final HashMap<String, String> TRANSLATIONS = new HashMap<>();
 
     public static DebugRuleRegistrar getInstance() {
         if (instance == null) {
@@ -32,8 +30,8 @@ public class DebugRuleRegistrar implements CarpetExtension {
     private DebugRuleRegistrar() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             this.settingsManager = new SettingsManager(
-                    FabricLoader.getInstance().getModContainer(CarpetOrgAddition.MOD_ID).orElseThrow().toString(),
-                    CarpetOrgAddition.MOD_ID,
+                    FabricLoader.getInstance().getModContainer(CarpetOrgAddition.MOD_ID).orElseThrow().getMetadata().getVersion().getFriendlyString(),
+                    "carpet-debug",
                     "CarpetOrgAdditionDebug"
             );
         } else {
@@ -54,7 +52,6 @@ public class DebugRuleRegistrar implements CarpetExtension {
         Translations.updateLanguage();
     }
 
-    @SuppressWarnings("rawtypes")
     private void parse(Field field, DebugRule debugRule) {
         try {
             translation(field, debugRule);
@@ -90,7 +87,7 @@ public class DebugRuleRegistrar implements CarpetExtension {
                     SettingsManager.class
             );
             parsedRuleConstructor.setAccessible(true);
-            CarpetRule parsedRule = (CarpetRule) parsedRuleConstructor.newInstance(field, ruleAnnotation, settingsManager);
+            CarpetRule<?> parsedRule = (CarpetRule<?>) parsedRuleConstructor.newInstance(field, ruleAnnotation, settingsManager);
             settingsManager.addCarpetRule(parsedRule);
         } catch (Exception e) {
             throw new RuntimeException(e);

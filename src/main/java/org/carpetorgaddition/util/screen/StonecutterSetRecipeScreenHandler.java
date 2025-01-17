@@ -7,12 +7,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.StonecutterScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionInterface;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.util.fakeplayer.actiondata.StonecuttingData;
+import org.carpetorgaddition.periodic.PeriodicTaskUtils;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
+import org.carpetorgaddition.periodic.fakeplayer.actiondata.StonecuttingData;
 
-public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler implements UnavailableSlotSyncInterface{
+public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler implements UnavailableSlotSyncInterface {
     private final EntityPlayerMPFake fakePlayer;
 
     public StonecutterSetRecipeScreenHandler(
@@ -45,7 +45,7 @@ public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler 
         if (button == -1) {
             return;
         }
-        FakePlayerActionManager actionManager = FakePlayerActionInterface.getManager(this.fakePlayer);
+        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(this.fakePlayer);
         // 设置玩家动作
         actionManager.setAction(FakePlayerAction.STONECUTTING, new StonecuttingData(itemStack.getItem(), button));
         // 调用父类方法返还物品

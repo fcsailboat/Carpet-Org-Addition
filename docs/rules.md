@@ -195,7 +195,7 @@ _对方块的破坏和交互同样有效_<br/>
 启用/playerTools命令用来提供一些假玩家相关的辅助工具
 
 - 类型：`字符串`
-- 默认值：`ops`
+- 默认值：`false`
 - 参考选项：`true`，`false`，`ops`，`0`，`1`，`2`，`3`，`4`
 - 分类：`Org`，`命令`
 
@@ -228,7 +228,11 @@ _对方块的破坏和交互同样有效_<br/>
 
 ### CCE更新抑制器(CCEUpdateSuppression)
 
-通过将潜影盒命名为指定名称来制作基于“ClassCastException”的更新抑制器
+通过将潜影盒命名为指定名称来制作基于“ClassCastException”的更新抑制器<br/>
+_规则值为false时，规则不生效_<br/>
+_规则值为true时，命名为“更新抑制器”或“updateSuppression”的潜影盒可以用来制作更新抑制器_<br/>
+_规则值为其它字符串时，命名为该字符串的潜影盒可以用来制作更新抑制器_<br/>
+_可以用来制作更新抑制器的潜影盒被发射器放置时会移除自定义名称_<br/>
 
 - 类型：`字符串`
 - 默认值：`false`
@@ -388,15 +392,6 @@ _对假玩家自动交易同样有效_<br/>
 - 默认值：`false`
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
-
-### 绘制粒子线命令(commandParticleLine)
-
-启用/particleLine命令用来使用粒子效果来绘制连接两点的线
-
-- 类型：`字符串`
-- 默认值：`true`
-- 参考选项：`true`，`false`，`ops`，`0`，`1`，`2`，`3`，`4`
-- 分类：`Org`，`命令`
 
 ### 禁止和平模式下持久生物被清除(disableMobPeacefulDespawn)
 
@@ -576,11 +571,13 @@ _值可以为负数，表示向内收缩指定格数_<br/>
 
 ### 可高亮方块坐标(canHighlightBlockPos)
 
-在方块坐标文本右侧添加一个按钮用来单击高亮方块坐标
+在方块坐标文本右侧添加一个按钮用来单击高亮方块坐标<br/>
+_false：禁用本条规则_<br/>
+_ommc：使用OMMC的高亮路径点_<br/>
+_default：使用CarpetOrgAddition的高亮路径点_<br/>
 
-- 类型：`布尔值`
-- 默认值：`true`
-- 参考选项：`true`，`false`
+- 类型：`枚举`
+- 默认值：`default`
 - 分类：`Org`，`生存`，`客户端`
 
 ### 玩家管理器(commandPlayerManager)
@@ -664,4 +661,42 @@ _-1表示无限制_<br/>
 - 默认值：`false`
 - 参考选项：`true`，`false`
 - 分类：`Org`，`试验性`
+
+### 潜影盒可堆叠(shulkerBoxStackable)
+
+允许空潜影盒物品堆叠到64<br/>
+_这不会改变漏斗、投掷器，合成器和比较器的行为_<br/>
+_同时安装锂（Lithium）时，此规则与漏斗计数器等功能不兼容_<br/>
+
+- 类型：`布尔值`
+- 默认值：`false`
+- 参考选项：`true`，`false`
+- 分类：`Org`，`试验性`
+
+### 最大方块放置距离同步客户端(maxBlockPlaceDistanceSyncClient)
+
+是否允许修改客户端的方块放置距离
+
+- 类型：`布尔值`
+- 默认值：`true`
+- 参考选项：`true`，`false`
+- 分类：`Org`，`客户端`
+
+### 限制幻翼生成(limitPhantomSpawn)
+
+幻翼生成会受到刷怪上限影响
+
+- 类型：`布尔值`
+- 默认值：`false`
+- 参考选项：`true`，`false`
+- 分类：`Org`，`生存`
+
+### 立即应用工具效果(applyToolEffectsImmediately)
+
+修复切换工具后挖掘速度不会立即生效
+
+- 类型：`布尔值`
+- 默认值：`false`
+- 参考选项：`true`，`false`
+- 分类：`Org`，`生存`
 

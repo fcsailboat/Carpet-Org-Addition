@@ -22,7 +22,9 @@ public class MessageUtils {
      *
      * @param player  通过这个玩家对象获取玩家管理器对象，然后通过玩家管理器对象发送消息，player不是消息的发送者
      * @param message 要广播消息的内容
+     * @deprecated 使用玩家做为参数有误导性
      */
+    @Deprecated(forRemoval = true)
     public static void broadcastMessage(ServerPlayerEntity player, Text message) {
         MinecraftServer server = player.getServer();
         if (server == null) {
@@ -37,10 +39,16 @@ public class MessageUtils {
      *
      * @param source  通过这个服务器命令源对象获取玩家管理器对象，然后通过玩家管理器对象发送消息，source不是消息的发送者
      * @param message 要广播消息的内容
+     * @deprecated 使用服务器命令源作为参数有误导性
      */
+    @Deprecated(forRemoval = true)
     public static void broadcastMessage(ServerCommandSource source, Text message) {
         PlayerManager playerManager = source.getServer().getPlayerManager();
         broadcastMessage(playerManager, message);
+    }
+
+    public static void broadcastMessage(MinecraftServer server, Text message) {
+        broadcastMessage(server.getPlayerManager(), message);
     }
 
     /**
@@ -59,7 +67,7 @@ public class MessageUtils {
      * @param player  要发送文本消息的玩家
      * @param message 发送文本消息的内容
      */
-    public static void sendMessage(PlayerEntity player, Text message) {
+    public static void sendMessage(ServerPlayerEntity player, Text message) {
         player.sendMessage(message);
     }
 
@@ -109,6 +117,7 @@ public class MessageUtils {
      * @param obj    消息中替代占位符的内容
      */
     public static void sendErrorMessage(ServerCommandSource source, Throwable e, String key, Object... obj) {
+        // TODO 改为异常名+异常信息
         String error = Objects.requireNonNullElse(e.getMessage(), e.getClass().getSimpleName());
         MutableText message = TextUtils.setColor(TextUtils.translate(key, obj), Formatting.RED);
         MessageUtils.sendMessage(source, TextUtils.hoverText(message, TextUtils.createText(error)));

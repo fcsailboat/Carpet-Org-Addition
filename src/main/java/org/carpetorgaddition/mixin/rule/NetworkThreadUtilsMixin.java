@@ -29,6 +29,7 @@ public class NetworkThreadUtilsMixin {
                 }
             }
         } catch (CCEUpdateSuppressException e) {
+            // TODO 是否应该重新抛出
             if (listener instanceof ServerPlayNetworkHandler networkHandler) {
                 e.onCatch(networkHandler.player, (Packet<ServerPlayPacketListener>) packet);
             }
