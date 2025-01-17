@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.carpetorgaddition.util.inventory.ImmutableInventory;
 import org.carpetorgaddition.util.wheel.ContainerDeepCopy;
+import org.jetbrains.annotations.CheckReturnValue;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -27,6 +28,7 @@ public class InventoryUtils {
      * @param predicate  一个物品匹配器对象，用来指定要从潜影盒中拿取的物品
      * @return 潜影盒中获取的指定物品
      */
+    @CheckReturnValue
     public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate) {
         // 判断潜影盒是否为空，空潜影盒直接返回空物品
         if (isEmptyShulkerBox(shulkerBox)) {
@@ -108,7 +110,6 @@ public class InventoryUtils {
         if (isEmptyShulkerBox(shulkerBox)) {
             return ImmutableInventory.EMPTY;
         }
-        // 获取潜影盒NBT
         ContainerComponent component = shulkerBox.get(DataComponentTypes.CONTAINER);
         // 因为有空潜影盒的判断，shulkerBox.get(DataComponentTypes.CONTAINER)不会返回null
         //noinspection DataFlowIssue

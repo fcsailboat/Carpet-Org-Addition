@@ -3,7 +3,8 @@ package org.docs.rule;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.carpetorgaddition.rule.HideRule;
+import org.carpetorgaddition.rule.Hidden;
+import org.carpetorgaddition.rule.Removed;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -68,7 +69,7 @@ public class RuleDocument {
     RuleInformation readClass(String rule) throws ClassNotFoundException, NoSuchFieldException {
         Class<?> clazz = Class.forName("org.carpetorgaddition.CarpetOrgAdditionSettings");
         Field field = clazz.getField(rule);
-        if (field.isAnnotationPresent(HideRule.class)) {
+        if (field.isAnnotationPresent(Removed.class) || field.isAnnotationPresent(Hidden.class)) {
             return null;
         }
         return new RuleInformation(field, readRuleName(rule), readRuleDesc(rule), readRuleExtra(rule));

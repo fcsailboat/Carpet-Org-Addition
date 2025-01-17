@@ -1,7 +1,6 @@
 package org.carpetorgaddition.util.wheel;
 
 import com.google.gson.Gson;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -178,8 +177,8 @@ public class Location {
     }
 
     //显示详细信息
-    public void showInfo(ServerCommandSource source, PlayerEntity player, String name) {
-        MessageUtils.sendMessage((ServerPlayerEntity) player, getText("[" + name + "]"));
+    public void showInfo(ServerCommandSource source, ServerPlayerEntity player, String name) {
+        MessageUtils.sendMessage(player, getText("[" + name + "]"));
         if (illustrate != null) {
             MessageUtils.sendMessage(source, "carpet.commands.locations.text.info.illustrate", illustrate);
         }

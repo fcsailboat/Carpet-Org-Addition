@@ -32,6 +32,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Map;
+
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
     private LivingEntityMixin(EntityType<?> type, World world) {

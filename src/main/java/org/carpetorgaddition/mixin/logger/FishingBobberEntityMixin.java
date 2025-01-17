@@ -37,17 +37,17 @@ public abstract class FishingBobberEntityMixin {
         if (LoggerRegister.fishing) {
             PlayerEntity player = this.getPlayerOwner();
             FunctionLogger logger = (FunctionLogger) LoggerNames.getLogger(LoggerNames.FISHING);
-            if (player instanceof ServerPlayerEntity && logger.isSubscribed((ServerPlayerEntity) player)) {
+            if (player instanceof ServerPlayerEntity serverPlayer && logger.isSubscribed(serverPlayer)) {
                 if (this.waitCountdown != 0) {
                     // 鱼出现
-                    MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.logger.fishing.appear", this.waitCountdown));
+                    MessageUtils.sendMessageToHud(serverPlayer, TextUtils.translate("carpet.logger.fishing.appear", this.waitCountdown));
                 } else if (this.fishTravelCountdown != 0) {
                     // 鱼上钩
-                    MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.logger.fishing.bite", this.fishTravelCountdown));
+                    MessageUtils.sendMessageToHud(serverPlayer, TextUtils.translate("carpet.logger.fishing.bite", this.fishTravelCountdown));
                 } else if (this.hookCountdown != 0) {
                     // 鱼挣脱
                     MutableText translate = TextUtils.translate("carpet.logger.fishing.break_free", this.hookCountdown);
-                    MessageUtils.sendMessageToHud(player, TextUtils.setColor(translate, Formatting.GREEN));
+                    MessageUtils.sendMessageToHud(serverPlayer, TextUtils.setColor(translate, Formatting.GREEN));
                 }
             }
         }
