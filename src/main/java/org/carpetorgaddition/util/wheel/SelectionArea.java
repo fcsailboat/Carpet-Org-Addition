@@ -3,7 +3,6 @@ package org.carpetorgaddition.util.wheel;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import org.carpetorgaddition.CarpetOrgAddition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -26,9 +25,7 @@ public class SelectionArea implements Iterable<BlockPos> {
         this.minY = world.getBottomY();
         this.minZ = sourcePos.getZ() - Math.abs(range);
         this.maxX = sourcePos.getX() + Math.abs(range);
-        int topY = world.getBottomY() + world.getHeight();
-        CarpetOrgAddition.LOGGER.info("世界顶部：{}", topY);
-        this.maxY = topY;
+        this.maxY = world.getBottomY() + world.getHeight();
         this.maxZ = sourcePos.getZ() + Math.abs(range);
     }
 
@@ -61,7 +58,7 @@ public class SelectionArea implements Iterable<BlockPos> {
      * @return 与当前对象等效的Box对象
      */
     public Box toBox() {
-        return new Box(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
+        return new Box(this.minX, this.minY, this.minZ, this.maxX + 1, this.maxY + 1, this.maxZ + 1);
     }
 
     /**
@@ -71,15 +68,21 @@ public class SelectionArea implements Iterable<BlockPos> {
     @Override
     public Iterator<BlockPos> iterator() {
         return new Iterator<>() {
+            /**
+             * 当前迭代次数
+             */
+            private int iterations = 0;
+            /**
+             * 最大迭代次数
+             */
+            private final int maxIterations = SelectionArea.this.size();
             // 迭代器当前遍历到的位置
-            private BlockPos currentPos = new BlockPos(SelectionArea.this.minX, SelectionArea.this.minY, SelectionArea.this.minZ);
+            private BlockPos currentPos = new BlockPos(minX, minY, minZ);
 
             @Override
             public boolean hasNext() {
                 // 当前方块坐标是否在选区内
-                return currentPos.getX() <= SelectionArea.this.maxX
-                        && currentPos.getY() <= SelectionArea.this.maxY
-                        && currentPos.getZ() <= SelectionArea.this.maxZ;
+                return this.iterations < maxIterations;
             }
 
             @Override
@@ -88,6 +91,7 @@ public class SelectionArea implements Iterable<BlockPos> {
                     // 超出选区抛出异常
                     throw new NoSuchElementException();
                 }
+                this.iterations++;
                 // 当前遍历到的位置坐标的副本
                 BlockPos blockPos = this.currentPos;
                 this.currentPos = new BlockPos(this.currentPos.getX() + 1, this.currentPos.getY(), this.currentPos.getZ());

@@ -21,7 +21,7 @@ import org.carpetorgaddition.util.constant.TextConstants;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class SendMessageCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandBuildContext) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
         dispatcher.register(CommandManager.literal("sendMessage")
                 .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandSendMessage))
                 .then(CommandManager.literal("copy")
@@ -44,7 +44,7 @@ public class SendMessageCommand {
                                 .executes(SendMessageCommand::sendFormattingText)))
                 .then(CommandManager.literal("item")
                         .executes(context -> SendMessageCommand.sendItemHoverableText(context, true))
-                        .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandBuildContext))
+                        .then(CommandManager.argument("itemStack", ItemStackArgumentType.itemStack(commandRegistryAccess))
                                 .executes(context -> sendItemHoverableText(context, false)))));
     }
 
@@ -56,7 +56,7 @@ public class SendMessageCommand {
         String text = StringArgumentType.getString(context, "text");
         //给文本添加颜色，单击事件，鼠标悬停事件
         MutableText copy = TextUtils.copy(text, text, TextUtils.translate("chat.copy.click"), Formatting.GREEN);
-        MessageUtils.broadcastMessage(source, appendPlayerName(source, copy));
+        MessageUtils.broadcastMessage(source.getServer(), appendPlayerName(source, copy));
         return 1;
     }
 
@@ -67,7 +67,7 @@ public class SendMessageCommand {
         //创建可变文本对象
         String text = StringArgumentType.getString(context, "url");
         MutableText url = TextUtils.url(text, text, TextUtils.translate("carpet.commands.sendMessage.url.click_open_url").getString(), null);
-        MessageUtils.broadcastMessage(source, appendPlayerName(source, url));
+        MessageUtils.broadcastMessage(source.getServer(), appendPlayerName(source, url));
         return 1;
     }
 
@@ -88,7 +88,7 @@ public class SendMessageCommand {
                     player.getDisplayName(), WorldUtils.getDimensionId(player.getWorld()),
                     TextConstants.blockPos(blockPos, null));
         };
-        MessageUtils.broadcastMessage(context.getSource(), mutableText);
+        MessageUtils.broadcastMessage(context.getSource().getServer(), mutableText);
         return 1;
     }
 
@@ -100,7 +100,7 @@ public class SendMessageCommand {
         // 获取要发送的文本内容
         String text = StringArgumentType.getString(context, "text");
         // 发送消息
-        MessageUtils.broadcastMessage(source, appendPlayerName(source, TextUtils.setColor(TextUtils.createText(text), color)));
+        MessageUtils.broadcastMessage(source.getServer(), appendPlayerName(source, TextUtils.setColor(TextUtils.createText(text), color)));
         return 1;
     }
 
@@ -110,7 +110,7 @@ public class SendMessageCommand {
         // 获取要发送的文本内容
         String text = StringArgumentType.getString(context, "text");
         // 发送消息
-        MessageUtils.broadcastMessage(source, appendPlayerName(source,
+        MessageUtils.broadcastMessage(source.getServer(), appendPlayerName(source,
                 TextUtils.regularStyle(text, Formatting.WHITE, false, false, false, true)));
         return 1;
     }
@@ -120,7 +120,7 @@ public class SendMessageCommand {
         ServerCommandSource source = context.getSource();
         // 获取要发送的文本内容，并将“$”符号替换为“§”
         String text = StringArgumentType.getString(context, "text").replaceAll("\\$", "§");
-        MessageUtils.broadcastMessage(source, appendPlayerName(source, TextUtils.createText(text)));
+        MessageUtils.broadcastMessage(source.getServer(), appendPlayerName(source, TextUtils.createText(text)));
         return 1;
     }
 
@@ -152,7 +152,7 @@ public class SendMessageCommand {
         }
         // 发送物品带有悬停文本的消息
         MutableText message = TextUtils.appendAll(player.getDisplayName(), "：", itemStack.toHoverableText());
-        MessageUtils.broadcastMessage(context.getSource(), message);
+        MessageUtils.broadcastMessage(context.getSource().getServer(), message);
         return 1;
     }
 }

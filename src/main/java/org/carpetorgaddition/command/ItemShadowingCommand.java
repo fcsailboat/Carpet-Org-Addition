@@ -35,9 +35,12 @@ public class ItemShadowingCommand {
             // 制作物品分身
             player.setStackInHand(Hand.OFF_HAND, main);
             // 广播制作物品分身的消息
-            MessageUtils.broadcastMessage(context.getSource(),
+            MessageUtils.broadcastMessage(context.getSource().getServer(),
                     TextUtils.translate("carpet.commands.itemshadowing.broadcast",
-                            player.getDisplayName(), main.toHoverableText()));
+                            player.getDisplayName(),
+                            main.toHoverableText()
+                    )
+            );
             // 将玩家制作物品分身的消息写入日志
             if (InventoryUtils.isShulkerBoxItem(main)) {
                 // 获取潜影盒的物品栏

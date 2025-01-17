@@ -17,11 +17,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.task.DrawParticleLineTask;
+import org.carpetorgaddition.periodic.task.ServerTaskManager;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.WorldUtils;
-import org.carpetorgaddition.util.task.DrawParticleLineTask;
-import org.carpetorgaddition.util.task.ServerTaskManagerInterface;
 
 @Deprecated(forRemoval = true)
 public class ParticleLineCommand {
@@ -61,9 +62,9 @@ public class ParticleLineCommand {
         if (distance == 0) {
             return 0;
         }
-        ServerTaskManagerInterface worldInterface = ServerTaskManagerInterface.getInstance(player.getServer());
+        ServerTaskManager manager = ServerPeriodicTaskManager.getManager(context).getServerTaskManager();
         // 新建绘制粒子线任务
-        worldInterface.addTask(new DrawParticleLineTask(player.getServerWorld(), mainParticle, from, to));
+        manager.addTask(new DrawParticleLineTask(player.getServerWorld(), mainParticle, from, to));
         // 发送箭头
         sendArrow(player, to);
         // 返回值为粒子线的长度

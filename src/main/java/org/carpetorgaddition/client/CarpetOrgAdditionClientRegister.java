@@ -7,15 +7,14 @@ import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.screen.ScreenHandler;
 import org.carpetorgaddition.client.command.DictionaryCommand;
 import org.carpetorgaddition.client.command.HighlightCommand;
-import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
 import org.carpetorgaddition.client.logger.ClientLogger;
 import org.carpetorgaddition.client.renderer.WorldRendererManager;
 import org.carpetorgaddition.client.renderer.beaconbox.BeaconBoxRenderer;
 import org.carpetorgaddition.client.renderer.villagerpoi.VillagerPoiRenderer;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRenderer;
 import org.carpetorgaddition.client.renderer.waypoint.WaypointRendererType;
-import org.carpetorgaddition.debug.client.render.ComparatorLevelRender;
-import org.carpetorgaddition.debug.client.render.SoulSandItemCountRender;
+import org.carpetorgaddition.debug.client.command.SelectionAreaCommand;
+import org.carpetorgaddition.debug.client.render.HudDebugRendererRegister;
 import org.carpetorgaddition.network.s2c.*;
 import org.carpetorgaddition.util.screen.BackgroundSpriteSyncSlot;
 import org.carpetorgaddition.util.screen.UnavailableSlotImplInterface;
@@ -142,8 +141,8 @@ public class CarpetOrgAdditionClientRegister {
      */
     private static void developed() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            SoulSandItemCountRender.render();
-            ComparatorLevelRender.render();
+            HudDebugRendererRegister.register();
+            SelectionAreaCommand.register();
         }
     }
 }
