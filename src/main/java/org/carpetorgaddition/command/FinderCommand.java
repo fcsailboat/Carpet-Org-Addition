@@ -260,8 +260,6 @@ public class FinderCommand {
         return 1;
     }
 
-    // 尝试添加任务
-
     // 将物品数量转换为“多少组多少个”的形式
     public static MutableText showCount(ItemStack itemStack, int count, boolean inTheShulkerBox) {
         MutableText text = TextConstants.itemCount(count, itemStack.getMaxCount());

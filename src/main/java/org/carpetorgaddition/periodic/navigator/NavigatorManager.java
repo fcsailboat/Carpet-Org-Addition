@@ -13,10 +13,14 @@ import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.wheel.Waypoint;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NavigatorManager {
     private AbstractNavigator navigator;
     private final ServerPlayerEntity player;
 
+    // TODO 玩家死亡后导航器留在原地
     public NavigatorManager(ServerPlayerEntity player) {
         this.player = player;
     }
