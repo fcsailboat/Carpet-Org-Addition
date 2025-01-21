@@ -177,13 +177,16 @@ public class FakePlayerUtils {
      * @throws IllegalStateException 如果调用时光标上存在物品
      */
     public static void collectItem(ScreenHandler screenHandler, int slotIndex, AutoGrowInventory inventory, EntityPlayerMPFake fakePlayer) {
+        // TODO 检查槽位物品是否可以取出
         InventoryUtils.assertEmptyStack(screenHandler.getCursorStack(), () -> "光标上物品非空");
         while (screenHandler.getSlot(slotIndex).hasStack()) {
             // 拿取槽位上的物品
+            // TODO 不应该是右键单击
             screenHandler.onSlotClick(slotIndex, PICKUP_RIGHT_CLICK, SlotActionType.PICKUP, fakePlayer);
             // 将槽位上的物品放入物品栏并清空光标上的物品
             inventory.addStack(screenHandler.getCursorStack());
             screenHandler.setCursorStack(ItemStack.EMPTY);
+            // TODO 不必要的断言
             InventoryUtils.assertEmptyStack(screenHandler.getCursorStack(), () -> "物品未完全收集");
         }
     }

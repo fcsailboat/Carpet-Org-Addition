@@ -117,6 +117,7 @@ public class FakePlayerCraft {
             if (successCount == 9) {
                 // 工作台输出槽里有物品，说明配方正确并且前面的合成没有问题，可以取出合成的物品
                 if (craftingScreenHandler.getSlot(0).hasStack()) {
+                    // TODO 是否不再需要启用Ctrl+Q合成修复
                     FakePlayerUtils.collectItem(craftingScreenHandler, 0, inventory, fakePlayer);
                     // 合成成功，合成计数器自增
                     craftCount++;
