@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +43,7 @@ public class WanderingTraderManagerMixin {
     private int spawnChance;
 
     @Inject(method = "spawn", at = @At("HEAD"))
-    private void updataLogger(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfoReturnable<Integer> cir) {
+    private void updataLogger(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfo ci) {
         if (world.getGameRules().getBoolean(GameRules.DO_TRADER_SPAWNING)) {
             // 获取流浪商人生成的倒计时，并换算成秒
             int countdown = ((this.spawnDelay == 0 ? 1200 : this.spawnDelay) - (1200 - this.spawnTimer)) / 20;

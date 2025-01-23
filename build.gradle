@@ -33,7 +33,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     // fabric-carpet
     // modImplementation("curse.maven:carpet-349239:${project.carpet_core_version}")
-    modImplementation files("lib/fabric-carpet-25w03a-1.4.163+v250116.jar")
+    modImplementation files("lib/fabric-carpet-25w04a-1.4.164+v250122.jar")
     // mixinextras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")))
     testImplementation(group: 'junit', name: 'junit', version: junit_version)
@@ -47,8 +47,7 @@ processResources {
 
     filesMatching("fabric.mod.json") {
         expand "version": mod_version,
-               // "minecraft_version": project.minecraft_version,
-                "minecraft_version": "1.21.5-alpha.25.3.a",
+                "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version
     }
 }
