@@ -480,6 +480,6 @@ public class CarpetOrgAdditionSettings {
     public static boolean finderCommandSearchWorldEater = false;
 
     // 记录玩家命令
-    @Rule(categories = {ORG, RuleCategory.COMMAND, RuleCategory.FEATURE})
+    @Rule(categories = {ORG, RuleCategory.COMMAND})
     public static boolean recordPlayerCommand = false;
 }

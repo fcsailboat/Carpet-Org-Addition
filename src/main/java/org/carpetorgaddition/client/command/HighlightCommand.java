@@ -24,6 +24,7 @@ public class HighlightCommand {
     }
 
     // 高亮路径点
+    // TODO 添加持续时间控制
     private static int highlight(CommandContext<FabricClientCommandSource> context) {
         Vec3d vec3d = ClientBlockPosArgumentType.getBlockPos(context, "blockPos").toCenterPos();
         ClientWorld world = context.getSource().getWorld();
