@@ -31,15 +31,21 @@ public class WaypointRenderer implements WorldRenderer {
     private boolean fade = false;
     private long fadeTime = -1L;
     private boolean stop = false;
+    private final long durationTime;
 
-    public WaypointRenderer(WaypointRendererType renderType, Vec3d target, String worldId) {
+    public WaypointRenderer(WaypointRendererType renderType, Vec3d target, String worldId, long durationTime) {
         this.renderType = renderType;
         this.target = target;
         this.worldId = worldId;
+        this.durationTime = durationTime;
     }
 
-    public WaypointRenderer(WaypointRendererType renderType, Vec3d target, World world) {
-        this(renderType, target, WorldUtils.getDimensionId(world));
+    public WaypointRenderer(WaypointRendererType renderType, Vec3d target, String worldId) {
+        this(renderType, target, worldId, renderType.getDefaultDurationTime());
+    }
+
+    public WaypointRenderer(WaypointRendererType renderType, Vec3d target, World world, long durationTime) {
+        this(renderType, target, WorldUtils.getDimensionId(world), durationTime);
     }
 
     /**
@@ -114,7 +120,7 @@ public class WaypointRenderer implements WorldRenderer {
         // 将路径点平移到方块位置
         matrixStack.translate(correctionVec3d.getX(), correctionVec3d.getY(), correctionVec3d.getZ());
         // 固定路径点大小，防止因距离的改变而改变（远小近大）
-        float scale = this.renderType.getScale(correctionVec3d.length(), this.startTime, this.fade, this.fadeTime);
+        float scale = this.renderType.getScale(correctionVec3d.length(), this.startTime, this.durationTime, this.fade, this.fadeTime);
         if (scale <= 0F) {
             this.stop = true;
             return;
