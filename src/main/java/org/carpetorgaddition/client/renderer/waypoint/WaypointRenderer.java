@@ -82,14 +82,14 @@ public class WaypointRenderer implements WorldRenderer {
         if (WorldUtils.equalsWorld(this.worldId, playerWorldId)) {
             return this.target;
         }
-        // TODO Y坐标设置为玩家坐标
+        Camera camera = client.gameRenderer.getCamera();
         // 玩家在主世界，路径点在下界，将路径点坐标换算成主世界坐标
         if (WorldUtils.isOverworld(playerWorldId) && WorldUtils.isTheNether(this.worldId)) {
-            return new Vec3d(this.target.getX() * 8, this.target.getY(), this.target.getZ() * 8);
+            return new Vec3d(this.target.getX() * 8, camera.getPos().getY(), this.target.getZ() * 8);
         }
         // 玩家在下界，路径点在主世界，将路径点坐标换算成下界坐标
         if (WorldUtils.isTheNether(playerWorldId) && WorldUtils.isOverworld(this.worldId)) {
-            return new Vec3d(this.target.getX() / 8, this.target.getY(), this.target.getZ() / 8);
+            return new Vec3d(this.target.getX() / 8, camera.getPos().getY(), this.target.getZ() / 8);
         }
         return null;
     }
