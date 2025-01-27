@@ -397,7 +397,7 @@
   "carpet.client.commands.highlight": "Click to highlight the waypoint",
   "carpet.client.commands.dictionary.not_matched": "The string does not match any object",
   "carpet.client.commands.dictionary.id": "%s the id is:%s",
-  "carpet.client.commands.dictionary.multiple.id": "The specified string corresponds to %s objects:",
+  "carpet.client.commands.dictionary.multiple.id": "String matches %s objects:",
   "carpet.client.commands.dictionary.multiple.each": "- %s",
   "carpet.client.render.waypoint.error": "An unexpected error was encountered while rendering the waypoint"
 }

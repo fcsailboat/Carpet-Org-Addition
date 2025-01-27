@@ -489,7 +489,7 @@
   "carpet.client.commands.highlight": "点击以高亮路径点",
   "carpet.client.commands.dictionary.not_matched": "字符串与任何对象都不匹配",
   "carpet.client.commands.dictionary.id": "%s的ID是：%s",
-  "carpet.client.commands.dictionary.multiple.id": "指定字符串对应%s个对象：",
+  "carpet.client.commands.dictionary.multiple.id": "字符串与%s个对象匹配：",
   "carpet.client.commands.dictionary.multiple.each": "- %s",
   "carpet.client.render.waypoint.error": "渲染路径点时遇到意外错误"
 }
