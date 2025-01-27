@@ -27,6 +27,14 @@ public class EnchantmentUtils {
     }
 
     /**
+     * @return 附魔是否与注册项对应
+     */
+    public static boolean isSpecified(World world, RegistryKey<Enchantment> key, Enchantment enchantment) {
+        Enchantment value = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).get(key);
+        return value != null && value.equals(enchantment);
+    }
+
+    /**
      * @return 获取指定物品上指定附魔的等级
      */
     public static int getLevel(World world, Enchantment enchantment, ItemStack itemStack) {

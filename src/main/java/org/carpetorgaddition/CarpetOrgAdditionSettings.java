@@ -2,6 +2,7 @@ package org.carpetorgaddition;
 
 import carpet.api.settings.Rule;
 import carpet.api.settings.RuleCategory;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.carpetorgaddition.rule.Hidden;
 import org.carpetorgaddition.rule.Removed;
@@ -22,6 +23,10 @@ public class CarpetOrgAdditionSettings {
      * 当前方块的破坏者，启用{@link CarpetOrgAdditionSettings#blockDropsDirectlyEnterInventory}后，方块掉落物会直接进入玩家物品栏
      */
     public static final ThreadLocal<ServerPlayerEntity> blockBreaking = new ThreadLocal<>();
+    /**
+     * 当前正在使用铁砧附魔的玩家
+     */
+    public static final ThreadLocal<PlayerEntity> enchanter = new ThreadLocal<>();
 
     private CarpetOrgAdditionSettings() {
     }

@@ -65,7 +65,7 @@
   "carpet.rule.maxBlockPlaceDistanceReferToEntity.name": "最大方块放置距离适用于实体",
   "carpet.rule.maxBlockPlaceDistanceReferToEntity.desc": "玩家可以选中最大方块交互距离内的实体",
   "carpet.rule.knockbackStick.name": "击退棒",
-  "carpet.rule.knockbackStick.desc": "可以给木棍附魔击退",
+  "carpet.rule.knockbackStick.desc": "可以使用铁砧给木棍附魔击退",
   "carpet.rule.disableRespawnBlocksExplode.name": "禁止重生方块爆炸",
   "carpet.rule.disableRespawnBlocksExplode.desc": "玩家在非主世界维度使用床或在非下界维度使用重生锚时不会爆炸",
   "carpet.rule.CCEUpdateSuppression.name": "CCE更新抑制器",
