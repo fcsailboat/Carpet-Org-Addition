@@ -1,8 +1,10 @@
 package org.carpetorgaddition.mixin.rule.enchantment;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
@@ -10,6 +12,7 @@ import net.minecraft.screen.ScreenHandlerType;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(AnvilScreenHandler.class)
 public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
@@ -17,11 +20,11 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         super(type, syncId, playerInventory, context);
     }
 
-    @WrapMethod(method = "updateResult")
-    private void updateResult(Operation<Void> original) {
+    @WrapOperation(method = "updateResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/Enchantment;isAcceptableItem(Lnet/minecraft/item/ItemStack;)Z"))
+    private boolean isAcceptableItem(Enchantment instance, ItemStack stack, Operation<Boolean> original) {
         try {
             CarpetOrgAdditionSettings.enchanter.set(this.player);
-            original.call();
+            return original.call(instance, stack);
         } finally {
             CarpetOrgAdditionSettings.enchanter.remove();
         }

@@ -486,4 +486,12 @@ public class CarpetOrgAdditionSettings {
     // 记录玩家命令
     @Rule(categories = {ORG, RuleCategory.COMMAND})
     public static boolean recordPlayerCommand = false;
+
+    // 保护类魔咒兼容
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean protectionEnchantmentCompatible = false;
+
+    // 伤害类魔咒兼容
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean damageEnchantmentCompatible = false;
 }
