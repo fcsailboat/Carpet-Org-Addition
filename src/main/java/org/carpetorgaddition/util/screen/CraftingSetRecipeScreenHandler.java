@@ -1,7 +1,6 @@
 package org.carpetorgaddition.util.screen;
 
 import carpet.patches.EntityPlayerMPFake;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.RecipeInputInventory;
@@ -10,8 +9,6 @@ import net.minecraft.item.Items;
 import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.command.ServerCommandSource;
-import org.carpetorgaddition.command.PlayerActionCommand;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
@@ -29,22 +26,11 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
      * 控制假玩家合成物品的物品栏，与父类中的input是同一个对象
      */
     private final RecipeInputInventory inputInventory;
-    /**
-     * 执行/playerAction命令后的命令执行上下文对象，修改假玩家动作类型时会用到这个属性
-     */
-    private final CommandContext<ServerCommandSource> context;
 
-    public CraftingSetRecipeScreenHandler(
-            int syncId,
-            PlayerInventory playerInventory,
-            EntityPlayerMPFake fakePlayer,
-            ScreenHandlerContext screenHandlerContext,
-            CommandContext<ServerCommandSource> context
-    ) {
-        super(syncId, playerInventory, screenHandlerContext);
+    public CraftingSetRecipeScreenHandler(int syncId, PlayerInventory playerInventory, EntityPlayerMPFake fakePlayer, ScreenHandlerContext context) {
+        super(syncId, playerInventory, context);
         this.inputInventory = ((FakePlayerCraftRecipeInterface) this).getInput();
         this.fakePlayer = fakePlayer;
-        this.context = context;
     }
 
     // 阻止玩家取出输出槽位的物品
