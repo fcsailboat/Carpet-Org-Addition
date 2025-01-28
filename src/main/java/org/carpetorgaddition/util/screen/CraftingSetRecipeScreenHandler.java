@@ -73,8 +73,6 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
         setCraftAction(items, PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer));
         // 关闭GUI后，使用父类的方法让物品回到玩家背包
         super.onClosed(player);
-        // 提示启用Ctrl+Q合成修复
-        PlayerActionCommand.promptToEnableCtrlQCraftingFix(context.getSource());
     }
 
     // 设置假玩家合成动作
