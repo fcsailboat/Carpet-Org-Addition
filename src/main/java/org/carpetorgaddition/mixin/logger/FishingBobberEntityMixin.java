@@ -38,15 +38,13 @@ public abstract class FishingBobberEntityMixin {
             PlayerEntity player = this.getPlayerOwner();
             FunctionLogger logger = (FunctionLogger) LoggerNames.getLogger(LoggerNames.FISHING);
             if (player instanceof ServerPlayerEntity serverPlayer && logger.isSubscribed(serverPlayer)) {
-                // TODO 值可能为-1，不能使用!=0判断
-                // TODO 只显示与出现倒计时，改为距离鱼上钩还有<出现时间>+<上钩时间>刻
-                if (this.waitCountdown != 0) {
+                if (this.waitCountdown > 0) {
                     // 鱼出现
                     MessageUtils.sendMessageToHud(serverPlayer, TextUtils.translate("carpet.logger.fishing.appear", this.waitCountdown));
-                } else if (this.fishTravelCountdown != 0) {
+                } else if (this.fishTravelCountdown > 0) {
                     // 鱼上钩
                     MessageUtils.sendMessageToHud(serverPlayer, TextUtils.translate("carpet.logger.fishing.bite", this.fishTravelCountdown));
-                } else if (this.hookCountdown != 0) {
+                } else if (this.hookCountdown > 0) {
                     // 鱼挣脱
                     MutableText translate = TextUtils.translate("carpet.logger.fishing.break_free", this.hookCountdown);
                     MessageUtils.sendMessageToHud(serverPlayer, TextUtils.setColor(translate, Formatting.GREEN));
