@@ -7,8 +7,8 @@ import net.minecraft.screen.StonecutterScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.InfiniteLoopException;
-import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.StonecuttingData;
+import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.inventory.AutoGrowInventory;
 
 public class FakePlayerStonecutting {
@@ -103,8 +103,9 @@ public class FakePlayerStonecutting {
             // 如果找到，移动到切石机输入槽，然后结束循环
             ItemStack itemStack = screenHandler.getSlot(index).getStack();
             if (itemStack.isOf(item)) {
-                FakePlayerUtils.quickMove(screenHandler, index, fakePlayer);
-                return false;
+                if (FakePlayerUtils.withKeepPickupAndMoveItemStack(screenHandler, index, 0, fakePlayer)) {
+                    return false;
+                }
             } else if (CarpetOrgAdditionSettings.fakePlayerCraftPickItemFromShulkerBox && InventoryUtils.isShulkerBoxItem(itemStack)) {
                 // 从潜影盒中查找指定物品
                 ItemStack stack = InventoryUtils.pickItemFromShulkerBox(itemStack, content -> content.isOf(item));

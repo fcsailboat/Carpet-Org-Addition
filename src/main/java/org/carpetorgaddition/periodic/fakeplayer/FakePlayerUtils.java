@@ -115,8 +115,7 @@ public class FakePlayerUtils {
      * @param player        当前操作GUI的假玩家
      * @return 物品是否可以移动
      */
-    public static boolean withKeepPickupAndMoveItemStack(ScreenHandler screenHandler, int fromIndex,
-                                                         int toIndex, EntityPlayerMPFake player) {
+    public static boolean withKeepPickupAndMoveItemStack(ScreenHandler screenHandler, int fromIndex, int toIndex, EntityPlayerMPFake player) {
         ItemStack itemStack = screenHandler.getSlot(fromIndex).getStack();
         // 如果假玩家合成保留物品启用，并且该物品的数量为1，并且该物品的最大堆叠数大于1
         // 认为这个物品需要保留，不移动物品
