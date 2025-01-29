@@ -2,13 +2,10 @@ package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
-import net.minecraft.text.MutableText;
-import net.minecraft.util.Formatting;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
 import org.carpetorgaddition.util.MessageUtils;
-import org.carpetorgaddition.util.TextUtils;
 
 public class FakePlayerActionManager {
     private final EntityPlayerMPFake fakePlayer;
@@ -30,14 +27,13 @@ public class FakePlayerActionManager {
                     this.getAction().toString(),
                     e
             );
-            // 向聊天栏发送错误消息的反馈
-            MutableText message = TextUtils.translate(
+            MessageUtils.broadcastErrorMessage(
+                    this.fakePlayer.server,
+                    e,
                     "carpet.commands.playerAction.exception.runtime",
                     this.fakePlayer.getDisplayName(),
                     this.getAction().getDisplayName()
             );
-            MutableText errorMessage = TextUtils.hoverText(TextUtils.setColor(message, Formatting.RED), e.getMessage());
-            MessageUtils.broadcastMessage(this.fakePlayer.server, errorMessage);
             // 让假玩家停止当前操作
             this.stop();
         }

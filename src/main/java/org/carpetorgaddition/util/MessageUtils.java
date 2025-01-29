@@ -1,6 +1,7 @@
 package org.carpetorgaddition.util;
 
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
@@ -11,7 +12,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class MessageUtils {
     private MessageUtils() {
@@ -59,6 +59,17 @@ public class MessageUtils {
      */
     public static void broadcastMessage(PlayerManager playerManager, Text message) {
         playerManager.broadcast(message, false);
+    }
+
+    /**
+     * 广播一条错误消息
+     */
+    public static void broadcastErrorMessage(MinecraftServer server, Throwable e, String key, Object... obj) {
+        server.getPlayerManager()
+                .getPlayerList()
+                .stream()
+                .map(Entity::getCommandSource)
+                .forEach(source -> sendErrorMessage(source, e, key, obj));
     }
 
     /**
@@ -117,8 +128,7 @@ public class MessageUtils {
      * @param obj    消息中替代占位符的内容
      */
     public static void sendErrorMessage(ServerCommandSource source, Throwable e, String key, Object... obj) {
-        // TODO 改为异常名+异常信息
-        String error = Objects.requireNonNullElse(e.getMessage(), e.getClass().getSimpleName());
+        String error = GameUtils.getExceptionString(e);
         MutableText message = TextUtils.setColor(TextUtils.translate(key, obj), Formatting.RED);
         MessageUtils.sendMessage(source, TextUtils.hoverText(message, TextUtils.createText(error)));
     }

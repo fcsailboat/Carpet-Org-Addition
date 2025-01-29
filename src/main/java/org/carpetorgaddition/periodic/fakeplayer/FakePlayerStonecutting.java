@@ -15,7 +15,6 @@ public class FakePlayerStonecutting {
     private FakePlayerStonecutting() {
     }
 
-    // TODO 检查“假玩家合成保留物品”是否对该功能有效
     public static void stonecutting(StonecuttingData stonecuttingData, EntityPlayerMPFake fakePlayer) {
         /*
          * 切石机的输出槽不能使用Ctrl+Q一次性丢出整组物品，只能一个个丢出。在合成
