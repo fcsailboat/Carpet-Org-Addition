@@ -10,7 +10,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.StopData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.StopContext;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -75,7 +75,7 @@ public class FakePlayerUtils {
      * @param key          停止操作时在聊天栏输出的内容的翻译键
      */
     public static void stopAction(ServerCommandSource source, EntityPlayerMPFake playerMPFake, String key, Object... obj) {
-        PeriodicTaskUtils.getFakePlayerActionManager(playerMPFake).setAction(FakePlayerAction.STOP, StopData.STOP);
+        PeriodicTaskUtils.getFakePlayerActionManager(playerMPFake).setAction(FakePlayerAction.STOP, StopContext.STOP);
         MessageUtils.broadcastMessage(
                 source.getServer(),
                 TextUtils.appendAll(playerMPFake.getDisplayName(), ": ", TextUtils.translate(key, obj))
@@ -135,8 +135,17 @@ public class FakePlayerUtils {
         return true;
     }
 
+    public static void pickupAndMoveItemStack(ScreenHandler screenHandler, int fromIndex, int toIndex, EntityPlayerMPFake player) {
+        // 如果鼠标光标上有物品，先把光标上的物品丢弃
+        if (!screenHandler.getCursorStack().isEmpty()) {
+            screenHandler.onSlotClick(EMPTY_SPACE_SLOT_INDEX, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, player);
+        }
+        screenHandler.onSlotClick(fromIndex, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, player);
+        screenHandler.onSlotClick(toIndex, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, player);
+    }
+
     /**
-     * 功能与{@link FakePlayerUtils#withKeepPickupAndMoveItemStack(ScreenHandler, int, int, EntityPlayerMPFake)}基本一致，只是本方法使用右键拿取物品，即一次拿取一半的物品
+     * 功能与{@link FakePlayerUtils#pickupAndMoveItemStack(ScreenHandler, int, int, EntityPlayerMPFake)}基本一致，只是本方法使用右键拿取物品，即一次拿取一半的物品
      *
      * @param screenHandler 玩家当前打开的GUI
      * @param fromIndex     从哪个槽位拿取物品

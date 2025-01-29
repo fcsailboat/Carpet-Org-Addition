@@ -25,7 +25,7 @@ import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.*;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -128,7 +128,7 @@ public class PlayerActionCommand {
         Vec3d thisVec = Vec3ArgumentType.getVec3(context, "this");
         //获取非分拣物品要丢出的方向
         Vec3d otherVec = Vec3ArgumentType.getVec3(context, "other");
-        actionManager.setAction(FakePlayerAction.SORTING, new SortingData(item, thisVec, otherVec));
+        actionManager.setAction(FakePlayerAction.SORTING, new SortingContext(item, thisVec, otherVec));
         return 1;
     }
 
@@ -138,10 +138,10 @@ public class PlayerActionCommand {
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         if (allItem) {
             // 设置清空潜影盒内的所有物品，不需要获取Item对象
-            actionManager.setAction(FakePlayerAction.CLEAN, CleanData.CLEAN_ALL);
+            actionManager.setAction(FakePlayerAction.CLEAN, CleanContext.CLEAN_ALL);
         } else {
             Item item = ItemStackArgumentType.getItemStackArgument(context, "filter").getItem();
-            actionManager.setAction(FakePlayerAction.CLEAN, new CleanData(item, false));
+            actionManager.setAction(FakePlayerAction.CLEAN, new CleanContext(item, false));
         }
         return 1;
     }
@@ -152,10 +152,10 @@ public class PlayerActionCommand {
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         if (allItem) {
             // 向潜影盒内填充任意物品
-            actionManager.setAction(FakePlayerAction.FILL, FillData.FILL_ALL);
+            actionManager.setAction(FakePlayerAction.FILL, FillContext.FILL_ALL);
         } else {
             Item item = ItemStackArgumentType.getItemStackArgument(context, "filter").getItem();
-            actionManager.setAction(FakePlayerAction.FILL, new FillData(item, false));
+            actionManager.setAction(FakePlayerAction.FILL, new FillContext(item, false));
         }
         return 1;
     }
@@ -166,7 +166,7 @@ public class PlayerActionCommand {
         ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
         actionManager.setAction(
                 FakePlayerAction.INVENTORY_CRAFT,
-                new InventoryCraftData(fillArray(predicate, new ItemStackPredicate[4], false))
+                new InventoryCraftContext(fillArray(predicate, new ItemStackPredicate[4], false))
         );
         return 1;
     }
@@ -177,7 +177,7 @@ public class PlayerActionCommand {
         ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
         actionManager.setAction(
                 FakePlayerAction.INVENTORY_CRAFT,
-                new InventoryCraftData(fillArray(predicate, new ItemStackPredicate[4], true))
+                new InventoryCraftContext(fillArray(predicate, new ItemStackPredicate[4], true))
         );
         return 1;
     }
@@ -190,7 +190,7 @@ public class PlayerActionCommand {
             // 获取每一个合成材料
             items[i - 1] = new ItemStackPredicate(context, "item" + i);
         }
-        actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, new InventoryCraftData(items));
+        actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, new InventoryCraftContext(items));
         return 1;
     }
 
@@ -200,7 +200,7 @@ public class PlayerActionCommand {
         ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
         actionManager.setAction(
                 FakePlayerAction.CRAFTING_TABLE_CRAFT,
-                new CraftingTableCraftData(fillArray(predicate, new ItemStackPredicate[9], true))
+                new CraftingTableCraftContext(fillArray(predicate, new ItemStackPredicate[9], true))
         );
         return 1;
     }
@@ -212,7 +212,7 @@ public class PlayerActionCommand {
         for (int i = 1; i <= 9; i++) {
             items[i - 1] = new ItemStackPredicate(context, "item" + i);
         }
-        actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftData(items));
+        actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftContext(items));
         return 1;
     }
 
@@ -222,7 +222,7 @@ public class PlayerActionCommand {
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         // 获取按钮的索引，减去1
         int index = IntegerArgumentType.getInteger(context, "index") - 1;
-        actionManager.setAction(FakePlayerAction.TRADE, new TradeData(index, voidTrade));
+        actionManager.setAction(FakePlayerAction.TRADE, new TradeContext(index, voidTrade));
         return 1;
     }
 
@@ -233,7 +233,7 @@ public class PlayerActionCommand {
         // 获取当前要操作的物品和要重命名的字符串
         Item item = ItemStackArgumentType.getItemStackArgument(context, "item").getItem();
         String newName = StringArgumentType.getString(context, "name");
-        actionManager.setAction(FakePlayerAction.RENAME, new RenameData(item, newName));
+        actionManager.setAction(FakePlayerAction.RENAME, new RenameContext(item, newName));
         return 1;
     }
 
@@ -244,7 +244,7 @@ public class PlayerActionCommand {
         // 获取要切割的物品和按钮的索引
         Item item = ItemStackArgumentType.getItemStackArgument(context, "item").getItem();
         int buttonIndex = IntegerArgumentType.getInteger(context, "button") - 1;
-        actionManager.setAction(FakePlayerAction.STONECUTTING, new StonecuttingData(item, buttonIndex));
+        actionManager.setAction(FakePlayerAction.STONECUTTING, new StonecuttingContext(item, buttonIndex));
         return 1;
     }
 
@@ -264,7 +264,7 @@ public class PlayerActionCommand {
     private static int setFishing(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
-        actionManager.setAction(FakePlayerAction.FISHING, new FishingData());
+        actionManager.setAction(FakePlayerAction.FISHING, new FishingContext());
         return 1;
     }
 
@@ -290,7 +290,7 @@ public class PlayerActionCommand {
     private static int getAction(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
-        MessageUtils.sendListMessage(context.getSource(), actionManager.getActionData().info(fakePlayer));
+        MessageUtils.sendListMessage(context.getSource(), actionManager.getActionContext().info(fakePlayer));
         return 1;
     }
 

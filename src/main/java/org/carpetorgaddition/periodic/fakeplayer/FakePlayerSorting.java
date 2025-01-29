@@ -7,20 +7,20 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.exception.InfiniteLoopException;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.SortingContext;
 import org.carpetorgaddition.util.InventoryUtils;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.SortingData;
 
 public class FakePlayerSorting {
     private FakePlayerSorting() {
     }
 
-    public static void sorting(SortingData sortingData, EntityPlayerMPFake fakePlayer) {
+    public static void sorting(SortingContext context, EntityPlayerMPFake fakePlayer) {
         //获取要分拣的物品对象
-        Item item = sortingData.getItem();
+        Item item = context.getItem();
         //获取分拣物品要丢出的方向
-        Vec3d thisVec = sortingData.getThisVec();
+        Vec3d thisVec = context.getThisVec();
         //获取非分拣物品要丢出的方向
-        Vec3d otherVec = sortingData.getOtherVec();
+        Vec3d otherVec = context.getOtherVec();
         //获取玩家物品栏对象
         PlayerInventory inventory = fakePlayer.getInventory();
         //遍历玩家物品栏，找到要丢出的物品

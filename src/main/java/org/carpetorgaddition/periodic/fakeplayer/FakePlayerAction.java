@@ -1,7 +1,7 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import net.minecraft.text.MutableText;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.*;
 import org.carpetorgaddition.util.TextUtils;
 
 public enum FakePlayerAction {
@@ -53,18 +53,18 @@ public enum FakePlayerAction {
     }
 
     // 检查当前动作是否与指定动作数据匹配
-    public void checkActionData(Class<? extends AbstractActionData> clazz) {
+    public void checkActionData(Class<? extends AbstractActionContext> clazz) {
         if (clazz != switch (this) {
-            case STOP -> StopData.class;
-            case SORTING -> SortingData.class;
-            case CLEAN -> CleanData.class;
-            case FILL -> FillData.class;
-            case INVENTORY_CRAFT -> InventoryCraftData.class;
-            case CRAFTING_TABLE_CRAFT -> CraftingTableCraftData.class;
-            case RENAME -> RenameData.class;
-            case STONECUTTING -> StonecuttingData.class;
-            case TRADE -> TradeData.class;
-            case FISHING -> FishingData.class;
+            case STOP -> StopContext.class;
+            case SORTING -> SortingContext.class;
+            case CLEAN -> CleanContext.class;
+            case FILL -> FillContext.class;
+            case INVENTORY_CRAFT -> InventoryCraftContext.class;
+            case CRAFTING_TABLE_CRAFT -> CraftingTableCraftContext.class;
+            case RENAME -> RenameContext.class;
+            case STONECUTTING -> StonecuttingContext.class;
+            case TRADE -> TradeContext.class;
+            case FISHING -> FishingContext.class;
         }) {
             throw new IllegalArgumentException();
         }

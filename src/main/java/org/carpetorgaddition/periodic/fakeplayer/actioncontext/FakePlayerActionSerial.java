@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -12,55 +12,55 @@ import org.carpetorgaddition.util.wheel.TextBuilder;
 
 public class FakePlayerActionSerial {
     private final FakePlayerAction action;
-    private final AbstractActionData actionData;
+    private final AbstractActionContext context;
     public static final FakePlayerActionSerial NO_ACTION = new FakePlayerActionSerial();
 
     private FakePlayerActionSerial() {
         this.action = FakePlayerAction.STOP;
-        this.actionData = StopData.STOP;
+        this.context = StopContext.STOP;
     }
 
     public FakePlayerActionSerial(EntityPlayerMPFake fakePlayer) {
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         this.action = actionManager.getAction();
-        this.actionData = actionManager.getActionData();
+        this.context = actionManager.getActionContext();
     }
 
     public FakePlayerActionSerial(JsonObject json) {
         if (json.has("stop")) {
             this.action = FakePlayerAction.STOP;
-            this.actionData = StopData.STOP;
+            this.context = StopContext.STOP;
         } else if (json.has("sorting")) {
             this.action = FakePlayerAction.SORTING;
-            this.actionData = SortingData.load(json.get("sorting").getAsJsonObject());
+            this.context = SortingContext.load(json.get("sorting").getAsJsonObject());
         } else if (json.has("clean")) {
             this.action = FakePlayerAction.CLEAN;
-            this.actionData = CleanData.load(json.get("clean").getAsJsonObject());
+            this.context = CleanContext.load(json.get("clean").getAsJsonObject());
         } else if (json.has("fill")) {
             this.action = FakePlayerAction.FILL;
-            this.actionData = FillData.load(json.get("fill").getAsJsonObject());
+            this.context = FillContext.load(json.get("fill").getAsJsonObject());
         } else if (json.has("inventory_crafting")) {
             this.action = FakePlayerAction.INVENTORY_CRAFT;
-            this.actionData = InventoryCraftData.load(json.get("inventory_crafting").getAsJsonObject());
+            this.context = InventoryCraftContext.load(json.get("inventory_crafting").getAsJsonObject());
         } else if (json.has("crafting_table_craft")) {
             this.action = FakePlayerAction.CRAFTING_TABLE_CRAFT;
-            this.actionData = CraftingTableCraftData.load(json.get("crafting_table_craft").getAsJsonObject());
+            this.context = CraftingTableCraftContext.load(json.get("crafting_table_craft").getAsJsonObject());
         } else if (json.has("rename")) {
             this.action = FakePlayerAction.RENAME;
-            this.actionData = RenameData.load(json.get("rename").getAsJsonObject());
+            this.context = RenameContext.load(json.get("rename").getAsJsonObject());
         } else if (json.has("stonecutting")) {
             this.action = FakePlayerAction.STONECUTTING;
-            this.actionData = StonecuttingData.load(json.get("stonecutting").getAsJsonObject());
+            this.context = StonecuttingContext.load(json.get("stonecutting").getAsJsonObject());
         } else if (json.has("trade")) {
             this.action = FakePlayerAction.TRADE;
-            this.actionData = TradeData.load(json.get("trade").getAsJsonObject());
+            this.context = TradeContext.load(json.get("trade").getAsJsonObject());
         } else if (json.has("fishing")) {
             this.action = FakePlayerAction.FISHING;
-            this.actionData = new FishingData();
+            this.context = new FishingContext();
         } else {
             CarpetOrgAddition.LOGGER.warn("从json中反序列化玩家动作失败");
             this.action = FakePlayerAction.STOP;
-            this.actionData = StopData.STOP;
+            this.context = StopContext.STOP;
         }
     }
 
@@ -72,7 +72,7 @@ public class FakePlayerActionSerial {
             return;
         }
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
-        actionManager.setAction(this.action, this.actionData);
+        actionManager.setAction(this.action, this.context);
     }
 
     public boolean hasAction() {
@@ -102,7 +102,7 @@ public class FakePlayerActionSerial {
             case TRADE -> "trade";
             case FISHING -> "fishing";
         };
-        json.add(action, this.actionData.toJson());
+        json.add(action, this.context.toJson());
         return json;
     }
 }

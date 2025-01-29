@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -13,23 +13,23 @@ import org.carpetorgaddition.util.wheel.TextBuilder;
 
 import java.util.ArrayList;
 
-public class CraftingTableCraftData extends AbstractActionData {
+public class CraftingTableCraftContext extends AbstractActionContext {
     /**
      * 合成配方
      */
     private final ItemStackPredicate[] predicates = new ItemStackPredicate[9];
 
-    public CraftingTableCraftData(ItemStackPredicate[] predicates) {
+    public CraftingTableCraftContext(ItemStackPredicate[] predicates) {
         System.arraycopy(predicates, 0, this.predicates, 0, this.predicates.length);
     }
 
-    public static CraftingTableCraftData load(JsonObject json) {
+    public static CraftingTableCraftContext load(JsonObject json) {
         ItemStackPredicate[] predicates = new ItemStackPredicate[9];
         for (int i = 0; i < predicates.length; i++) {
             String item = json.get(String.valueOf(i)).getAsString();
             predicates[i] = ItemStackPredicate.load(item);
         }
-        return new CraftingTableCraftData(predicates);
+        return new CraftingTableCraftContext(predicates);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CraftingTableCraftData extends AbstractActionData {
                 .blank().append(this.predicates[4].getInitialUpperCase())
                 .blank().append(this.predicates[5].getInitialUpperCase());
         if (!craftOutput.isEmpty()) {
-            builder.appendString(" -> ").append(AbstractActionData.getWithCountHoverText(craftOutput));
+            builder.appendString(" -> ").append(AbstractActionContext.getWithCountHoverText(craftOutput));
         }
         list.add(builder.toLine());
         // 配方第三排

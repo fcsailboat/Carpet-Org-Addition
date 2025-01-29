@@ -7,7 +7,7 @@ import net.minecraft.screen.StonecutterScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.InfiniteLoopException;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.StonecuttingData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.StonecuttingContext;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.inventory.AutoGrowInventory;
 
@@ -15,7 +15,7 @@ public class FakePlayerStonecutting {
     private FakePlayerStonecutting() {
     }
 
-    public static void stonecutting(StonecuttingData stonecuttingData, EntityPlayerMPFake fakePlayer) {
+    public static void stonecutting(StonecuttingContext context, EntityPlayerMPFake fakePlayer) {
         /*
          * 切石机的输出槽不能使用Ctrl+Q一次性丢出整组物品，只能一个个丢出。在合成
          * 物品时，会有大量物品产生，因为是一个个丢出的，所以物品不会立即合并。例如，
@@ -26,14 +26,14 @@ public class FakePlayerStonecutting {
          */
         AutoGrowInventory inventory = new AutoGrowInventory();
         // 合成物品
-        stonecutting(stonecuttingData, fakePlayer, inventory);
+        stonecutting(context, fakePlayer, inventory);
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
             fakePlayer.dropItem(itemStack, false, true);
         }
     }
 
-    public static void stonecutting(StonecuttingData stonecuttingData, EntityPlayerMPFake fakePlayer, AutoGrowInventory inventory) {
+    public static void stonecutting(StonecuttingContext stonecuttingData, EntityPlayerMPFake fakePlayer, AutoGrowInventory inventory) {
         if (fakePlayer.currentScreenHandler instanceof StonecutterScreenHandler stonecutterScreenHandler) {
             // 获取要切割的物品和按钮的索引
             Item item = stonecuttingData.getItem();

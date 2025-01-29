@@ -14,7 +14,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.FakePlayerActionSerial;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.FakePlayerActionSerial;
 import org.carpetorgaddition.periodic.task.ServerTaskManager;
 import org.carpetorgaddition.periodic.task.playerscheduletask.DelayedLoginTask;
 import org.carpetorgaddition.util.*;
