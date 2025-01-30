@@ -152,7 +152,6 @@ public class FakePlayerUtils {
      * @param toIndex       将物品放在哪个槽位
      * @param player        操作GUI的假玩家
      */
-    @SuppressWarnings("unused")
     public static void pickupAndMoveHalfItemStack(ScreenHandler screenHandler, int fromIndex,
                                                   int toIndex, EntityPlayerMPFake player) {
         // 如果鼠标光标上有物品，先把光标上的物品丢弃
@@ -175,6 +174,7 @@ public class FakePlayerUtils {
      * @apiNote 请勿在工作台输出槽中使用此方法丢弃物品
      */
     public static void loopThrowItem(ScreenHandler screenHandler, int slotIndex, EntityPlayerMPFake player) {
+        // TODO 检查物品是否可以取出
         while (screenHandler.getSlot(slotIndex).hasStack()) {
             screenHandler.onSlotClick(slotIndex, THROW_Q, SlotActionType.THROW, player);
         }
@@ -214,6 +214,17 @@ public class FakePlayerUtils {
             return;
         }
         screenHandler.onSlotClick(EMPTY_SPACE_SLOT_INDEX, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, fakePlayer);
+    }
+
+    /**
+     * 交换两个槽位中的物品
+     */
+    public static void swapSlotItem(ScreenHandler screenHandler, int index1, int index2, EntityPlayerMPFake fakePlayer) {
+        // 拿取槽位1上的物品，单击槽位2，与槽位2物品交互位置，再次单击槽位1，将物品放回
+        // 不需要检查槽位上是否有物品
+        screenHandler.onSlotClick(index1, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, fakePlayer);
+        screenHandler.onSlotClick(index2, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, fakePlayer);
+        screenHandler.onSlotClick(index1, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, fakePlayer);
     }
 
     /**

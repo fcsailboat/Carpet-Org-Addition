@@ -44,7 +44,11 @@ public enum FakePlayerAction {
     /**
      * 自动钓鱼
      */
-    FISHING("carpet.commands.playerAction.action.fishing");
+    FISHING("carpet.commands.playerAction.action.fishing"),
+    /**
+     * 自动种植
+     */
+    FARMING("carpet.commands.playerAction.action.Farming");
 
     private final MutableText displayName;
 
@@ -65,6 +69,7 @@ public enum FakePlayerAction {
             case STONECUTTING -> StonecuttingContext.class;
             case TRADE -> TradeContext.class;
             case FISHING -> FishingContext.class;
+            case FARMING -> FarmingContext.class;
         }) {
             throw new IllegalArgumentException();
         }
@@ -90,6 +95,7 @@ public enum FakePlayerAction {
             case STONECUTTING -> "切石";
             case TRADE -> "交易";
             case FISHING -> "钓鱼";
+            case FARMING -> "种植";
         };
     }
 }
