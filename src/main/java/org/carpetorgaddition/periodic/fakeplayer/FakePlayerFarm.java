@@ -34,7 +34,7 @@ public class FakePlayerFarm {
         // 获取玩家交互距离内的所有方块
         double range = fakePlayer.getBlockInteractionRange();
         // 限制交互距离，减少卡顿
-        Box box = new Box(fakePlayer.getBlockPos()).expand(range > 10 ? 10 : range);
+        Box box = new Box(fakePlayer.getBlockPos()).expand(Math.min(range, 10.0));
         // 获取当前种植的是什么类型的农作物
         FarmType farmType = FarmType.getFarmType(cropsItem);
         SelectionArea area = new SelectionArea(box);
