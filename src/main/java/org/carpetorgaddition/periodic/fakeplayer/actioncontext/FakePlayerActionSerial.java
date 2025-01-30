@@ -57,9 +57,9 @@ public class FakePlayerActionSerial {
         } else if (json.has("fishing")) {
             this.action = FakePlayerAction.FISHING;
             this.context = new FishingContext();
-        } else if (json.has("farming")) {
-            this.action = FakePlayerAction.FARMING;
-            this.context = new FarmingContext();
+        } else if (json.has("farm")) {
+            this.action = FakePlayerAction.FARM;
+            this.context = new FarmContext();
         } else {
             CarpetOrgAddition.LOGGER.warn("从json中反序列化玩家动作失败");
             this.action = FakePlayerAction.STOP;
@@ -104,7 +104,7 @@ public class FakePlayerActionSerial {
             case STONECUTTING -> "stonecutting";
             case TRADE -> "trade";
             case FISHING -> "fishing";
-            case FARMING -> "farming";
+            case FARM -> "farm";
         };
         json.add(action, this.context.toJson());
         return json;

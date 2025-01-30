@@ -8,10 +8,10 @@ import org.carpetorgaddition.util.TextUtils;
 
 import java.util.ArrayList;
 
-public class FarmingContext extends AbstractActionContext {
+public class FarmContext extends AbstractActionContext {
     @Override
     public ArrayList<MutableText> info(EntityPlayerMPFake fakePlayer) {
-        return Lists.newArrayList(TextUtils.translate("carpet.commands.playerAction.info.farming", fakePlayer.getDisplayName()));
+        return Lists.newArrayList(TextUtils.translate("carpet.commands.playerAction.info.farm", fakePlayer.getDisplayName()));
     }
 
     @Override

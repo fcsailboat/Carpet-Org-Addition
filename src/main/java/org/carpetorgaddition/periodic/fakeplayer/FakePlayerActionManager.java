@@ -67,7 +67,7 @@ public class FakePlayerActionManager {
             // 自动钓鱼
             case FISHING -> FakePlayerFishing.fishing((FishingContext) function.getActionData(), fakePlayer);
             // 自动种植
-            case FARMING -> FakePlayerFarming.farming((FarmingContext) function.getActionData(), fakePlayer);
+            case FARM -> FakePlayerFarm.farm((FarmContext) function.getActionData(), fakePlayer);
             default -> {
                 CarpetOrgAddition.LOGGER.error("{}的行为没有预先定义", this.function.getAction());
                 this.stop();
@@ -112,7 +112,7 @@ public class FakePlayerActionManager {
             case STONECUTTING -> "stonecutting";
             case TRADE -> "trade";
             case FISHING -> "fishing";
-            case FARMING -> "farming";
+            case FARM -> "farm";
         };
         json.add(action, this.getActionContext().toJson());
         return json;

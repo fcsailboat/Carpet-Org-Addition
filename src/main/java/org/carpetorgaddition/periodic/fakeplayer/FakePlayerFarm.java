@@ -16,13 +16,13 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.carpetorgaddition.periodic.fakeplayer.actioncontext.FarmingContext;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.FarmContext;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.util.function.Predicate;
 
-public class FakePlayerFarming {
-    public static void farming(FarmingContext context, EntityPlayerMPFake fakePlayer) {
+public class FakePlayerFarm {
+    public static void farm(FarmContext context, EntityPlayerMPFake fakePlayer) {
         // 根据副手的物品是什么来决定种植什么农作物
         ItemStack cropsItem = fakePlayer.getOffHandStack();
         // 如果副手没有物品，直接结束方法
@@ -36,10 +36,10 @@ public class FakePlayerFarming {
         // 限制交互距离，减少卡顿
         Box box = new Box(fakePlayer.getBlockPos()).expand(range > 10 ? 10 : range);
         // 获取当前种植的是什么类型的农作物
-        FarmingType farmingType = FarmingType.getFarmingType(cropsItem);
+        FarmType farmType = FarmType.getFarmType(cropsItem);
         SelectionArea area = new SelectionArea(box);
         for (BlockPos blockPos : area) {
-            if (tryFarming(fakePlayer, blockPos, farmingType, world, cropsItem)) {
+            if (tryFarm(fakePlayer, blockPos, farmType, world, cropsItem)) {
                 return;
             }
         }
@@ -50,9 +50,9 @@ public class FakePlayerFarming {
      *
      * @return 是否应该结束本tick种植
      */
-    private static boolean tryFarming(EntityPlayerMPFake fakePlayer, BlockPos blockPos, FarmingType farmingType, World world, ItemStack cropsItem) {
+    private static boolean tryFarm(EntityPlayerMPFake fakePlayer, BlockPos blockPos, FarmType farmType, World world, ItemStack cropsItem) {
         if (fakePlayer.canInteractWithBlockAt(blockPos, 0)) {
-            switch (farmingType) {
+            switch (farmType) {
                 case CROPS -> {
                     if (plantingCrops(fakePlayer, world, cropsItem, blockPos)) {
                         return true;
@@ -294,7 +294,7 @@ public class FakePlayerFarming {
         return false;
     }
 
-    public enum FarmingType {
+    public enum FarmType {
         /**
          * 种植普通农作物，小麦、土豆、胡萝卜，甜菜，以及火把花，瓶子草
          */
@@ -313,7 +313,7 @@ public class FakePlayerFarming {
          */
         NONE;
 
-        public static FarmingType getFarmingType(ItemStack itemStack) {
+        public static FarmType getFarmType(ItemStack itemStack) {
             if ((itemStack.isOf(Items.WHEAT_SEEDS)
                     || itemStack.isOf(Items.POTATO)
                     || itemStack.isOf(Items.CARROT)

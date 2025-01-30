@@ -91,8 +91,8 @@ public class PlayerActionCommand {
                                         .executes(PlayerActionCommand::useGuiSetStonecutting)))
                         .then(CommandManager.literal("fishing")
                                 .executes(PlayerActionCommand::setFishing))
-                        .then(CommandManager.literal("farming")
-                                .executes(PlayerActionCommand::setFarming))));
+                        .then(CommandManager.literal("farm")
+                                .executes(PlayerActionCommand::setFarm))));
     }
 
     // 注册物品谓词节点
@@ -272,10 +272,10 @@ public class PlayerActionCommand {
 
     // TODO 隐藏该功能
     // 设置自动种植
-    private static int setFarming(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int setFarm(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
-        actionManager.setAction(FakePlayerAction.FARMING, new FarmingContext());
+        actionManager.setAction(FakePlayerAction.FARM, new FarmContext());
         return 1;
     }
 
