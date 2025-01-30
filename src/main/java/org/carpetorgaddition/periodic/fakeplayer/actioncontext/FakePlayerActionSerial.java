@@ -27,25 +27,29 @@ public class FakePlayerActionSerial {
     }
 
     public FakePlayerActionSerial(JsonObject json) {
-        // TODO 需要测试
         for (FakePlayerAction value : FakePlayerAction.values()) {
             String serializedName = value.getSerializedName();
             if (json.has(serializedName)) {
-                this.action = value;
-                final JsonObject jsonObject = json.get(serializedName).getAsJsonObject();
-                this.context = switch (value) {
-                    case STOP -> StopContext.STOP;
-                    case SORTING -> SortingContext.load(jsonObject);
-                    case CLEAN -> CleanContext.load(jsonObject);
-                    case FILL -> FillContext.load(jsonObject);
-                    case CRAFTING_TABLE_CRAFT -> CraftingTableCraftContext.load(jsonObject);
-                    case INVENTORY_CRAFT -> InventoryCraftContext.load(jsonObject);
-                    case RENAME -> RenameContext.load(jsonObject);
-                    case STONECUTTING -> StonecuttingContext.load(jsonObject);
-                    case TRADE -> TradeContext.load(jsonObject);
-                    case FISHING -> new FishingContext();
-                    case FARM -> new FarmContext();
-                };
+                if (FakePlayerAction.hiddenThisFunction(value)) {
+                    this.action = FakePlayerAction.STOP;
+                    this.context = StopContext.STOP;
+                } else {
+                    this.action = value;
+                    final JsonObject jsonObject = json.get(serializedName).getAsJsonObject();
+                    this.context = switch (value) {
+                        case STOP -> StopContext.STOP;
+                        case SORTING -> SortingContext.load(jsonObject);
+                        case CLEAN -> CleanContext.load(jsonObject);
+                        case FILL -> FillContext.load(jsonObject);
+                        case CRAFTING_TABLE_CRAFT -> CraftingTableCraftContext.load(jsonObject);
+                        case INVENTORY_CRAFT -> InventoryCraftContext.load(jsonObject);
+                        case RENAME -> RenameContext.load(jsonObject);
+                        case STONECUTTING -> StonecuttingContext.load(jsonObject);
+                        case TRADE -> TradeContext.load(jsonObject);
+                        case FISHING -> new FishingContext();
+                        case FARM -> new FarmContext();
+                    };
+                }
                 return;
             }
         }
@@ -80,8 +84,12 @@ public class FakePlayerActionSerial {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        String action = this.action.getSerializedName();
-        json.add(action, this.context.toJson());
+        if (FakePlayerAction.hiddenThisFunction(this.action)) {
+            json.add(FakePlayerAction.STOP.getSerializedName(), StopContext.STOP.toJson());
+        } else {
+            String action = this.action.getSerializedName();
+            json.add(action, this.context.toJson());
+        }
         return json;
     }
 }

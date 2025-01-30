@@ -1,6 +1,7 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import net.minecraft.text.MutableText;
+import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.*;
 import org.carpetorgaddition.util.TextUtils;
 
@@ -88,6 +89,13 @@ public enum FakePlayerAction {
             case FISHING -> FishingContext.class;
             case FARM -> FarmContext.class;
         };
+    }
+
+    public static boolean hiddenThisFunction(FakePlayerAction value) {
+        if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
+            return false;
+        }
+        return value == FARM;
     }
 
     @Override

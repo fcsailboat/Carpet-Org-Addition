@@ -21,6 +21,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
+import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
@@ -92,6 +93,7 @@ public class PlayerActionCommand {
                         .then(CommandManager.literal("fishing")
                                 .executes(PlayerActionCommand::setFishing))
                         .then(CommandManager.literal("farm")
+                                .requires(source -> CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION)
                                 .executes(PlayerActionCommand::setFarm))));
     }
 
@@ -270,9 +272,11 @@ public class PlayerActionCommand {
         return 1;
     }
 
-    // TODO 隐藏该功能
     // 设置自动种植
     private static int setFarm(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        if (FakePlayerAction.hiddenThisFunction(FakePlayerAction.FARM)) {
+            return 0;
+        }
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
         actionManager.setAction(FakePlayerAction.FARM, new FarmContext());

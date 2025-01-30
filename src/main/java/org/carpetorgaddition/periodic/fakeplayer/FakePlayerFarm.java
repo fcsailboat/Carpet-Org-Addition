@@ -16,6 +16,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.FarmContext;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
@@ -23,24 +24,26 @@ import java.util.function.Predicate;
 
 public class FakePlayerFarm {
     public static void farm(FarmContext ignored, EntityPlayerMPFake fakePlayer) {
-        // 根据副手的物品是什么来决定种植什么农作物
-        ItemStack cropsItem = fakePlayer.getOffHandStack();
-        // 如果副手没有物品，直接结束方法
-        if (cropsItem.isEmpty()) {
-            return;
-        }
-        // 获取玩家所站的位置
-        World world = fakePlayer.getWorld();
-        // 获取玩家交互距离内的所有方块
-        double range = fakePlayer.getBlockInteractionRange();
-        // 限制交互距离，减少卡顿
-        Box box = new Box(fakePlayer.getBlockPos()).expand(Math.min(range, 10.0));
-        // 获取当前种植的是什么类型的农作物
-        FarmType farmType = FarmType.getFarmType(cropsItem);
-        SelectionArea area = new SelectionArea(box);
-        for (BlockPos blockPos : area) {
-            if (tryFarm(fakePlayer, blockPos, farmType, world, cropsItem)) {
+        if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
+            // 根据副手的物品是什么来决定种植什么农作物
+            ItemStack cropsItem = fakePlayer.getOffHandStack();
+            // 如果副手没有物品，直接结束方法
+            if (cropsItem.isEmpty()) {
                 return;
+            }
+            // 获取玩家所站的位置
+            World world = fakePlayer.getWorld();
+            // 获取玩家交互距离内的所有方块
+            double range = fakePlayer.getBlockInteractionRange();
+            // 限制交互距离，减少卡顿
+            Box box = new Box(fakePlayer.getBlockPos()).expand(Math.min(range, 10.0));
+            // 获取当前种植的是什么类型的农作物
+            FarmType farmType = FarmType.getFarmType(cropsItem);
+            SelectionArea area = new SelectionArea(box);
+            for (BlockPos blockPos : area) {
+                if (tryFarm(fakePlayer, blockPos, farmType, world, cropsItem)) {
+                    return;
+                }
             }
         }
     }
