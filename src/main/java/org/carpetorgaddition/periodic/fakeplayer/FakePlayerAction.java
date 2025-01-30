@@ -4,6 +4,8 @@ import net.minecraft.text.MutableText;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.*;
 import org.carpetorgaddition.util.TextUtils;
 
+import java.util.Locale;
+
 public enum FakePlayerAction {
     /**
      * 停止操作
@@ -51,14 +53,29 @@ public enum FakePlayerAction {
     FARM("carpet.commands.playerAction.action.farm");
 
     private final MutableText displayName;
+    private final String serialName;
 
     FakePlayerAction(String key) {
         this.displayName = TextUtils.translate(key);
+        this.serialName = this.name().toLowerCase(Locale.ROOT);
     }
 
-    // 检查当前动作是否与指定动作数据匹配
-    public void checkActionContext(Class<? extends AbstractActionContext> clazz) {
-        if (clazz != switch (this) {
+    /**
+     * @return 当前动作类型的显示名称
+     */
+    public MutableText getDisplayName() {
+        return this.displayName;
+    }
+
+    /**
+     * 获取序列化名称
+     */
+    public String getSerializedName() {
+        return this.serialName;
+    }
+
+    public Class<? extends AbstractActionContext> getContextClass() {
+        return switch (this) {
             case STOP -> StopContext.class;
             case SORTING -> SortingContext.class;
             case CLEAN -> CleanContext.class;
@@ -70,16 +87,7 @@ public enum FakePlayerAction {
             case TRADE -> TradeContext.class;
             case FISHING -> FishingContext.class;
             case FARM -> FarmContext.class;
-        }) {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    /**
-     * @return 当前动作类型的显示名称
-     */
-    public MutableText getDisplayName() {
-        return this.displayName;
+        };
     }
 
     @Override

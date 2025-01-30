@@ -27,44 +27,31 @@ public class FakePlayerActionSerial {
     }
 
     public FakePlayerActionSerial(JsonObject json) {
-        if (json.has("stop")) {
-            this.action = FakePlayerAction.STOP;
-            this.context = StopContext.STOP;
-        } else if (json.has("sorting")) {
-            this.action = FakePlayerAction.SORTING;
-            this.context = SortingContext.load(json.get("sorting").getAsJsonObject());
-        } else if (json.has("clean")) {
-            this.action = FakePlayerAction.CLEAN;
-            this.context = CleanContext.load(json.get("clean").getAsJsonObject());
-        } else if (json.has("fill")) {
-            this.action = FakePlayerAction.FILL;
-            this.context = FillContext.load(json.get("fill").getAsJsonObject());
-        } else if (json.has("inventory_crafting")) {
-            this.action = FakePlayerAction.INVENTORY_CRAFT;
-            this.context = InventoryCraftContext.load(json.get("inventory_crafting").getAsJsonObject());
-        } else if (json.has("crafting_table_craft")) {
-            this.action = FakePlayerAction.CRAFTING_TABLE_CRAFT;
-            this.context = CraftingTableCraftContext.load(json.get("crafting_table_craft").getAsJsonObject());
-        } else if (json.has("rename")) {
-            this.action = FakePlayerAction.RENAME;
-            this.context = RenameContext.load(json.get("rename").getAsJsonObject());
-        } else if (json.has("stonecutting")) {
-            this.action = FakePlayerAction.STONECUTTING;
-            this.context = StonecuttingContext.load(json.get("stonecutting").getAsJsonObject());
-        } else if (json.has("trade")) {
-            this.action = FakePlayerAction.TRADE;
-            this.context = TradeContext.load(json.get("trade").getAsJsonObject());
-        } else if (json.has("fishing")) {
-            this.action = FakePlayerAction.FISHING;
-            this.context = new FishingContext();
-        } else if (json.has("farm")) {
-            this.action = FakePlayerAction.FARM;
-            this.context = new FarmContext();
-        } else {
-            CarpetOrgAddition.LOGGER.warn("从json中反序列化玩家动作失败");
-            this.action = FakePlayerAction.STOP;
-            this.context = StopContext.STOP;
+        // TODO 需要测试
+        for (FakePlayerAction value : FakePlayerAction.values()) {
+            String serializedName = value.getSerializedName();
+            if (json.has(serializedName)) {
+                this.action = value;
+                final JsonObject jsonObject = json.get(serializedName).getAsJsonObject();
+                this.context = switch (value) {
+                    case STOP -> StopContext.STOP;
+                    case SORTING -> SortingContext.load(jsonObject);
+                    case CLEAN -> CleanContext.load(jsonObject);
+                    case FILL -> FillContext.load(jsonObject);
+                    case CRAFTING_TABLE_CRAFT -> CraftingTableCraftContext.load(jsonObject);
+                    case INVENTORY_CRAFT -> InventoryCraftContext.load(jsonObject);
+                    case RENAME -> RenameContext.load(jsonObject);
+                    case STONECUTTING -> StonecuttingContext.load(jsonObject);
+                    case TRADE -> TradeContext.load(jsonObject);
+                    case FISHING -> new FishingContext();
+                    case FARM -> new FarmContext();
+                };
+                return;
+            }
         }
+        CarpetOrgAddition.LOGGER.warn("从json中反序列化玩家动作失败");
+        this.action = FakePlayerAction.STOP;
+        this.context = StopContext.STOP;
     }
 
     /**
@@ -93,19 +80,7 @@ public class FakePlayerActionSerial {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        String action = switch (this.action) {
-            case STOP -> "stop";
-            case SORTING -> "sorting";
-            case CLEAN -> "clean";
-            case FILL -> "fill";
-            case INVENTORY_CRAFT -> "inventory_crafting";
-            case CRAFTING_TABLE_CRAFT -> "crafting_table_craft";
-            case RENAME -> "rename";
-            case STONECUTTING -> "stonecutting";
-            case TRADE -> "trade";
-            case FISHING -> "fishing";
-            case FARM -> "farm";
-        };
+        String action = this.action.getSerializedName();
         json.add(action, this.context.toJson());
         return json;
     }

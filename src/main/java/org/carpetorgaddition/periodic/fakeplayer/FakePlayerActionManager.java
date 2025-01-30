@@ -1,7 +1,6 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
-import com.google.gson.JsonObject;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.*;
@@ -99,25 +98,6 @@ public class FakePlayerActionManager {
         this.setAction(actionManager.getAction(), actionManager.getActionContext());
     }
 
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        String action = switch (this.getAction()) {
-            case STOP -> "stop";
-            case SORTING -> "sorting";
-            case CLEAN -> "clean";
-            case FILL -> "fill";
-            case INVENTORY_CRAFT -> "inventory_crafting";
-            case CRAFTING_TABLE_CRAFT -> "crafting_table_craft";
-            case RENAME -> "rename";
-            case STONECUTTING -> "stonecutting";
-            case TRADE -> "trade";
-            case FISHING -> "fishing";
-            case FARM -> "farm";
-        };
-        json.add(action, this.getActionContext().toJson());
-        return json;
-    }
-
     /**
      * 将动作类型和动作数据封装起来，保证类型与数据对应，类中所以成员变量和成员方法全部为私有，防止外部其他类直接调用
      */
@@ -128,7 +108,9 @@ public class FakePlayerActionManager {
         // 动作类型必须和动作数据一起修改来保证类型与数据对应
         private void setAction(FakePlayerAction action, AbstractActionContext actionContext) {
             // 检查动作类型是否与数据匹配
-            action.checkActionContext(actionContext.getClass());
+            if (actionContext.getClass() != action.getContextClass()) {
+                throw new IllegalArgumentException();
+            }
             this.action = action;
             this.actionContext = actionContext;
         }
