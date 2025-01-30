@@ -478,11 +478,6 @@ public class CarpetOrgAdditionSettings {
     @Rule(categories = {ORG, Hidden})
     public static boolean autoSyncPlayerStatus = false;
 
-    // 查找可能影响世吞运行的方块
-    @Hidden
-    @Rule(categories = {ORG, RuleCategory.COMMAND, Hidden})
-    public static boolean finderCommandSearchWorldEater = false;
-
     // 记录玩家命令
     @Rule(categories = {ORG, RuleCategory.COMMAND})
     public static boolean recordPlayerCommand = false;
