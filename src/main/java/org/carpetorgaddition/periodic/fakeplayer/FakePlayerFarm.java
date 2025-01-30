@@ -22,7 +22,7 @@ import org.carpetorgaddition.util.wheel.SelectionArea;
 import java.util.function.Predicate;
 
 public class FakePlayerFarm {
-    public static void farm(FarmContext context, EntityPlayerMPFake fakePlayer) {
+    public static void farm(FarmContext ignored, EntityPlayerMPFake fakePlayer) {
         // 根据副手的物品是什么来决定种植什么农作物
         ItemStack cropsItem = fakePlayer.getOffHandStack();
         // 如果副手没有物品，直接结束方法

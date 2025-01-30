@@ -39,11 +39,12 @@ public class FakePlayerActionManager {
     }
 
     // 执行动作
-    public void executeAction() {
-        switch (function.getAction()) {
-            case STOP -> {
-                // 什么也不做
-            }
+    private void executeAction() {
+        FakePlayerAction action = function.getAction();
+        if (action == FakePlayerAction.STOP) {
+            return;
+        }
+        switch (action) {
             // 物品分拣
             case SORTING -> FakePlayerSorting.sorting((SortingContext) function.getActionContext(), fakePlayer);
             // 清空潜影盒
@@ -68,7 +69,7 @@ public class FakePlayerActionManager {
             // 自动种植
             case FARM -> FakePlayerFarm.farm((FarmContext) function.getActionContext(), fakePlayer);
             default -> {
-                CarpetOrgAddition.LOGGER.error("行为“{}”没有预先定义", this.function.getAction());
+                CarpetOrgAddition.LOGGER.error("行为“{}”没有预先定义", action);
                 this.stop();
             }
         }
