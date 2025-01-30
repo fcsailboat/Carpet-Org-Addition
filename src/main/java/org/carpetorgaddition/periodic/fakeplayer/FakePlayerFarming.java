@@ -17,10 +17,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.FarmingContext;
-import org.carpetorgaddition.util.WorldUtils;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
-import java.util.List;
 import java.util.function.Predicate;
 
 public class FakePlayerFarming {
@@ -40,7 +38,7 @@ public class FakePlayerFarming {
         FarmingType farmingType = FarmingType.getFarmingType(cropsItem);
         switch (farmingType) {
             case CROPS -> plantingCrops(fakePlayer, box, world, cropsItem);
-            case BAMBOO -> plantingBamboo(fakePlayer, box, world, cropsItem);
+            case BAMBOO -> plantingBamboo(fakePlayer, box, world);
             case NONE -> {
             }
         }
@@ -98,62 +96,55 @@ public class FakePlayerFarming {
     }
 
     // 种植竹子
-    @SuppressWarnings("removal")
-    private static void plantingBamboo(EntityPlayerMPFake fakePlayer, Box box, World world, ItemStack itemStack) {
-        // 获取所有
-        List<BlockPos> list = WorldUtils.allBlockPos(box).stream()
-                .filter(blockPos -> world.getBlockState(blockPos).isIn(BlockTags.BAMBOO_PLANTABLE_ON)
-                        // 竹子和竹笋自身也有“bamboo_plantable_on”标签，需要排除掉
-                        && !world.getBlockState(blockPos).isOf(Blocks.BAMBOO)
-                        && !world.getBlockState(blockPos).isOf(Blocks.BAMBOO_SAPLING))
-                .filter(blockPos -> world.getBlockState(blockPos.up()).isAir()
-                        || world.getBlockState(blockPos.up()).isOf(Blocks.BAMBOO)
-                        || world.getBlockState(blockPos.up()).isOf(Blocks.BAMBOO_SAPLING))
-                .toList();
-        for (BlockPos blockPos : list) {
-            PlayerScreenHandler playerScreenHandler = fakePlayer.playerScreenHandler;
-            // 玩家手上的竹子太少，需要补货
-            if (itemStack.getCount() <= 1) {
-                DefaultedList<Slot> slots = playerScreenHandler.slots;
-                if (replenishment(fakePlayer, slots.size() - 1, itemStack.getItem(), playerScreenHandler)) {
-                    // 补货失败，玩家身上已经没有足够的竹子了，直接结束方法
-                    return;
-                }
+    private static void plantingBamboo(EntityPlayerMPFake fakePlayer, Box box, World world) {
+        // 是否可以种植竹子
+        Predicate<BlockPos> canBePlanted = blockPos -> world.getBlockState(blockPos).isIn(BlockTags.BAMBOO_PLANTABLE_ON)
+                // 竹子和竹笋自身也有“bamboo_plantable_on”标签，需要排除掉
+                && !world.getBlockState(blockPos).isOf(Blocks.BAMBOO)
+                && !world.getBlockState(blockPos).isOf(Blocks.BAMBOO_SAPLING);
+        for (BlockPos plantablePos : new SelectionArea(box)) {
+            if (!canBePlanted.test(plantablePos)) {
+                continue;
             }
-            BlockPos upPos = blockPos.up();
-            BlockState blockState = world.getBlockState(upPos);
-            Block block = blockState.getBlock();
+            PlayerScreenHandler playerScreenHandler = fakePlayer.playerScreenHandler;
+            BlockPos bambooPos = plantablePos.up();
+            BlockState blockState = world.getBlockState(bambooPos);
             if (blockState.isAir()) {
-                // 种植竹子
-                plant(fakePlayer, world, itemStack, blockPos, upPos);
-            } else if (block instanceof BambooShootBlock) {
-                // 竹笋方块，直接使用骨粉
-                fertilize(fakePlayer, playerScreenHandler, world, upPos);
+                // 不去主动种植竹子，只催熟和收割现有的竹子
+                continue;
+            }
+            Block block = blockState.getBlock();
+            if (block instanceof BambooShootBlock && world.getBlockState(bambooPos.up()).isAir()) {
+                // 竹笋方块，如果上方没有方块阻挡，直接使用骨粉
+                fertilize(fakePlayer, playerScreenHandler, world, bambooPos);
             } else if (block instanceof BambooBlock bambooBlock) {
                 // 判断竹子是否可以施肥
-                if (bambooBlock.isFertilizable(world, upPos, blockState)) {
+                if (bambooBlock.isFertilizable(world, bambooPos, blockState)) {
                     // 可以施肥
                     // 竹子上方第一个空气方块开始，向上空气方块的数量
                     int airCount = 0;
                     // 一个标记，从这个标记变为true开始，记录上方空气的数量
                     boolean hasAir = false;
                     /*
-                      从当前竹子根的位置向上找16格，判断上方是否有上次砍伐但没来得及掉落的竹子。
-                      竹子被砍断后不会立即掉落所有的竹子，而且从砍断的位置开始向上逐个掉落，
-                      如果在掉落前立即撒骨粉施肥，那么新的竹子极有可能与之前的竹子连接，之前的竹子不会掉落，会白白浪费骨粉。
-                      对竹子使用骨粉时会让竹子向上生长1-2格，所以，要想让新的竹子不会与旧的竹子相连接，新竹子距离之前的竹子至少要距离3格
-                      从第二格开始找是因为竹子是从第二格开始砍断的，第零格是支撑竹子的方块，第一格是竹子的根，所以底下这两格一定不是空气。
+                     * 从当前竹子根的位置向上找16格，判断上方是否有上次砍伐但没来得及掉落的竹子。
+                     * 竹子被砍断后不会立即掉落所有的竹子，而且从砍断的位置开始向上逐个掉落，
+                     * 如果在掉落前立即撒骨粉施肥，那么新的竹子极有可能与之前的竹子连接，之前的竹子不会掉落，会白白浪费骨粉。
+                     * 对竹子使用骨粉时会让竹子向上生长1-2格，所以，要想让新的竹子不会与旧的竹子相连接，新竹子距离之前的竹子至少要距离3格
+                     * 从第二格开始找是因为竹子是从第二格开始砍断的，第零格是支撑竹子的方块，第一格是竹子的根，所以底下这两格一定不是空气。
                      */
                     for (int height = 2; height <= 16; height++) {
-                        BlockState tempBlockState = world.getBlockState(new BlockPos(blockPos.getX(), blockPos.getY() + height, blockPos.getZ()));
+                        BlockState tempBlockState = world.getBlockState(new BlockPos(plantablePos.getX(), plantablePos.getY() + height, plantablePos.getZ()));
                         if (tempBlockState.isAir()) {
                             hasAir = true;
                             airCount++;
+                        } else if (!tempBlockState.isOf(Blocks.BAMBOO)) {
+                            // 有方块阻止了竹子生长
+                            break;
                         }
                         if (hasAir) {
                             // 如果上方连续的空气方块数量大于等于3，则可以使用骨粉
                             if (airCount >= 3) {
-                                fertilize(fakePlayer, playerScreenHandler, world, upPos);
+                                fertilize(fakePlayer, playerScreenHandler, world, bambooPos);
                                 break;
                             } else if (tempBlockState.isOf(Blocks.BAMBOO)) {
                                 // 如果上方连续的空气方块数量小于3，不能施肥，跳出循环
@@ -161,18 +152,18 @@ public class FakePlayerFarming {
                             }
                         }
                         if (height == 16) {
-                         /*
-                            检查到了第16格，直接施肥
-                            如果第15格是空气，那么判断第16格时：
-                            1.如果第16格是竹子，则代码会在上面检查airCount>=3时，条件不会成立，会进入else if判断然后跳出循环，代码不会执行到这里
-                            2.如果第16格是空气，那么15格16格是空气，17格超出了竹子的最大生长高度所以一定也是空气，连续3格空气，可以施肥。
-                          */
-                            fertilize(fakePlayer, playerScreenHandler, world, upPos);
+                            /*
+                             * 检查到了第16格，直接施肥
+                             * 如果第15格是空气，那么判断第16格时：
+                             * 1.如果第16格是竹子，则代码会在上面检查airCount>=3时，条件不会成立，会进入else if判断然后跳出循环，代码不会执行到这里
+                             * 2.如果第16格是空气，那么15格16格是空气，17格超出了竹子的最大生长高度所以一定也是空气，连续3格空气，可以施肥。
+                             */
+                            fertilize(fakePlayer, playerScreenHandler, world, bambooPos);
                         }
                     }
                 } else {
                     // 不能施肥，破坏竹子
-                    useToolBreakBlock(fakePlayer, upPos, world, true);
+                    useToolBreakBlock(fakePlayer, bambooPos, world, true);
                 }
             }
         }
