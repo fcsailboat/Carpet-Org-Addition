@@ -57,7 +57,7 @@ public enum FakePlayerAction {
     }
 
     // 检查当前动作是否与指定动作数据匹配
-    public void checkActionData(Class<? extends AbstractActionContext> clazz) {
+    public void checkActionContext(Class<? extends AbstractActionContext> clazz) {
         if (clazz != switch (this) {
             case STOP -> StopContext.class;
             case SORTING -> SortingContext.class;
