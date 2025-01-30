@@ -68,7 +68,7 @@ public class FakePlayerActionManager {
             // 自动种植
             case FARM -> FakePlayerFarm.farm((FarmContext) function.getActionContext(), fakePlayer);
             default -> {
-                CarpetOrgAddition.LOGGER.error("{}的行为没有预先定义", this.function.getAction());
+                CarpetOrgAddition.LOGGER.error("行为“{}”没有预先定义", this.function.getAction());
                 this.stop();
             }
         }
