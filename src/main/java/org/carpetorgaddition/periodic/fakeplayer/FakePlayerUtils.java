@@ -3,6 +3,7 @@ package org.carpetorgaddition.periodic.fakeplayer;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -187,9 +188,12 @@ public class FakePlayerUtils {
      */
     public static void collectItem(ScreenHandler screenHandler, int slotIndex, AutoGrowInventory inventory, EntityPlayerMPFake fakePlayer) {
         InventoryUtils.assertEmptyStack(screenHandler.getCursorStack(), () -> "光标上物品非空");
+        // 取出物品的过程中，输出槽位的物品可能会随着输入物品的改变而改变
+        // 物品改变后，应停止取出物品，避免合成错误的物品
+        Item item = screenHandler.getSlot(slotIndex).getStack().getItem();
         while (true) {
             Slot slot = screenHandler.getSlot(slotIndex);
-            if (slot.hasStack() && slot.canTakeItems(fakePlayer)) {
+            if (slot.hasStack() && slot.canTakeItems(fakePlayer) && item == slot.getStack().getItem()) {
                 // 拿取槽位上的物品
                 screenHandler.onSlotClick(slotIndex, PICKUP_LEFT_CLICK, SlotActionType.PICKUP, fakePlayer);
                 // 将槽位上的物品放入物品栏并清空光标上的物品
