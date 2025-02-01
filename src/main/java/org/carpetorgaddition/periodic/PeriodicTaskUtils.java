@@ -1,6 +1,7 @@
 package org.carpetorgaddition.periodic;
 
 import carpet.patches.EntityPlayerMPFake;
+import org.carpetorgaddition.periodic.fakeplayer.BlockBreakManager;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.jetbrains.annotations.Contract;
 
@@ -13,5 +14,10 @@ public class PeriodicTaskUtils {
     @Contract("_ -> !null")
     public static FakePlayerActionManager getFakePlayerActionManager(EntityPlayerMPFake fakePlayer) {
         return PlayerPeriodicTaskManager.getManager(fakePlayer).getFakePlayerActionManager();
+    }
+
+    @Contract("_ -> !null")
+    public static BlockBreakManager getBlockBreakManager(EntityPlayerMPFake fakePlayer) {
+        return PlayerPeriodicTaskManager.getManager(fakePlayer).getBlockBreakManager();
     }
 }
