@@ -37,15 +37,20 @@ public class BlockBreakManager {
         }
     }
 
+    public boolean breakBlock(BlockPos blockPos, Direction direction) {
+        return breakBlock(blockPos, direction, true);
+    }
+
     /**
      * 尝试挖掘方块
      *
-     * @param blockPos 挖掘方块的位置
+     * @param blockPos         挖掘方块的位置
+     * @param breakingCooldown 是否受方块挖掘冷却影响
      * @return 是否成功挖掘
      */
-    public boolean breakBlock(BlockPos blockPos, Direction direction) {
+    public boolean breakBlock(BlockPos blockPos, Direction direction, boolean breakingCooldown) {
         // 方块挖掘冷却
-        if (this.blockBreakingCooldown > 0) {
+        if (breakingCooldown && this.blockBreakingCooldown > 0) {
             return false;
         }
         World world = this.player.getWorld();
