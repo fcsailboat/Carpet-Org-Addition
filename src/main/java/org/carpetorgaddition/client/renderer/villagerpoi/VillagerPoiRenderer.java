@@ -40,7 +40,7 @@ public class VillagerPoiRenderer implements WorldRenderer {
         if (MinecraftClient.getInstance().gameRenderer.getCamera().getPos().distanceTo(villagerEntity.getPos()) > 96) {
             return;
         }
-        float tickDelta = context.tickCounter().getTickDelta(true);
+        float tickDelta = context.tickCounter().getTickProgress(true);
         Vec3d leashPos = this.villagerEntity
                 .getLerpedPos(tickDelta)
                 .add(new Vec3d(0.0, this.villagerEntity.getHeight() * 0.6, 0.0));

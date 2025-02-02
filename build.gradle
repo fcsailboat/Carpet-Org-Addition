@@ -33,7 +33,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     // fabric-carpet
     // modImplementation("curse.maven:carpet-349239:${project.carpet_core_version}")
-    modImplementation files("lib/fabric-carpet-25w04a-1.4.164+v250122.jar")
+    modImplementation files("lib/fabric-carpet-25w05a-1.4.165+v250130.jar")
     // mixinextras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")))
     testImplementation(group: 'junit', name: 'junit', version: junit_version)
