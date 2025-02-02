@@ -203,10 +203,10 @@ public class FakePlayerFarm {
     }
 
     // 种植
-    private static void plant(EntityPlayerMPFake fakePlayer, World world, ItemStack itemStack, BlockPos blockPos, BlockPos upPos) {
+    private static void plant(EntityPlayerMPFake fakePlayer, World world, ItemStack itemStack, BlockPos blockPos, BlockPos lookPos) {
         // 让假玩家看向该位置（这不是必须的）
-        fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, upPos.toCenterPos());
-        BlockHitResult hitResult = new BlockHitResult(blockPos.toCenterPos(), Direction.UP, upPos, false);
+        fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, lookPos.toCenterPos());
+        BlockHitResult hitResult = new BlockHitResult(blockPos.toCenterPos(), Direction.UP, lookPos, false);
         fakePlayer.interactionManager.interactBlock(fakePlayer, world, itemStack, Hand.OFF_HAND, hitResult);
         // 摆动手
         fakePlayer.swingHand(Hand.OFF_HAND, true);
@@ -256,7 +256,7 @@ public class FakePlayerFarm {
      * @return 是否完成挖掘
      */
     private static boolean useToolBreakBlock(EntityPlayerMPFake fakePlayer, BlockPos pos, FarmContext context) {
-        // 如果玩家是创造模式，或者玩家手上的工具已经能够瞬间破坏方块，那么就无需切换工具，直接破坏方块即可
+        // 如果有工具，拿在主手，剑可以瞬间破坏竹子，它也是工具物品
         replenishment(fakePlayer, itemStack -> itemStack.getItem() instanceof ToolItem);
         // 让假玩家看向该位置（这不是必须的）
         fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, pos.toCenterPos());
@@ -322,11 +322,6 @@ public class FakePlayerFarm {
          * 种植竹子
          */
         BAMBOO,
-        /**
-         * 种植可可豆
-         */
-        @SuppressWarnings("unused")
-        COCOA,
         /**
          * 一个占位符，表示什么都不种植
          */
