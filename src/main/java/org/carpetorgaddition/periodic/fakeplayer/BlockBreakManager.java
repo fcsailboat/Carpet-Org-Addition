@@ -2,6 +2,7 @@ package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.block.BlockState;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.Hand;
@@ -70,6 +71,8 @@ public class BlockBreakManager {
             return false;
         }
         BlockState blockState = world.getBlockState(blockPos);
+        // 让假玩家看向该位置（这不是必须的）
+        this.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, blockPos.toCenterPos());
         // 获取每次挖掘增加的进度
         float delta = blockState.calcBlockBreakingDelta(this.player, world, blockPos);
         // 当前方块是否被破坏
@@ -126,9 +129,28 @@ public class BlockBreakManager {
             this.breakingAction(Action.STOP_DESTROY_BLOCK, blockPos, direction);
             this.currentBreakingPos = null;
             this.blockBreakingCooldown = 5;
+            this.currentBreakingProgress = 0F;
             return true;
         }
         return false;
+    }
+
+    /**
+     * 如果返回1，表示该方块可以在当前游戏刻破坏
+     *
+     * @return 破坏当前方块还需要多少个游戏刻
+     */
+    public int getCurrentBreakingTime(BlockPos blockPos) {
+        World world = this.player.getWorld();
+        if (this.currentBreakingPos == null || this.currentBreakingPos.equals(blockPos)) {
+            if (this.player.isCreative()) {
+                return 1;
+            }
+            BlockState blockState = world.getBlockState(blockPos);
+            float delta = blockState.calcBlockBreakingDelta(this.player, world, blockPos);
+            return (int) Math.ceil((1F - this.currentBreakingProgress) / delta);
+        }
+        return -1;
     }
 
     private void breakingAction(Action action, BlockPos blockPos, Direction direction) {

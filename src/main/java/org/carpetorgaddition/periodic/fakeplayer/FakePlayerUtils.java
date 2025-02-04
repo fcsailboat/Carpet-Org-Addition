@@ -1,14 +1,18 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
+import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.util.math.Direction;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.StopContext;
@@ -16,6 +20,8 @@ import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.inventory.AutoGrowInventory;
+
+import java.util.function.Predicate;
 
 public class FakePlayerUtils {
 
@@ -251,5 +257,37 @@ public class FakePlayerUtils {
             return false;
         }
         return component.copyNbt().get("GcaClear") != null;
+    }
+
+    /**
+     * 将合适的物品移动到主手
+     *
+     * @return 是否移动成功
+     */
+    public static boolean replenishment(EntityPlayerMPFake fakePlayer, Predicate<ItemStack> predicate) {
+        if (predicate.test(fakePlayer.getMainHandStack())) {
+            return true;
+        }
+        PlayerScreenHandler screenHandler = fakePlayer.playerScreenHandler;
+        // 主手槽位
+        int mainHeadSlot = 36 + fakePlayer.getInventory().selectedSlot;
+        for (int i = 9; i < 45; i++) {
+            if (i == mainHeadSlot) {
+                continue;
+            }
+            if (predicate.test(screenHandler.getSlot(i).getStack())) {
+                swapSlotItem(screenHandler, i, mainHeadSlot, fakePlayer);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 让玩家看向某个方向
+     */
+    public static void look(EntityPlayerMPFake fakePlayer, Direction direction) {
+        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) fakePlayer).getActionPack();
+        actionPack.look(direction);
     }
 }

@@ -68,6 +68,8 @@ public class FakePlayerActionManager {
             case FISHING -> FakePlayerFishing.fishing((FishingContext) function.getActionContext(), fakePlayer);
             // 自动种植
             case FARM -> FakePlayerFarm.farm((FarmContext) function.getActionContext(), fakePlayer);
+            case BEDROCK ->
+                    FakePlayerBreakBedrock.breakBedrock((BreakBedrockContext) function.getActionContext(), fakePlayer);
             default -> {
                 CarpetOrgAddition.LOGGER.error("行为“{}”没有预先定义", action);
                 this.stop();

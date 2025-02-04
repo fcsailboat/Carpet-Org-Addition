@@ -30,7 +30,7 @@ public class FakePlayerActionSerial {
         for (FakePlayerAction value : FakePlayerAction.values()) {
             String serializedName = value.getSerializedName();
             if (json.has(serializedName)) {
-                if (FakePlayerAction.hiddenThisFunction(value)) {
+                if (value.isHidden()) {
                     this.action = FakePlayerAction.STOP;
                     this.context = StopContext.STOP;
                 } else {
@@ -48,6 +48,7 @@ public class FakePlayerActionSerial {
                         case TRADE -> TradeContext.load(jsonObject);
                         case FISHING -> new FishingContext();
                         case FARM -> new FarmContext();
+                        case BEDROCK -> new BreakBedrockContext();
                     };
                 }
                 return;
@@ -84,7 +85,7 @@ public class FakePlayerActionSerial {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        if (FakePlayerAction.hiddenThisFunction(this.action)) {
+        if (this.action.isHidden()) {
             json.add(FakePlayerAction.STOP.getSerializedName(), StopContext.STOP.toJson());
         } else {
             String action = this.action.getSerializedName();

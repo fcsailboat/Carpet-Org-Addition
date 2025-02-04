@@ -86,7 +86,7 @@ public class FakePlayerFarm {
         if (itemStack.getCount() <= 1 && !fakePlayer.isCreative()) {
             Predicate<ItemStack> predicate = stack -> ItemStack.areItemsAndComponentsEqual(itemStack, stack);
             // 尝试补货
-            thereAreManySeeds = replenishment(fakePlayer, screenHandler.slots.size() - 1, predicate, screenHandler);
+            thereAreManySeeds = replenishment(fakePlayer, screenHandler.slots.size() - 1, predicate);
         }
         BlockPos upPos = blockPos.up();
         BlockState blockState = world.getBlockState(upPos);
@@ -104,14 +104,14 @@ public class FakePlayerFarm {
                 // 收集农作物（破坏方块）
                 return breakBlock(fakePlayer, upPos, context);
             } else {
-                fertilize(fakePlayer, screenHandler, world, upPos);
+                fertilize(fakePlayer, world, upPos);
             }
         } else if (block instanceof PitcherCropBlock pitcherCropBlock) {
             // 处理瓶子草
             // 判断瓶子草是否可以施肥，如果可以，就施肥，否则瓶子草可能已经成熟，破坏瓶子草
             if (pitcherCropBlock.isFertilizable(world, upPos, blockState)) {
                 // 施肥
-                fertilize(fakePlayer, screenHandler, world, upPos);
+                fertilize(fakePlayer, world, upPos);
             } else {
                 // 收集瓶子草
                 return breakBlock(fakePlayer, upPos, context);
@@ -149,7 +149,7 @@ public class FakePlayerFarm {
         Block block = blockState.getBlock();
         if (block instanceof BambooShootBlock && world.getBlockState(bambooPos.up()).isAir()) {
             // 竹笋方块，如果上方没有方块阻挡，直接使用骨粉
-            fertilize(fakePlayer, playerScreenHandler, world, bambooPos);
+            fertilize(fakePlayer, world, bambooPos);
         } else if (block instanceof BambooBlock bambooBlock) {
             // 判断竹子是否可以施肥
             if (bambooBlock.isFertilizable(world, bambooPos, blockState)) {
@@ -177,7 +177,7 @@ public class FakePlayerFarm {
                     if (hasAir) {
                         // 如果上方连续的空气方块数量大于等于3，则可以使用骨粉
                         if (airCount >= 3) {
-                            fertilize(fakePlayer, playerScreenHandler, world, bambooPos);
+                            fertilize(fakePlayer, world, bambooPos);
                             break;
                         } else if (tempBlockState.isOf(Blocks.BAMBOO)) {
                             // 如果上方连续的空气方块数量小于3，不能施肥，跳出循环
@@ -191,7 +191,7 @@ public class FakePlayerFarm {
                          * 1.如果第16格是竹子，则代码会在上面检查airCount>=3时，条件不会成立，会进入else if判断然后跳出循环，代码不会执行到这里
                          * 2.如果第16格是空气，那么15格16格是空气，17格超出了竹子的最大生长高度所以一定也是空气，连续3格空气，可以施肥。
                          */
-                        fertilize(fakePlayer, playerScreenHandler, world, bambooPos);
+                        fertilize(fakePlayer, world, bambooPos);
                     }
                 }
             } else {
@@ -213,14 +213,14 @@ public class FakePlayerFarm {
     }
 
     // 撒骨粉催熟
-    private static void fertilize(EntityPlayerMPFake fakePlayer, PlayerScreenHandler screenHandler, World world, BlockPos upPos) {
+    private static void fertilize(EntityPlayerMPFake fakePlayer, World world, BlockPos upPos) {
         Predicate<ItemStack> predicate = stack -> stack.isOf(Items.BONE_MEAL);
         // 要求玩家身上有骨粉
-        if (replenishment(fakePlayer, predicate)) {
+        if (FakePlayerUtils.replenishment(fakePlayer, predicate)) {
             ItemStack itemStack = fakePlayer.getMainHandStack();
             if (itemStack.getCount() > 1
                     || fakePlayer.isCreative()
-                    || replenishment(fakePlayer, fakePlayer.getInventory().selectedSlot + 36, predicate, screenHandler)) {
+                    || replenishment(fakePlayer, fakePlayer.getInventory().selectedSlot + 36, predicate)) {
                 // 如果手上有多余一个的骨粉，就使用骨粉
                 Vec3d centerPos = upPos.toCenterPos();
                 // 让假玩家看向该位置（这不是必须的）
@@ -241,8 +241,6 @@ public class FakePlayerFarm {
      * @return 是否完成挖掘
      */
     private static boolean breakBlock(EntityPlayerMPFake fakePlayer, BlockPos pos, FarmContext context) {
-        // 让假玩家看向该位置（这不是必须的）
-        fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, pos.toCenterPos());
         BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
         boolean breakBlock = breakManager.breakBlock(pos, Direction.DOWN, !fakePlayer.isCreative());
         context.setCropPos(breakBlock ? null : pos);
@@ -257,9 +255,7 @@ public class FakePlayerFarm {
      */
     private static boolean useToolBreakBlock(EntityPlayerMPFake fakePlayer, BlockPos pos, FarmContext context) {
         // 如果有工具，拿在主手，剑可以瞬间破坏竹子，它也是工具物品
-        replenishment(fakePlayer, itemStack -> itemStack.getItem() instanceof ToolItem);
-        // 让假玩家看向该位置（这不是必须的）
-        fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, pos.toCenterPos());
+        FakePlayerUtils.replenishment(fakePlayer, itemStack -> itemStack.getItem() instanceof ToolItem);
         BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
         boolean breakBlock = breakManager.breakBlock(pos, Direction.DOWN);
         context.setCropPos(breakBlock ? null : pos);
@@ -267,7 +263,8 @@ public class FakePlayerFarm {
     }
 
     // 自动补货，返回值表示是否补货成功
-    private static boolean replenishment(EntityPlayerMPFake fakePlayer, int slotIndex, Predicate<ItemStack> predicate, PlayerScreenHandler screenHandler) {
+    private static boolean replenishment(EntityPlayerMPFake fakePlayer, int slotIndex, Predicate<ItemStack> predicate) {
+        PlayerScreenHandler screenHandler = fakePlayer.playerScreenHandler;
         DefaultedList<Slot> slots = screenHandler.slots;
         // 遍历玩家物品栏，找到需要的物品
         for (int index = 5; index < slots.size() - 1; index++) {
@@ -283,30 +280,6 @@ public class FakePlayerFarm {
                 } else {
                     FakePlayerUtils.pickupAndMoveItemStack(screenHandler, index, slotIndex, fakePlayer);
                 }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 将合适的物品移动到主手
-     *
-     * @return 是否移动成功
-     */
-    private static boolean replenishment(EntityPlayerMPFake fakePlayer, Predicate<ItemStack> predicate) {
-        if (predicate.test(fakePlayer.getMainHandStack())) {
-            return true;
-        }
-        PlayerScreenHandler screenHandler = fakePlayer.playerScreenHandler;
-        // 主手槽位
-        int mainHeadSlot = 36 + fakePlayer.getInventory().selectedSlot;
-        for (int i = 9; i < 45; i++) {
-            if (i == mainHeadSlot) {
-                continue;
-            }
-            if (predicate.test(screenHandler.getSlot(i).getStack())) {
-                FakePlayerUtils.swapSlotItem(screenHandler, i, mainHeadSlot, fakePlayer);
                 return true;
             }
         }

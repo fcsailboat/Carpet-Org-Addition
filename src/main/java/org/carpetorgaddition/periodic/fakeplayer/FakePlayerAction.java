@@ -51,7 +51,11 @@ public enum FakePlayerAction {
     /**
      * 自动种植
      */
-    FARM("carpet.commands.playerAction.action.farm");
+    FARM("carpet.commands.playerAction.action.farm"),
+    /**
+     * 自动破基岩
+     */
+    BEDROCK("carpet.commands.playerAction.action.bedrock");
 
     private final MutableText displayName;
     private final String serialName;
@@ -88,14 +92,15 @@ public enum FakePlayerAction {
             case TRADE -> TradeContext.class;
             case FISHING -> FishingContext.class;
             case FARM -> FarmContext.class;
+            case BEDROCK -> BreakBedrockContext.class;
         };
     }
 
-    public static boolean hiddenThisFunction(FakePlayerAction value) {
+    public boolean isHidden() {
         if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
             return false;
         }
-        return value == FARM;
+        return this == FARM || this == BEDROCK;
     }
 
     @Override
@@ -112,6 +117,7 @@ public enum FakePlayerAction {
             case TRADE -> "交易";
             case FISHING -> "钓鱼";
             case FARM -> "种植";
+            case BEDROCK -> "破基岩";
         };
     }
 }

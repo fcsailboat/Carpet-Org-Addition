@@ -94,7 +94,10 @@ public class PlayerActionCommand {
                                 .executes(PlayerActionCommand::setFishing))
                         .then(CommandManager.literal("farm")
                                 .requires(source -> CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION)
-                                .executes(PlayerActionCommand::setFarm))));
+                                .executes(PlayerActionCommand::setFarm))
+                        .then(CommandManager.literal("bedrock")
+                                .requires(source -> CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION)
+                                .executes(PlayerActionCommand::setBreakBedrock))));
     }
 
     // 注册物品谓词节点
@@ -274,13 +277,23 @@ public class PlayerActionCommand {
 
     // 设置自动种植
     private static int setFarm(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        if (FakePlayerAction.hiddenThisFunction(FakePlayerAction.FARM)) {
-            return 0;
+        if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
+            EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+            FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
+            actionManager.setAction(FakePlayerAction.FARM, new FarmContext());
+            return 1;
         }
-        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
-        actionManager.setAction(FakePlayerAction.FARM, new FarmContext());
-        return 1;
+        return 0;
+    }
+
+    private static int setBreakBedrock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
+            EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+            FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
+            actionManager.setAction(FakePlayerAction.BEDROCK, new BreakBedrockContext());
+            return 1;
+        }
+        return 0;
     }
 
     // 填充数组
