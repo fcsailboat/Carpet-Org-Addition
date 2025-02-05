@@ -1,8 +1,11 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.OperatorBlock;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.item.Item;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.Hand;
@@ -61,14 +64,14 @@ public class BlockBreakManager {
         if (this.player.isBlockBreakingRestricted(world, blockPos, gameMode)) {
             return false;
         }
-        // 当前位置超出了世界边界
-        if (!world.getWorldBorder().contains(blockPos)) {
+        // 当前位置是否为出生点保护区域或超出了世界边界
+        if (!world.canPlayerModifyAt(this.player, blockPos)) {
             return false;
         }
         // 正在挖掘空气方块
         if (this.currentBreakingPos != null && world.getBlockState(this.currentBreakingPos).isAir()) {
             this.currentBreakingPos = null;
-            return false;
+            return true;
         }
         BlockState blockState = world.getBlockState(blockPos);
         // 让假玩家看向该位置（这不是必须的）
@@ -156,5 +159,35 @@ public class BlockBreakManager {
     private void breakingAction(Action action, BlockPos blockPos, Direction direction) {
         World world = this.player.getWorld();
         this.player.interactionManager.processBlockBreakingAction(blockPos, action, direction, world.getTopY(), -1);
+    }
+
+    /**
+     * @return 玩家是否可以破坏指定位置的方块
+     */
+    public static boolean canBreak(EntityPlayerMPFake fakePlayer, BlockPos blockPos) {
+        World world = fakePlayer.getWorld();
+        BlockState blockState = world.getBlockState(blockPos);
+        Block block = blockState.getBlock();
+        // 非管理员不能破坏管理员方块
+        if (block instanceof OperatorBlock && !fakePlayer.isCreativeLevelTwoOp()) {
+            return false;
+        }
+        // 是否限制了方块破坏
+        if (fakePlayer.isBlockBreakingRestricted(world, blockPos, fakePlayer.interactionManager.getGameMode())) {
+            return false;
+        }
+        Item mainHandItem = fakePlayer.getMainHandStack().getItem();
+        // 主手物品是否可以挖掘方块，当前位置是否超出了世界边界
+        if (mainHandItem.canMine(blockState, world, blockPos, fakePlayer) && world.canPlayerModifyAt(fakePlayer, blockPos)) {
+            // 创造模式破坏方块
+            if (fakePlayer.isCreative() || blockState.isAir()) {
+                return true;
+            }
+            // 非创造玩家无法破坏硬度为-1的方块
+            if (blockState.getHardness(world, blockPos) == -1) {
+                return false;
+            }
+        }
+        return false;
     }
 }

@@ -139,7 +139,6 @@ public class FakePlayerFarm {
                 && !world.getBlockState(plantablePos.up()).isOf(Blocks.BAMBOO_SAPLING)) {
             return true;
         }
-        PlayerScreenHandler playerScreenHandler = fakePlayer.playerScreenHandler;
         BlockPos bambooPos = plantablePos.up();
         BlockState blockState = world.getBlockState(bambooPos);
         if (blockState.isAir()) {

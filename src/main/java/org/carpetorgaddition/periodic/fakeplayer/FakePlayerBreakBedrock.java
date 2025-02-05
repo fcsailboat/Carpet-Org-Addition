@@ -1,10 +1,7 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.LeverBlock;
-import net.minecraft.block.WallMountedBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockFace;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.item.ItemStack;
@@ -18,26 +15,41 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.carpetorgaddition.exception.InfiniteLoopException;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.BreakBedrockContext;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
+// TODO 限定范围，自动切换工具
 public class FakePlayerBreakBedrock {
     public static void breakBedrock(BreakBedrockContext context, EntityPlayerMPFake fakePlayer) {
+        context.removeIf(destructor -> {
+            if (destructor.getState() == State.COMPLETE) {
+                return true;
+            }
+            return !fakePlayer.canInteractWithBlockAt(destructor.getBedrockPos(), 0.0);
+        });
         World world = fakePlayer.getWorld();
-        SelectionArea area = new SelectionArea(new Box(fakePlayer.getBlockPos()).expand(5, 1, 5));
-        context.remove();
+        double range = fakePlayer.getBlockInteractionRange();
+        Box box = new Box(fakePlayer.getBlockPos()).expand(Math.min(range, 10.0));
+        SelectionArea area = new SelectionArea(box);
         for (BlockPos blockPos : area) {
-            if (world.getBlockState(blockPos).isOf(Blocks.BEDROCK)) {
+            if (world.getBlockState(blockPos).isOf(Blocks.BEDROCK) && fakePlayer.canInteractWithBlockAt(blockPos, 0.0)) {
                 context.add(new BedrockDestructor(blockPos));
             }
         }
         for (BedrockDestructor destructor : context) {
+            int loopCount = 0;
             loop:
             while (true) {
+                loopCount++;
+                if (loopCount > 10) {
+                    throw new InfiniteLoopException();
+                }
                 StepResult stepResult = start(destructor, fakePlayer);
                 switch (stepResult) {
                     case COMPLETION -> {
@@ -57,15 +69,24 @@ public class FakePlayerBreakBedrock {
         BlockPos bedrockPos = destructor.getBedrockPos();
         switch (destructor.getState()) {
             case PLACE_THE_PISTON_FACING_UP -> {
-                if (hasMaterial(fakePlayer) && placePiston(fakePlayer, bedrockPos)) {
-                    destructor.nextStep();
+                if (hasMaterial(fakePlayer)) {
+                    StepResult stepResult = placePiston(fakePlayer, bedrockPos);
+                    if (stepResult == StepResult.CONTINUE) {
+                        destructor.nextStep();
+                    } else {
+                        return stepResult;
+                    }
                 } else {
-                    return StepResult.COMPLETION;
+                    // 玩家没有足够的材料
+                    return StepResult.TICK_COMPLETION;
                 }
             }
             case PLACE_AND_ACTIVATE_THE_LEVER -> {
-                if (placeAndActivateTheLever(destructor, fakePlayer)) {
+                StepResult stepResult = placeAndActivateTheLever(destructor, fakePlayer);
+                if (stepResult == StepResult.CONTINUE) {
                     destructor.nextStep();
+                } else {
+                    return stepResult;
                 }
                 // 不管是否成功放置都结束方法
                 return StepResult.COMPLETION;
@@ -126,34 +147,58 @@ public class FakePlayerBreakBedrock {
      *
      * @return 是否放置成功
      */
-    private static boolean placePiston(EntityPlayerMPFake fakePlayer, BlockPos bedrockPos) {
+    private static StepResult placePiston(EntityPlayerMPFake fakePlayer, BlockPos bedrockPos) {
         World world = fakePlayer.getWorld();
-        BlockState blockState = world.getBlockState(bedrockPos.up(1));
+        BlockPos up = bedrockPos.up(1);
+        BlockState blockState = world.getBlockState(up);
+        BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
         boolean isPiston = false;
         //noinspection StatementWithEmptyBody
-        if (blockState.isIn(BlockTags.REPLACEABLE)) {
+        if (blockState.isAir() || blockState.isIn(BlockTags.REPLACEABLE)) {
             // 当前方块是可以被直接替换的，例如雪
             // 什么也不需要不做
+        } else if (blockState.isOf(Blocks.PISTON)) {
+            // 当方块已经是活塞了，不需要再次放置
+            isPiston = true;
+        } else if (canMine(fakePlayer, blockState, world, up)) {
+            return tickBreakBlock(breakManager, up);
         } else {
-            if (blockState.isOf(Blocks.PISTON)) {
-                // 当方块已经是活塞了，不需要再次放置
-                isPiston = true;
-            } else {
-                return false;
-            }
+            return StepResult.COMPLETION;
         }
-        blockState = world.getBlockState(bedrockPos.up(2));
+        up = bedrockPos.up(2);
+        blockState = world.getBlockState(up);
+        if (isPiston && blockState.isOf(Blocks.PISTON_HEAD) && blockState.get(PistonHeadBlock.FACING) == Direction.UP) {
+            // 上方方块是下方活塞伸出的活塞头
+            return StepResult.CONTINUE;
+        }
         // 活塞上方的方块不会影响活塞退出
         if (blockState.isAir() || blockState.getPistonBehavior() == PistonBehavior.DESTROY) {
             if (isPiston) {
-                return true;
+                return StepResult.CONTINUE;
             }
             // 放置活塞
             placePiston(fakePlayer, bedrockPos, Direction.UP);
-            return true;
+            return StepResult.CONTINUE;
+        } else if (canMine(fakePlayer, blockState, world, up)) {
+            return tickBreakBlock(breakManager, up);
         } else {
+            return StepResult.COMPLETION;
+        }
+    }
+
+    private static boolean canMine(EntityPlayerMPFake fakePlayer, BlockState blockState, World world, BlockPos blockPos) {
+        if (blockState.isAir()) {
+            return true;
+        }
+        boolean isPiston = blockState.isOf(Blocks.PISTON);
+        // 允许破坏浮空的活塞
+        if (isPiston && !world.getBlockState(blockPos.down()).isOf(Blocks.BEDROCK)) {
+            return true;
+        }
+        if (blockState.isOf(Blocks.LEVER) || isPiston || blockState.isOf(Blocks.PISTON_HEAD)) {
             return false;
         }
+        return blockState.getHardness(world, blockPos) != -1 && BlockBreakManager.canBreak(fakePlayer, blockPos);
     }
 
     /**
@@ -161,7 +206,7 @@ public class FakePlayerBreakBedrock {
      *
      * @return 拉杆是否放置并激活成功
      */
-    private static boolean placeAndActivateTheLever(BedrockDestructor destructor, EntityPlayerMPFake fakePlayer) {
+    private static StepResult placeAndActivateTheLever(BedrockDestructor destructor, EntityPlayerMPFake fakePlayer) {
         BlockPos bedrockPos = destructor.getBedrockPos();
         World world = fakePlayer.getWorld();
         ServerPlayerInteractionManager interactionManager = fakePlayer.interactionManager;
@@ -173,12 +218,11 @@ public class FakePlayerBreakBedrock {
                 direction = value;
                 continue;
             }
+            BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
             if (blockState.isOf(Blocks.LEVER)) {
                 // 拉杆没有附着在墙壁上，破坏拉杆
-                BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
                 if (blockState.get(WallMountedBlock.FACE) != BlockFace.WALL) {
-                    breakManager.breakBlock(offset, Direction.DOWN, false);
-                    return false;
+                    return tickBreakBlock(breakManager, bedrockPos);
                 }
                 if (bedrockPos.equals(offset.offset(blockState.get(LeverBlock.FACING), -1))) {
                     if (destructor.getLeverPos() == null) {
@@ -190,24 +234,34 @@ public class FakePlayerBreakBedrock {
                         interactionLever(fakePlayer, offset);
                     } else {
                         // 拉杆正确的附着在了基岩上，但是拉杆不止一个
-                        breakManager.breakBlock(offset, Direction.DOWN, false);
-                        return false;
+                        return tickBreakBlock(breakManager, bedrockPos);
                     }
                 } else {
+                    BlockPos supportBlockPos = offset.offset(blockState.get(LeverBlock.FACING), -1);
+                    // 拉杆附着在了另一个基岩上
+                    if (world.getBlockState(supportBlockPos).isOf(Blocks.BEDROCK)) {
+                        continue;
+                    }
                     // 拉杆附着在了墙上，但不是当前要破坏的基岩方块
-                    breakManager.breakBlock(offset, Direction.DOWN, false);
-                    return false;
+                    return tickBreakBlock(breakManager, bedrockPos);
                 }
+            } else if (canMine(fakePlayer, blockState, world, offset)) {
+                return tickBreakBlock(breakManager, offset);
             }
         }
         if (destructor.getLeverPos() != null) {
-            return true;
+            return StepResult.CONTINUE;
         }
         if (direction == null) {
-            return false;
+            return StepResult.COMPLETION;
         }
         // 没有正确的拉杆附着在基岩上，放置并激活拉杆
         BlockPos offset = bedrockPos.offset(direction);
+        BlockState blockState = world.getBlockState(offset.down());
+        if (blockState.isOf(Blocks.PISTON) && blockState.get(PistonBlock.FACING) == Direction.UP) {
+            // 当前位置下方是未伸出的活塞，不能在这里放置拉杆
+            return StepResult.COMPLETION;
+        }
         FakePlayerUtils.replenishment(fakePlayer, stack -> stack.isOf(Items.LEVER));
         FakePlayerUtils.look(fakePlayer, direction.getOpposite());
         BlockHitResult hitResult = new BlockHitResult(bedrockPos.toCenterPos(), direction, bedrockPos, false);
@@ -216,7 +270,7 @@ public class FakePlayerBreakBedrock {
         // 再次单击激活拉杆
         interactionLever(fakePlayer, offset);
         destructor.setLeverPos(offset);
-        return true;
+        return StepResult.CONTINUE;
     }
 
     /**
@@ -226,7 +280,8 @@ public class FakePlayerBreakBedrock {
         BlockPos bedrockPos = destructor.getBedrockPos();
         BlockPos up = bedrockPos.up();
         // 基岩上方方块是活塞
-        BlockState blockState = fakePlayer.getWorld().getBlockState(up);
+        World world = fakePlayer.getWorld();
+        BlockState blockState = world.getBlockState(up);
         if (blockState.isOf(Blocks.PISTON)) {
             BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
             // 计算剩余挖掘时间
@@ -234,27 +289,93 @@ public class FakePlayerBreakBedrock {
             if (currentTime == 1) {
                 // 方块将在本游戏刻挖掘完毕
                 BlockPos leverPos = destructor.getLeverPos();
-                // 关闭拉杆，然后放置朝下的活塞
-                interactionLever(fakePlayer, leverPos);
-                destructor.setLeverPos(null);
-                // 继续挖掘，此时活塞应该会挖掘完毕
-                breakManager.breakBlock(up, Direction.DOWN, false);
-                // 放置一个朝下的活塞，这个活塞会破坏掉基岩
-                placePiston(fakePlayer, bedrockPos, Direction.DOWN);
+                BlockState leverState = world.getBlockState(leverPos);
+                if (leverState.isOf(Blocks.LEVER)) {
+                    if (leverState.get(LeverBlock.POWERED)) {
+                        // 关闭附着在基岩上的拉杆
+                        interactionLever(fakePlayer, leverPos);
+                    }
+                    // 关闭周围可能激活活塞的拉杆
+                    closeTheSurroundingLevers(up, fakePlayer);
+                    destructor.setLeverPos(null);
+                    // 继续挖掘，此时活塞应该会挖掘完毕
+                    breakBlock(breakManager, up);
+                    // 放置一个朝下的活塞，这个活塞会破坏掉基岩
+                    placePiston(fakePlayer, bedrockPos, Direction.DOWN);
+                    return StepResult.COMPLETION;
+                }
                 return StepResult.COMPLETION;
             }
-            breakManager.breakBlock(up, Direction.DOWN, false);
+            breakBlock(breakManager, up);
             return StepResult.TICK_COMPLETION;
         } else {
             return StepResult.COMPLETION;
         }
     }
 
+    /**
+     * 关闭周围所有可能激活活塞的拉杆
+     */
+    private static void closeTheSurroundingLevers(BlockPos pistonPos, EntityPlayerMPFake fakePlayer) {
+        World world = fakePlayer.getWorld();
+        Consumer<BlockPos> consumer = blockPos -> {
+            BlockState blockState = world.getBlockState(blockPos);
+            if (blockState.isAir()) {
+                return;
+            }
+            if (blockState.isOf(Blocks.LEVER) && blockState.get(LeverBlock.POWERED)) {
+                interactionLever(fakePlayer, blockPos);
+            }
+        };
+        for (Direction direction : MathUtils.HORIZONTAL) {
+            BlockPos offset = pistonPos.offset(direction);
+            // 活塞周围的拉杆
+            consumer.accept(offset);
+            // 活塞周围的方块，这些方块可能是拉杆的支撑方块
+            for (Direction value : MathUtils.HORIZONTAL) {
+                consumer.accept(offset.offset(value));
+            }
+        }
+        for (Direction direction : MathUtils.HORIZONTAL) {
+            BlockPos offset = pistonPos.up().offset(direction);
+            consumer.accept(offset);
+            for (Direction value : MathUtils.HORIZONTAL) {
+                consumer.accept(offset.offset(value));
+            }
+        }
+        consumer.accept(pistonPos.up(2));
+        for (Direction direction : MathUtils.HORIZONTAL) {
+            consumer.accept(pistonPos.up(2).offset(direction));
+        }
+        // 活塞上方第三格可能放着朝下的拉杆
+        BlockPos up = pistonPos.up(3);
+        BlockState blockState = world.getBlockState(up);
+        if (blockState.isOf(Blocks.LEVER) && blockState.get(LeverBlock.POWERED) && blockState.get(LeverBlock.FACING) == Direction.DOWN) {
+            interactionLever(fakePlayer, up);
+        }
+    }
+
+    /**
+     * 挖掘掉破完基岩后留下的活塞
+     */
     private static boolean cleanPiston(EntityPlayerMPFake fakePlayer, BlockPos blockPos) {
         BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
         if (fakePlayer.getWorld().getBlockState(blockPos).isAir()) {
             return true;
         }
+        return breakBlock(breakManager, blockPos);
+    }
+
+    private static StepResult tickBreakBlock(BlockBreakManager breakManager, BlockPos blockPos) {
+        return breakBlock(breakManager, blockPos) ? StepResult.COMPLETION : StepResult.TICK_COMPLETION;
+    }
+
+    /**
+     * 尝试破坏指定位置的方块
+     *
+     * @return 是否破坏成功
+     */
+    private static boolean breakBlock(BlockBreakManager breakManager, BlockPos blockPos) {
         return breakManager.breakBlock(blockPos, Direction.DOWN, false);
     }
 

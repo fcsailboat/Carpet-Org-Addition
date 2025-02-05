@@ -4,7 +4,6 @@ import carpet.patches.EntityPlayerMPFake;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import net.minecraft.text.MutableText;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerBreakBedrock;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerBreakBedrock.BedrockDestructor;
 import org.carpetorgaddition.util.TextUtils;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 public class BreakBedrockContext extends AbstractActionContext implements Iterable<BedrockDestructor> {
     private final HashSet<BedrockDestructor> hashSet = new HashSet<>();
@@ -30,8 +30,8 @@ public class BreakBedrockContext extends AbstractActionContext implements Iterab
         this.hashSet.add(destructor);
     }
 
-    public void remove() {
-        this.hashSet.removeIf(destructor -> destructor.getState() == FakePlayerBreakBedrock.State.COMPLETE);
+    public void removeIf(Predicate<BedrockDestructor> predicate) {
+        this.hashSet.removeIf(predicate);
     }
 
     public boolean isEmpty() {
