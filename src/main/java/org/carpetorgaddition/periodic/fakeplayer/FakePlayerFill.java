@@ -8,20 +8,20 @@ import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.FillData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.FillContext;
 
 public class FakePlayerFill {
     private FakePlayerFill() {
     }
 
-    public static void fill(FillData fillData, EntityPlayerMPFake fakePlayer) {
+    public static void fill(FillContext context, EntityPlayerMPFake fakePlayer) {
         ScreenHandler screenHandler = fakePlayer.currentScreenHandler;
         if (screenHandler == null || screenHandler instanceof PlayerScreenHandler) {
             return;
         }
-        boolean allItem = fillData.isAllItem();
+        boolean allItem = context.isAllItem();
         // 获取要装在潜影盒的物品
-        Item item = allItem ? null : fillData.getItem();
+        Item item = allItem ? null : context.getItem();
         for (int index = 0; index < screenHandler.slots.size(); index++) {
             Slot slot = screenHandler.getSlot(index);
             // TODO 只支持常用容器

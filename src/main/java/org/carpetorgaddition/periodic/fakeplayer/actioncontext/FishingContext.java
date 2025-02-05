@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -8,10 +8,10 @@ import org.carpetorgaddition.util.TextUtils;
 
 import java.util.ArrayList;
 
-public class FishingData extends AbstractActionData {
+public class FishingContext extends AbstractActionContext {
     private final MutableInt timer = new MutableInt();
 
-    public FishingData() {
+    public FishingContext() {
     }
 
     @Override

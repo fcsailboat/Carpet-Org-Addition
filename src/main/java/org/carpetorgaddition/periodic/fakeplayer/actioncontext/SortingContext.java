@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonArray;
@@ -13,7 +13,7 @@ import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.ArrayList;
 
-public class SortingData extends AbstractActionData {
+public class SortingContext extends AbstractActionContext {
 
     private static final String ITEM = "item";
     private static final String THIS_VEC = "thisVec";
@@ -31,13 +31,13 @@ public class SortingData extends AbstractActionData {
      */
     private final Vec3d otherVec;
 
-    public SortingData(Item item, Vec3d thisVec, Vec3d otherVec) {
+    public SortingContext(Item item, Vec3d thisVec, Vec3d otherVec) {
         this.item = item;
         this.thisVec = thisVec;
         this.otherVec = otherVec;
     }
 
-    public static SortingData load(JsonObject json) {
+    public static SortingContext load(JsonObject json) {
         String id = json.get(ITEM).getAsString();
         Item item = ItemStackPredicate.stringAsItem(id);
         JsonArray thisVecArray = json.get(THIS_VEC).getAsJsonArray();
@@ -50,7 +50,7 @@ public class SortingData extends AbstractActionData {
                 otherVecArray.get(0).getAsDouble(),
                 otherVecArray.get(1).getAsDouble(),
                 otherVecArray.get(2).getAsDouble());
-        return new SortingData(item, thisVec, otherVec);
+        return new SortingContext(item, thisVec, otherVec);
     }
 
     @Override

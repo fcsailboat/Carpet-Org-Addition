@@ -9,14 +9,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.carpetorgaddition.mixin.command.FishingBobberEntityAccessor;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.FishingData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.FishingContext;
 
 public class FakePlayerFishing {
     private FakePlayerFishing() {
     }
 
-    public static void fishing(FishingData fishingData, EntityPlayerMPFake fakePlayer) {
-        MutableInt timer = fishingData.getTimer();
+    public static void fishing(FishingContext context, EntityPlayerMPFake fakePlayer) {
+        MutableInt timer = context.getTimer();
         // 检查玩家是否持有钓鱼竿
         if (pickFishingRod(fakePlayer)) {
             // 检查玩家是否抛出钓竿

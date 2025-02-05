@@ -28,7 +28,7 @@ public class SettingsManagerMixin {
             return false;
         }
         if (field.isAnnotationPresent(Hidden.class)) {
-            return CarpetOrgAddition.ENABLE_CUSTOMIZED_RULE;
+            return CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION;
         }
         return true;
     }

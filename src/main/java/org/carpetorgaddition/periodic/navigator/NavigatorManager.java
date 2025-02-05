@@ -14,6 +14,7 @@ import org.carpetorgaddition.util.wheel.Waypoint;
 import org.jetbrains.annotations.Nullable;
 
 public class NavigatorManager {
+    @Nullable
     private AbstractNavigator navigator;
     private final ServerPlayerEntity player;
 
@@ -63,6 +64,7 @@ public class NavigatorManager {
 
     public void setNavigatorFromOldPlayer(ServerPlayerEntity oldPlayer) {
         NavigatorManager manager = PlayerPeriodicTaskManager.getManager(oldPlayer).getNavigatorManager();
-        this.navigator = manager.getNavigator();
+        AbstractNavigator navigator = manager.getNavigator();
+        this.navigator = navigator == null ? null : navigator.copy(this.player);
     }
 }

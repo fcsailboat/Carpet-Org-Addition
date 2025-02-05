@@ -2,7 +2,9 @@ package org.carpetorgaddition.util;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class MathUtils {
@@ -13,6 +15,12 @@ public class MathUtils {
     }
 
     private static final Random RANDOM = new Random();
+    /**
+     * 所有水平的基本方向
+     */
+    public static final Direction[] HORIZONTAL = Arrays.stream(Direction.values())
+            .filter(direction -> direction.getAxis().isHorizontal())
+            .toArray(Direction[]::new);
 
     /**
      * 获取两个方块坐标的距离的平方

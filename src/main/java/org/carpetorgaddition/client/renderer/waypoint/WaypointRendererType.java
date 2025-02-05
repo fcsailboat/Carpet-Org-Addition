@@ -20,17 +20,17 @@ public enum WaypointRendererType {
      */
     private final Identifier icon;
     /**
-     * 路径点持续时间
+     * 路径点默认持续时间
      */
-    private final long durationTime;
+    private final long defaultDurationTime;
     /**
      * 路径点消失时间
      */
     private static final long VANISHING_TIME = 800L;
 
-    WaypointRendererType(Identifier identifier, long durationTime) {
+    WaypointRendererType(Identifier identifier, long defaultDurationTime) {
         this.icon = identifier;
-        this.durationTime = durationTime;
+        this.defaultDurationTime = defaultDurationTime;
     }
 
     /**
@@ -48,7 +48,7 @@ public enum WaypointRendererType {
      * @param fade      路径点是否立即消失
      * @param fadeTime  路径点设置立即消失时的时间
      */
-    public float getScale(double distance, long startTime, boolean fade, long fadeTime) {
+    public float getScale(double distance, long startTime, long durationTime, boolean fade, long fadeTime) {
         // 修正路径点大小，使大小不会随着距离的改变而改变
         float scale = (float) distance / 30F;
         // 再次修正路径点大小，使随着距离的拉远路径点尺寸略微减小
@@ -58,9 +58,9 @@ public enum WaypointRendererType {
             // 剩余消失时间
             long remainingTime = (fadeTime + VANISHING_TIME) - currentTimeMillis;
             return fade(remainingTime, scale);
-        } else if (this.durationTime > 0L) {
+        } else if (durationTime > 0L) {
             long currentTimeMillis = System.currentTimeMillis();
-            long duration = startTime + this.durationTime;
+            long duration = startTime + durationTime;
             if (currentTimeMillis < duration) {
                 return scale;
             }
@@ -103,6 +103,10 @@ public enum WaypointRendererType {
                 consumer.accept(NAVIGATOR);
             }
         }
+    }
+
+    public long getDefaultDurationTime() {
+        return this.defaultDurationTime;
     }
 
     /**

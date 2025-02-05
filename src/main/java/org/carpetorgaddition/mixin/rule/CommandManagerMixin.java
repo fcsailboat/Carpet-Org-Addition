@@ -16,7 +16,7 @@ public class CommandManagerMixin {
     private void recordCommand(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.recordPlayerCommand) {
             ServerCommandSource source = parseResults.getContext().getSource();
-            CarpetOrgAddition.LOGGER.info("<%s>: [%s]".formatted(source.getName(), command));
+            CarpetOrgAddition.LOGGER.info("<%s> [Command: /%s]".formatted(source.getName(), command));
         }
     }
 }

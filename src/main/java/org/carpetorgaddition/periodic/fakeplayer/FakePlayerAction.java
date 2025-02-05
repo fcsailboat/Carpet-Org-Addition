@@ -1,8 +1,11 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import net.minecraft.text.MutableText;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
+import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.*;
 import org.carpetorgaddition.util.TextUtils;
+
+import java.util.Locale;
 
 public enum FakePlayerAction {
     /**
@@ -44,30 +47,22 @@ public enum FakePlayerAction {
     /**
      * 自动钓鱼
      */
-    FISHING("carpet.commands.playerAction.action.fishing");
+    FISHING("carpet.commands.playerAction.action.fishing"),
+    /**
+     * 自动种植
+     */
+    FARM("carpet.commands.playerAction.action.farm"),
+    /**
+     * 自动破基岩
+     */
+    BEDROCK("carpet.commands.playerAction.action.bedrock");
 
     private final MutableText displayName;
+    private final String serialName;
 
     FakePlayerAction(String key) {
         this.displayName = TextUtils.translate(key);
-    }
-
-    // 检查当前动作是否与指定动作数据匹配
-    public void checkActionData(Class<? extends AbstractActionData> clazz) {
-        if (clazz != switch (this) {
-            case STOP -> StopData.class;
-            case SORTING -> SortingData.class;
-            case CLEAN -> CleanData.class;
-            case FILL -> FillData.class;
-            case INVENTORY_CRAFT -> InventoryCraftData.class;
-            case CRAFTING_TABLE_CRAFT -> CraftingTableCraftData.class;
-            case RENAME -> RenameData.class;
-            case STONECUTTING -> StonecuttingData.class;
-            case TRADE -> TradeData.class;
-            case FISHING -> FishingData.class;
-        }) {
-            throw new IllegalArgumentException();
-        }
+        this.serialName = this.name().toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -75,6 +70,37 @@ public enum FakePlayerAction {
      */
     public MutableText getDisplayName() {
         return this.displayName;
+    }
+
+    /**
+     * 获取序列化名称
+     */
+    public String getSerializedName() {
+        return this.serialName;
+    }
+
+    public Class<? extends AbstractActionContext> getContextClass() {
+        return switch (this) {
+            case STOP -> StopContext.class;
+            case SORTING -> SortingContext.class;
+            case CLEAN -> CleanContext.class;
+            case FILL -> FillContext.class;
+            case INVENTORY_CRAFT -> InventoryCraftContext.class;
+            case CRAFTING_TABLE_CRAFT -> CraftingTableCraftContext.class;
+            case RENAME -> RenameContext.class;
+            case STONECUTTING -> StonecuttingContext.class;
+            case TRADE -> TradeContext.class;
+            case FISHING -> FishingContext.class;
+            case FARM -> FarmContext.class;
+            case BEDROCK -> BreakBedrockContext.class;
+        };
+    }
+
+    public boolean isHidden() {
+        if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
+            return false;
+        }
+        return this == FARM || this == BEDROCK;
     }
 
     @Override
@@ -90,6 +116,8 @@ public enum FakePlayerAction {
             case STONECUTTING -> "切石";
             case TRADE -> "交易";
             case FISHING -> "钓鱼";
+            case FARM -> "种植";
+            case BEDROCK -> "破基岩";
         };
     }
 }
