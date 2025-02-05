@@ -199,7 +199,7 @@ public class ItemFindTask extends ServerTask {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find",
                     size, itemCount, predicate.toText());
         }
-        for (int i = 0; i < size && i <= CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount; i++) {
+        for (int i = 0; i < size && i < CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount; i++) {
             MutableText message = this.results.get(i).toText();
             MessageUtils.sendMessage(this.context.getSource(), message);
         }

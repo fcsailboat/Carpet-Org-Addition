@@ -129,13 +129,13 @@ public class BlockFindTask extends ServerTask {
     protected void sendFeedback() {
         int count = this.results.size();
         MutableText name = this.blockPredicate.getName();
-        if (count <= CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount) {
-            MessageUtils.sendMessage(context.getSource(),
-                    "carpet.commands.finder.block.find", count, name);
-        } else {
+        if (count > CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount) {
             // 数量过多，只输出距离最近的前十个
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.block.find.limit",
                     count, name, CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount);
+        } else {
+            MessageUtils.sendMessage(context.getSource(),
+                    "carpet.commands.finder.block.find", count, name);
         }
         for (int i = 0; i < this.results.size() && i < CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount; i++) {
             MessageUtils.sendMessage(context.getSource(), this.results.get(i).toText());
