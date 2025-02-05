@@ -1,5 +1,5 @@
 {
-  "carpet.category.ORG": "Org",
+  "carpet.category.Org": "Org",
   "carpet.category.Hidden": "Hidden",
   "carpet.rule.commandItemShadowing.desc": "Enable /itemshadowing command to create a shadow of the item in the main hand",
   "carpet.rule.setBedrockHardness.desc": "Set the hardness of bedrock",

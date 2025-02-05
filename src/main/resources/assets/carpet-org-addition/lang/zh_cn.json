@@ -1,5 +1,5 @@
 {
-  "carpet.category.ORG": "Org",
+  "carpet.category.Org": "Org",
   "carpet.category.Hidden": "隐藏",
   "carpet.rule.commandItemShadowing.name": "制作物品分身",
   "carpet.rule.commandItemShadowing.desc": "启用/itemshadowing命令以制作物品分身",
