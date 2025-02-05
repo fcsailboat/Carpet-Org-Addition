@@ -25,7 +25,7 @@ public class SelectionArea implements Iterable<BlockPos> {
         this.minY = world.getBottomY();
         this.minZ = sourcePos.getZ() - Math.abs(range);
         this.maxX = sourcePos.getX() + Math.abs(range);
-        this.maxY = world.getBottomY() + world.getHeight();
+        this.maxY = world.getTopYInclusive();
         this.maxZ = sourcePos.getZ() + Math.abs(range);
     }
 
