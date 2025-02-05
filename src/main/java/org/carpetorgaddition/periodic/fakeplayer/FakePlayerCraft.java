@@ -8,9 +8,9 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.InfiniteLoopException;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CraftingTableCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.InventoryCraftContext;
 import org.carpetorgaddition.util.InventoryUtils;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.InventoryCraftData;
 import org.carpetorgaddition.util.inventory.AutoGrowInventory;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
@@ -22,25 +22,25 @@ public class FakePlayerCraft {
     }
 
     // 在工作台合成物品
-    public static void craftingTableCraft(CraftingTableCraftData craftData, EntityPlayerMPFake fakePlayer) {
+    public static void craftingTableCraft(CraftingTableCraftContext context, EntityPlayerMPFake fakePlayer) {
         if (fakePlayer.currentScreenHandler instanceof CraftingScreenHandler craftingScreenHandler) {
             AutoGrowInventory inventory = new AutoGrowInventory();
-            craftingTableCraft(craftData, fakePlayer, inventory, craftingScreenHandler);
+            craftingTableCraft(context, fakePlayer, inventory, craftingScreenHandler);
             // 丢弃合成输出
             dropCraftOut(fakePlayer, inventory);
         }
     }
 
     // 在生存模式物品栏合成物品
-    public static void inventoryCraft(InventoryCraftData craftData, EntityPlayerMPFake fakePlayer) {
+    public static void inventoryCraft(InventoryCraftContext context, EntityPlayerMPFake fakePlayer) {
         AutoGrowInventory inventory = new AutoGrowInventory();
-        inventoryCraft(craftData, fakePlayer, inventory);
+        inventoryCraft(context, fakePlayer, inventory);
         // 丢弃合成输出
         dropCraftOut(fakePlayer, inventory);
     }
 
     private static void craftingTableCraft(
-            CraftingTableCraftData craftData,
+            CraftingTableCraftContext craftData,
             EntityPlayerMPFake fakePlayer,
             AutoGrowInventory inventory,
             CraftingScreenHandler craftingScreenHandler
@@ -140,7 +140,7 @@ public class FakePlayerCraft {
         }
     }
 
-    private static void inventoryCraft(InventoryCraftData craftData, EntityPlayerMPFake fakePlayer, AutoGrowInventory inventory) {
+    private static void inventoryCraft(InventoryCraftContext craftData, EntityPlayerMPFake fakePlayer, AutoGrowInventory inventory) {
         PlayerScreenHandler playerScreenHandler = fakePlayer.playerScreenHandler;
         ItemStackPredicate[] items = craftData.getPredicates();
         // 定义变量记录成功完成合成的次数

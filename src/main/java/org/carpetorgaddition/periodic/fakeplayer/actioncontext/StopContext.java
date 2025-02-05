@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -7,10 +7,10 @@ import org.carpetorgaddition.util.TextUtils;
 
 import java.util.ArrayList;
 
-public final class StopData extends AbstractActionData {
-    public static final StopData STOP = new StopData();
+public final class StopContext extends AbstractActionContext {
+    public static final StopContext STOP = new StopContext();
 
-    private StopData() {
+    private StopContext() {
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -11,35 +11,31 @@ import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.ArrayList;
 
-public class CleanData extends AbstractActionData {
+public class FillContext extends AbstractActionContext {
     private static final String ITEM = "item";
     private static final String ALL_ITEM = "allItem";
-    public static final CleanData CLEAN_ALL = new CleanData(null, true);
+    public static final FillContext FILL_ALL = new FillContext(null, true);
     /**
-     * 要从潜影盒中丢出的物品
+     * 要向潜影盒填充的物品
      */
     private final Item item;
     /**
-     * 是否忽略{@link CleanData#item}，并清空潜影盒内的所有物品
+     * 是否向潜影盒内填充任意物品并忽略{@link FillContext#item}（本身就不能放入潜影盒的物品不会被填充）
      */
     private final boolean allItem;
 
-    /**
-     * @param item    要清空的物品
-     * @param allItem 是否清空所有物品
-     */
-    public CleanData(Item item, boolean allItem) {
+    public FillContext(Item item, boolean allItem) {
         this.item = item;
         this.allItem = allItem;
     }
 
-    public static CleanData load(JsonObject json) {
+    public static FillContext load(JsonObject json) {
         boolean allItem = json.get(ALL_ITEM).getAsBoolean();
         if (allItem) {
-            return new CleanData(null, true);
+            return new FillContext(null, true);
         }
         Item item = ItemStackPredicate.stringAsItem(json.get(ITEM).getAsString());
-        return new CleanData(item, false);
+        return new FillContext(item, false);
     }
 
     @Override
@@ -57,16 +53,13 @@ public class CleanData extends AbstractActionData {
     public ArrayList<MutableText> info(EntityPlayerMPFake fakePlayer) {
         ArrayList<MutableText> list = new ArrayList<>();
         if (this.allItem) {
-            // 将玩家清空潜影盒的信息添加到集合
-            list.add(TextUtils.translate("carpet.commands.playerAction.info.clean.item",
-                    fakePlayer.getDisplayName(),
-                    Items.SHULKER_BOX.getName()));
+            // 将“<玩家名> 正在向 潜影盒 填充 [item] 物品”信息添加到集合
+            list.add(TextUtils.translate("carpet.commands.playerAction.info.fill_all.item",
+                    fakePlayer.getDisplayName(), Items.SHULKER_BOX.getName()));
         } else {
-            // 将玩家清空潜影盒的信息添加到集合
-            list.add(TextUtils.translate("carpet.commands.playerAction.info.clean.designated_item",
-                    fakePlayer.getDisplayName(),
-                    Items.SHULKER_BOX.getName(),
-                    this.item.getName()));
+            // 将“<玩家名> 正在向 潜影盒 填充 [item] 物品”信息添加到集合
+            list.add(TextUtils.translate("carpet.commands.playerAction.info.fill.item",
+                    fakePlayer.getDisplayName(), Items.SHULKER_BOX.getName(), this.item.getDefaultStack().toHoverableText()));
         }
         return list;
     }

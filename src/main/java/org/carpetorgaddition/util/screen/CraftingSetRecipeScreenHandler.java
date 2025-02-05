@@ -11,8 +11,8 @@ import net.minecraft.screen.slot.SlotActionType;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.InventoryCraftData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CraftingTableCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.InventoryCraftContext;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implements UnavailableSlotSyncInterface {
@@ -26,8 +26,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             PlayerInventory playerInventory,
             EntityPlayerMPFake fakePlayer,
             ScreenHandlerContext screenHandlerContext) {
-        super(syncId, playerInventory, screenHandlerContext
-        );
+        super(syncId, playerInventory, screenHandlerContext);
         this.fakePlayer = fakePlayer;
     }
 
@@ -75,7 +74,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             for (int i = 0; i < predicates.length; i++) {
                 predicates[i] = new ItemStackPredicate(items[i]);
             }
-            actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftData(predicates));
+            actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftContext(predicates));
         }
     }
 
@@ -91,13 +90,13 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
     }
 
     // 创建合成数据
-    private InventoryCraftData createData(Item[] items, int... indices) {
+    private InventoryCraftContext createData(Item[] items, int... indices) {
         ItemStackPredicate[] predicates = new ItemStackPredicate[4];
         // 这里的index并不是indices里保存的元素
         for (int index = 0; index < 4; index++) {
             predicates[index] = new ItemStackPredicate(items[indices[index]]);
         }
-        return new InventoryCraftData(predicates);
+        return new InventoryCraftContext(predicates);
     }
 
     @Override

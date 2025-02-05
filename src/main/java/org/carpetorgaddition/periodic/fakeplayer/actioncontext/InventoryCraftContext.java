@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -12,23 +12,23 @@ import org.carpetorgaddition.util.wheel.TextBuilder;
 
 import java.util.ArrayList;
 
-public class InventoryCraftData extends AbstractActionData {
+public class InventoryCraftContext extends AbstractActionContext {
     /**
      * 物品合成所使用的物品栏
      */
     private final ItemStackPredicate[] predicates = new ItemStackPredicate[4];
 
-    public InventoryCraftData(ItemStackPredicate[] predicates) {
+    public InventoryCraftContext(ItemStackPredicate[] predicates) {
         System.arraycopy(predicates, 0, this.predicates, 0, this.predicates.length);
     }
 
-    public static InventoryCraftData load(JsonObject json) {
+    public static InventoryCraftContext load(JsonObject json) {
         ItemStackPredicate[] itemStackPredicates = new ItemStackPredicate[4];
         for (int i = 0; i < itemStackPredicates.length; i++) {
             String item = json.get(String.valueOf(i)).getAsString();
             itemStackPredicates[i] = ItemStackPredicate.load(item);
         }
-        return new InventoryCraftData(itemStackPredicates);
+        return new InventoryCraftContext(itemStackPredicates);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class InventoryCraftData extends AbstractActionData {
                 .indentation().append(this.predicates[2].getInitialUpperCase())
                 .blank().append(this.predicates[3].getInitialUpperCase());
         if (!craftOutput.isEmpty()) {
-            builder.appendString(" -> ").append(AbstractActionData.getWithCountHoverText(craftOutput));
+            builder.appendString(" -> ").append(AbstractActionContext.getWithCountHoverText(craftOutput));
         }
         list.add(builder.toLine());
     }

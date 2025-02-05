@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -13,7 +13,7 @@ import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 import java.util.ArrayList;
 
-public class RenameData extends AbstractActionData {
+public class RenameContext extends AbstractActionContext {
     private static final String ITEM = "item";
     private static final String NEW_NAME = "new_name";
     /**
@@ -25,15 +25,15 @@ public class RenameData extends AbstractActionData {
      */
     private final String newName;
 
-    public RenameData(Item item, String newName) {
+    public RenameContext(Item item, String newName) {
         this.item = item;
         this.newName = newName;
     }
 
-    public static RenameData load(JsonObject json) {
+    public static RenameContext load(JsonObject json) {
         Item item = ItemStackPredicate.stringAsItem(json.get(ITEM).getAsString());
         String newName = json.get(NEW_NAME).getAsString();
-        return new RenameData(item, newName);
+        return new RenameContext(item, newName);
     }
 
     @Override

@@ -26,6 +26,7 @@ import net.minecraft.util.UserCache;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
 import org.carpetorgaddition.periodic.task.ServerTask;
@@ -110,7 +111,7 @@ public class FinderCommand {
                                                 .suggests(suggestionDefaultDistance())
                                                 .executes(context -> findEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "range")))))))
                 .then(CommandManager.literal("worldEater")
-                        .requires(source -> CarpetOrgAdditionSettings.finderCommandSearchWorldEater)
+                        .requires(source -> CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION)
                         .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
                                 .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
                                         .executes(FinderCommand::mayAffectWorldEater)))));
@@ -259,8 +260,6 @@ public class FinderCommand {
         ServerPeriodicTaskManager.getManager(context).getServerTaskManager().addTask(task);
         return 1;
     }
-
-    // 尝试添加任务
 
     // 将物品数量转换为“多少组多少个”的形式
     public static MutableText showCount(ItemStack itemStack, int count, boolean inTheShulkerBox) {

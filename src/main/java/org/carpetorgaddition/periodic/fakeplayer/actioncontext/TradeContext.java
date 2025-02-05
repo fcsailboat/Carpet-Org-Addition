@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -11,7 +11,7 @@ import org.carpetorgaddition.util.TextUtils;
 
 import java.util.ArrayList;
 
-public class TradeData extends AbstractActionData {
+public class TradeContext extends AbstractActionContext {
     private static final String INDEX = "index";
     private static final String VOID_TRADE = "void_trade";
     /**
@@ -27,16 +27,16 @@ public class TradeData extends AbstractActionData {
      */
     private final MutableInt timer = new MutableInt();
 
-    public TradeData(int index, boolean voidTrade) {
+    public TradeContext(int index, boolean voidTrade) {
         this.index = index;
         this.voidTrade = voidTrade;
         timer.setValue(FakePlayerTrade.TRADE_WAIT_TIME);
     }
 
-    public static TradeData load(JsonObject json) {
+    public static TradeContext load(JsonObject json) {
         int index = json.get(INDEX).getAsInt();
         boolean voidTrade = json.get(VOID_TRADE).getAsBoolean();
-        return new TradeData(index, voidTrade);
+        return new TradeContext(index, voidTrade);
     }
 
     @Override

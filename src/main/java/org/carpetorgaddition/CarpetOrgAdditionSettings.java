@@ -2,6 +2,7 @@ package org.carpetorgaddition;
 
 import carpet.api.settings.Rule;
 import carpet.api.settings.RuleCategory;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.carpetorgaddition.rule.Hidden;
 import org.carpetorgaddition.rule.Removed;
@@ -22,6 +23,10 @@ public class CarpetOrgAdditionSettings {
      * 当前方块的破坏者，启用{@link CarpetOrgAdditionSettings#blockDropsDirectlyEnterInventory}后，方块掉落物会直接进入玩家物品栏
      */
     public static final ThreadLocal<ServerPlayerEntity> blockBreaking = new ThreadLocal<>();
+    /**
+     * 当前正在使用铁砧附魔的玩家
+     */
+    public static final ThreadLocal<PlayerEntity> enchanter = new ThreadLocal<>();
 
     private CarpetOrgAdditionSettings() {
     }
@@ -459,9 +464,8 @@ public class CarpetOrgAdditionSettings {
     @Rule(categories = {ORG, RuleCategory.SURVIVAL})
     public static boolean limitPhantomSpawn = false;
 
-    // TODO 改为漏洞修复
     // 立即应用工具效果
-    @Rule(categories = {ORG, RuleCategory.SURVIVAL})
+    @Rule(categories = {ORG, RuleCategory.BUGFIX})
     public static boolean applyToolEffectsImmediately = false;
 
     // 强制补货
@@ -474,12 +478,15 @@ public class CarpetOrgAdditionSettings {
     @Rule(categories = {ORG, Hidden})
     public static boolean autoSyncPlayerStatus = false;
 
-    // 查找可能影响世吞运行的方块
-    @Hidden
-    @Rule(categories = {ORG, RuleCategory.COMMAND, Hidden})
-    public static boolean finderCommandSearchWorldEater = false;
-
     // 记录玩家命令
-    @Rule(categories = {ORG, RuleCategory.COMMAND, RuleCategory.FEATURE})
+    @Rule(categories = {ORG, RuleCategory.COMMAND})
     public static boolean recordPlayerCommand = false;
+
+    // 保护类魔咒兼容
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean protectionEnchantmentCompatible = false;
+
+    // 伤害类魔咒兼容
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean damageEnchantmentCompatible = false;
 }

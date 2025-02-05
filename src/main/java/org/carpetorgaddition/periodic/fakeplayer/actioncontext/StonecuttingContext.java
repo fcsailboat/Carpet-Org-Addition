@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -20,7 +20,7 @@ import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class StonecuttingData extends AbstractActionData {
+public class StonecuttingContext extends AbstractActionContext {
     private static final String ITEM = "item";
     private static final String BUTTON = "button";
     /**
@@ -32,15 +32,15 @@ public class StonecuttingData extends AbstractActionData {
      */
     private final int button;
 
-    public StonecuttingData(Item item, int button) {
+    public StonecuttingContext(Item item, int button) {
         this.item = item;
         this.button = button;
     }
 
-    public static StonecuttingData load(JsonObject json) {
+    public static StonecuttingContext load(JsonObject json) {
         Item item = ItemStackPredicate.stringAsItem(json.get(ITEM).getAsString());
         int index = json.get(BUTTON).getAsInt();
-        return new StonecuttingData(item, index);
+        return new StonecuttingContext(item, index);
     }
 
     @Override
