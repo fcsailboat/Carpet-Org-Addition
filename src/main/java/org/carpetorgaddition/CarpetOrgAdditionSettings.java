@@ -31,7 +31,6 @@ public class CarpetOrgAdditionSettings {
     private CarpetOrgAdditionSettings() {
     }
 
-    // TODO 不支持翻译
     public static final String ORG = "Org";
     public static final String Hidden = "Hidden";
 
@@ -489,4 +488,13 @@ public class CarpetOrgAdditionSettings {
     // 伤害类魔咒兼容
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean damageEnchantmentCompatible = false;
+
+    // /finder命令最大反馈数量
+    @Rule(
+            categories = {ORG, RuleCategory.COMMAND},
+            options = {"10", "15", "20", "25"},
+            validators = FinderCommandMaxFeedbackCountValidator.class,
+            strict = false
+    )
+    public static int finderCommandMaxFeedbackCount = 10;
 }
