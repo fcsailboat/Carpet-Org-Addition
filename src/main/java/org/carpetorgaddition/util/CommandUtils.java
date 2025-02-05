@@ -68,9 +68,9 @@ public class CommandUtils {
     }
 
     public static CommandSyntaxException createException(Throwable e, String key, Object... obj) {
-        // TODO 可能导致空指针
+        String exceptionMessage = GameUtils.getExceptionString(e);
         MutableText message = TextUtils.translate(key, obj);
-        return new SimpleCommandExceptionType(TextUtils.hoverText(message, e.getMessage())).create();
+        return new SimpleCommandExceptionType(TextUtils.hoverText(message, exceptionMessage)).create();
     }
 
     /**

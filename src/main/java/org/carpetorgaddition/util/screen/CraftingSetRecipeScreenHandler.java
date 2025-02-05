@@ -1,7 +1,6 @@
 package org.carpetorgaddition.util.screen;
 
 import carpet.patches.EntityPlayerMPFake;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.RecipeInputInventory;
@@ -10,14 +9,12 @@ import net.minecraft.item.Items;
 import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.command.ServerCommandSource;
-import org.carpetorgaddition.command.PlayerActionCommand;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerCraftRecipeInterface;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.InventoryCraftData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CraftingTableCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.InventoryCraftContext;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implements UnavailableSlotSyncInterface {
@@ -29,22 +26,11 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
      * 控制假玩家合成物品的物品栏，与父类中的input是同一个对象
      */
     private final RecipeInputInventory inputInventory;
-    /**
-     * 执行/playerAction命令后的命令执行上下文对象，修改假玩家动作类型时会用到这个属性
-     */
-    private final CommandContext<ServerCommandSource> context;
 
-    public CraftingSetRecipeScreenHandler(
-            int syncId,
-            PlayerInventory playerInventory,
-            EntityPlayerMPFake fakePlayer,
-            ScreenHandlerContext screenHandlerContext,
-            CommandContext<ServerCommandSource> context
-    ) {
-        super(syncId, playerInventory, screenHandlerContext);
+    public CraftingSetRecipeScreenHandler(int syncId, PlayerInventory playerInventory, EntityPlayerMPFake fakePlayer, ScreenHandlerContext context) {
+        super(syncId, playerInventory, context);
         this.inputInventory = ((FakePlayerCraftRecipeInterface) this).getInput();
         this.fakePlayer = fakePlayer;
-        this.context = context;
     }
 
     // 阻止玩家取出输出槽位的物品
@@ -73,8 +59,6 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
         setCraftAction(items, PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer));
         // 关闭GUI后，使用父类的方法让物品回到玩家背包
         super.onClosed(player);
-        // 提示启用Ctrl+Q合成修复
-        PlayerActionCommand.promptToEnableCtrlQCraftingFix(context.getSource());
     }
 
     // 设置假玩家合成动作
@@ -94,7 +78,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             for (int i = 0; i < predicates.length; i++) {
                 predicates[i] = new ItemStackPredicate(items[i]);
             }
-            actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftData(predicates));
+            actionManager.setAction(FakePlayerAction.CRAFTING_TABLE_CRAFT, new CraftingTableCraftContext(predicates));
         }
     }
 
@@ -110,13 +94,13 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
     }
 
     // 创建合成数据
-    private InventoryCraftData createData(Item[] items, int... indices) {
+    private InventoryCraftContext createData(Item[] items, int... indices) {
         ItemStackPredicate[] predicates = new ItemStackPredicate[4];
         // 这里的index并不是indices里保存的元素
         for (int index = 0; index < 4; index++) {
             predicates[index] = new ItemStackPredicate(items[indices[index]]);
         }
-        return new InventoryCraftData(predicates);
+        return new InventoryCraftContext(predicates);
     }
 
     @Override

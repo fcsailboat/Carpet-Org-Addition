@@ -33,7 +33,7 @@ public class RegisterCarpetCommands {
         RuleSearchCommand.register(dispatcher);
         // 玩家管理器命令
         PlayerManagerCommand.register(dispatcher);
-        // 追踪器命令
+        // 导航器命令
         NavigatorCommand.register(dispatcher);
         // 快递命令
         MailCommand.register(dispatcher);

@@ -1,4 +1,4 @@
-package org.carpetorgaddition.periodic.fakeplayer.actiondata;
+package org.carpetorgaddition.periodic.fakeplayer.actioncontext;
 
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -12,7 +12,7 @@ import org.carpetorgaddition.util.TextUtils;
 
 import java.util.ArrayList;
 
-public abstract class AbstractActionData {
+public abstract class AbstractActionContext {
     public abstract ArrayList<MutableText> info(EntityPlayerMPFake fakePlayer);
 
     // 获取物品堆栈的可变文本形式：物品名称*堆叠数量

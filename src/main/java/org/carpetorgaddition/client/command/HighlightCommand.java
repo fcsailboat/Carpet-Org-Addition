@@ -1,10 +1,12 @@
 package org.carpetorgaddition.client.command;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
@@ -18,19 +20,24 @@ public class HighlightCommand {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
                 dispatcher.register(ClientCommandManager.literal("highlight")
                         .then(ClientCommandManager.argument("blockPos", ClientBlockPosArgumentType.blockPos())
-                                .executes(HighlightCommand::highlight))
+                                .executes(context -> highlight(context, WaypointRendererType.HIGHLIGHT.getDefaultDurationTime()))
+                                .then(ClientCommandManager.argument("second", IntegerArgumentType.integer(1))
+                                        .suggests((context, builder) -> CommandSource.suggestMatching(new String[]{"30", "60", "120"}, builder))
+                                        .executes(context -> highlight(context, IntegerArgumentType.getInteger(context, "second") * 1000L)))
+                                .then(ClientCommandManager.literal("continue")
+                                        .executes(context -> highlight(context, -1L))))
                         .then(ClientCommandManager.literal("clear")
                                 .executes(context -> clear()))));
     }
 
     // 高亮路径点
-    private static int highlight(CommandContext<FabricClientCommandSource> context) {
+    private static int highlight(CommandContext<FabricClientCommandSource> context, long durationTime) {
         Vec3d vec3d = ClientBlockPosArgumentType.getBlockPos(context, "blockPos").toCenterPos();
         ClientWorld world = context.getSource().getWorld();
         // 获取旧路径点
         WaypointRenderer oldRender = getWaypointRenderer();
         // 创建新路径点
-        WaypointRenderer newRender = new WaypointRenderer(WaypointRendererType.HIGHLIGHT, vec3d, world);
+        WaypointRenderer newRender = new WaypointRenderer(WaypointRendererType.HIGHLIGHT, vec3d, world, durationTime);
         // 如果两个路径点指向同一个位置，就让玩家看向该路径点
         if (oldRender != null && oldRender.equalsTarget(newRender)) {
             // if语句结束后仍要设置新路径点，因为要重置持续时间

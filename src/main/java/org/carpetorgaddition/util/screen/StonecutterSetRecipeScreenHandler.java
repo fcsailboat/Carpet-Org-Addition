@@ -10,7 +10,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.StonecuttingData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.StonecuttingContext;
 
 public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler implements UnavailableSlotSyncInterface {
     private final EntityPlayerMPFake fakePlayer;
@@ -42,12 +42,11 @@ public class StonecutterSetRecipeScreenHandler extends StonecutterScreenHandler 
         }
         // 获取按钮索引
         int button = this.getSelectedRecipe();
-        if (button == -1) {
-            return;
+        if (button != -1) {
+            FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(this.fakePlayer);
+            // 设置玩家动作
+            actionManager.setAction(FakePlayerAction.STONECUTTING, new StonecuttingContext(itemStack.getItem(), button));
         }
-        FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(this.fakePlayer);
-        // 设置玩家动作
-        actionManager.setAction(FakePlayerAction.STONECUTTING, new StonecuttingData(itemStack.getItem(), button));
         // 调用父类方法返还物品
         super.onClosed(player);
     }

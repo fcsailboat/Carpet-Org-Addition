@@ -86,6 +86,16 @@ public class GameUtils {
     }
 
     /**
+     * @return 获取异常的类名+消息形式，如果没有消息，返回异常类的简单类名
+     * @apiNote 不使用 {@code toString} 方法是因为方法可能被子类重写
+     */
+    public static String getExceptionString(Throwable throwable) {
+        String name = throwable.getClass().getSimpleName();
+        String message = throwable.getMessage();
+        return message == null ? name : name + ": " + message;
+    }
+
+    /**
      * 一个占位符，什么也不做
      */
     public static void pass() {

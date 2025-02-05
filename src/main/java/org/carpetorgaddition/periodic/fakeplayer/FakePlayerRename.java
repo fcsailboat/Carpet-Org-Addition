@@ -6,13 +6,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.RenameData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.RenameContext;
 
 public class FakePlayerRename {
     private FakePlayerRename() {
     }
 
-    public static void rename(RenameData renameData, EntityPlayerMPFake fakePlayer) {
+    public static void rename(RenameContext renameData, EntityPlayerMPFake fakePlayer) {
         // 如果假玩家对铁砧持续按住右键，就会一直打开新的铁砧界面，同时旧的铁砧界面会自动关闭，关闭旧的铁砧界面时，铁砧内的物品会回到玩家物品栏
         if (fakePlayer.currentScreenHandler instanceof AnvilScreenHandler anvilScreenHandler) {
             // 如果假玩家没有足够的经验，直接介绍方法，创造玩家给物品重命名不需要消耗经验

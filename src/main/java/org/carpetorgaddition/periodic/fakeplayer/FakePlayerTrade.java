@@ -16,7 +16,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.InfiniteLoopException;
 import org.carpetorgaddition.mixin.rule.MerchantScreenHandlerAccessor;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.TradeData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.TradeContext;
 import org.carpetorgaddition.util.InventoryUtils;
 
 import java.util.UUID;
@@ -29,14 +29,14 @@ public class FakePlayerTrade {
     public static final int TRADE_WAIT_TIME = 1;
 
     //假玩家交易
-    public static void trade(TradeData tradeData, EntityPlayerMPFake fakePlayer) {
+    public static void trade(TradeContext context, EntityPlayerMPFake fakePlayer) {
         //获取按钮的索引
-        int index = tradeData.getIndex();
+        int index = context.getIndex();
         //判断当前打开的GUI是否为交易界面
         if (fakePlayer.currentScreenHandler instanceof MerchantScreenHandler merchantScreenHandler) {
-            boolean voidTrade = tradeData.isVoidTrade();
+            boolean voidTrade = context.isVoidTrade();
             // 获取计数器，记录村民距离上次被加载的时间是否超过了5游戏刻（区块卸载后村民似乎不会立即卸载）
-            MutableInt timer = tradeData.getTimer();
+            MutableInt timer = context.getTimer();
             if (voidTrade) {
                 // 获取正在接受交易的村民
                 MerchantScreenHandlerAccessor accessor = (MerchantScreenHandlerAccessor) merchantScreenHandler;

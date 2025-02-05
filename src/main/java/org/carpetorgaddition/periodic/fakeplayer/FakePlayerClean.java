@@ -6,14 +6,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.CleanData;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CleanContext;
 
 public class FakePlayerClean {
     private FakePlayerClean() {
     }
 
-    public static void clean(CleanData cleanData, EntityPlayerMPFake fakePlayer) {
-        Item item = cleanData.isAllItem() ? null : cleanData.getItem();
+    public static void clean(CleanContext context, EntityPlayerMPFake fakePlayer) {
+        Item item = context.isAllItem() ? null : context.getItem();
         ScreenHandler screenHandler = fakePlayer.currentScreenHandler;
         if (screenHandler == null || screenHandler instanceof PlayerScreenHandler) {
             return;
@@ -28,7 +28,7 @@ public class FakePlayerClean {
             if (itemStack.isEmpty() || FakePlayerUtils.isGcaItem(itemStack)) {
                 continue;
             }
-            if (cleanData.isAllItem() || itemStack.isOf(item)) {
+            if (context.isAllItem() || itemStack.isOf(item)) {
                 // 丢弃一组物品
                 FakePlayerUtils.throwItem(screenHandler, index, fakePlayer);
             }

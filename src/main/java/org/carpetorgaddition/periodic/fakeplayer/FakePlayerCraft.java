@@ -1,6 +1,5 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
-import carpet.CarpetSettings;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.CraftingScreenHandler;
@@ -9,9 +8,9 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.exception.InfiniteLoopException;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CraftingTableCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.InventoryCraftContext;
 import org.carpetorgaddition.util.InventoryUtils;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.CraftingTableCraftData;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.InventoryCraftData;
 import org.carpetorgaddition.util.inventory.AutoGrowInventory;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
@@ -23,25 +22,25 @@ public class FakePlayerCraft {
     }
 
     // 在工作台合成物品
-    public static void craftingTableCraft(CraftingTableCraftData craftData, EntityPlayerMPFake fakePlayer) {
+    public static void craftingTableCraft(CraftingTableCraftContext context, EntityPlayerMPFake fakePlayer) {
         if (fakePlayer.currentScreenHandler instanceof CraftingScreenHandler craftingScreenHandler) {
             AutoGrowInventory inventory = new AutoGrowInventory();
-            craftingTableCraft(craftData, fakePlayer, inventory, craftingScreenHandler);
+            craftingTableCraft(context, fakePlayer, inventory, craftingScreenHandler);
             // 丢弃合成输出
             dropCraftOut(fakePlayer, inventory);
         }
     }
 
     // 在生存模式物品栏合成物品
-    public static void inventoryCraft(InventoryCraftData craftData, EntityPlayerMPFake fakePlayer) {
+    public static void inventoryCraft(InventoryCraftContext context, EntityPlayerMPFake fakePlayer) {
         AutoGrowInventory inventory = new AutoGrowInventory();
-        inventoryCraft(craftData, fakePlayer, inventory);
+        inventoryCraft(context, fakePlayer, inventory);
         // 丢弃合成输出
         dropCraftOut(fakePlayer, inventory);
     }
 
     private static void craftingTableCraft(
-            CraftingTableCraftData craftData,
+            CraftingTableCraftContext craftData,
             EntityPlayerMPFake fakePlayer,
             AutoGrowInventory inventory,
             CraftingScreenHandler craftingScreenHandler
@@ -51,7 +50,7 @@ public class FakePlayerCraft {
         int craftCount = 0;
         // 记录循环次数用来在游戏可能进入死循环时抛出异常
         int loopCount = 0;
-        do {
+        while (true) {
             // 检查循环次数，在循环次数过多时抛出异常
             loopCount++;
             if (loopCount > MAX_LOOP_COUNT) {
@@ -138,17 +137,17 @@ public class FakePlayerCraft {
                 // 遍历完物品栏后，如果找到正确合成材料小于9，认为玩家身上没有足够的合成材料了，直接结束方法
                 return;
             }
-        } while (CarpetSettings.ctrlQCraftingFix);
+        }
     }
 
-    private static void inventoryCraft(InventoryCraftData craftData, EntityPlayerMPFake fakePlayer, AutoGrowInventory inventory) {
+    private static void inventoryCraft(InventoryCraftContext craftData, EntityPlayerMPFake fakePlayer, AutoGrowInventory inventory) {
         PlayerScreenHandler playerScreenHandler = fakePlayer.playerScreenHandler;
         ItemStackPredicate[] items = craftData.getPredicates();
         // 定义变量记录成功完成合成的次数
         int craftCount = 0;
         // 记录循环次数用来在游戏可能进入死循环时抛出异常
         int loopCount = 0;
-        do {
+        while (true) {
             // 检查循环次数
             loopCount++;
             if (loopCount > MAX_LOOP_COUNT) {
@@ -231,7 +230,7 @@ public class FakePlayerCraft {
                 // 遍历完物品栏后，如果没有找到足够多的合成材料，认为玩家身上没有足够的合成材料了，直接结束方法
                 return;
             }
-        } while (CarpetSettings.ctrlQCraftingFix);
+        }
     }
 
     // 丢弃合成输出

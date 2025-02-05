@@ -1,14 +1,10 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
-import com.google.gson.JsonObject;
-import net.minecraft.text.MutableText;
-import net.minecraft.util.Formatting;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
-import org.carpetorgaddition.periodic.fakeplayer.actiondata.*;
+import org.carpetorgaddition.periodic.fakeplayer.actioncontext.*;
 import org.carpetorgaddition.util.MessageUtils;
-import org.carpetorgaddition.util.TextUtils;
 
 public class FakePlayerActionManager {
     private final EntityPlayerMPFake fakePlayer;
@@ -30,48 +26,52 @@ public class FakePlayerActionManager {
                     this.getAction().toString(),
                     e
             );
-            // 向聊天栏发送错误消息的反馈
-            MutableText message = TextUtils.translate(
+            MessageUtils.broadcastErrorMessage(
+                    this.fakePlayer.server,
+                    e,
                     "carpet.commands.playerAction.exception.runtime",
                     this.fakePlayer.getDisplayName(),
                     this.getAction().getDisplayName()
             );
-            MutableText errorMessage = TextUtils.hoverText(TextUtils.setColor(message, Formatting.RED), e.getMessage());
-            MessageUtils.broadcastMessage(this.fakePlayer.server, errorMessage);
             // 让假玩家停止当前操作
             this.stop();
         }
     }
 
     // 执行动作
-    public void executeAction() {
-        switch (function.getAction()) {
-            case STOP -> {
-                // 什么也不做
-            }
+    private void executeAction() {
+        FakePlayerAction action = function.getAction();
+        if (action == FakePlayerAction.STOP) {
+            return;
+        }
+        switch (action) {
             // 物品分拣
-            case SORTING -> FakePlayerSorting.sorting((SortingData) function.getActionData(), fakePlayer);
+            case SORTING -> FakePlayerSorting.sorting((SortingContext) function.getActionContext(), fakePlayer);
             // 清空潜影盒
-            case CLEAN -> FakePlayerClean.clean((CleanData) function.getActionData(), fakePlayer);
+            case CLEAN -> FakePlayerClean.clean((CleanContext) function.getActionContext(), fakePlayer);
             // 填充潜影盒
-            case FILL -> FakePlayerFill.fill((FillData) function.getActionData(), fakePlayer);
+            case FILL -> FakePlayerFill.fill((FillContext) function.getActionContext(), fakePlayer);
             // 在生存模式物品栏合成物品
             case INVENTORY_CRAFT ->
-                    FakePlayerCraft.inventoryCraft((InventoryCraftData) function.getActionData(), fakePlayer);
+                    FakePlayerCraft.inventoryCraft((InventoryCraftContext) function.getActionContext(), fakePlayer);
             // 在工作台合成物品
             case CRAFTING_TABLE_CRAFT ->
-                    FakePlayerCraft.craftingTableCraft((CraftingTableCraftData) function.getActionData(), fakePlayer);
+                    FakePlayerCraft.craftingTableCraft((CraftingTableCraftContext) function.getActionContext(), fakePlayer);
             // 重命名物品
-            case RENAME -> FakePlayerRename.rename((RenameData) function.getActionData(), fakePlayer);
+            case RENAME -> FakePlayerRename.rename((RenameContext) function.getActionContext(), fakePlayer);
             // 使用切石机
             case STONECUTTING ->
-                    FakePlayerStonecutting.stonecutting((StonecuttingData) function.actionData, fakePlayer);
+                    FakePlayerStonecutting.stonecutting((StonecuttingContext) function.actionContext, fakePlayer);
             // 自动交易
-            case TRADE -> FakePlayerTrade.trade((TradeData) function.actionData, fakePlayer);
+            case TRADE -> FakePlayerTrade.trade((TradeContext) function.actionContext, fakePlayer);
             // 自动钓鱼
-            case FISHING -> FakePlayerFishing.fishing((FishingData) function.getActionData(), fakePlayer);
+            case FISHING -> FakePlayerFishing.fishing((FishingContext) function.getActionContext(), fakePlayer);
+            // 自动种植
+            case FARM -> FakePlayerFarm.farm((FarmContext) function.getActionContext(), fakePlayer);
+            case BEDROCK ->
+                    FakePlayerBreakBedrock.breakBedrock((BreakBedrockContext) function.getActionContext(), fakePlayer);
             default -> {
-                CarpetOrgAddition.LOGGER.error("{}的行为没有预先定义", this.function.getAction());
+                CarpetOrgAddition.LOGGER.error("行为“{}”没有预先定义", action);
                 this.stop();
             }
         }
@@ -81,42 +81,24 @@ public class FakePlayerActionManager {
         return function.getAction();
     }
 
-    public AbstractActionData getActionData() {
-        return this.function.getActionData();
+    public AbstractActionContext getActionContext() {
+        return this.function.getActionContext();
     }
 
     // 设置假玩家当前的动作，类型必须与数据对应
-    public void setAction(FakePlayerAction action, AbstractActionData data) {
-        this.function.setAction(action, data);
+    public void setAction(FakePlayerAction action, AbstractActionContext context) {
+        this.function.setAction(action, context);
     }
 
     // 让假玩家停止当前的动作
     public void stop() {
-        this.function.setAction(FakePlayerAction.STOP, StopData.STOP);
+        this.function.setAction(FakePlayerAction.STOP, StopContext.STOP);
     }
 
     // 从另一个玩家浅拷贝此动作管理器
     public void setActionFromOldPlayer(EntityPlayerMPFake oldPlayer) {
         FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(oldPlayer);
-        this.setAction(actionManager.getAction(), actionManager.getActionData());
-    }
-
-    public JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        String action = switch (this.getAction()) {
-            case STOP -> "stop";
-            case SORTING -> "sorting";
-            case CLEAN -> "clean";
-            case FILL -> "fill";
-            case INVENTORY_CRAFT -> "inventory_crafting";
-            case CRAFTING_TABLE_CRAFT -> "crafting_table_craft";
-            case RENAME -> "rename";
-            case STONECUTTING -> "stonecutting";
-            case TRADE -> "trade";
-            case FISHING -> "fishing";
-        };
-        json.add(action, this.getActionData().toJson());
-        return json;
+        this.setAction(actionManager.getAction(), actionManager.getActionContext());
     }
 
     /**
@@ -124,22 +106,24 @@ public class FakePlayerActionManager {
      */
     private static class ActionFunction {
         private FakePlayerAction action = FakePlayerAction.STOP;
-        private AbstractActionData actionData = StopData.STOP;
+        private AbstractActionContext actionContext = StopContext.STOP;
 
         // 动作类型必须和动作数据一起修改来保证类型与数据对应
-        private void setAction(FakePlayerAction action, AbstractActionData actionData) {
+        private void setAction(FakePlayerAction action, AbstractActionContext actionContext) {
             // 检查动作类型是否与数据匹配
-            action.checkActionData(actionData.getClass());
+            if (actionContext.getClass() != action.getContextClass()) {
+                throw new IllegalArgumentException();
+            }
             this.action = action;
-            this.actionData = actionData;
+            this.actionContext = actionContext;
         }
 
         private FakePlayerAction getAction() {
             return action;
         }
 
-        private AbstractActionData getActionData() {
-            return actionData;
+        private AbstractActionContext getActionContext() {
+            return actionContext;
         }
     }
 }
