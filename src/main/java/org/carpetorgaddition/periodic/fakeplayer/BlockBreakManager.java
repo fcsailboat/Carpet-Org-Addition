@@ -158,7 +158,7 @@ public class BlockBreakManager {
 
     private void breakingAction(Action action, BlockPos blockPos, Direction direction) {
         World world = this.player.getWorld();
-        this.player.interactionManager.processBlockBreakingAction(blockPos, action, direction, world.getTopY(), -1);
+        this.player.interactionManager.processBlockBreakingAction(blockPos, action, direction, world.getTopYInclusive(), -1);
     }
 
     /**

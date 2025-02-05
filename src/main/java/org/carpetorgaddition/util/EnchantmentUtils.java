@@ -38,7 +38,11 @@ public class EnchantmentUtils {
      * @return 附魔是否与注册项对应
      */
     public static boolean isSpecified(World world, RegistryKey<Enchantment> key, Enchantment enchantment) {
-        Enchantment value = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).get(key);
+        Optional<Registry<Enchantment>> optional = world.getRegistryManager().getOptional(RegistryKeys.ENCHANTMENT);
+        if (optional.isEmpty()) {
+            return false;
+        }
+        Enchantment value = optional.get().get(key);
         return value != null && value.equals(enchantment);
     }
 

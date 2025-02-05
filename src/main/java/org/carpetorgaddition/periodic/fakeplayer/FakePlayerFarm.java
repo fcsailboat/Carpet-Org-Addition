@@ -5,7 +5,8 @@ import net.minecraft.block.*;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ToolItem;
+import net.minecraft.item.MiningToolItem;
+import net.minecraft.item.SwordItem;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -254,7 +255,7 @@ public class FakePlayerFarm {
      */
     private static boolean useToolBreakBlock(EntityPlayerMPFake fakePlayer, BlockPos pos, FarmContext context) {
         // 如果有工具，拿在主手，剑可以瞬间破坏竹子，它也是工具物品
-        FakePlayerUtils.replenishment(fakePlayer, itemStack -> itemStack.getItem() instanceof ToolItem);
+        FakePlayerUtils.replenishment(fakePlayer, itemStack -> itemStack.getItem() instanceof SwordItem || itemStack.getItem() instanceof MiningToolItem);
         BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
         boolean breakBlock = breakManager.breakBlock(pos, Direction.DOWN);
         context.setCropPos(breakBlock ? null : pos);

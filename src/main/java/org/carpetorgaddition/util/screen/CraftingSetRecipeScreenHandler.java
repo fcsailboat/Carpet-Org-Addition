@@ -11,7 +11,6 @@ import net.minecraft.screen.slot.SlotActionType;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerCraftRecipeInterface;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CraftingTableCraftContext;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.InventoryCraftContext;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
@@ -27,8 +26,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             PlayerInventory playerInventory,
             EntityPlayerMPFake fakePlayer,
             ScreenHandlerContext screenHandlerContext) {
-        super(syncId, playerInventory, screenHandlerContext
-        );
+        super(syncId, playerInventory, screenHandlerContext);
         this.fakePlayer = fakePlayer;
     }
 

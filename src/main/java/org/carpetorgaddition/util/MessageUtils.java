@@ -1,7 +1,6 @@
 package org.carpetorgaddition.util;
 
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
@@ -68,7 +67,7 @@ public class MessageUtils {
         server.getPlayerManager()
                 .getPlayerList()
                 .stream()
-                .map(Entity::getCommandSource)
+                .map(ServerPlayerEntity::getCommandSource)
                 .forEach(source -> sendErrorMessage(source, e, key, obj));
     }
 
