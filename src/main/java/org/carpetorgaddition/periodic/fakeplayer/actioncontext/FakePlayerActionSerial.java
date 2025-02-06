@@ -48,7 +48,7 @@ public class FakePlayerActionSerial {
                         case TRADE -> TradeContext.load(jsonObject);
                         case FISHING -> new FishingContext();
                         case FARM -> new FarmContext();
-                        case BEDROCK -> new BreakBedrockContext();
+                        case BEDROCK -> new BreakBedrockContext(jsonObject);
                     };
                 }
                 return;

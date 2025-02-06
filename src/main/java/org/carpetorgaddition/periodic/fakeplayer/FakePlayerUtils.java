@@ -12,6 +12,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Direction;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
@@ -265,18 +266,27 @@ public class FakePlayerUtils {
      * @return 是否移动成功
      */
     public static boolean replenishment(EntityPlayerMPFake fakePlayer, Predicate<ItemStack> predicate) {
-        if (predicate.test(fakePlayer.getMainHandStack())) {
+        return replenishment(fakePlayer, Hand.MAIN_HAND, predicate);
+    }
+
+    /**
+     * 将合适的物品移动到主手
+     *
+     * @return 是否移动成功
+     */
+    public static boolean replenishment(EntityPlayerMPFake fakePlayer, Hand hand, Predicate<ItemStack> predicate) {
+        if (predicate.test(fakePlayer.getStackInHand(hand))) {
             return true;
         }
         PlayerScreenHandler screenHandler = fakePlayer.playerScreenHandler;
         // 主手槽位
-        int mainHeadSlot = 36 + fakePlayer.getInventory().selectedSlot;
+        int headSlot = hand == Hand.MAIN_HAND ? 36 + fakePlayer.getInventory().selectedSlot : 45;
         for (int i = 9; i < 45; i++) {
-            if (i == mainHeadSlot) {
+            if (i == headSlot) {
                 continue;
             }
             if (predicate.test(screenHandler.getSlot(i).getStack())) {
-                swapSlotItem(screenHandler, i, mainHeadSlot, fakePlayer);
+                swapSlotItem(screenHandler, i, headSlot, fakePlayer);
                 return true;
             }
         }
@@ -289,5 +299,14 @@ public class FakePlayerUtils {
     public static void look(EntityPlayerMPFake fakePlayer, Direction direction) {
         EntityPlayerActionPack actionPack = ((ServerPlayerInterface) fakePlayer).getActionPack();
         actionPack.look(direction);
+    }
+
+    /**
+     * 交互主副手物品
+     */
+    public static void swapHand(EntityPlayerMPFake fakePlayer) {
+        ItemStack temp = fakePlayer.getStackInHand(Hand.OFF_HAND);
+        fakePlayer.setStackInHand(Hand.OFF_HAND, fakePlayer.getStackInHand(Hand.MAIN_HAND));
+        fakePlayer.setStackInHand(Hand.MAIN_HAND, temp);
     }
 }

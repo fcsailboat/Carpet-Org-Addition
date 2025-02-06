@@ -10,16 +10,14 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.ItemPredicateArgumentType;
-import net.minecraft.command.argument.ItemStackArgumentType;
-import net.minecraft.command.argument.Vec3ArgumentType;
+import net.minecraft.command.argument.*;
 import net.minecraft.item.Item;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
@@ -97,7 +95,9 @@ public class PlayerActionCommand {
                                 .executes(PlayerActionCommand::setFarm))
                         .then(CommandManager.literal("bedrock")
                                 .requires(source -> CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION)
-                                .executes(PlayerActionCommand::setBreakBedrock))));
+                                .then(CommandManager.argument("from", BlockPosArgumentType.blockPos())
+                                        .then(CommandManager.argument("to", BlockPosArgumentType.blockPos())
+                                                .executes(PlayerActionCommand::setBreakBedrock))))));
     }
 
     // 注册物品谓词节点
@@ -288,9 +288,11 @@ public class PlayerActionCommand {
 
     private static int setBreakBedrock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
+            BlockPos from = BlockPosArgumentType.getBlockPos(context, "from");
+            BlockPos to = BlockPosArgumentType.getBlockPos(context, "to");
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerActionManager actionManager = PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer);
-            actionManager.setAction(FakePlayerAction.BEDROCK, new BreakBedrockContext());
+            actionManager.setAction(FakePlayerAction.BEDROCK, new BreakBedrockContext(from, to));
             return 1;
         }
         return 0;

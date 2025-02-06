@@ -1,11 +1,18 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockFace;
 import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.EnchantmentEffectComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.PickaxeItem;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.Hand;
@@ -38,7 +45,9 @@ public class FakePlayerBreakBedrock {
         Box box = new Box(fakePlayer.getBlockPos()).expand(Math.min(range, 10.0));
         SelectionArea area = new SelectionArea(box);
         for (BlockPos blockPos : area) {
-            if (world.getBlockState(blockPos).isOf(Blocks.BEDROCK) && fakePlayer.canInteractWithBlockAt(blockPos, 0.0)) {
+            if (world.getBlockState(blockPos).isOf(Blocks.BEDROCK)
+                    && fakePlayer.canInteractWithBlockAt(blockPos, 0.0)
+                    && context.contains(blockPos)) {
                 context.add(new BedrockDestructor(blockPos));
             }
         }
@@ -50,7 +59,7 @@ public class FakePlayerBreakBedrock {
                 if (loopCount > 10) {
                     throw new InfiniteLoopException();
                 }
-                StepResult stepResult = start(destructor, fakePlayer);
+                StepResult stepResult = start(destructor, fakePlayer, context);
                 switch (stepResult) {
                     case COMPLETION -> {
                         break loop;
@@ -65,7 +74,7 @@ public class FakePlayerBreakBedrock {
         }
     }
 
-    private static StepResult start(BedrockDestructor destructor, EntityPlayerMPFake fakePlayer) {
+    private static StepResult start(BedrockDestructor destructor, EntityPlayerMPFake fakePlayer, BreakBedrockContext context) {
         BlockPos bedrockPos = destructor.getBedrockPos();
         switch (destructor.getState()) {
             case PLACE_THE_PISTON_FACING_UP -> {
@@ -82,7 +91,7 @@ public class FakePlayerBreakBedrock {
                 }
             }
             case PLACE_AND_ACTIVATE_THE_LEVER -> {
-                StepResult stepResult = placeAndActivateTheLever(destructor, fakePlayer);
+                StepResult stepResult = placeAndActivateTheLever(destructor, fakePlayer, context);
                 if (stepResult == StepResult.CONTINUE) {
                     destructor.nextStep();
                 } else {
@@ -206,7 +215,8 @@ public class FakePlayerBreakBedrock {
      *
      * @return 拉杆是否放置并激活成功
      */
-    private static StepResult placeAndActivateTheLever(BedrockDestructor destructor, EntityPlayerMPFake fakePlayer) {
+    private static StepResult placeAndActivateTheLever(BedrockDestructor destructor, EntityPlayerMPFake fakePlayer, BreakBedrockContext context) {
+        // TODO 不会自动清理方块
         BlockPos bedrockPos = destructor.getBedrockPos();
         World world = fakePlayer.getWorld();
         ServerPlayerInteractionManager interactionManager = fakePlayer.interactionManager;
@@ -222,7 +232,7 @@ public class FakePlayerBreakBedrock {
             if (blockState.isOf(Blocks.LEVER)) {
                 // 拉杆没有附着在墙壁上，破坏拉杆
                 if (blockState.get(WallMountedBlock.FACE) != BlockFace.WALL) {
-                    return tickBreakBlock(breakManager, bedrockPos);
+                    return tickBreakBlock(breakManager, offset);
                 }
                 if (bedrockPos.equals(offset.offset(blockState.get(LeverBlock.FACING), -1))) {
                     if (destructor.getLeverPos() == null) {
@@ -234,12 +244,12 @@ public class FakePlayerBreakBedrock {
                         interactionLever(fakePlayer, offset);
                     } else {
                         // 拉杆正确的附着在了基岩上，但是拉杆不止一个
-                        return tickBreakBlock(breakManager, bedrockPos);
+                        return tickBreakBlock(breakManager, offset);
                     }
                 } else {
                     BlockPos supportBlockPos = offset.offset(blockState.get(LeverBlock.FACING), -1);
                     // 拉杆附着在了另一个基岩上
-                    if (world.getBlockState(supportBlockPos).isOf(Blocks.BEDROCK)) {
+                    if (world.getBlockState(supportBlockPos).isOf(Blocks.BEDROCK) && context.contains(supportBlockPos)) {
                         continue;
                     }
                     // 拉杆附着在了墙上，但不是当前要破坏的基岩方块
@@ -262,11 +272,11 @@ public class FakePlayerBreakBedrock {
             // 当前位置下方是未伸出的活塞，不能在这里放置拉杆
             return StepResult.COMPLETION;
         }
-        FakePlayerUtils.replenishment(fakePlayer, stack -> stack.isOf(Items.LEVER));
+        FakePlayerUtils.replenishment(fakePlayer, Hand.OFF_HAND, stack -> stack.isOf(Items.LEVER));
         FakePlayerUtils.look(fakePlayer, direction.getOpposite());
         BlockHitResult hitResult = new BlockHitResult(bedrockPos.toCenterPos(), direction, bedrockPos, false);
         // 放置拉杆
-        interactionManager.interactBlock(fakePlayer, world, fakePlayer.getMainHandStack(), Hand.MAIN_HAND, hitResult);
+        interactionManager.interactBlock(fakePlayer, world, fakePlayer.getOffHandStack(), Hand.OFF_HAND, hitResult);
         // 再次单击激活拉杆
         interactionLever(fakePlayer, offset);
         destructor.setLeverPos(offset);
@@ -376,6 +386,32 @@ public class FakePlayerBreakBedrock {
      * @return 是否破坏成功
      */
     private static boolean breakBlock(BlockBreakManager breakManager, BlockPos blockPos) {
+        EntityPlayerMPFake player = breakManager.getPlayer();
+        World world = player.getWorld();
+        BlockState blockState = world.getBlockState(blockPos);
+        FakePlayerUtils.replenishment(player, itemStack -> {
+            if (player.isCreative()) {
+                return itemStack.getItem().canMine(blockState, world, blockPos, player);
+            }
+            if (itemStack.isEmpty()) {
+                return false;
+            }
+            // 不使用低耐久工具
+            if (itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
+                // 检查是否有经验修补
+                ItemEnchantmentsComponent component = itemStack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+                for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : component.getEnchantmentEntries()) {
+                    RegistryEntry<Enchantment> registryEntry = entry.getKey();
+                    if (registryEntry.value().effects().contains(EnchantmentEffectComponentTypes.REPAIR_WITH_XP)) {
+                        return false;
+                    }
+                }
+            }
+            if (blockState.isIn(BlockTags.PICKAXE_MINEABLE)) {
+                return itemStack.getItem() instanceof PickaxeItem;
+            }
+            return false;
+        });
         return breakManager.breakBlock(blockPos, Direction.DOWN, false);
     }
 
@@ -386,10 +422,10 @@ public class FakePlayerBreakBedrock {
         ServerPlayerInteractionManager interactionManager = fakePlayer.interactionManager;
         // 看向与活塞相反的方向
         FakePlayerUtils.look(fakePlayer, direction.getOpposite());
-        FakePlayerUtils.replenishment(fakePlayer, itemStack -> itemStack.isOf(Items.PISTON));
+        FakePlayerUtils.replenishment(fakePlayer, Hand.OFF_HAND, itemStack -> itemStack.isOf(Items.PISTON));
         // 放置活塞
         BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(bedrockPos, 1.0), direction, bedrockPos.up(), false);
-        interactionManager.interactBlock(fakePlayer, fakePlayer.getWorld(), fakePlayer.getMainHandStack(), Hand.MAIN_HAND, hitResult);
+        interactionManager.interactBlock(fakePlayer, fakePlayer.getWorld(), fakePlayer.getOffHandStack(), Hand.OFF_HAND, hitResult);
     }
 
     /**
