@@ -45,7 +45,7 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
                 StringRange range = commandNode.getRange();
                 this.input = context.getInput().substring(range.getStart(), range.getEnd());
                 ItemStackPredicateArgument predicate = ItemPredicateArgumentType.getItemStackPredicate(context, arguments);
-                if ("*".equals(this.input)) {
+                if (this.input.startsWith("*")) {
                     this.predicate = itemStack -> !itemStack.isEmpty() && predicate.test(itemStack);
                 } else {
                     this.predicate = predicate;
