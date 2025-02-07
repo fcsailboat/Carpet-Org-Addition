@@ -28,13 +28,16 @@ import java.util.function.Consumer;
 
 public class FakePlayerBreakBedrock {
     public static void breakBedrock(BreakBedrockContext context, EntityPlayerMPFake fakePlayer) {
+        World world = fakePlayer.getWorld();
         context.removeIf(destructor -> {
             if (destructor.getState() == State.COMPLETE) {
                 return true;
             }
-            return !fakePlayer.canInteractWithBlockAt(destructor.getBedrockPos(), 0.0);
+            if (world.getBlockState(destructor.getBedrockPos()).isOf(Blocks.BEDROCK)) {
+                return !fakePlayer.canInteractWithBlockAt(destructor.getBedrockPos(), 0.0);
+            }
+            return destructor.getState() != State.CLEAN_PISTON;
         });
-        World world = fakePlayer.getWorld();
         double range = fakePlayer.getBlockInteractionRange();
         Box box = new Box(fakePlayer.getBlockPos()).expand(Math.min(range, 10.0));
         SelectionArea area = new SelectionArea(box);
@@ -106,6 +109,10 @@ public class FakePlayerBreakBedrock {
                     case TICK_COMPLETION -> {
                         return StepResult.TICK_COMPLETION;
                     }
+                    case FAIL -> {
+                        destructor.fail();
+                        return StepResult.COMPLETION;
+                    }
                     default -> throw new IllegalStateException();
                 }
             }
@@ -152,6 +159,7 @@ public class FakePlayerBreakBedrock {
      * @return 是否放置成功
      */
     private static StepResult placePiston(EntityPlayerMPFake fakePlayer, BlockPos bedrockPos) {
+        // TODO 放置时检查是否与实体相交
         World world = fakePlayer.getWorld();
         BlockPos up = bedrockPos.up(1);
         BlockState blockState = world.getBlockState(up);
@@ -199,6 +207,7 @@ public class FakePlayerBreakBedrock {
         if (isPiston && !world.getBlockState(blockPos.down()).isOf(Blocks.BEDROCK)) {
             return true;
         }
+        // TODO 允许破坏不在侧面的拉杆和方向不正确的活塞
         if (blockState.isOf(Blocks.LEVER) || isPiston || blockState.isOf(Blocks.PISTON_HEAD)) {
             return false;
         }
@@ -218,6 +227,7 @@ public class FakePlayerBreakBedrock {
         for (Direction value : MathUtils.HORIZONTAL) {
             BlockPos offset = bedrockPos.offset(value);
             BlockState blockState = world.getBlockState(offset);
+            // TODO 改为可替换方块
             if (blockState.isAir()) {
                 direction = value;
                 continue;
@@ -247,7 +257,7 @@ public class FakePlayerBreakBedrock {
                         continue;
                     }
                     // 拉杆附着在了墙上，但不是当前要破坏的基岩方块
-                    return tickBreakBlock(breakManager, bedrockPos);
+                    return tickBreakBlock(breakManager, offset);
                 }
             } else if (canMine(fakePlayer, blockState, world, offset)) {
                 return tickBreakBlock(breakManager, offset);
@@ -264,6 +274,10 @@ public class FakePlayerBreakBedrock {
         BlockState blockState = world.getBlockState(offset.down());
         if (blockState.isOf(Blocks.PISTON) && blockState.get(PistonBlock.FACING) == Direction.UP) {
             // 当前位置下方是未伸出的活塞，不能在这里放置拉杆
+            return StepResult.COMPLETION;
+        }
+        if (blockState.isOf(Blocks.MOVING_PISTON)) {
+            // 当前位置下方是移动的活塞
             return StepResult.COMPLETION;
         }
         FakePlayerUtils.replenishment(fakePlayer, Hand.OFF_HAND, stack -> stack.isOf(Items.LEVER));
@@ -286,7 +300,7 @@ public class FakePlayerBreakBedrock {
         // 基岩上方方块是活塞
         World world = fakePlayer.getWorld();
         BlockState blockState = world.getBlockState(up);
-        if (blockState.isOf(Blocks.PISTON)) {
+        if (blockState.isOf(Blocks.PISTON) && blockState.get(PistonBlock.EXTENDED)) {
             BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
             // 先切换工具，再计算剩余挖掘时间
             switchTool(blockState, world, up, fakePlayer);
@@ -315,7 +329,7 @@ public class FakePlayerBreakBedrock {
             breakBlock(breakManager, up, false);
             return StepResult.TICK_COMPLETION;
         } else {
-            return StepResult.COMPLETION;
+            return StepResult.FAIL;
         }
     }
 
@@ -489,6 +503,10 @@ public class FakePlayerBreakBedrock {
             this.state = values[this.state.ordinal() + 1];
         }
 
+        public void fail() {
+            this.state = State.COMPLETE;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -545,6 +563,10 @@ public class FakePlayerBreakBedrock {
         /**
          * 不再执行下一步，并且应该结束当前tick
          */
-        TICK_COMPLETION
+        TICK_COMPLETION,
+        /**
+         * 破基岩失败，重新开始
+         */
+        FAIL
     }
 }

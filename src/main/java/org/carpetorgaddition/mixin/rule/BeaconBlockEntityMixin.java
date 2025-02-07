@@ -65,6 +65,7 @@ public abstract class BeaconBlockEntityMixin {
     private static void sendBoxUpdate(World world, BlockPos pos, BeaconRangeBox beaconRangeBox) {
         int viewDistance = world.getServer().getPlayerManager().getViewDistance();
         for (PlayerEntity player : world.getPlayers()) {
+            // TODO 玩家距离不考虑高度
             if (player instanceof EntityPlayerMPFake || pos.toCenterPos().distanceTo(player.getPos()) > viewDistance * 16) {
                 continue;
             }

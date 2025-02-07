@@ -179,6 +179,7 @@ public class OfflinePlayerFindTask extends ServerTask {
         if (this.predicate.canConvertItem()) {
             count = FinderCommand.showCount(this.predicate.asItem().getDefaultStack(), this.itemCount.get(), this.shulkerBox.get());
         } else {
+            // TODO 无法转换为物品的谓词中，结果数量不会呈现斜体，以前版本中会呈现吗？
             count = TextUtils.createText(Integer.toString(this.itemCount.get()));
         }
         if (this.list.size() > CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount) {
