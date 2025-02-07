@@ -304,6 +304,7 @@ public class FakePlayerUtils {
     /**
      * 交互主副手物品
      */
+    @SuppressWarnings("unused")
     public static void swapHand(EntityPlayerMPFake fakePlayer) {
         ItemStack temp = fakePlayer.getStackInHand(Hand.OFF_HAND);
         fakePlayer.setStackInHand(Hand.OFF_HAND, fakePlayer.getStackInHand(Hand.MAIN_HAND));

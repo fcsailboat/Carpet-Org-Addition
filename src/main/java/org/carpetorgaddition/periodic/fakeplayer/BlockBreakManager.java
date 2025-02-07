@@ -185,10 +185,8 @@ public class BlockBreakManager {
                 return true;
             }
             // 非创造玩家无法破坏硬度为-1的方块
-            if (blockState.getHardness(world, blockPos) == -1) {
-                return false;
-            }
+            return blockState.getHardness(world, blockPos) != -1;
         }
-        return false;
+        return true;
     }
 }

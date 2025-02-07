@@ -47,6 +47,7 @@ public class CarpetOrgAddition implements ModInitializer {
      * 是否同时加载了{@code Lithium}（锂）模组
      */
     public static final boolean LITHIUM = FabricLoader.getInstance().isModLoaded("lithium");
+    // TODO 日志打印是否启用隐藏规则，javadoc注释
     public static final boolean ENABLE_HIDDEN_FUNCTION = Boolean.getBoolean("CarpetOrgAddition.EnableHiddenFunction");
 
     /**
