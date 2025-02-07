@@ -9,12 +9,12 @@ import net.minecraft.item.Items;
 import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
-import org.carpetorgaddition.periodic.PeriodicTaskUtils;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
+import org.carpetorgaddition.periodic.fakeplayer.action.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerCraftRecipeInterface;
-import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CraftingTableCraftContext;
-import org.carpetorgaddition.periodic.fakeplayer.actioncontext.InventoryCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.action.context.CraftingTableCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.action.context.InventoryCraftContext;
+import org.carpetorgaddition.util.GenericFetcherUtils;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implements UnavailableSlotSyncInterface {
@@ -56,7 +56,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             items[i] = inputInventory.getStack(i).getItem();
         }
         // 设置假玩家合成动作
-        setCraftAction(items, PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer));
+        setCraftAction(items, GenericFetcherUtils.getFakePlayerActionManager(fakePlayer));
         // 关闭GUI后，使用父类的方法让物品回到玩家背包
         super.onClosed(player);
     }
