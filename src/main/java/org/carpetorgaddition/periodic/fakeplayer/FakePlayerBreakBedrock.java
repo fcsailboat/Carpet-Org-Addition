@@ -1,18 +1,11 @@
 package org.carpetorgaddition.periodic.fakeplayer;
 
 import carpet.patches.EntityPlayerMPFake;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockFace;
 import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.EnchantmentEffectComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.PickaxeItem;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.Hand;
@@ -25,6 +18,7 @@ import net.minecraft.world.World;
 import org.carpetorgaddition.exception.InfiniteLoopException;
 import org.carpetorgaddition.periodic.PeriodicTaskUtils;
 import org.carpetorgaddition.periodic.fakeplayer.actioncontext.BreakBedrockContext;
+import org.carpetorgaddition.util.EnchantmentUtils;
 import org.carpetorgaddition.util.MathUtils;
 import org.carpetorgaddition.util.wheel.SelectionArea;
 
@@ -294,6 +288,8 @@ public class FakePlayerBreakBedrock {
         BlockState blockState = world.getBlockState(up);
         if (blockState.isOf(Blocks.PISTON)) {
             BlockBreakManager breakManager = PeriodicTaskUtils.getBlockBreakManager(fakePlayer);
+            // 先切换工具，再计算剩余挖掘时间
+            switchTool(blockState, world, up, fakePlayer);
             // 计算剩余挖掘时间
             int currentTime = breakManager.getCurrentBreakingTime(up);
             if (currentTime == 1) {
@@ -309,14 +305,14 @@ public class FakePlayerBreakBedrock {
                     closeTheSurroundingLevers(up, fakePlayer);
                     destructor.setLeverPos(null);
                     // 继续挖掘，此时活塞应该会挖掘完毕
-                    breakBlock(breakManager, up);
+                    breakBlock(breakManager, up, false);
                     // 放置一个朝下的活塞，这个活塞会破坏掉基岩
                     placePiston(fakePlayer, bedrockPos, Direction.DOWN);
                     return StepResult.COMPLETION;
                 }
                 return StepResult.COMPLETION;
             }
-            breakBlock(breakManager, up);
+            breakBlock(breakManager, up, false);
             return StepResult.TICK_COMPLETION;
         } else {
             return StepResult.COMPLETION;
@@ -385,25 +381,33 @@ public class FakePlayerBreakBedrock {
             return false;
         }
         if (blockState.isOf(Blocks.PISTON)) {
-            return breakBlock(breakManager, blockPos);
+            return breakBlock(breakManager, blockPos, true);
         }
         return true;
     }
 
     private static StepResult tickBreakBlock(BlockBreakManager breakManager, BlockPos blockPos) {
-        return breakBlock(breakManager, blockPos) ? StepResult.COMPLETION : StepResult.TICK_COMPLETION;
+        return breakBlock(breakManager, blockPos, true) ? StepResult.COMPLETION : StepResult.TICK_COMPLETION;
     }
 
     /**
      * 尝试破坏指定位置的方块
      *
+     * @param switchTool 是否需要切换工具
      * @return 是否破坏成功
      */
-    private static boolean breakBlock(BlockBreakManager breakManager, BlockPos blockPos) {
+    private static boolean breakBlock(BlockBreakManager breakManager, BlockPos blockPos, boolean switchTool) {
         EntityPlayerMPFake player = breakManager.getPlayer();
         World world = player.getWorld();
         BlockState blockState = world.getBlockState(blockPos);
-        FakePlayerUtils.replenishment(player, itemStack -> {
+        if (switchTool) {
+            switchTool(blockState, world, blockPos, player);
+        }
+        return breakManager.breakBlock(blockPos, Direction.DOWN, false);
+    }
+
+    private static void switchTool(BlockState blockState, World world, BlockPos blockPos, EntityPlayerMPFake player) {
+        boolean replenishment = FakePlayerUtils.replenishment(player, itemStack -> {
             if (player.isCreative()) {
                 return itemStack.getItem().canMine(blockState, world, blockPos, player);
             }
@@ -411,22 +415,23 @@ public class FakePlayerBreakBedrock {
                 return false;
             }
             // 不使用低耐久工具
-            if (itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
-                // 检查是否有经验修补
-                ItemEnchantmentsComponent component = itemStack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
-                for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : component.getEnchantmentEntries()) {
-                    RegistryEntry<Enchantment> registryEntry = entry.getKey();
-                    if (registryEntry.value().effects().contains(EnchantmentEffectComponentTypes.REPAIR_WITH_XP)) {
-                        return false;
-                    }
-                }
+            if (isDamaged(itemStack)) {
+                return false;
             }
-            if (blockState.isIn(BlockTags.PICKAXE_MINEABLE)) {
-                return itemStack.getItem() instanceof PickaxeItem;
-            }
-            return false;
+            return itemStack.getMiningSpeedMultiplier(blockState) > 1F;
         });
-        return breakManager.breakBlock(blockPos, Direction.DOWN, false);
+        if (replenishment) {
+            return;
+        }
+        // 工具没有切换成功，使用其他物品替换手上工具以避免工具损坏
+        FakePlayerUtils.replenishment(player, itemStack -> !isDamaged(itemStack));
+    }
+
+    /**
+     * @return 指定物品是否是低耐久且有经验修补的物品
+     */
+    private static boolean isDamaged(ItemStack itemStack) {
+        return itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10 && EnchantmentUtils.canRepairWithXp(itemStack);
     }
 
     /**

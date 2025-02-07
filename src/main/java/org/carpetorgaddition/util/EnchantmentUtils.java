@@ -1,6 +1,8 @@
 package org.carpetorgaddition.util;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -89,5 +91,19 @@ public class EnchantmentUtils {
             mutableText = TextUtils.appendAll(mutableText, ScreenTexts.SPACE, TextUtils.translate("enchantment.level." + level));
         }
         return mutableText;
+    }
+
+    /**
+     * @return 指定物品是否可以使用经验修复
+     */
+    public static boolean canRepairWithXp(ItemStack itemStack) {
+        ItemEnchantmentsComponent component = itemStack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : component.getEnchantmentEntries()) {
+            RegistryEntry<Enchantment> registryEntry = entry.getKey();
+            if (registryEntry.value().effects().contains(EnchantmentEffectComponentTypes.REPAIR_WITH_XP)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
