@@ -47,7 +47,9 @@ public class CarpetOrgAddition implements ModInitializer {
      * 是否同时加载了{@code Lithium}（锂）模组
      */
     public static final boolean LITHIUM = FabricLoader.getInstance().isModLoaded("lithium");
-    // TODO 日志打印是否启用隐藏规则，javadoc注释
+    /**
+     * 是否启用隐藏功能
+     */
     public static final boolean ENABLE_HIDDEN_FUNCTION = Boolean.getBoolean("CarpetOrgAddition.EnableHiddenFunction");
 
     /**
@@ -60,6 +62,9 @@ public class CarpetOrgAddition implements ModInitializer {
         NetworkS2CPacketRegister.register();
         // 注册事件
         RegisterEvent.register();
+        if (CarpetOrgAddition.ENABLE_HIDDEN_FUNCTION) {
+            CarpetOrgAddition.LOGGER.info("已启用隐藏功能");
+        }
         // 如果当前为调试模式的开发环境，注册测试规则
         if (isDebugDevelopment()) {
             DebugRuleRegistrar.getInstance().registrar();
