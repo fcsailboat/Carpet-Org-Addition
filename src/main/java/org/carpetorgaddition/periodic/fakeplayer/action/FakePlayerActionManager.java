@@ -52,7 +52,7 @@ public class FakePlayerActionManager {
             // 填充潜影盒
             case FILL -> FakePlayerFill.fill((FillContext) function.getActionContext(), fakePlayer);
             // 在生存模式物品栏合成物品
-            case INVENTORY_CRAFT ->
+            case INVENTORY_CRAFTING ->
                     FakePlayerCraft.inventoryCraft((InventoryCraftContext) function.getActionContext(), fakePlayer);
             // 在工作台合成物品
             case CRAFTING_TABLE_CRAFT ->

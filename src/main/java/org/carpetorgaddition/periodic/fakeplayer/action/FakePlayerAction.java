@@ -31,7 +31,7 @@ public enum FakePlayerAction {
     /**
      * 在生存模式物品栏合成物品
      */
-    INVENTORY_CRAFT("carpet.commands.playerAction.action.inventory_craft"),
+    INVENTORY_CRAFTING("carpet.commands.playerAction.action.inventory_craft"),
     /**
      * 自动重命名物品
      */
@@ -85,7 +85,7 @@ public enum FakePlayerAction {
             case SORTING -> SortingContext.class;
             case CLEAN -> CleanContext.class;
             case FILL -> FillContext.class;
-            case INVENTORY_CRAFT -> InventoryCraftContext.class;
+            case INVENTORY_CRAFTING -> InventoryCraftContext.class;
             case CRAFTING_TABLE_CRAFT -> CraftingTableCraftContext.class;
             case RENAME -> RenameContext.class;
             case STONECUTTING -> StonecuttingContext.class;
@@ -111,7 +111,7 @@ public enum FakePlayerAction {
             case CLEAN -> "清空潜影盒";
             case FILL -> "填充潜影盒";
             case CRAFTING_TABLE_CRAFT -> "在工作台合成物品";
-            case INVENTORY_CRAFT -> "在生存模式物品栏合成物品";
+            case INVENTORY_CRAFTING -> "在生存模式物品栏合成物品";
             case RENAME -> "重命名";
             case STONECUTTING -> "切石";
             case TRADE -> "交易";

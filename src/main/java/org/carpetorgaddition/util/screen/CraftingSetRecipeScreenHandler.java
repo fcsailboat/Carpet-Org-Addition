@@ -65,13 +65,13 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
     private void setCraftAction(Item[] items, FakePlayerActionManager actionManager) {
         // 如果能在2x2合成格中合成，优先使用2x2
         if (canInventoryCraft(items, 0, 1, 2, 5, 8)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 3, 4, 6, 7));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 3, 4, 6, 7));
         } else if (canInventoryCraft(items, 0, 3, 6, 7, 8)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 1, 2, 4, 5));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 1, 2, 4, 5));
         } else if (canInventoryCraft(items, 2, 5, 6, 7, 8)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 0, 1, 3, 4));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 0, 1, 3, 4));
         } else if (canInventoryCraft(items, 0, 1, 2, 3, 6)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 4, 5, 7, 8));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 4, 5, 7, 8));
         } else {
             //将假玩家动作设置为3x3合成
             ItemStackPredicate[] predicates = new ItemStackPredicate[9];

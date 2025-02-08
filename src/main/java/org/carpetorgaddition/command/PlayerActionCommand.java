@@ -172,7 +172,7 @@ public class PlayerActionCommand {
         FakePlayerActionManager actionManager = prepareTheCrafting(context);
         ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
         actionManager.setAction(
-                FakePlayerAction.INVENTORY_CRAFT,
+                FakePlayerAction.INVENTORY_CRAFTING,
                 new InventoryCraftContext(fillArray(predicate, new ItemStackPredicate[4], false))
         );
         return 1;
@@ -183,7 +183,7 @@ public class PlayerActionCommand {
         FakePlayerActionManager actionManager = prepareTheCrafting(context);
         ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
         actionManager.setAction(
-                FakePlayerAction.INVENTORY_CRAFT,
+                FakePlayerAction.INVENTORY_CRAFTING,
                 new InventoryCraftContext(fillArray(predicate, new ItemStackPredicate[4], true))
         );
         return 1;
@@ -197,7 +197,7 @@ public class PlayerActionCommand {
             // 获取每一个合成材料
             items[i - 1] = new ItemStackPredicate(context, "item" + i);
         }
-        actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, new InventoryCraftContext(items));
+        actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, new InventoryCraftContext(items));
         return 1;
     }
 

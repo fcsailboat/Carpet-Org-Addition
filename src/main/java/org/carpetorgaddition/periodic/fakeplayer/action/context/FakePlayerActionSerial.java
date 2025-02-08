@@ -42,7 +42,7 @@ public class FakePlayerActionSerial {
                         case CLEAN -> CleanContext.load(jsonObject);
                         case FILL -> FillContext.load(jsonObject);
                         case CRAFTING_TABLE_CRAFT -> CraftingTableCraftContext.load(jsonObject);
-                        case INVENTORY_CRAFT -> InventoryCraftContext.load(jsonObject);
+                        case INVENTORY_CRAFTING -> InventoryCraftContext.load(jsonObject);
                         case RENAME -> RenameContext.load(jsonObject);
                         case STONECUTTING -> StonecuttingContext.load(jsonObject);
                         case TRADE -> TradeContext.load(jsonObject);
