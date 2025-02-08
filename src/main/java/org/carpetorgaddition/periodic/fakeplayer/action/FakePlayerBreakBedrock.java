@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -161,7 +162,6 @@ public class FakePlayerBreakBedrock {
      * @return 是否放置成功
      */
     private static StepResult placePiston(EntityPlayerMPFake fakePlayer, BlockPos bedrockPos) {
-        // TODO 放置时检查是否与实体相交
         World world = fakePlayer.getWorld();
         BlockPos up = bedrockPos.up(1);
         BlockState blockState = world.getBlockState(up);
@@ -191,8 +191,10 @@ public class FakePlayerBreakBedrock {
                 return StepResult.CONTINUE;
             }
             // 放置活塞
-            placePiston(fakePlayer, bedrockPos, Direction.UP);
-            return StepResult.CONTINUE;
+            if (placePiston(fakePlayer, bedrockPos, Direction.UP).isAccepted()) {
+                return StepResult.CONTINUE;
+            }
+            return StepResult.COMPLETION;
         } else if (canMine(fakePlayer, blockState, world, up)) {
             return tickBreakBlock(breakManager, up);
         } else {
@@ -205,12 +207,19 @@ public class FakePlayerBreakBedrock {
             return true;
         }
         boolean isPiston = blockState.isOf(Blocks.PISTON);
+        // 允许破坏方向不正确的活塞
+        if (isPiston && blockState.get(PistonBlock.FACING).getAxis() != Direction.Axis.Y) {
+            return true;
+        }
         // 允许破坏浮空的活塞
         if (isPiston && !world.getBlockState(blockPos.down()).isOf(Blocks.BEDROCK)) {
             return true;
         }
-        // TODO 允许破坏不在侧面的拉杆和方向不正确的活塞
-        if (blockState.isOf(Blocks.LEVER) || isPiston || blockState.isOf(Blocks.PISTON_HEAD)) {
+        // 允许破坏没有附着在方块侧面的拉杆
+        if (blockState.isOf(Blocks.LEVER)) {
+            return blockState.get(LeverBlock.FACE) != BlockFace.WALL;
+        }
+        if (isPiston || blockState.isOf(Blocks.PISTON_HEAD)) {
             return false;
         }
         return blockState.getHardness(world, blockPos) != -1 && BlockBreakManager.canBreak(fakePlayer, blockPos);
@@ -229,8 +238,7 @@ public class FakePlayerBreakBedrock {
         for (Direction value : MathUtils.HORIZONTAL) {
             BlockPos offset = bedrockPos.offset(value);
             BlockState blockState = world.getBlockState(offset);
-            // TODO 改为可替换方块
-            if (blockState.isAir()) {
+            if (blockState.isAir() || blockState.isIn(BlockTags.REPLACEABLE)) {
                 direction = value;
                 continue;
             }
@@ -323,8 +331,9 @@ public class FakePlayerBreakBedrock {
                     // 继续挖掘，此时活塞应该会挖掘完毕
                     breakBlock(breakManager, up, false);
                     // 放置一个朝下的活塞，这个活塞会破坏掉基岩
-                    placePiston(fakePlayer, bedrockPos, Direction.DOWN);
-                    return StepResult.COMPLETION;
+                    if (placePiston(fakePlayer, bedrockPos, Direction.DOWN).isAccepted()) {
+                        return StepResult.COMPLETION;
+                    }
                 }
                 return StepResult.COMPLETION;
             }
@@ -453,14 +462,14 @@ public class FakePlayerBreakBedrock {
     /**
      * 放置活塞
      */
-    private static void placePiston(EntityPlayerMPFake fakePlayer, BlockPos bedrockPos, Direction direction) {
+    private static ActionResult placePiston(EntityPlayerMPFake fakePlayer, BlockPos bedrockPos, Direction direction) {
         ServerPlayerInteractionManager interactionManager = fakePlayer.interactionManager;
         // 看向与活塞相反的方向
         FakePlayerUtils.look(fakePlayer, direction.getOpposite());
         FakePlayerUtils.replenishment(fakePlayer, Hand.OFF_HAND, itemStack -> itemStack.isOf(Items.PISTON));
         // 放置活塞
         BlockHitResult hitResult = new BlockHitResult(Vec3d.ofCenter(bedrockPos, 1.0), direction, bedrockPos.up(), false);
-        interactionManager.interactBlock(fakePlayer, fakePlayer.getWorld(), fakePlayer.getOffHandStack(), Hand.OFF_HAND, hitResult);
+        return interactionManager.interactBlock(fakePlayer, fakePlayer.getWorld(), fakePlayer.getOffHandStack(), Hand.OFF_HAND, hitResult);
     }
 
     /**
