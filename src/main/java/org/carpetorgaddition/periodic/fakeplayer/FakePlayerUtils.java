@@ -183,6 +183,7 @@ public class FakePlayerUtils {
      * @apiNote 请勿在工作台输出槽中使用此方法丢弃物品
      */
     public static void loopThrowItem(ScreenHandler screenHandler, int slotIndex, EntityPlayerMPFake player) {
+        InventoryUtils.assertEmptyStack(screenHandler.getCursorStack());
         while (screenHandler.getSlot(slotIndex).hasStack() && screenHandler.getSlot(slotIndex).canTakeItems(player)) {
             screenHandler.onSlotClick(slotIndex, THROW_Q, SlotActionType.THROW, player);
         }

@@ -30,6 +30,7 @@ public class FakePlayerTrade {
     public static final int TRADE_WAIT_TIME = 1;
 
     //假玩家交易
+    // TODO 交易物品错误
     public static void trade(TradeContext context, EntityPlayerMPFake fakePlayer) {
         //获取按钮的索引
         int index = context.getIndex();
@@ -146,20 +147,21 @@ public class FakePlayerTrade {
     ) {
         DefaultedList<Slot> list = merchantScreenHandler.slots;
         // 获取交易槽上的物品
-        ItemStack slotItem = merchantScreenHandler.getSlot(slotIndex).getStack();
+        Slot tradeSlot = merchantScreenHandler.getSlot(slotIndex);
         // 如果交易槽上的物品不是需要的物品，就丢弃槽位中的物品
-        if (!slotItem.isOf(buyItem.getItem())) {
+        if (!tradeSlot.getStack().isOf(buyItem.getItem())) {
             FakePlayerUtils.throwItem(merchantScreenHandler, slotIndex, fakePlayer);
         }
         // 如果交易所需的物品为空，或者槽位的物品已经是所需的物品，直接跳过该物品
-        if (buyItem.isEmpty() || slotItemCanTrade(slotItem, buyItem)) {
+        if (buyItem.isEmpty() || slotItemCanTrade(tradeSlot.getStack(), buyItem)) {
             return true;
         }
         // 将物品移动到交易槽位
+        // 从物品栏寻找物品
         for (int index = 3; index < list.size(); index++) {
             // 获取当前槽位上的物品
             ItemStack itemStack = list.get(index).getStack();
-            Predicate<ItemStack> predicate = getStackPredicate(buyItem, slotItem, itemStack);
+            Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlot.getStack());
             if (predicate.test(itemStack)) {
                 // 如果匹配，将当前物品移动到交易槽位
                 if (FakePlayerUtils.withKeepPickupAndMoveItemStack(merchantScreenHandler, index, slotIndex, fakePlayer)) {
@@ -167,39 +169,51 @@ public class FakePlayerTrade {
                     if (!merchantScreenHandler.getCursorStack().isEmpty()) {
                         FakePlayerUtils.pickupCursorStack(merchantScreenHandler, index, fakePlayer);
                     }
-                    // 交易槽位物品的地址值可能发生变化，不能直接使用slotItem对象，需要重新获取
-                    slotItem = merchantScreenHandler.getSlot(slotIndex).getStack();
-                    if (slotItemCanTrade(slotItem, buyItem)) {
+                    if (slotItemCanTrade(tradeSlot.getStack(), buyItem)) {
                         return true;
                     }
                 }
-            } else if (CarpetOrgAdditionSettings.fakePlayerCraftPickItemFromShulkerBox && InventoryUtils.isShulkerBoxItem(itemStack)) {
-                // 从潜影盒提取物品
-                ItemStack contentItemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, predicate);
-                if (contentItemStack.isEmpty()) {
-                    continue;
+            }
+        }
+        // 从潜影盒寻找物品
+        if (CarpetOrgAdditionSettings.fakePlayerCraftPickItemFromShulkerBox) {
+            // 从潜影盒寻找物品
+            for (int index = 3; index < list.size(); index++) {
+                // 用来交易的物品还差多少个满一组
+                int difference = tradeSlot.getStack().getMaxCount() - tradeSlot.getStack().getCount();
+                // 获取当前槽位上的物品
+                ItemStack itemStack = list.get(index).getStack();
+                Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlot.getStack());
+                if (InventoryUtils.isShulkerBoxItem(itemStack)) {
+                    // 从潜影盒提取物品
+                    ItemStack contentItemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, predicate, difference);
+                    if (contentItemStack.isEmpty()) {
+                        continue;
+                    }
+                    // 丢弃光标上的物品（如果有）
+                    FakePlayerUtils.dropCursorStack(merchantScreenHandler, fakePlayer);
+                    // 将光标上的物品设置为从潜影盒中取出来的物品
+                    merchantScreenHandler.setCursorStack(contentItemStack);
+                    // 将光标上的物品放在交易槽位上
+                    FakePlayerUtils.pickupCursorStack(merchantScreenHandler, slotIndex, fakePlayer);
+                    if (slotItemCanTrade(tradeSlot.getStack(), buyItem)) {
+                        return true;
+                    }
                 }
-                // 丢弃光标上的物品（如果有）
-                FakePlayerUtils.dropCursorStack(merchantScreenHandler, fakePlayer);
-                // 将光标上的物品设置为从潜影盒中取出来的物品
-                merchantScreenHandler.setCursorStack(contentItemStack);
-                // 将光标上的物品放在合成方格的槽位上
-                FakePlayerUtils.pickupCursorStack(merchantScreenHandler, slotIndex, fakePlayer);
-                return true;
             }
         }
         // 假玩家身上没有足够的物品用来交易，返回false
         return false;
     }
 
-    private static Predicate<ItemStack> getStackPredicate(ItemStack buyItem, final ItemStack slotItem, ItemStack itemStack) {
+    private static Predicate<ItemStack> getStackPredicate(ItemStack buyItem, final ItemStack slotItem) {
         Predicate<ItemStack> predicate;
         if (slotItem.isEmpty()) {
             // 将当前物品直接与村民需要的交易物品进行比较，不比较NBT
             predicate = stack -> buyItem.isOf(stack.getItem());
         } else {
             // 交易槽位上有物品，将当前物品与交易槽上的物品比较，同时比较物品NBT
-            predicate = stack -> ItemStack.areItemsAndComponentsEqual(slotItem, itemStack);
+            predicate = stack -> ItemStack.areItemsAndComponentsEqual(slotItem, stack);
         }
         return predicate;
     }
