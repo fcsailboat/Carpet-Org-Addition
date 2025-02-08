@@ -29,12 +29,11 @@ public class FakePlayerTrade {
      */
     public static final int TRADE_WAIT_TIME = 1;
 
-    //假玩家交易
-    // TODO 交易物品错误
+    // 假玩家交易
     public static void trade(TradeContext context, EntityPlayerMPFake fakePlayer) {
-        //获取按钮的索引
+        // 获取按钮的索引
         int index = context.getIndex();
-        //判断当前打开的GUI是否为交易界面
+        // 判断当前打开的GUI是否为交易界面
         if (fakePlayer.currentScreenHandler instanceof MerchantScreenHandler merchantScreenHandler) {
             boolean voidTrade = context.isVoidTrade();
             // 获取计数器，记录村民距离上次被加载的时间是否超过了5游戏刻（区块卸载后村民似乎不会立即卸载）
@@ -101,8 +100,10 @@ public class FakePlayerTrade {
             // 填充交易槽位
             if (switchItem(fakePlayer, merchantScreenHandler, tradeOffer)) {
                 // 判断输出槽是否有物品，如果有，丢出物品，否则停止交易，结束方法
-                if (merchantScreenHandler.getSlot(2).hasStack()) {
-                    FakePlayerUtils.loopThrowItem(merchantScreenHandler, 2, fakePlayer);
+                Slot outputSlot = merchantScreenHandler.getSlot(2);
+                // 假玩家可能交易出其他交易选项的物品，请参阅：https://bugs.mojang.com/browse/MC-215441
+                if (outputSlot.hasStack()) {
+                    FakePlayerUtils.compareAndThrow(merchantScreenHandler, 2, tradeOffer.getSellItem(), fakePlayer);
                     if (CarpetOrgAdditionSettings.villagerInfiniteTrade
                             && CarpetOrgAdditionSettings.fakePlayerMaxCraftCount > 0
                             && loopCount >= CarpetOrgAdditionSettings.fakePlayerMaxCraftCount) {

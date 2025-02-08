@@ -182,9 +182,37 @@ public class FakePlayerUtils {
      * @param player        当前操作该GUI的玩家
      * @apiNote 请勿在工作台输出槽中使用此方法丢弃物品
      */
+    @SuppressWarnings("unused")
     public static void loopThrowItem(ScreenHandler screenHandler, int slotIndex, EntityPlayerMPFake player) {
+        // 如果光标不为空，那么将无法丢弃槽位上的物品
         InventoryUtils.assertEmptyStack(screenHandler.getCursorStack());
-        while (screenHandler.getSlot(slotIndex).hasStack() && screenHandler.getSlot(slotIndex).canTakeItems(player)) {
+        Slot slot = screenHandler.getSlot(slotIndex);
+        Item item = slot.getStack().getItem();
+        while (true) {
+            ItemStack itemStack = slot.getStack();
+            if (itemStack.isEmpty()) {
+                return;
+            }
+            if (itemStack.isOf(item) && slot.canTakeItems(player)) {
+                screenHandler.onSlotClick(slotIndex, THROW_Q, SlotActionType.THROW, player);
+                continue;
+            }
+            return;
+        }
+    }
+
+    /**
+     * 比较并丢出槽位物品<br/>
+     * 如果槽位上的物品与预期物品相同，则丢出槽位上的物品
+     *
+     * @apiNote 本方法用来丢弃村民交易槽位上的物品
+     * @see <a href="https://bugs.mojang.com/browse/MC-157977">MC-157977</a>
+     * @see <a href="https://bugs.mojang.com/browse/MC-215441">MC-215441</a>
+     */
+    public static void compareAndThrow(ScreenHandler screenHandler, int slotIndex, ItemStack itemStack, EntityPlayerMPFake player) {
+        InventoryUtils.assertEmptyStack(screenHandler.getCursorStack());
+        Slot slot = screenHandler.getSlot(slotIndex);
+        while (slot.hasStack() && ItemStack.areItemsAndComponentsEqual(itemStack, slot.getStack()) && slot.canTakeItems(player)) {
             screenHandler.onSlotClick(slotIndex, THROW_Q, SlotActionType.THROW, player);
         }
     }
