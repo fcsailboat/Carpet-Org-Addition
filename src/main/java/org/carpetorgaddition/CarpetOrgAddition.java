@@ -57,6 +57,7 @@ public class CarpetOrgAddition implements ModInitializer {
      */
     @Override
     public void onInitialize() {
+        // TODO 子命令权限，可配置的规则管理器
         CarpetServer.manageExtension(new CarpetOrgAdditionExtension());
         // 注册网络数据包
         NetworkS2CPacketRegister.register();
