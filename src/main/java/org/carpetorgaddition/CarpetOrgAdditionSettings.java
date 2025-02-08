@@ -464,8 +464,8 @@ public class CarpetOrgAdditionSettings {
     public static boolean limitPhantomSpawn = false;
 
     // 立即应用工具效果
-    // TODO 隐藏此规则
-    @Rule(categories = {ORG, RuleCategory.BUGFIX})
+    @Hidden
+    @Rule(categories = {ORG, Hidden, RuleCategory.BUGFIX})
     public static boolean applyToolEffectsImmediately = false;
 
     // 强制补货
