@@ -8,7 +8,6 @@ import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -105,8 +104,8 @@ public final class ImmutableInventory extends SimpleInventory implements Iterabl
 
     @NotNull
     @Override
-    public Iterator<ItemStack> iterator() {
-        return new Iterator<>() {
+    public java.util.Iterator<ItemStack> iterator() {
+        return new java.util.Iterator<>() {
             // 要返回的下一个元素的索引
             private int cursor = 0;
 

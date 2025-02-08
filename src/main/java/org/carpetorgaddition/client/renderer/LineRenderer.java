@@ -6,6 +6,7 @@ import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
+import org.carpetorgaddition.client.util.ClientRenderUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
@@ -49,7 +50,7 @@ public class LineRenderer {
         RenderSystem.lineWidth(3F);
         //noinspection resource
         RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        ClientRenderUtils.drawWithGlobalProgram(bufferBuilder.end());
         RenderSystem.lineWidth(1F);
         RenderSystem.depthMask(true);
         RenderSystem.disableBlend();

@@ -10,6 +10,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
+import org.carpetorgaddition.client.util.ClientRenderUtils;
 import org.joml.Matrix4f;
 
 import java.util.Objects;
@@ -51,7 +52,7 @@ public class BlockOutlineRender {
         RenderSystem.enableDepthTest();
         //noinspection resource
         RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        ClientRenderUtils.drawWithGlobalProgram(bufferBuilder.end());
         RenderSystem.disableDepthTest();
         matrixStack.pop();
     }

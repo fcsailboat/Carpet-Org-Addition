@@ -8,7 +8,6 @@ import org.carpetorgaddition.util.InventoryUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -105,11 +104,11 @@ public class AutoGrowInventory implements Inventory, Iterable<ItemStack> {
 
     @NotNull
     @Override
-    public Iterator<ItemStack> iterator() {
+    public java.util.Iterator<ItemStack> iterator() {
         return new AutoGrowInventoryIterator();
     }
 
-    private class AutoGrowInventoryIterator implements Iterator<ItemStack> {
+    private class AutoGrowInventoryIterator implements java.util.Iterator<ItemStack> {
         private int index = 0;
         private final int expectedGrowCount = AutoGrowInventory.this.growCount;
 

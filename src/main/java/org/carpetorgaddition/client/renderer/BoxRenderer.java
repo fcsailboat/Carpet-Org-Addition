@@ -7,6 +7,7 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import org.carpetorgaddition.client.util.ClientRenderUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
@@ -78,7 +79,7 @@ public class BoxRenderer {
         this.drawFillBox(bufferBuilder, matrix4f, minX, minY, minZ, maxX, maxY, maxZ);
         //noinspection resource
         RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        ClientRenderUtils.drawWithGlobalProgram(bufferBuilder.end());
         RenderSystem.depthMask(true);
         if (this.seeThroughLine) {
             // 允许填充框透过方块渲染
@@ -94,7 +95,7 @@ public class BoxRenderer {
         RenderSystem.lineWidth(2F);
         //noinspection resource
         RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
-        BufferRenderer.drawWithGlobalProgram(builder.end());
+        ClientRenderUtils.drawWithGlobalProgram(builder.end());
         // 将框线改回原本的粗细
         RenderSystem.lineWidth(1F);
         // 启用剔除

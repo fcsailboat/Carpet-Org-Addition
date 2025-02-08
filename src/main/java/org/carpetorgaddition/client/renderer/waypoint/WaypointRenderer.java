@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.client.renderer.WorldRenderer;
 import org.carpetorgaddition.client.util.ClientMessageUtils;
+import org.carpetorgaddition.client.util.ClientRenderUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.WorldUtils;
 import org.jetbrains.annotations.Nullable;
@@ -138,7 +139,7 @@ public class WaypointRenderer implements WorldRenderer {
         RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX);
         RenderSystem.setShaderTexture(0, renderType.getIcon());
         // 将缓冲区绘制到屏幕上。
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        ClientRenderUtils.drawWithGlobalProgram(bufferBuilder.end());
         tessellator.clear();
         // 如果准星正在指向路径点，显示文本
         if (pointerPointing(camera, target)) {

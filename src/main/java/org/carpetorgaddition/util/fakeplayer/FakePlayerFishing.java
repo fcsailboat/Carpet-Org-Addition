@@ -57,7 +57,7 @@ public class FakePlayerFishing {
         }
         // 从物品栏拿取钓鱼竿
         PlayerInventory inventory = fakePlayer.getInventory();
-        for (int i = 0; i < inventory.main.size(); i++) {
+        for (int i = 0; i < inventory.getMainStacks().size(); i++) {
             if (inventory.getStack(i).isOf(Items.FISHING_ROD)) {
                 // 将非钓鱼竿物品放入主手
                 inventory.swapSlotWithHotbar(i);
@@ -78,7 +78,7 @@ public class FakePlayerFishing {
         }
         PlayerInventory inventory = fakePlayer.getInventory();
         // 查找物品栏内的非钓鱼竿物品
-        for (int i = 0; i < inventory.main.size(); i++) {
+        for (int i = 0; i < inventory.getMainStacks().size(); i++) {
             ItemStack itemStack = inventory.getStack(i);
             // 其它钓鱼竿物品不能与主手物品切换
             if (itemStack.isOf(Items.FISHING_ROD)) {
