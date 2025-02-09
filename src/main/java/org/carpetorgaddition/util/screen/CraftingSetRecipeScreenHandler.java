@@ -8,11 +8,11 @@ import net.minecraft.item.Items;
 import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
-import org.carpetorgaddition.periodic.PeriodicTaskUtils;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerAction;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerActionManager;
-import org.carpetorgaddition.periodic.fakeplayer.actioncontext.CraftingTableCraftContext;
-import org.carpetorgaddition.periodic.fakeplayer.actioncontext.InventoryCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.action.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
+import org.carpetorgaddition.periodic.fakeplayer.action.context.CraftingTableCraftContext;
+import org.carpetorgaddition.periodic.fakeplayer.action.context.InventoryCraftContext;
+import org.carpetorgaddition.util.GenericFetcherUtils;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 
 public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implements UnavailableSlotSyncInterface {
@@ -52,7 +52,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
             items[i] = craftingInventory.getStack(i).getItem();
         }
         // 设置假玩家合成动作
-        setCraftAction(items, PeriodicTaskUtils.getFakePlayerActionManager(fakePlayer));
+        setCraftAction(items, GenericFetcherUtils.getFakePlayerActionManager(fakePlayer));
         // 关闭GUI后，使用父类的方法让物品回到玩家背包
         super.onClosed(player);
     }
@@ -61,13 +61,13 @@ public class CraftingSetRecipeScreenHandler extends CraftingScreenHandler implem
     private void setCraftAction(Item[] items, FakePlayerActionManager actionManager) {
         // 如果能在2x2合成格中合成，优先使用2x2
         if (canInventoryCraft(items, 0, 1, 2, 5, 8)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 3, 4, 6, 7));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 3, 4, 6, 7));
         } else if (canInventoryCraft(items, 0, 3, 6, 7, 8)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 1, 2, 4, 5));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 1, 2, 4, 5));
         } else if (canInventoryCraft(items, 2, 5, 6, 7, 8)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 0, 1, 3, 4));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 0, 1, 3, 4));
         } else if (canInventoryCraft(items, 0, 1, 2, 3, 6)) {
-            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFT, createData(items, 4, 5, 7, 8));
+            actionManager.setAction(FakePlayerAction.INVENTORY_CRAFTING, createData(items, 4, 5, 7, 8));
         } else {
             //将假玩家动作设置为3x3合成
             ItemStackPredicate[] predicates = new ItemStackPredicate[9];

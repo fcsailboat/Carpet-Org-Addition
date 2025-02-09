@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.logger.LoggerNames;
@@ -65,7 +66,12 @@ public abstract class BeaconBlockEntityMixin {
     private static void sendBoxUpdate(World world, BlockPos pos, BeaconRangeBox beaconRangeBox) {
         int viewDistance = world.getServer().getPlayerManager().getViewDistance();
         for (PlayerEntity player : world.getPlayers()) {
-            if (player instanceof EntityPlayerMPFake || pos.toCenterPos().distanceTo(player.getPos()) > viewDistance * 16) {
+            Vec3d playerPos = player.getPos();
+            Vec3d blockPos = pos.toCenterPos();
+            double x = playerPos.getX() - blockPos.getX();
+            double z = playerPos.getZ() - blockPos.getZ();
+            double sqrt = Math.sqrt(x * x + z * z);
+            if (player instanceof EntityPlayerMPFake || sqrt > viewDistance * 16) {
                 continue;
             }
             if (player instanceof ServerPlayerEntity serverPlayerEntity) {

@@ -62,6 +62,30 @@ public class SelectionArea implements Iterable<BlockPos> {
     }
 
     /**
+     * @return 改选区是否包含指定位置
+     */
+    public boolean contains(BlockPos blockPos) {
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();
+        return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY && z >= this.minZ && z <= this.maxZ;
+    }
+
+    /**
+     * @return XYZ轴正方向最大的方块坐标
+     */
+    public BlockPos getMaxBlockPos() {
+        return new BlockPos(this.maxX, this.maxY, this.maxZ);
+    }
+
+    /**
+     * @return XYZ轴正方向最小的方块坐标
+     */
+    public BlockPos getMinBlockPos() {
+        return new BlockPos(this.minX, this.minY, this.minZ);
+    }
+
+    /**
      * 类对象是不可变的，因此不需要考虑并发修改的问题
      */
     @NotNull

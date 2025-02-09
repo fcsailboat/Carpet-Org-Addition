@@ -15,6 +15,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.exception.TaskExecutionException;
 import org.carpetorgaddition.periodic.task.ServerTask;
@@ -191,14 +192,14 @@ public class ItemFindTask extends ServerTask {
             itemCount = this.shulkerBox ? TextUtils.toItalic(countText) : countText;
         }
         int size = this.results.size();
-        if (size > FinderCommand.MAX_FEEDBACK_COUNT) {
+        if (size > CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount) {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find.limit",
-                    size, itemCount, predicate.toText(), FinderCommand.MAX_FEEDBACK_COUNT);
+                    size, itemCount, predicate.toText(), CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount);
         } else {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.item.find",
                     size, itemCount, predicate.toText());
         }
-        for (int i = 0; i < size && i <= FinderCommand.MAX_FEEDBACK_COUNT; i++) {
+        for (int i = 0; i < size && i < CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount; i++) {
             MutableText message = this.results.get(i).toText();
             MessageUtils.sendMessage(this.context.getSource(), message);
         }

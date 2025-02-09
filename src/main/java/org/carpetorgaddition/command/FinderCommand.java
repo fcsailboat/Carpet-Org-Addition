@@ -45,11 +45,6 @@ public class FinderCommand {
      */
     public static final int MAXIMUM_STATISTICAL_COUNT = 30000;
     /**
-     * 最大反馈消息数量
-     */
-    // TODO 改为规则控制
-    public static final int MAX_FEEDBACK_COUNT = 10;
-    /**
      * 每个游戏刻最大查找时间
      */
     public static final long MAX_FIND_TIME = 200;

@@ -145,20 +145,21 @@ public class BlockBreakManager {
      */
     public int getCurrentBreakingTime(BlockPos blockPos) {
         World world = this.player.getWorld();
-        if (this.currentBreakingPos == null || this.currentBreakingPos.equals(blockPos)) {
-            if (this.player.isCreative()) {
-                return 1;
-            }
-            BlockState blockState = world.getBlockState(blockPos);
-            float delta = blockState.calcBlockBreakingDelta(this.player, world, blockPos);
-            return (int) Math.ceil((1F - this.currentBreakingProgress) / delta);
+        if (this.player.isCreative()) {
+            return 1;
         }
-        return -1;
+        BlockState blockState = world.getBlockState(blockPos);
+        float delta = blockState.calcBlockBreakingDelta(this.player, world, blockPos);
+        return (int) Math.ceil((1F - this.currentBreakingProgress) / delta);
     }
 
     private void breakingAction(Action action, BlockPos blockPos, Direction direction) {
         World world = this.player.getWorld();
         this.player.interactionManager.processBlockBreakingAction(blockPos, action, direction, world.getTopYInclusive(), -1);
+    }
+
+    public EntityPlayerMPFake getPlayer() {
+        return this.player;
     }
 
     /**
@@ -184,10 +185,8 @@ public class BlockBreakManager {
                 return true;
             }
             // 非创造玩家无法破坏硬度为-1的方块
-            if (blockState.getHardness(world, blockPos) == -1) {
-                return false;
-            }
+            return blockState.getHardness(world, blockPos) != -1;
         }
-        return false;
+        return true;
     }
 }
