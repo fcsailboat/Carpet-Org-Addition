@@ -10,7 +10,6 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.SlotActionType;
 import org.carpetorgaddition.periodic.fakeplayer.action.FakePlayerAction;
 import org.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
-import org.carpetorgaddition.periodic.fakeplayer.FakePlayerCraftRecipeInterface;
 import org.carpetorgaddition.periodic.fakeplayer.action.context.CraftingTableCraftContext;
 import org.carpetorgaddition.periodic.fakeplayer.action.context.InventoryCraftContext;
 import org.carpetorgaddition.util.GenericFetcherUtils;

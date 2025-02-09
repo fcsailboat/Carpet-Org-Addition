@@ -1,6 +1,6 @@
 package org.carpetorgaddition.util.constant;
 
-import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import org.carpetorgaddition.util.TextUtils;
 
 @SuppressWarnings("unused")
