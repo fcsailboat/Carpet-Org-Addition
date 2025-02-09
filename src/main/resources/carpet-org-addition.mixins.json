@@ -103,8 +103,8 @@
   ],
   "client": [
     "debug.ScreenAccessor",
-    "network.backgroundspritesync.SlotMixin",
-    "network.unavailableslotsync.ScreenHandlerMixin",
+    "network.SlotMixin",
+    "network.ScreenHandlerMixin",
     "rule.client.carpet.SettingsManagerMixin"
   ],
   "injectors": {

@@ -50,6 +50,43 @@ public class InventoryUtils {
     }
 
     /**
+     * 从潜影盒中取出指定数量的物品
+     *
+     * @return 从潜影盒中取出的物品
+     */
+    @CheckReturnValue
+    public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
+        if (count <= 0) {
+            return ItemStack.EMPTY;
+        }
+        // 将潜影盒内的物品栏组件替换为该组件的深拷贝副本
+        InventoryUtils.deepCopyContainer(shulkerBox);
+        ContainerComponent component = shulkerBox.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT);
+        ItemStack itemStack = ItemStack.EMPTY;
+        for (ItemStack stack : component.iterateNonEmpty()) {
+            if (itemStack.isEmpty()) {
+                if (predicate.test(stack)) {
+                    itemStack = stack.split(count);
+                    // 如果count为65，而物品最大堆叠数为64，那么取出的物品数量将超过最大值
+                    // 因此在这里限制一下count的值
+                    count = Math.min(itemStack.getMaxCount(), count) - itemStack.getCount();
+                }
+            } else if (ItemStack.areItemsAndComponentsEqual(itemStack, stack)) {
+                ItemStack split = stack.split(count);
+                count -= split.getCount();
+                itemStack.increment(split.getCount());
+            }
+            if (count == 0) {
+                break;
+            }
+            if (count < 0) {
+                throw new IllegalStateException();
+            }
+        }
+        return itemStack;
+    }
+
+    /**
      * 获取潜影盒中指定物品，并让这个物品执行一个函数，然后将执行函数前的物品返回
      *
      * @param predicate 匹配物品的谓词

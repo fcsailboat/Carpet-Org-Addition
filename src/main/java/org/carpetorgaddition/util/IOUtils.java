@@ -48,6 +48,27 @@ public class IOUtils {
     }
 
     /**
+     * 如果一个文件不存在，则创建，如果这个文件的父级也不存在则同时创建
+     *
+     * @return 是否创建成功
+     */
+    public static boolean createFileIfNotExists(File file) {
+        if (file.isFile()) {
+            return true;
+        }
+        File parent = file.getParentFile();
+        // 如果父级路径不存在则创建
+        if (parent.isDirectory() || parent.mkdirs()) {
+            try {
+                return file.createNewFile();
+            } catch (IOException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
      * json对象中是否包含指定元素
      *
      * @param elements 一个字符串数组，数组中只要有一个元素不存在于json中方法就返回false

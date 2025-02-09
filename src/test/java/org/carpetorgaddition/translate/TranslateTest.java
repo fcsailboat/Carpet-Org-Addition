@@ -43,8 +43,8 @@ public class TranslateTest {
             }
             notRuleKey.add(key);
         }
-        // 删除carpet.category.ORG，因为它在源码中没有被直接使用
-        notRuleKey.remove("carpet.category.ORG");
+        // 删除carpet.category.Org，因为它在源码中没有被直接使用
+        notRuleKey.remove("carpet.category.Org");
         notRuleKey.remove("carpet.category.Hidden");
     }
 

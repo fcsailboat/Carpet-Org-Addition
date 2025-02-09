@@ -1,6 +1,7 @@
 package org.carpetorgaddition.rule.validator;
 
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import org.carpetorgaddition.util.constant.RuleValidatorConstants;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +16,7 @@ public class BedrockHardnessValidator extends AbstractValidator<Float> {
     }
 
     @Override
-    public @NotNull MutableText errorMessage() {
+    public @NotNull Text errorMessage() {
         return RuleValidatorConstants.greaterThanOrEqualOrNumber(0, -1);
     }
 }

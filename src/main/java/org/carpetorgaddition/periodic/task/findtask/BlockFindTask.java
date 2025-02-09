@@ -7,6 +7,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
+import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.exception.TaskExecutionException;
 import org.carpetorgaddition.periodic.task.ServerTask;
@@ -128,15 +129,15 @@ public class BlockFindTask extends ServerTask {
     protected void sendFeedback() {
         int count = this.results.size();
         MutableText name = this.blockPredicate.getName();
-        if (count <= FinderCommand.MAX_FEEDBACK_COUNT) {
-            MessageUtils.sendMessage(context.getSource(),
-                    "carpet.commands.finder.block.find", count, name);
-        } else {
+        if (count > CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount) {
             // 数量过多，只输出距离最近的前十个
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.finder.block.find.limit",
-                    count, name, FinderCommand.MAX_FEEDBACK_COUNT);
+                    count, name, CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount);
+        } else {
+            MessageUtils.sendMessage(context.getSource(),
+                    "carpet.commands.finder.block.find", count, name);
         }
-        for (int i = 0; i < this.results.size() && i < FinderCommand.MAX_FEEDBACK_COUNT; i++) {
+        for (int i = 0; i < this.results.size() && i < CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount; i++) {
             MessageUtils.sendMessage(context.getSource(), this.results.get(i).toText());
         }
         this.findState = FindState.END;

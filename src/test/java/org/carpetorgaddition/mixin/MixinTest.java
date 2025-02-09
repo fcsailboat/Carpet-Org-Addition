@@ -62,7 +62,7 @@ public class MixinTest {
     // 遍历文件夹
     private void traverse(File file) {
         // 如果是文件，检查类文件是否被声明，否则遍历文件夹
-        if (file.isFile()) {
+        if (file.isFile() && !"package-info.java".equals(file.getName())) {
             Assert.assertTrue("未声明的Mixin类：" + file.getPath(), this.mixinClass.contains(file));
         } else {
             File[] files = file.listFiles();

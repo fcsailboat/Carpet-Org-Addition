@@ -6,6 +6,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.exception.TaskExecutionException;
 import org.carpetorgaddition.periodic.task.ServerTask;
@@ -123,18 +124,18 @@ public abstract class AbstractTradeFindTask extends ServerTask {
         list.add(this.tradeCount);
         // 消息的翻译键
         String key;
-        if (this.results.size() > FinderCommand.MAX_FEEDBACK_COUNT) {
-            // 结果太多，限制只显示前10条
+        if (this.results.size() > CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount) {
+            // 结果太多，限制只显示前几条
             key = getResultLimitKey();
             // 需要限制数量的消息中多一个占位符
-            list.add(FinderCommand.MAX_FEEDBACK_COUNT);
+            list.add(CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount);
         } else {
             key = "carpet.commands.finder.trade.result";
         }
         // 发送消息：在周围找到了<交易选项数量>个出售<出售的物品名称>的<村民>或<流浪商人>
         MessageUtils.sendMessage(context.getSource(), key, list.toArray(Object[]::new));
         // 发送每一条（或前10条）结果
-        for (int i = 0; i < this.results.size() && i < FinderCommand.MAX_FEEDBACK_COUNT; i++) {
+        for (int i = 0; i < this.results.size() && i < CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount; i++) {
             MessageUtils.sendMessage(this.context.getSource(), this.results.get(i).toText());
         }
         this.findState = FindState.END;
