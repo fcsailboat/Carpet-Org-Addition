@@ -33,7 +33,6 @@ public class CarpetOrgAddition implements ModInitializer {
     /**
      * 模组当前的版本
      */
-    @SuppressWarnings("unused")
     public static final String VERSION = METADATA.getVersion().getFriendlyString();
     /**
      * 模组名称小写
@@ -57,7 +56,6 @@ public class CarpetOrgAddition implements ModInitializer {
      */
     @Override
     public void onInitialize() {
-        // TODO 子命令权限，可配置的规则管理器
         CarpetServer.manageExtension(new CarpetOrgAdditionExtension());
         // 注册网络数据包
         NetworkS2CPacketRegister.register();
