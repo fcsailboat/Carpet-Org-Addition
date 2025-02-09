@@ -30,7 +30,7 @@ public class DebugRuleRegistrar implements CarpetExtension {
     private DebugRuleRegistrar() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             this.settingsManager = new SettingsManager(
-                    FabricLoader.getInstance().getModContainer(CarpetOrgAddition.MOD_ID).orElseThrow().getMetadata().getVersion().getFriendlyString(),
+                    CarpetOrgAddition.VERSION,
                     "carpet-debug",
                     "CarpetOrgAdditionDebug"
             );

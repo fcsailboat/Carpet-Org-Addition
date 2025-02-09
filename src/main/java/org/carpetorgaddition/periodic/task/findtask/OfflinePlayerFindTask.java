@@ -13,6 +13,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.UserCache;
 import org.carpetorgaddition.CarpetOrgAddition;
+import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.periodic.task.ServerTask;
 import org.carpetorgaddition.util.MessageUtils;
@@ -178,16 +179,20 @@ public class OfflinePlayerFindTask extends ServerTask {
         if (this.predicate.canConvertItem()) {
             count = FinderCommand.showCount(this.predicate.asItem().getDefaultStack(), this.itemCount.get(), this.shulkerBox.get());
         } else {
-            count = TextUtils.createText(Integer.toString(this.itemCount.get()));
+            MutableText text = TextUtils.createText(Integer.toString(this.itemCount.get()));
+            if (this.shulkerBox.get()) {
+                text = TextUtils.toItalic(text);
+            }
+            count = text;
         }
-        if (this.list.size() > FinderCommand.MAX_FEEDBACK_COUNT) {
+        if (this.list.size() > CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount) {
             message = TextUtils.translate(
                     "carpet.commands.finder.item.offline_player.limit",
                     this.list.size(),
                     this.getInventoryName(),
                     count,
                     this.predicate.toText(),
-                    FinderCommand.MAX_FEEDBACK_COUNT
+                    CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount
             );
         } else {
             message = TextUtils.translate(
@@ -199,7 +204,7 @@ public class OfflinePlayerFindTask extends ServerTask {
             );
         }
         MessageUtils.sendMessage(this.context.getSource(), TextUtils.hoverText(message, hoverPrompt));
-        for (int i = 0; i < Math.min(this.list.size(), FinderCommand.MAX_FEEDBACK_COUNT); i++) {
+        for (int i = 0; i < Math.min(this.list.size(), CarpetOrgAdditionSettings.finderCommandMaxFeedbackCount); i++) {
             Result result = this.list.get(i);
             sendEveryFeedback(result);
         }

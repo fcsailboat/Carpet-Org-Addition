@@ -12,10 +12,12 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Direction;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.periodic.PeriodicTaskUtils;
-import org.carpetorgaddition.periodic.fakeplayer.actioncontext.StopContext;
+import org.carpetorgaddition.periodic.fakeplayer.action.FakePlayerAction;
+import org.carpetorgaddition.periodic.fakeplayer.action.context.StopContext;
+import org.carpetorgaddition.util.GenericFetcherUtils;
 import org.carpetorgaddition.util.InventoryUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
@@ -82,7 +84,7 @@ public class FakePlayerUtils {
      * @param key          停止操作时在聊天栏输出的内容的翻译键
      */
     public static void stopAction(ServerCommandSource source, EntityPlayerMPFake playerMPFake, String key, Object... obj) {
-        PeriodicTaskUtils.getFakePlayerActionManager(playerMPFake).setAction(FakePlayerAction.STOP, StopContext.STOP);
+        GenericFetcherUtils.getFakePlayerActionManager(playerMPFake).setAction(FakePlayerAction.STOP, StopContext.STOP);
         MessageUtils.broadcastMessage(
                 source.getServer(),
                 TextUtils.appendAll(playerMPFake.getDisplayName(), ": ", TextUtils.translate(key, obj))
@@ -180,8 +182,37 @@ public class FakePlayerUtils {
      * @param player        当前操作该GUI的玩家
      * @apiNote 请勿在工作台输出槽中使用此方法丢弃物品
      */
+    @SuppressWarnings("unused")
     public static void loopThrowItem(ScreenHandler screenHandler, int slotIndex, EntityPlayerMPFake player) {
-        while (screenHandler.getSlot(slotIndex).hasStack() && screenHandler.getSlot(slotIndex).canTakeItems(player)) {
+        // 如果光标不为空，那么将无法丢弃槽位上的物品
+        InventoryUtils.assertEmptyStack(screenHandler.getCursorStack());
+        Slot slot = screenHandler.getSlot(slotIndex);
+        Item item = slot.getStack().getItem();
+        while (true) {
+            ItemStack itemStack = slot.getStack();
+            if (itemStack.isEmpty()) {
+                return;
+            }
+            if (itemStack.isOf(item) && slot.canTakeItems(player)) {
+                screenHandler.onSlotClick(slotIndex, THROW_Q, SlotActionType.THROW, player);
+                continue;
+            }
+            return;
+        }
+    }
+
+    /**
+     * 比较并丢出槽位物品<br/>
+     * 如果槽位上的物品与预期物品相同，则丢出槽位上的物品
+     *
+     * @apiNote 本方法用来丢弃村民交易槽位上的物品
+     * @see <a href="https://bugs.mojang.com/browse/MC-157977">MC-157977</a>
+     * @see <a href="https://bugs.mojang.com/browse/MC-215441">MC-215441</a>
+     */
+    public static void compareAndThrow(ScreenHandler screenHandler, int slotIndex, ItemStack itemStack, EntityPlayerMPFake player) {
+        InventoryUtils.assertEmptyStack(screenHandler.getCursorStack());
+        Slot slot = screenHandler.getSlot(slotIndex);
+        while (slot.hasStack() && ItemStack.areItemsAndComponentsEqual(itemStack, slot.getStack()) && slot.canTakeItems(player)) {
             screenHandler.onSlotClick(slotIndex, THROW_Q, SlotActionType.THROW, player);
         }
     }
@@ -265,18 +296,27 @@ public class FakePlayerUtils {
      * @return 是否移动成功
      */
     public static boolean replenishment(EntityPlayerMPFake fakePlayer, Predicate<ItemStack> predicate) {
-        if (predicate.test(fakePlayer.getMainHandStack())) {
+        return replenishment(fakePlayer, Hand.MAIN_HAND, predicate);
+    }
+
+    /**
+     * 将合适的物品移动到主手
+     *
+     * @return 是否移动成功
+     */
+    public static boolean replenishment(EntityPlayerMPFake fakePlayer, Hand hand, Predicate<ItemStack> predicate) {
+        if (predicate.test(fakePlayer.getStackInHand(hand))) {
             return true;
         }
         PlayerScreenHandler screenHandler = fakePlayer.playerScreenHandler;
         // 主手槽位
-        int mainHeadSlot = 36 + fakePlayer.getInventory().selectedSlot;
+        int headSlot = hand == Hand.MAIN_HAND ? 36 + fakePlayer.getInventory().selectedSlot : 45;
         for (int i = 9; i < 45; i++) {
-            if (i == mainHeadSlot) {
+            if (i == headSlot) {
                 continue;
             }
             if (predicate.test(screenHandler.getSlot(i).getStack())) {
-                swapSlotItem(screenHandler, i, mainHeadSlot, fakePlayer);
+                swapSlotItem(screenHandler, i, headSlot, fakePlayer);
                 return true;
             }
         }
@@ -289,5 +329,15 @@ public class FakePlayerUtils {
     public static void look(EntityPlayerMPFake fakePlayer, Direction direction) {
         EntityPlayerActionPack actionPack = ((ServerPlayerInterface) fakePlayer).getActionPack();
         actionPack.look(direction);
+    }
+
+    /**
+     * 交互主副手物品
+     */
+    @SuppressWarnings("unused")
+    public static void swapHand(EntityPlayerMPFake fakePlayer) {
+        ItemStack temp = fakePlayer.getStackInHand(Hand.OFF_HAND);
+        fakePlayer.setStackInHand(Hand.OFF_HAND, fakePlayer.getStackInHand(Hand.MAIN_HAND));
+        fakePlayer.setStackInHand(Hand.MAIN_HAND, temp);
     }
 }

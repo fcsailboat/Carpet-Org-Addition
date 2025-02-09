@@ -13,10 +13,14 @@ import org.spongepowered.asm.mixin.injection.At;
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(value = AbstractNetworkAddon.class, priority = 998, remap = false)
 public abstract class AbstractNetworkAddonMixin {
+    /**
+     * 修复fabric api和Carpet的内存泄漏问题
+     *
+     * @see <a href="https://github.com/FabricMC/fabric/issues/3974">Memory leaks occur when players log in or log out.</a>
+     */
     @SuppressWarnings("RedundantIfStatement")
     @WrapWithCondition(method = "lateInit", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/impl/networking/GlobalReceiverRegistry;startSession(Lnet/fabricmc/fabric/impl/networking/AbstractNetworkAddon;)V"))
     private boolean notStartSession_ifFakeClientConnection(GlobalReceiverRegistry<?> instance, AbstractNetworkAddon<?> addon) {
-        // 修复fabric api和Carpet的内存泄漏问题
         if (CarpetOrgAdditionSettings.fakePlayerSpawnMemoryLeakFix && addon instanceof AbstractChanneledNetworkAddon<?>) {
             ClientConnection connection = ((AbstractChanneledNetworkAddonInvoker) addon).getConnection();
             if (connection instanceof FakeClientConnection) {
