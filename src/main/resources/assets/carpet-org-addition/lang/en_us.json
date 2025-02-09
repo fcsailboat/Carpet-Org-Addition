@@ -126,6 +126,7 @@
   "carpet.rule.protectionEnchantmentCompatible.desc": "Allow all protection enchantments to be compatible",
   "carpet.rule.damageEnchantmentCompatible.desc": "Allow all damage enchantments to be compatible",
   "carpet.rule.finderCommandMaxFeedbackCount.desc": "Control the maximum number of feedback for the /finder command",
+  "carpet.rule.villagerVoidTrading.desc": "Prevent the transaction window from closing after moving out of the villager's interaction range to restore void trading as it was before 24w44a",
   "carpet.rule.message.disableRespawnBlocksExplode": "Respawn blocks explosion is disabled",
   "carpet.rule.message.CCEUpdateSuppression": "You cannot open the shulkerbox for update surpression",
   "carpet.rule.validate.invalid_value": "Wrong value %s for: %s",

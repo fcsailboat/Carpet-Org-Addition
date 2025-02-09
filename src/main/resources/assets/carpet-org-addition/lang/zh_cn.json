@@ -220,6 +220,8 @@
   "carpet.rule.damageEnchantmentCompatible.desc": "允许伤害类魔咒共存",
   "carpet.rule.finderCommandMaxFeedbackCount.name": "/finder最大反馈数量",
   "carpet.rule.finderCommandMaxFeedbackCount.desc": "控制/finder命令的最大反馈数量",
+  "carpet.rule.villagerVoidTrading.name": "村民虚空交易",
+  "carpet.rule.villagerVoidTrading.desc": "阻止离开村民交互距离后交易窗口关闭以恢复24w44a之前的虚空交易",
   "carpet.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",
   "carpet.rule.message.CCEUpdateSuppression": "你不能打开用于更新抑制的潜影盒",
   "carpet.rule.validate.invalid_value": "规则“%s”值无效：%s",

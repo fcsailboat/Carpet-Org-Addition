@@ -31,7 +31,6 @@
     "rule.ContainerComponentMixin",
     "rule.CreeperEntityMixin",
     "rule.EnchantmentHelperMixin",
-    "rule.enchantment.EnchantmentMixin",
     "rule.EndermanEntityMixin",
     "rule.EnderPearlEntityMixin",
     "rule.EntityAccessor",
@@ -45,6 +44,7 @@
     "rule.ItemEntityMixin",
     "rule.ItemMixin",
     "rule.LivingEntityMixin",
+    "rule.MerchantEntityMixin",
     "rule.MerchantScreenHandlerAccessor",
     "rule.MobEntityMixin",
     "rule.NetworkThreadUtilsMixin",
@@ -83,6 +83,7 @@
     "rule.disablemobpeacefuldespawn.MobEntityMixin",
     "rule.disablemobpeacefuldespawn.WitherEntityMixin",
     "rule.enchantment.AnvilScreenHandlerMixin",
+    "rule.enchantment.EnchantmentMixin",
     "rule.entityplayeractionpack.ActionAccessor",
     "rule.entityplayeractionpack.EntityPlayerActionPackAccessor",
     "rule.fakeplayerkeepinventory.PlayerEntityMixin",
@@ -103,8 +104,8 @@
   ],
   "client": [
     "debug.ScreenAccessor",
-    "network.SlotMixin",
     "network.ScreenHandlerMixin",
+    "network.SlotMixin",
     "rule.client.carpet.SettingsManagerMixin"
   ],
   "injectors": {

@@ -498,4 +498,8 @@ public class CarpetOrgAdditionSettings {
             strict = false
     )
     public static int finderCommandMaxFeedbackCount = 10;
+
+    // 村民虚空交易
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean villagerVoidTrading = false;
 }
