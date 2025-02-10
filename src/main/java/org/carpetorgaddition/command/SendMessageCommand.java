@@ -31,7 +31,7 @@ public class SendMessageCommand {
                                 .executes(SendMessageCommand::sendReplicableText)))
                 .then(CommandManager.literal("url")
                         .then(CommandManager.argument("url", StringArgumentType.string())
-                                .executes(context -> sendClickableLink(context, commandBuildContext))))
+                                .executes(context -> sendClickableLink(context, commandRegistryAccess))))
                 .then(CommandManager.literal("location")
                         .executes(SendMessageCommand::sendSelfLocation))
                 .then(CommandManager.literal("color")

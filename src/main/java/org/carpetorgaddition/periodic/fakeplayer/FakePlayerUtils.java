@@ -310,7 +310,7 @@ public class FakePlayerUtils {
         }
         PlayerScreenHandler screenHandler = fakePlayer.playerScreenHandler;
         // 主手槽位
-        int headSlot = hand == Hand.MAIN_HAND ? 36 + fakePlayer.getInventory().selectedSlot : 45;
+        int headSlot = hand == Hand.MAIN_HAND ? 36 + fakePlayer.getInventory().getSelectedSlot() : 45;
         for (int i = 9; i < 45; i++) {
             if (i == headSlot) {
                 continue;

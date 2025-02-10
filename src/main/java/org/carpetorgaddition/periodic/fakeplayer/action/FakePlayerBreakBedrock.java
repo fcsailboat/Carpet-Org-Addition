@@ -141,8 +141,8 @@ public class FakePlayerBreakBedrock {
         int pistonCount = 0;
         int levelCount = 0;
         // 遍历物品栏和副手，不遍历盔甲槽
-        ArrayList<ItemStack> list = new ArrayList<>(fakePlayer.getInventory().main);
-        list.addAll(fakePlayer.getInventory().offHand);
+        ArrayList<ItemStack> list = new ArrayList<>(fakePlayer.getInventory().getMainStacks());
+        list.add(fakePlayer.getOffHandStack());
         for (ItemStack itemStack : list) {
             if (itemStack.isOf(Items.PISTON)) {
                 pistonCount += itemStack.getCount();
@@ -434,7 +434,7 @@ public class FakePlayerBreakBedrock {
     private static void switchTool(BlockState blockState, World world, BlockPos blockPos, EntityPlayerMPFake player) {
         boolean replenishment = FakePlayerUtils.replenishment(player, itemStack -> {
             if (player.isCreative()) {
-                return itemStack.getItem().canMine(blockState, world, blockPos, player);
+                return itemStack.getItem().canMine(player.getMainHandStack(), blockState, world, blockPos, player);
             }
             if (itemStack.isEmpty()) {
                 return false;

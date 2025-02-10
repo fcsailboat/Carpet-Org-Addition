@@ -68,11 +68,11 @@ public abstract class ServerPlayerEntityMixin {
     private void restock(PlayerInventory inventory) {
         for (int i = 0; i < PlayerInventory.getHotbarSize(); i++) {
             // 获取快捷栏物品
-            ItemStack hotbarStack = inventory.main.get(i);
+            ItemStack hotbarStack = inventory.getMainStacks().get(i);
             int count = hotbarStack.getMaxCount() - hotbarStack.getCount();
             // 检查该物品是否可堆叠或堆叠已满
             if (hotbarStack.isStackable() && count > 0) {
-                for (int j = PlayerInventory.getHotbarSize(); j < inventory.main.size(); j++) {
+                for (int j = PlayerInventory.getHotbarSize(); j < inventory.getMainStacks().size(); j++) {
                     ItemStack inventoryStack = inventory.getStack(j);
                     // 如果可堆叠就自动补货
                     if (ItemStack.areItemsAndComponentsEqual(hotbarStack, inventoryStack)) {

@@ -6,6 +6,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.OperatorBlock;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.Hand;
@@ -65,7 +66,7 @@ public class BlockBreakManager {
             return false;
         }
         // 当前位置是否为出生点保护区域或超出了世界边界
-        if (!world.canPlayerModifyAt(this.player, blockPos)) {
+        if (!world.canEntityModifyAt(this.player, blockPos)) {
             return false;
         }
         // 正在挖掘空气方块
@@ -177,9 +178,10 @@ public class BlockBreakManager {
         if (fakePlayer.isBlockBreakingRestricted(world, blockPos, fakePlayer.interactionManager.getGameMode())) {
             return false;
         }
-        Item mainHandItem = fakePlayer.getMainHandStack().getItem();
+        ItemStack mainHandItemStack = fakePlayer.getMainHandStack();
+        Item mainHandItem = mainHandItemStack.getItem();
         // 主手物品是否可以挖掘方块，当前位置是否超出了世界边界
-        if (mainHandItem.canMine(blockState, world, blockPos, fakePlayer) && world.canPlayerModifyAt(fakePlayer, blockPos)) {
+        if (mainHandItem.canMine(mainHandItemStack, blockState, world, blockPos, fakePlayer) && world.canEntityModifyAt(fakePlayer, blockPos)) {
             // 创造模式破坏方块
             if (fakePlayer.isCreative() || blockState.isAir()) {
                 return true;

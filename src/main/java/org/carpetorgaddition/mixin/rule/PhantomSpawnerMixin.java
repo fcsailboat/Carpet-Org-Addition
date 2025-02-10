@@ -11,13 +11,13 @@ import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PhantomSpawner.class)
 public abstract class PhantomSpawnerMixin {
     // 限制幻翼生成
     @Inject(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/SpawnHelper;isClearForSpawn(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/fluid/FluidState;Lnet/minecraft/entity/EntityType;)Z"), cancellable = true)
-    private void spawn(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfoReturnable<Integer> cir, @Local(ordinal = 1) BlockPos blockPos) {
+    private void spawn(ServerWorld world, boolean spawnMonsters, boolean spawnAnimals, CallbackInfo ci, @Local(ordinal = 1) BlockPos blockPos) {
         if (CarpetOrgAdditionSettings.limitPhantomSpawn) {
             SpawnHelper.Info spawnInfo = world.getChunkManager().getSpawnInfo();
             if (spawnInfo == null) {
@@ -29,7 +29,7 @@ public abstract class PhantomSpawnerMixin {
             if (isBelowCap && canSpawn) {
                 return;
             }
-            cir.setReturnValue(0);
+            ci.cancel();
         }
     }
 }
