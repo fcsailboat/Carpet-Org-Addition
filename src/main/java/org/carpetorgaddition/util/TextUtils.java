@@ -178,6 +178,10 @@ public class TextUtils {
         return Text.literal(text);
     }
 
+    public static MutableText createText(Number number) {
+        return Text.literal(number.toString());
+    }
+
     /**
      * 创建一个不包含任何内容的可变文本对象
      */
@@ -218,7 +222,7 @@ public class TextUtils {
             switch (obj) {
                 case String str -> textBuilder.appendString(str);
                 case Text text -> textBuilder.append(text);
-                case Number number -> textBuilder.append(String.valueOf(number));
+                case Number number -> textBuilder.appendTranslate(String.valueOf(number));
                 case null -> throw new NullPointerException();
                 default -> throw new IllegalArgumentException(obj + "即不是可变文本对象，也不是字符串对象");
             }

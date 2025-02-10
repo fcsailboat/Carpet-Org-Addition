@@ -50,7 +50,7 @@ public class LocationsCommand {
                                         .executes(context -> addAnotherPos(context, null))
                                         .then(CommandManager.argument("anotherPos", BlockPosArgumentType.blockPos())
                                                 .executes(context -> addAnotherPos(context, BlockPosArgumentType.getBlockPos(context, "anotherPos")))))))
-                .then(CommandManager.literal("delete")
+                .then(CommandManager.literal("remove")
                         .then(CommandManager.argument("name", StringArgumentType.string())
                                 .suggests(suggestion())
                                 .executes(LocationsCommand::deleteWayPoint)))

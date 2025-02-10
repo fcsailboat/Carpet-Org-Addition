@@ -13,10 +13,10 @@ import net.minecraft.util.math.Vec3d;
 import org.carpetorgaddition.command.PlayerManagerCommand;
 import org.carpetorgaddition.command.RegisterCarpetCommands;
 import org.carpetorgaddition.logger.LoggerRegister;
+import org.carpetorgaddition.periodic.ServerPeriodicTaskManager;
+import org.carpetorgaddition.periodic.express.ExpressManager;
+import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSerial;
 import org.carpetorgaddition.translate.Translate;
-import org.carpetorgaddition.util.express.ExpressManager;
-import org.carpetorgaddition.util.express.ExpressManagerInterface;
-import org.carpetorgaddition.util.fakeplayer.FakePlayerSerial;
 import org.carpetorgaddition.util.wheel.Waypoint;
 
 import java.util.Map;
@@ -32,7 +32,6 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     // 当玩家登录时
     @Override
     public void onPlayerLoggedIn(ServerPlayerEntity player) {
-        CarpetExtension.super.onPlayerLoggedIn(player);
         // 假玩家生成时不保留上一次的击退，着火时间，摔落高度
         if (CarpetOrgAdditionSettings.fakePlayerSpawnNoKnockback && player instanceof EntityPlayerMPFake) {
             // 清除速度
@@ -45,7 +44,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
             player.getStatusEffects().removeIf(effect -> effect.getEffectType().value().getCategory() == StatusEffectCategory.HARMFUL);
         }
         // 提示玩家接收快递
-        ExpressManager expressManager = ExpressManagerInterface.getInstance(player.server);
+        ExpressManager expressManager = ServerPeriodicTaskManager.getManager(player.server).getExpressManager();
         expressManager.promptToReceive(player);
         // 加载假玩家安全挂机
         PlayerManagerCommand.loadSafeAfk(player);
@@ -54,7 +53,6 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     // 服务器启动时调用
     @Override
     public void onServerLoaded(MinecraftServer server) {
-        CarpetExtension.super.onServerLoaded(server);
         // 服务器启动时自动将旧的路径点替换成新的
         Waypoint.replaceWaypoint(server);
     }
@@ -79,7 +77,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
 
     // 注册命令
     @Override
-    public void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandBuildContext) {
-        RegisterCarpetCommands.registerCarpetCommands(dispatcher, commandBuildContext);
+    public void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
+        RegisterCarpetCommands.registerCarpetCommands(dispatcher, commandRegistryAccess);
     }
 }

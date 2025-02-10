@@ -2,8 +2,10 @@ package org.carpetorgaddition;
 
 import carpet.api.settings.Rule;
 import carpet.api.settings.RuleCategory;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.carpetorgaddition.rule.HideRule;
+import org.carpetorgaddition.rule.Hidden;
+import org.carpetorgaddition.rule.Removed;
 import org.carpetorgaddition.rule.validator.*;
 import org.carpetorgaddition.rule.value.*;
 
@@ -21,11 +23,16 @@ public class CarpetOrgAdditionSettings {
      * 当前方块的破坏者，启用{@link CarpetOrgAdditionSettings#blockDropsDirectlyEnterInventory}后，方块掉落物会直接进入玩家物品栏
      */
     public static final ThreadLocal<ServerPlayerEntity> blockBreaking = new ThreadLocal<>();
+    /**
+     * 当前正在使用铁砧附魔的玩家
+     */
+    public static final ThreadLocal<PlayerEntity> enchanter = new ThreadLocal<>();
 
     private CarpetOrgAdditionSettings() {
     }
 
     public static final String ORG = "Org";
+    public static final String Hidden = "Hidden";
 
     // 制作物品分身
     @Rule(
@@ -50,7 +57,7 @@ public class CarpetOrgAdditionSettings {
     public static boolean disableOpenOrWaterDetection = false;
 
     // 幽匿尖啸体放置时状态
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean sculkShriekerCanSummon = false;
 
@@ -59,7 +66,7 @@ public class CarpetOrgAdditionSettings {
     public static boolean creativeImmuneKill = false;
 
     // 掉落物不消失
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean itemNeverDespawn = false;
 
@@ -95,17 +102,17 @@ public class CarpetOrgAdditionSettings {
     public static boolean notDamageEnderPearl = false;
 
     // 禁用伤害免疫
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean disableDamageImmunity = false;
 
     // 干草捆完全抵消摔落伤害
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean hayBlockCompleteOffsetFall = false;
 
     // 蓝冰上不能刷怪
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean blueIceCanSpawn = false;
 
@@ -134,17 +141,17 @@ public class CarpetOrgAdditionSettings {
     public static boolean riptideIgnoreWeather = false;
 
     // 禁止猪灵僵尸化
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean disablePiglinZombify = false;
 
     // 禁止村民女巫化
     @Rule(categories = {ORG, RuleCategory.FEATURE})
-    @HideRule
+    @Removed
     public static boolean disableVillagerWitch = false;
 
     // 禁止铁傀儡攻击玩家
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static boolean disableIronGolemAttackPlayer = false;
 
@@ -274,7 +281,7 @@ public class CarpetOrgAdditionSettings {
     public static boolean fakePlayerCraftKeepItem = false;
 
     // 绘制粒子线命令
-    @HideRule
+    @Removed
     @Rule(
             categories = {ORG, RuleCategory.COMMAND},
             options = {"true", "false", "ops", "0", "1", "2", "3", "4"}
@@ -336,7 +343,7 @@ public class CarpetOrgAdditionSettings {
     public static QuickSettingFakePlayerCraft quickSettingFakePlayerCraft = QuickSettingFakePlayerCraft.FALSE;
 
     // 湿海绵立即干燥
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.SURVIVAL})
     public static WetSpongeImmediatelyDry wetSpongeImmediatelyDry = WetSpongeImmediatelyDry.FALSE;
 
@@ -378,7 +385,7 @@ public class CarpetOrgAdditionSettings {
     public static boolean beaconWorldHeight = false;
 
     // 生物是否可以捡起物品
-    @HideRule
+    @Removed
     @Rule(categories = {ORG, RuleCategory.FEATURE})
     public static MobWhetherOrNotCanPickItem mobWhetherOrNotCanPickItem = MobWhetherOrNotCanPickItem.VANILLA;
 
@@ -437,7 +444,7 @@ public class CarpetOrgAdditionSettings {
     public static boolean suppressionMismatchInDestroyBlockPosWarn = false;
 
     // 同步导航器航点
-    @HideRule
+    @Removed
     @Rule(
             categories = {ORG, RuleCategory.CLIENT},
             validators = SyncNavigateWaypointObserver.class
@@ -451,4 +458,48 @@ public class CarpetOrgAdditionSettings {
     // 最大服务器交互距离同步客户端
     @Rule(categories = {ORG, RuleCategory.CLIENT})
     public static boolean maxBlockPlaceDistanceSyncClient = true;
+
+    // 限制幻翼生成
+    @Rule(categories = {ORG, RuleCategory.SURVIVAL})
+    public static boolean limitPhantomSpawn = false;
+
+    // 立即应用工具效果
+    @Hidden
+    @Rule(categories = {ORG, Hidden, RuleCategory.BUGFIX})
+    public static boolean applyToolEffectsImmediately = false;
+
+    // 强制补货
+    @Hidden
+    @Rule(categories = {ORG, Hidden})
+    public static boolean forceRestock = false;
+
+    // 自动同步玩家状态
+    @Hidden
+    @Rule(categories = {ORG, Hidden})
+    public static boolean autoSyncPlayerStatus = false;
+
+    // 记录玩家命令
+    @Rule(categories = {ORG, RuleCategory.COMMAND})
+    public static boolean recordPlayerCommand = false;
+
+    // 保护类魔咒兼容
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean protectionEnchantmentCompatible = false;
+
+    // 伤害类魔咒兼容
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean damageEnchantmentCompatible = false;
+
+    // /finder命令最大反馈数量
+    @Rule(
+            categories = {ORG, RuleCategory.COMMAND},
+            options = {"10", "15", "20", "25"},
+            validators = FinderCommandMaxFeedbackCountValidator.class,
+            strict = false
+    )
+    public static int finderCommandMaxFeedbackCount = 10;
+
+    // 村民虚空交易
+    @Rule(categories = {ORG, RuleCategory.FEATURE})
+    public static boolean villagerVoidTrading = false;
 }

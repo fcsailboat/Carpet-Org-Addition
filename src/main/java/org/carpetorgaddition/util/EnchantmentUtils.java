@@ -1,9 +1,12 @@
 package org.carpetorgaddition.util;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registry;
@@ -31,6 +34,36 @@ public class EnchantmentUtils {
         }
         Enchantment enchantment = optional.get().get(key);
         return getLevel(world, enchantment, itemStack) > 0;
+    }
+
+    /**
+     * @return 附魔是否与注册项对应
+     */
+    public static boolean isSpecified(World world, RegistryKey<Enchantment> key, Enchantment enchantment) {
+        Optional<Registry<Enchantment>> optional = world.getRegistryManager().getOptional(RegistryKeys.ENCHANTMENT);
+        if (optional.isEmpty()) {
+            return false;
+        }
+        Enchantment value = optional.get().get(key);
+        return value != null && value.equals(enchantment);
+    }
+
+    /**
+     * 判断指定魔咒是否是保护类魔咒
+     *
+     * @return 指定魔咒是否是 {@code 保护}、{@code 爆炸保护}，{@code 火焰保护}或{@code 弹射物保护}
+     */
+    public static boolean isProtectionEnchantment(RegistryKey<Enchantment> key) {
+        return key == Enchantments.PROTECTION || key == Enchantments.BLAST_PROTECTION || key == Enchantments.FIRE_PROTECTION || key == Enchantments.PROJECTILE_PROTECTION;
+    }
+
+    /**
+     * 判断指定魔咒是否为伤害类魔咒
+     *
+     * @return 指定魔咒是否是 {@code 锋利}、{@code 亡灵杀手}，{@code 节肢杀手}、{@code 穿刺}，{@code 致密}或{@code 破甲}
+     */
+    public static boolean isDamageEnchantment(RegistryKey<Enchantment> key) {
+        return key == Enchantments.SHARPNESS || key == Enchantments.SMITE || key == Enchantments.BANE_OF_ARTHROPODS || key == Enchantments.IMPALING || key == Enchantments.DENSITY || key == Enchantments.BREACH;
     }
 
     /**
@@ -73,5 +106,19 @@ public class EnchantmentUtils {
             mutableText = TextUtils.appendAll(mutableText, ScreenTexts.SPACE, TextUtils.translate("enchantment.level." + level));
         }
         return mutableText;
+    }
+
+    /**
+     * @return 指定物品是否可以使用经验修复
+     */
+    public static boolean canRepairWithXp(ItemStack itemStack) {
+        ItemEnchantmentsComponent component = itemStack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : component.getEnchantmentEntries()) {
+            RegistryEntry<Enchantment> registryEntry = entry.getKey();
+            if (registryEntry.value().effects().contains(EnchantmentEffectComponentTypes.REPAIR_WITH_XP)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

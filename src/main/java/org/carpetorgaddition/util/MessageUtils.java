@@ -11,7 +11,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class MessageUtils {
     private MessageUtils() {
@@ -22,7 +21,9 @@ public class MessageUtils {
      *
      * @param player  通过这个玩家对象获取玩家管理器对象，然后通过玩家管理器对象发送消息，player不是消息的发送者
      * @param message 要广播消息的内容
+     * @deprecated 使用玩家做为参数有误导性
      */
+    @Deprecated(forRemoval = true)
     public static void broadcastMessage(ServerPlayerEntity player, Text message) {
         MinecraftServer server = player.getServer();
         if (server == null) {
@@ -37,10 +38,16 @@ public class MessageUtils {
      *
      * @param source  通过这个服务器命令源对象获取玩家管理器对象，然后通过玩家管理器对象发送消息，source不是消息的发送者
      * @param message 要广播消息的内容
+     * @deprecated 使用服务器命令源作为参数有误导性
      */
+    @Deprecated(forRemoval = true)
     public static void broadcastMessage(ServerCommandSource source, Text message) {
         PlayerManager playerManager = source.getServer().getPlayerManager();
         broadcastMessage(playerManager, message);
+    }
+
+    public static void broadcastMessage(MinecraftServer server, Text message) {
+        broadcastMessage(server.getPlayerManager(), message);
     }
 
     /**
@@ -54,13 +61,24 @@ public class MessageUtils {
     }
 
     /**
+     * 广播一条错误消息
+     */
+    public static void broadcastErrorMessage(MinecraftServer server, Throwable e, String key, Object... obj) {
+        server.getPlayerManager()
+                .getPlayerList()
+                .stream()
+                .map(ServerPlayerEntity::getCommandSource)
+                .forEach(source -> sendErrorMessage(source, e, key, obj));
+    }
+
+    /**
      * 让一个玩家发送带有特殊样式的文本，文本内容仅对消息发送者可见
      *
      * @param player  要发送文本消息的玩家
      * @param message 发送文本消息的内容
      */
     public static void sendMessage(ServerPlayerEntity player, Text message) {
-        player.sendMessage(message, false);
+        player.sendMessage(message);
     }
 
     /**
@@ -109,7 +127,7 @@ public class MessageUtils {
      * @param obj    消息中替代占位符的内容
      */
     public static void sendErrorMessage(ServerCommandSource source, Throwable e, String key, Object... obj) {
-        String error = Objects.requireNonNullElse(e.getMessage(), e.getClass().getSimpleName());
+        String error = GameUtils.getExceptionString(e);
         MutableText message = TextUtils.setColor(TextUtils.translate(key, obj), Formatting.RED);
         MessageUtils.sendMessage(source, TextUtils.hoverText(message, TextUtils.createText(error)));
     }

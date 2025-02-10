@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.carpetorgaddition.util.inventory.ImmutableInventory;
 import org.carpetorgaddition.util.wheel.ContainerDeepCopy;
+import org.jetbrains.annotations.CheckReturnValue;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -27,6 +28,7 @@ public class InventoryUtils {
      * @param predicate  一个物品匹配器对象，用来指定要从潜影盒中拿取的物品
      * @return 潜影盒中获取的指定物品
      */
+    @CheckReturnValue
     public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate) {
         // 判断潜影盒是否为空，空潜影盒直接返回空物品
         if (isEmptyShulkerBox(shulkerBox)) {
@@ -45,6 +47,43 @@ public class InventoryUtils {
             }
         }
         return ItemStack.EMPTY;
+    }
+
+    /**
+     * 从潜影盒中取出指定数量的物品
+     *
+     * @return 从潜影盒中取出的物品
+     */
+    @CheckReturnValue
+    public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
+        if (count <= 0) {
+            return ItemStack.EMPTY;
+        }
+        // 将潜影盒内的物品栏组件替换为该组件的深拷贝副本
+        InventoryUtils.deepCopyContainer(shulkerBox);
+        ContainerComponent component = shulkerBox.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT);
+        ItemStack itemStack = ItemStack.EMPTY;
+        for (ItemStack stack : component.iterateNonEmpty()) {
+            if (itemStack.isEmpty()) {
+                if (predicate.test(stack)) {
+                    itemStack = stack.split(count);
+                    // 如果count为65，而物品最大堆叠数为64，那么取出的物品数量将超过最大值
+                    // 因此在这里限制一下count的值
+                    count = Math.min(itemStack.getMaxCount(), count) - itemStack.getCount();
+                }
+            } else if (ItemStack.areItemsAndComponentsEqual(itemStack, stack)) {
+                ItemStack split = stack.split(count);
+                count -= split.getCount();
+                itemStack.increment(split.getCount());
+            }
+            if (count == 0) {
+                break;
+            }
+            if (count < 0) {
+                throw new IllegalStateException();
+            }
+        }
+        return itemStack;
     }
 
     /**
@@ -108,7 +147,6 @@ public class InventoryUtils {
         if (isEmptyShulkerBox(shulkerBox)) {
             return ImmutableInventory.EMPTY;
         }
-        // 获取潜影盒NBT
         ContainerComponent component = shulkerBox.get(DataComponentTypes.CONTAINER);
         // 因为有空潜影盒的判断，shulkerBox.get(DataComponentTypes.CONTAINER)不会返回null
         //noinspection DataFlowIssue

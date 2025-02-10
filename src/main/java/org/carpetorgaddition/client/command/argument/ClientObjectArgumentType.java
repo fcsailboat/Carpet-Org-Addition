@@ -26,6 +26,7 @@ import org.carpetorgaddition.util.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -70,7 +71,14 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
                     .map(this::objectToString)
                     .map(s -> s.contains(" ") ? "\"" + s + "\"" : s)
                     .toArray(String[]::new);
-            return CommandSource.suggestMatching(array, builder);
+            String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
+            for (String candidate : array) {
+                // 列出所有名称中包含输入字符串的对象
+                if (candidate.toLowerCase(Locale.ROOT).contains(remaining)) {
+                    builder.suggest(candidate);
+                }
+            }
+            return builder.buildFuture();
         } else {
             return Suggestions.empty();
         }

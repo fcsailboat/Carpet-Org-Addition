@@ -7,6 +7,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DeathProtectionComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,9 +33,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Map;
+
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-    private LivingEntityMixin(EntityType<?> type, World world) {
+    protected LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
 
@@ -43,6 +46,10 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Shadow
     public abstract void setHealth(float health);
+
+    @Shadow
+    @Nullable
+    protected abstract Map<EquipmentSlot, ItemStack> getEquipmentChanges();
 
     //创造玩家免疫/kill
     @Inject(method = "kill", at = @At("HEAD"), cancellable = true)
@@ -147,5 +154,10 @@ public abstract class LivingEntityMixin extends Entity {
             }
         }
         return null;
+    }
+
+    @Unique
+    protected void onPlayerBreakBlock() {
+        this.getEquipmentChanges();
     }
 }

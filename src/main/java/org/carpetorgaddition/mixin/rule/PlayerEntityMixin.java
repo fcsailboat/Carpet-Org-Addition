@@ -4,7 +4,9 @@ import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.CommandHelper;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +16,7 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.rule.RuleUtils;
 import org.carpetorgaddition.util.CommandUtils;
@@ -27,7 +30,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Optional;
 
 @Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin {
+public abstract class PlayerEntityMixin extends LivingEntityMixin {
+    protected PlayerEntityMixin(EntityType<?> type, World world) {
+        super(type, world);
+    }
+
     @Shadow
     public abstract HungerManager getHungerManager();
 
@@ -141,6 +148,13 @@ public abstract class PlayerEntityMixin {
         } else {
             // 掉落物正常消失
             original.call(inventory);
+        }
+    }
+
+    @Inject(method = "getBlockBreakingSpeed", at = @At(value = "HEAD"))
+    private void getBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
+        if (CarpetOrgAdditionSettings.applyToolEffectsImmediately) {
+            this.onPlayerBreakBlock();
         }
     }
 }

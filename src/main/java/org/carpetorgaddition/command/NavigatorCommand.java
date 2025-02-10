@@ -20,12 +20,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
+import org.carpetorgaddition.periodic.PlayerPeriodicTaskManager;
 import org.carpetorgaddition.util.CommandUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.WorldUtils;
 import org.carpetorgaddition.util.constant.TextConstants;
-import org.carpetorgaddition.util.navigator.NavigatorInterface;
 import org.carpetorgaddition.util.wheel.Waypoint;
 
 import java.io.IOException;
@@ -42,9 +42,14 @@ public class NavigatorCommand {
                 .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandNavigate))
                 .then(CommandManager.literal("entity")
                         .then(CommandManager.argument("entity", EntityArgumentType.entity())
-                                .executes(context -> navigateToEntity(context, false))
+                                .executes(context -> navigateToEntity(context, false, "entity"))
                                 .then(CommandManager.literal("continue")
-                                        .executes(context -> navigateToEntity(context, true)))))
+                                        .executes(context -> navigateToEntity(context, true, "entity")))))
+                .then(CommandManager.literal("player")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .executes(context -> navigateToEntity(context, false, "player"))
+                                .then(CommandManager.literal("continue")
+                                        .executes(context -> navigateToEntity(context, true, "player")))))
                 .then(CommandManager.literal("waypoint")
                         .requires(source -> CommandHelper.canUseCommand(source, CarpetOrgAdditionSettings.commandLocations))
                         .then(CommandManager.argument("waypoint", StringArgumentType.string())
@@ -60,22 +65,22 @@ public class NavigatorCommand {
                                 .executes(NavigatorCommand::navigateToBlock)))
                 .then(CommandManager.literal("spawnpoint")
                         .executes(NavigatorCommand::navigateToSpawnPoint))
-                .then(CommandManager.literal("lastDeathLocation")
+                .then(CommandManager.literal("death")
                         .executes(context -> navigateToLastDeathLocation(context, true))
                         .then(CommandManager.argument("player", EntityArgumentType.player())
                                 .executes(context -> navigateToLastDeathLocation(context, false)))));
     }
 
     // 开始导航实体
-    private static int navigateToEntity(CommandContext<ServerCommandSource> context, boolean isContinue) throws CommandSyntaxException {
+    private static int navigateToEntity(CommandContext<ServerCommandSource> context, boolean isContinue, String arguments) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
-        Entity entity = EntityArgumentType.getEntity(context, "entity");
+        Entity entity = EntityArgumentType.getEntity(context, arguments);
         // 如果目标是玩家，广播消息
         MutableText text = TextUtils.translate(START_NAVIGATION, player.getDisplayName(), entity.getDisplayName());
-        ((NavigatorInterface) player).setNavigator(entity, isContinue);
-        if (shouldBeBroadcasted(entity, player)) {
+        PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(entity, isContinue);
+        if (shouldBeBroadcast(entity, player)) {
             // 设置为斜体淡灰色
-            MessageUtils.broadcastMessage(context.getSource(), TextUtils.toGrayItalic(text));
+            MessageUtils.broadcastMessage(context.getSource().getServer(), TextUtils.toGrayItalic(text));
         } else {
             MessageUtils.sendMessage(context.getSource(), text);
         }
@@ -90,7 +95,7 @@ public class NavigatorCommand {
         try {
             Optional<Waypoint> optional = Waypoint.load(server, waypoint);
             if (optional.isPresent()) {
-                ((NavigatorInterface) player).setNavigator(optional.get());
+                PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(optional.get());
                 MessageUtils.sendMessage(context, START_NAVIGATION, player.getDisplayName(), "[" + waypoint + "]");
                 return 1;
             } else {
@@ -118,12 +123,12 @@ public class NavigatorCommand {
             if (entity == null) {
                 continue;
             }
-            ((NavigatorInterface) player).setNavigator(entity, false);
+            PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(entity, false);
             MutableText text = TextUtils.translate(START_NAVIGATION, player.getDisplayName(), entity.getDisplayName());
-            if (shouldBeBroadcasted(entity, player)) {
+            if (shouldBeBroadcast(entity, player)) {
                 // 将字体设置为灰色斜体
                 text = TextUtils.toItalic(TextUtils.setColor(text, Formatting.GRAY));
-                MessageUtils.broadcastMessage(context.getSource(), text);
+                MessageUtils.broadcastMessage(context.getSource().getServer(), text);
             } else {
                 MessageUtils.sendMessage(context.getSource(), text);
             }
@@ -134,7 +139,7 @@ public class NavigatorCommand {
     }
 
     // 是否应该广播导航消息
-    private static boolean shouldBeBroadcasted(Entity entity, ServerPlayerEntity player) {
+    private static boolean shouldBeBroadcast(Entity entity, ServerPlayerEntity player) {
         if (entity == player || entity instanceof EntityPlayerMPFake) {
             return false;
         }
@@ -144,7 +149,7 @@ public class NavigatorCommand {
     // 停止导航
     private static int stopNavigate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
-        ((NavigatorInterface) player).clearNavigator();
+        PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().clearNavigator();
         MessageUtils.sendMessageToHud(player, TextUtils.translate("carpet.commands.navigate.hud.stop"));
         return 1;
     }
@@ -153,10 +158,9 @@ public class NavigatorCommand {
     private static int navigateToBlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         BlockPos blockPos = BlockPosArgumentType.getBlockPos(context, "blockPos");
-        NavigatorInterface instance = NavigatorInterface.getInstance(player);
         World world = player.getWorld();
         // 设置导航器，维度为玩家当前所在维度
-        instance.setNavigator(blockPos, world);
+        PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(blockPos, world);
         // 发送命令反馈
         MessageUtils.sendMessage(context, START_NAVIGATION, player.getDisplayName(),
                 TextConstants.blockPos(blockPos, WorldUtils.getColor(world)));
@@ -168,7 +172,7 @@ public class NavigatorCommand {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         MutableText spawnPoint = TextUtils.translate("carpet.commands.navigate.name.spawnpoint");
         try {
-            NavigatorInterface.getInstance(player).setNavigator(Objects.requireNonNull(player.getSpawnPointPosition()),
+            PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(Objects.requireNonNull(player.getSpawnPointPosition()),
                     player.server.getWorld(Objects.requireNonNull(player.getSpawnPointDimension())), spawnPoint);
         } catch (NullPointerException e) {
             throw CommandUtils.createException("carpet.commands.navigate.unable_to_find", player.getDisplayName(), spawnPoint);
@@ -192,13 +196,13 @@ public class NavigatorCommand {
                 : TextUtils.translate("carpet.commands.navigate.hud.of", target.getDisplayName(), lastDeathLocation);
         // 获取死亡坐标和死亡维度
         GlobalPos globalPos = lastDeathPos.get();
-        NavigatorInterface.getInstance(player).setNavigator(globalPos.pos(),
+        PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(globalPos.pos(),
                 context.getSource().getServer().getWorld(globalPos.dimension()), name);
         MutableText message = TextUtils.translate(START_NAVIGATION, player.getDisplayName(), name);
         if (self || player == target) {
             MessageUtils.sendMessage(player, message);
         } else {
-            MessageUtils.broadcastMessage(context.getSource(), TextUtils.setColor(TextUtils.toItalic(message), Formatting.GRAY));
+            MessageUtils.broadcastMessage(context.getSource().getServer(), TextUtils.setColor(TextUtils.toItalic(message), Formatting.GRAY));
         }
         return 1;
     }

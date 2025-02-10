@@ -91,15 +91,15 @@ public final class ImmutableInventory extends SimpleInventory implements Iterabl
 
     @Override
     public String toString() {
-        StringJoiner inventory = new StringJoiner(", ", "{", "}");
+        StringJoiner joiner = new StringJoiner(", ", "{", "}");
         for (int index = 0; index < this.size(); index++) {
             ItemStack itemStack = this.getStack(index);
             if (itemStack.isEmpty()) {
                 continue;
             }
-            inventory.add(itemStack.getItem().toString() + "*" + itemStack.getCount());
+            joiner.add(itemStack.getItem().toString() + "*" + itemStack.getCount());
         }
-        return inventory.toString();
+        return joiner.toString();
     }
 
     @NotNull
