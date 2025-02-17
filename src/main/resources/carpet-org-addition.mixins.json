@@ -106,7 +106,9 @@
     "debug.ScreenAccessor",
     "network.ScreenHandlerMixin",
     "network.SlotMixin",
-    "rule.client.carpet.SettingsManagerMixin"
+    "rule.client.carpet.SettingsManagerMixin",
+    "util.MultiPhaseParametersBuilderAccessor",
+    "util.ShaderProgramLayersAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

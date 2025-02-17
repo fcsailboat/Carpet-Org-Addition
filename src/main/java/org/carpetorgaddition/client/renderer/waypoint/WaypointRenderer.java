@@ -4,9 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,7 +21,6 @@ import org.carpetorgaddition.client.util.ClientRenderUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.WorldUtils;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 public class WaypointRenderer implements WorldRenderer {
@@ -133,24 +131,11 @@ public class WaypointRenderer implements WorldRenderer {
         // 让路径点始终对准玩家
         matrixStack.multiply(new Quaternionf().rotateY((float) ((Math.PI / 180.0) * (camera.getYaw() - 180F))));
         matrixStack.multiply(new Quaternionf().rotateX((float) ((Math.PI / 180.0) * (-camera.getPitch()))));
-        MatrixStack.Entry entry = matrixStack.peek();
-        Matrix4f matrix4f = entry.getPositionMatrix();
-        Tessellator tessellator = Tessellator.getInstance();
-        // 绘制图标纹理
-        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(matrix4f, -1F, -1F, 0F).texture(0, 0);
-        bufferBuilder.vertex(matrix4f, -1F, 1F, 0F).texture(0, 1);
-        bufferBuilder.vertex(matrix4f, 1F, 1F, 0F).texture(1, 1);
-        bufferBuilder.vertex(matrix4f, 1F, -1F, 0F).texture(1, 0);
-        //noinspection resource
-        RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX);
-        RenderSystem.setShaderTexture(0, renderType.getIcon());
         // 将缓冲区绘制到屏幕上。
-        ClientRenderUtils.drawWithGlobalProgram(bufferBuilder.end());
-        tessellator.clear();
+        ClientRenderUtils.drawWaypoint(renderType.getIcon(), context);
         // 如果准星正在指向路径点，显示文本
         if (pointerPointing(camera, target)) {
-            drawDistance(context, matrixStack, offset, tessellator);
+            drawDistance(context, matrixStack, offset);
         }
         matrixStack.pop();
     }
@@ -158,7 +143,7 @@ public class WaypointRenderer implements WorldRenderer {
     /**
      * 绘制距离文本
      */
-    private void drawDistance(WorldRenderContext context, MatrixStack matrixStack, Vec3d offset, Tessellator tessellator) {
+    private void drawDistance(WorldRenderContext context, MatrixStack matrixStack, Vec3d offset) {
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
         // 计算距离
         double distance = offset.length();
@@ -180,7 +165,6 @@ public class WaypointRenderer implements WorldRenderer {
         textRenderer.draw(text, -width / 2F, 8, Colors.WHITE, false,
                 matrixStack.peek().getPositionMatrix(), context.consumers(),
                 TextRenderer.TextLayerType.SEE_THROUGH, opacity, 1);
-        tessellator.clear();
         matrixStack.pop();
     }
 

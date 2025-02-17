@@ -2,7 +2,6 @@ package org.carpetorgaddition.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
@@ -77,9 +76,7 @@ public class BoxRenderer {
         // 渲染填充框
         BufferBuilder bufferBuilder = this.tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         this.drawFillBox(bufferBuilder, matrix4f, minX, minY, minZ, maxX, maxY, maxZ);
-        //noinspection resource
-        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-        ClientRenderUtils.drawWithGlobalProgram(bufferBuilder.end());
+        ClientRenderUtils.draw(RenderLayer.getDebugTriangleFan(), bufferBuilder.end());
         RenderSystem.depthMask(true);
         if (this.seeThroughLine) {
             // 允许填充框透过方块渲染
@@ -93,11 +90,7 @@ public class BoxRenderer {
         this.drawLineBox(builder, entry, minX, minY, minZ, maxX, maxY, maxZ);
         // 加粗框线
         RenderSystem.lineWidth(2F);
-        //noinspection resource
-        RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
-        ClientRenderUtils.drawWithGlobalProgram(builder.end());
-        // 将框线改回原本的粗细
-        RenderSystem.lineWidth(1F);
+        ClientRenderUtils.draw(ClientRenderUtils.SEE_THROUGH_LINE, builder.end());
         // 启用剔除
         RenderSystem.enableCull();
         // 禁用半透明渲染

@@ -172,8 +172,10 @@ public class NavigatorCommand {
         ServerPlayerEntity player = CommandUtils.getSourcePlayer(context);
         MutableText spawnPoint = TextUtils.translate("carpet.commands.navigate.name.spawnpoint");
         try {
-            PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(Objects.requireNonNull(player.getSpawnPointPosition()),
-                    player.server.getWorld(Objects.requireNonNull(player.getSpawnPointDimension())), spawnPoint);
+            ServerPlayerEntity.Respawn respawn = Objects.requireNonNull(player.getRespawn());
+            BlockPos respawnPos = respawn.pos();
+            ServerWorld world = player.server.getWorld(respawn.dimension());
+            PlayerPeriodicTaskManager.getManager(player).getNavigatorManager().setNavigator(respawnPos, world, spawnPoint);
         } catch (NullPointerException e) {
             throw CommandUtils.createException("carpet.commands.navigate.unable_to_find", player.getDisplayName(), spawnPoint);
         }
