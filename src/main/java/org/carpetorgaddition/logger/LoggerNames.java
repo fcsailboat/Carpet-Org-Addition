@@ -20,10 +20,15 @@ public class LoggerNames {
      * 村民兴趣点记录器
      */
     public static final String VILLAGER = "villager";
+    /**
+     * 黑曜石生成记录器
+     */
+    public static final String OBSIDIAN = "obsidian";
 
     /**
      * @return 指定名称的记录器
      */
+    @Deprecated(forRemoval = true)
     public static Logger getLogger(String loggerName) {
         return LoggerRegistry.getLogger(loggerName);
     }

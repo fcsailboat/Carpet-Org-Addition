@@ -495,6 +495,7 @@
   "carpet.logger.fishing.appear": "距离鱼出现还有%s刻",
   "carpet.logger.fishing.bite": "距离鱼上钩还有%s刻",
   "carpet.logger.fishing.break_free": "距离鱼挣脱还有%s刻",
+  "carpet.logger.obsidian.generate": "在%s处生成了一块黑曜石",
   "carpet.inventory.item.placeholder": "占位",
   "carpet.client.commands.highlight": "点击以高亮路径点",
   "carpet.client.commands.dictionary.not_matched": "字符串与任何对象都不匹配",

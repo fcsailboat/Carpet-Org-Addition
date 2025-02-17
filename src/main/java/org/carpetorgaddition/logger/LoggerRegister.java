@@ -24,6 +24,9 @@ public class LoggerRegister {
     )
     public static boolean villager = false;
 
+    @LoggerConfig(name = LoggerNames.OBSIDIAN, type = LoggerType.FUNCTION)
+    public static boolean obsidian = false;
+
     /**
      * 注册记录器
      */

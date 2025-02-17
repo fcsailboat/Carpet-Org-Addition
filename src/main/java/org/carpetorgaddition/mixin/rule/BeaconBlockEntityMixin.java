@@ -12,8 +12,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.logger.LoggerRegister;
+import org.carpetorgaddition.logger.Loggers;
 import org.carpetorgaddition.logger.NetworkPacketLogger;
 import org.carpetorgaddition.network.s2c.BeaconBoxUpdateS2CPacket;
 import org.carpetorgaddition.util.wheel.BeaconRangeBox;
@@ -55,7 +55,7 @@ public abstract class BeaconBlockEntityMixin {
         BlockPos pos = blockEntity.getPos();
         // 信标不完整或者被遮挡
         if (LoggerRegister.beaconRange && (list.isEmpty() || updateLevel(blockEntity.getWorld(), pos.getX(), pos.getY(), pos.getZ()) == 0)) {
-            NetworkPacketLogger logger = (NetworkPacketLogger) LoggerNames.getLogger(LoggerNames.BEACON_RANGE);
+            NetworkPacketLogger logger = Loggers.getBeaconRangeLogger();
             logger.sendPacket(() -> new BeaconBoxUpdateS2CPacket(pos, BeaconBoxUpdateS2CPacket.ZERO));
         }
         return original.call(list);
@@ -75,7 +75,7 @@ public abstract class BeaconBlockEntityMixin {
                 continue;
             }
             if (player instanceof ServerPlayerEntity serverPlayerEntity) {
-                NetworkPacketLogger logger = (NetworkPacketLogger) LoggerNames.getLogger(LoggerNames.BEACON_RANGE);
+                NetworkPacketLogger logger = Loggers.getBeaconRangeLogger();
                 logger.sendPacketIfOnline(serverPlayerEntity, () -> new BeaconBoxUpdateS2CPacket(pos, beaconRangeBox));
             }
         }

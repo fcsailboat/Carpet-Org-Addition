@@ -1,6 +1,6 @@
 package org.carpetorgaddition.mixin.logger;
 
-import carpet.logging.Logger;
+import carpet.logging.HUDLogger;
 import carpet.utils.CommandHelper;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -14,8 +14,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WanderingTraderManager;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
-import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.logger.LoggerRegister;
+import org.carpetorgaddition.logger.Loggers;
 import org.carpetorgaddition.logger.WanderingTraderSpawnLogger;
 import org.carpetorgaddition.logger.WanderingTraderSpawnLogger.SpawnCountdown;
 import org.carpetorgaddition.util.MessageUtils;
@@ -62,7 +62,7 @@ public class WanderingTraderManagerMixin {
             if (server == null) {
                 return;
             }
-            Logger logger = LoggerNames.getLogger(LoggerNames.WANDERING_TRADER_SPAWN_COUNTDOWN);
+            HUDLogger logger = Loggers.getWanderingTraderLogger();
             Set<Map.Entry<String, String>> entries = ((LoggerAccessor) logger).getSubscribedOnlinePlayers().entrySet();
             // 普通消息
             MutableText message = TextUtils.translate("carpet.logger.wanderingTrader.message",

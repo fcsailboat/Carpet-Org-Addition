@@ -103,6 +103,10 @@ public class MessageUtils {
         MessageUtils.sendMessage(source, TextUtils.translate(key, obj));
     }
 
+    public static void sendMessage(ServerPlayerEntity player, String key, Object... obj) {
+        MessageUtils.sendMessage(player, TextUtils.translate(key, obj));
+    }
+
     /**
      * 发送一条红色的可以被翻译的消息做为命令的执行反馈，消息内容仅消息发送者可见
      */

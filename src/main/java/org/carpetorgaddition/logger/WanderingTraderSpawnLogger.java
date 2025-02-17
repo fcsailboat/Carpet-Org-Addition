@@ -32,12 +32,12 @@ public class WanderingTraderSpawnLogger {
                     time = TextUtils.translate("carpet.logger.wanderingTrader.time.minutes_and_seconds",
                             spawnCountdown / 60, spawnCountdown % 60);
                 }
-                LoggerNames.getLogger(LoggerNames.WANDERING_TRADER_SPAWN_COUNTDOWN).log((s, playerEntity) -> new Text[]{
+                Loggers.getWanderingTraderLogger().log((s, playerEntity) -> new Text[]{
                         TextUtils.translate("carpet.logger.wanderingTrader.hud", time, (String.format("%.1f", chance) + "%"))
                 });
             }
         } else {
-            LoggerNames.getLogger(LoggerNames.WANDERING_TRADER_SPAWN_COUNTDOWN).log((s, playerEntity)
+            Loggers.getWanderingTraderLogger().log((s, playerEntity)
                     -> new Text[]{TextUtils.translate("carpet.logger.wanderingTrader.gamerule.not_enabled",
                     TextUtils.translate(GameRules.DO_TRADER_SPAWNING.getTranslationKey()))});
         }

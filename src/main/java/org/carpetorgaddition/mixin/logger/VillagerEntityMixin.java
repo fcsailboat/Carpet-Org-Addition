@@ -3,8 +3,8 @@ package org.carpetorgaddition.mixin.logger;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.util.math.GlobalPos;
-import org.carpetorgaddition.logger.LoggerNames;
 import org.carpetorgaddition.logger.LoggerRegister;
+import org.carpetorgaddition.logger.Loggers;
 import org.carpetorgaddition.logger.NetworkPacketLogger;
 import org.carpetorgaddition.network.s2c.VillagerPoiSyncS2CPacket;
 import org.carpetorgaddition.network.s2c.VillagerPoiSyncS2CPacket.VillagerInfo;
@@ -27,7 +27,7 @@ public abstract class VillagerEntityMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     private void tick(CallbackInfo ci) {
         if (LoggerRegister.villager && thisVillager.getWorld().getTime() % 20 == 0 && thisVillager.getServer() != null) {
-            NetworkPacketLogger logger = (NetworkPacketLogger) LoggerNames.getLogger(LoggerNames.VILLAGER);
+            NetworkPacketLogger logger = Loggers.getVillagerLogger();
             logger.sendPacket(string -> {
                 VillagerInfo villagerInfo = new VillagerInfo(thisVillager.getId());
                 for (MemoryModuleType<GlobalPos> type : getList(string)) {

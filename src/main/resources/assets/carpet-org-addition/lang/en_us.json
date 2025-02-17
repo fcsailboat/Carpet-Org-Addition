@@ -401,6 +401,7 @@
   "carpet.logger.fishing.appear": "The fish will appear in %s tick",
   "carpet.logger.fishing.bite": "The fish will be hooked in %s tick",
   "carpet.logger.fishing.break_free": "The fish will break free in %s tick",
+  "carpet.logger.obsidian.generate": "A piece of obsidian has been generated at %s",
   "carpet.inventory.item.placeholder": "PLACEHOLDER",
   "carpet.client.commands.highlight": "Click to highlight the waypoint",
   "carpet.client.commands.dictionary.not_matched": "The string does not match any object",

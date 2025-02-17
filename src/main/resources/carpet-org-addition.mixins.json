@@ -16,6 +16,7 @@
     "event.ServerPlayerEntityMixin",
     "event.carpet.LoggerRegistryMixin",
     "logger.FishingBobberEntityMixin",
+    "logger.FluidBlockMixin",
     "logger.HUDControllerMixin",
     "logger.LoggerAccessor",
     "logger.VillagerEntityMixin",
@@ -31,7 +32,6 @@
     "rule.ContainerComponentMixin",
     "rule.CreeperEntityMixin",
     "rule.EnchantmentHelperMixin",
-    "rule.enchantment.EnchantmentMixin",
     "rule.EndermanEntityMixin",
     "rule.EnderPearlEntityMixin",
     "rule.EntityAccessor",
@@ -83,6 +83,7 @@
     "rule.disablemobpeacefuldespawn.MobEntityMixin",
     "rule.disablemobpeacefuldespawn.WitherEntityMixin",
     "rule.enchantment.AnvilScreenHandlerMixin",
+    "rule.enchantment.EnchantmentMixin",
     "rule.entityplayeractionpack.ActionAccessor",
     "rule.entityplayeractionpack.EntityPlayerActionPackAccessor",
     "rule.fakeplayerkeepinventory.PlayerEntityMixin",
@@ -104,8 +105,8 @@
   ],
   "client": [
     "debug.ScreenAccessor",
-    "network.SlotMixin",
     "network.ScreenHandlerMixin",
+    "network.SlotMixin",
     "rule.client.carpet.SettingsManagerMixin"
   ],
   "injectors": {
