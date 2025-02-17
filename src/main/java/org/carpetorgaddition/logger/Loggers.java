@@ -33,7 +33,7 @@ public class Loggers {
     }
 
     /**
-     * 黑曜石记录器
+     * 黑曜石生成记录器
      */
     public static FunctionLogger getObsidianLogger() {
         return (FunctionLogger) LoggerRegistry.getLogger(LoggerNames.OBSIDIAN);

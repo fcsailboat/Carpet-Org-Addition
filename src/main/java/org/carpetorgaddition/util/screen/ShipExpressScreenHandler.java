@@ -135,9 +135,9 @@ public class ShipExpressScreenHandler extends GenericContainerScreenHandler {
             default -> throw new IllegalStateException();
         };
         // 向物品发送者发送消息
-        MessageUtils.sendMessage(this.sourcePlayer.getCommandSource(), "carpet.commands.mail.sending.multiple", args);
+        MessageUtils.sendMessage(this.sourcePlayer, "carpet.commands.mail.sending.multiple", args);
         // 向物品接收者发送消息
-        MessageUtils.sendMessage(this.targetPlayer.getCommandSource(), "carpet.commands.mail.receive.multiple",
+        MessageUtils.sendMessage(this.targetPlayer, "carpet.commands.mail.receive.multiple",
                 this.sourcePlayer.getDisplayName(), args[1], args[2], TextConstants.clickRun("/mail receive"));
         Express.playXpOrbPickupSound(this.targetPlayer);
         Express.checkRecipientPermission(this.sourcePlayer, this.targetPlayer);

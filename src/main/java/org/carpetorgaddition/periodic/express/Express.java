@@ -288,7 +288,7 @@ public class Express implements Comparable<Express> {
         if (player == null) {
             return;
         }
-        MessageUtils.sendMessage(player.getCommandSource(), message.get());
+        MessageUtils.sendMessage(player, message.get());
     }
 
     /**
@@ -316,7 +316,7 @@ public class Express implements Comparable<Express> {
         }
         // 将消息设置为灰色斜体
         MutableText message = TextUtils.toGrayItalic(TextUtils.translate("carpet.commands.mail.sending.permission"));
-        MessageUtils.sendMessage(senderPlayer.getCommandSource(), message);
+        MessageUtils.sendMessage(senderPlayer, message);
     }
 
     /**
