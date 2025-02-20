@@ -2,10 +2,13 @@ package org.carpetorgaddition.periodic.task.findtask;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -16,11 +19,13 @@ import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.command.FinderCommand;
 import org.carpetorgaddition.periodic.task.ServerTask;
+import org.carpetorgaddition.util.IOUtils;
 import org.carpetorgaddition.util.MessageUtils;
 import org.carpetorgaddition.util.TextUtils;
 import org.carpetorgaddition.util.inventory.SimulatePlayerInventory;
 import org.carpetorgaddition.util.wheel.ItemStackPredicate;
 import org.carpetorgaddition.util.wheel.ItemStackStatistics;
+import org.carpetorgaddition.util.wheel.WorldFormat;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,12 +53,14 @@ public class OfflinePlayerFindTask extends ServerTask {
     private final CommandContext<ServerCommandSource> context;
     private final UserCache userCache;
     protected final ServerPlayerEntity player;
+    private final MinecraftServer server;
     private final File[] files;
     private final ItemStackPredicate predicate;
     private State taksState = State.START;
     // synchronized会导致虚拟线程被锁定吗？还能不能使用并发集合？
     private final ReentrantLock lock = new ReentrantLock();
     private final ArrayList<Result> list = new ArrayList<>();
+    private final WorldFormat tempFileDirectory;
 
     public OfflinePlayerFindTask(
             CommandContext<ServerCommandSource> context,
@@ -65,7 +72,9 @@ public class OfflinePlayerFindTask extends ServerTask {
         this.predicate = new ItemStackPredicate(context, "itemStack");
         this.userCache = userCache;
         this.player = player;
+        this.server = player.server;
         this.files = files;
+        this.tempFileDirectory = new WorldFormat(this.server, "temp", "playerdata");
     }
 
     @Override
@@ -98,7 +107,15 @@ public class OfflinePlayerFindTask extends ServerTask {
         this.threadCount.getAndIncrement();
         Thread.ofVirtual().start(() -> {
             try {
-                findItem(file);
+                File fileCopy = this.tempFileDirectory.file(file.getName());
+                // 复制文件，避免影响源文件
+                IOUtils.copyFile(file, fileCopy);
+                findItem(fileCopy);
+                // 删除临时文件
+                if (fileCopy.delete()) {
+                    return;
+                }
+                CarpetOrgAddition.LOGGER.warn("未成功删除临时文件{}", fileCopy.getName());
             } finally {
                 this.threadCount.getAndDecrement();
             }
@@ -119,13 +136,16 @@ public class OfflinePlayerFindTask extends ServerTask {
         if (optional.isPresent()) {
             GameProfile gameProfile = optional.get();
             // 不从在线玩家物品栏查找物品
-            if (this.player.server.getPlayerManager().getPlayer(gameProfile.getName()) != null) {
+            if (this.server.getPlayerManager().getPlayer(gameProfile.getName()) != null) {
                 return;
             }
             // 从玩家NBT读取物品栏
             NbtCompound nbt;
             try {
-                nbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
+                NbtCompound maybeOldNbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
+                int version = NbtHelper.getDataVersion(maybeOldNbt, -1);
+                // 看起来这个方法并没有将新的NBT重新写入文件，这是否意味着它不会对源文件产生影响？
+                nbt = DataFixTypes.PLAYER.update(this.server.getDataFixer(), maybeOldNbt, version);
             } catch (IOException e) {
                 CarpetOrgAddition.LOGGER.warn("无法从文件读取玩家数据：", e);
                 return;
@@ -155,8 +175,6 @@ public class OfflinePlayerFindTask extends ServerTask {
     protected Inventory getInventory(NbtCompound nbt) {
         return SimulatePlayerInventory.of(nbt, this.player.getServer());
     }
-
-    // 统计物品数量
 
     // 发送命令反馈
     private void sendFeedback() {

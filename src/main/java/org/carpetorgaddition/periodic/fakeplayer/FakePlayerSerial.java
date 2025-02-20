@@ -97,7 +97,7 @@ public class FakePlayerSerial {
     }
 
     public FakePlayerSerial(WorldFormat worldFormat, String name) throws IOException {
-        JsonObject json = IOUtils.loadJson(worldFormat.getFile(name));
+        JsonObject json = IOUtils.loadJson(worldFormat.getJsonFile(name));
         // 玩家名
         this.fakePlayerName = IOUtils.removeExtension(name);
         // 玩家位置
@@ -142,7 +142,7 @@ public class FakePlayerSerial {
         MinecraftServer server = context.getSource().getServer();
         WorldFormat worldFormat = new WorldFormat(server, PLAYER_DATA);
         String name = fakePlayerName;
-        File file = worldFormat.file(name);
+        File file = worldFormat.jsonFile(name);
         // 玩家数据是否已存在
         boolean exists = file.exists();
         if (exists && !resave) {

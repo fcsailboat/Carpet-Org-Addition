@@ -323,14 +323,14 @@ public class Express implements Comparable<Express> {
      * 将快递信息保存到本地文件
      */
     public void save() throws IOException {
-        NbtIo.write(this.writeNbt(this.server), this.worldFormat.file(this.getId() + ".nbt").toPath());
+        NbtIo.write(this.writeNbt(this.server), this.worldFormat.jsonFile(this.getId() + ".nbt").toPath());
     }
 
     /**
      * 删除已经完成的快递
      */
     public void delete() {
-        File file = this.worldFormat.getFile(this.getId() + ".nbt");
+        File file = this.worldFormat.getJsonFile(this.getId() + ".nbt");
         if (file.delete()) {
             return;
         }

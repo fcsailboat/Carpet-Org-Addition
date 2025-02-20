@@ -131,14 +131,14 @@ public class Waypoint {
             json.addProperty("another_z", this.anotherBlockPos.getZ());
         }
         WorldFormat worldFormat = new WorldFormat(server, WAYPOINT);
-        File file = worldFormat.file(this.name);
+        File file = worldFormat.jsonFile(this.name);
         IOUtils.saveJson(file, json);
     }
 
     // 从本地文件加载一个路径点对象
     public static Optional<Waypoint> load(MinecraftServer server, String name) throws IOException {
         WorldFormat worldFormat = new WorldFormat(server, WAYPOINT);
-        File file = worldFormat.getFile(name);
+        File file = worldFormat.getJsonFile(name);
         JsonObject json = IOUtils.loadJson(file);
         BlockPos blockPos;
         // 路径点的三个坐标

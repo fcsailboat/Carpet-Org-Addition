@@ -69,6 +69,28 @@ public class IOUtils {
     }
 
     /**
+     * 复制一个文件
+     *
+     * @param original 源文件，该文件必须存在且不能是文件夹
+     * @param copy     复制的目标位置
+     */
+    public static void copyFile(File original, File copy) {
+        try {
+            BufferedInputStream input = new BufferedInputStream(new FileInputStream(original));
+            BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(copy));
+            try (input; output) {
+                byte[] bytes = new byte[1024 * 8]; // 1024 * 8 = 8192;
+                int len;
+                while ((len = input.read(bytes)) != -1) {
+                    output.write(bytes, 0, len);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("发生IO错误：", e);
+        }
+    }
+
+    /**
      * json对象中是否包含指定元素
      *
      * @param elements 一个字符串数组，数组中只要有一个元素不存在于json中方法就返回false

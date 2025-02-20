@@ -215,7 +215,7 @@ public class LocationsCommand {
         //获取路径点文件对象
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), Waypoint.WAYPOINT);
         // 获取路径点文件的对象
-        File file = worldFormat.file(name);
+        File file = worldFormat.jsonFile(name);
         //从本地文件删除路径点
         if (file.delete()) {
             // 成功删除

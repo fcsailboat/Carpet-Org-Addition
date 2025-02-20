@@ -25,6 +25,9 @@ public class SimulatePlayerInventory implements Inventory {
     private SimulatePlayerInventory() {
     }
 
+    /**
+     * @see net.minecraft.entity.player.PlayerInventory#readNbt(NbtList)
+     */
     public static SimulatePlayerInventory of(NbtCompound nbt, MinecraftServer server) {
         NbtList nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
         SimulatePlayerInventory inventory = new SimulatePlayerInventory();

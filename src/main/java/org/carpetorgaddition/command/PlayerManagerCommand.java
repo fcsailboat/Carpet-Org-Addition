@@ -270,7 +270,7 @@ public class PlayerManagerCommand {
     ) throws IOException {
         String playerName = fakePlayer.getName().getString();
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), null);
-        File file = worldFormat.file(SAFEAFK_PROPERTIES);
+        File file = worldFormat.jsonFile(SAFEAFK_PROPERTIES);
         // 文件存在或者文件成功创建
         if (file.isFile() || file.createNewFile()) {
             Properties properties = new Properties();
@@ -300,7 +300,7 @@ public class PlayerManagerCommand {
     public static void loadSafeAfk(ServerPlayerEntity player) {
         if (player instanceof EntityPlayerMPFake) {
             WorldFormat worldFormat = new WorldFormat(player.server, null);
-            File file = worldFormat.file(SAFEAFK_PROPERTIES);
+            File file = worldFormat.jsonFile(SAFEAFK_PROPERTIES);
             // 文件必须存在
             if (file.isFile()) {
                 Properties properties = new Properties();
@@ -457,7 +457,7 @@ public class PlayerManagerCommand {
     private static int delete(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), FakePlayerSerial.PLAYER_DATA);
         String name = StringArgumentType.getString(context, "name");
-        File file = worldFormat.getFile(name);
+        File file = worldFormat.getJsonFile(name);
         // 文件存在且文件删除成功
         if (file.isFile() && file.delete()) {
             MessageUtils.sendMessage(context.getSource(), "carpet.commands.playerManager.delete.success");

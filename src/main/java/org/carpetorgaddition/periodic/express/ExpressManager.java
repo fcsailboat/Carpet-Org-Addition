@@ -7,7 +7,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -109,7 +108,7 @@ public class ExpressManager {
             express.checkRecipientPermission();
         }
         // 将快递信息写入本地文件
-        NbtIo.write(express.writeNbt(this.server), this.worldFormat.file(express.getId() + ".nbt").toPath());
+        NbtIo.write(express.writeNbt(this.server), this.worldFormat.jsonFile(express.getId() + ".nbt").toPath());
     }
 
     public Stream<Express> stream() {
