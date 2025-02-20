@@ -78,7 +78,7 @@ public class SpectatorCommand {
         }
         player.changeGameMode(gameMode);
         // 发送命令反馈
-        MutableText text = Text.translatable("gameMode." + gameMode.getName());
+        MutableText text = gameMode.getTranslatableName().copy();
         player.sendMessage(Text.translatable("commands.gamemode.success.self", text), true);
         return gameMode == GameMode.SURVIVAL ? 1 : 0;
     }
@@ -133,8 +133,7 @@ public class SpectatorCommand {
         if (player.isSpectator()) {
             return;
         }
-        throw CommandUtils.createException("carpet.commands.spectator.teleport.fail",
-                Text.translatable("gameMode." + GameMode.SPECTATOR.getName()));
+        throw CommandUtils.createException("carpet.commands.spectator.teleport.fail", GameMode.SPECTATOR.getTranslatableName());
     }
 
     // 将玩家位置保存到文件

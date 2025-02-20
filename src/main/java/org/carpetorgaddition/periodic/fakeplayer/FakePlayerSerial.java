@@ -110,7 +110,7 @@ public class FakePlayerSerial {
         // 维度
         this.dimension = json.get("dimension").getAsString();
         // 游戏模式
-        this.gameMode = GameMode.byName(json.get("gamemode").getAsString());
+        this.gameMode = GameMode.byId(json.get("gamemode").getAsString());
         // 是否飞行
         this.flying = json.get("flying").getAsBoolean();
         // 是否潜行
@@ -231,7 +231,7 @@ public class FakePlayerSerial {
         // 维度
         json.addProperty("dimension", this.dimension);
         // 游戏模式
-        json.addProperty("gamemode", this.gameMode.getName());
+        json.addProperty("gamemode", this.gameMode.getId());
         // 是否飞行
         json.addProperty("flying", this.flying);
         // 是否潜行

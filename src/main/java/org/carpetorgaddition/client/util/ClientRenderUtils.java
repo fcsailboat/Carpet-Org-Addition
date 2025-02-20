@@ -26,8 +26,8 @@ public class ClientRenderUtils {
                 1536,
                 ShaderProgramLayer
                         .create(ShaderProgramLayersAccessor.getRenderTypeLines())
-                        .setId(Identifier.of(CarpetOrgAddition.MOD_ID, "see_through_line"))
-                        .addDepthProgram(DepthTestState.NO_DEPTH_TEST)
+                        .id(Identifier.of(CarpetOrgAddition.MOD_ID, "see_through_line"))
+                        .depthTest(DepthTestState.NO_DEPTH_TEST)
                         .create(),
                 accessor.invokerBuild(false)
         );
