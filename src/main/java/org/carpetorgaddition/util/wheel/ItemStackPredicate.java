@@ -162,28 +162,23 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
      * @return 如果能够合成物品，返回合成输出物品，否则返回空物品，如果配方中包含不能转换为物品的元素，也返回空物品
      */
     public static ItemStack getCraftOutput(ItemStackPredicate[] predicates, int widthHeight, EntityPlayerMPFake fakePlayer) {
-        boolean allItem = true;
         for (ItemStackPredicate predicate : predicates) {
             if (predicate.canConvertItem()) {
                 continue;
             }
-            allItem = false;
-            break;
+            return ItemStack.EMPTY;
         }
-        if (allItem) {
-            // 前面的循环中已经判断了字符串是否能转换成物品，所以这里不需要再判断
-            List<ItemStack> list = Arrays.stream(predicates)
-                    .map(ItemStackPredicate::getInput)
-                    .map(Identifier::of)
-                    .map(Registries.ITEM::get)
-                    .map(Item::getDefaultStack)
-                    .toList();
-            CraftingRecipeInput input = CraftingRecipeInput.create(widthHeight, widthHeight, list);
-            World world = fakePlayer.getWorld();
-            Optional<RecipeEntry<CraftingRecipe>> optional = fakePlayer.server.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, world);
-            return optional.map(recipe -> recipe.value().craft(input, world.getRegistryManager())).orElse(ItemStack.EMPTY);
-        }
-        return ItemStack.EMPTY;
+        // 前面的循环中已经判断了字符串是否能转换成物品，所以这里不需要再判断
+        List<ItemStack> list = Arrays.stream(predicates)
+                .map(ItemStackPredicate::getInput)
+                .map(Identifier::of)
+                .map(Registries.ITEM::get)
+                .map(Item::getDefaultStack)
+                .toList();
+        CraftingRecipeInput input = CraftingRecipeInput.create(widthHeight, widthHeight, list);
+        World world = fakePlayer.getWorld();
+        Optional<RecipeEntry<CraftingRecipe>> optional = fakePlayer.server.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, world);
+        return optional.map(recipe -> recipe.value().craft(input, world.getRegistryManager())).orElse(ItemStack.EMPTY);
     }
 
     /**
