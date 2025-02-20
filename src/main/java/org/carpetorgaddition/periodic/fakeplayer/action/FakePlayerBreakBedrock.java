@@ -168,7 +168,7 @@ public class FakePlayerBreakBedrock {
         BlockBreakManager breakManager = GenericFetcherUtils.getBlockBreakManager(fakePlayer);
         boolean isPiston = false;
         //noinspection StatementWithEmptyBody
-        if (blockState.isAir() || blockState.isIn(BlockTags.REPLACEABLE)) {
+        if (isReplaceableBlock(blockState)) {
             // 当前方块是可以被直接替换的，例如雪
             // 什么也不需要不做
         } else if (blockState.isOf(Blocks.PISTON)) {
@@ -238,7 +238,7 @@ public class FakePlayerBreakBedrock {
         for (Direction value : MathUtils.HORIZONTAL) {
             BlockPos offset = bedrockPos.offset(value);
             BlockState blockState = world.getBlockState(offset);
-            if (blockState.isAir() || blockState.isIn(BlockTags.REPLACEABLE)) {
+            if (isReplaceableBlock(blockState)) {
                 direction = value;
                 continue;
             }
@@ -299,6 +299,25 @@ public class FakePlayerBreakBedrock {
         interactionLever(fakePlayer, offset);
         destructor.setLeverPos(offset);
         return StepResult.CONTINUE;
+    }
+
+    /**
+     * 判断当前方块是否是可替换的，只对雪片进行了特判，其他带有{@code #minecraft:replaceable}标签的方块，例如藤蔓，发光地衣等会直接返回{@code true}
+     *
+     * @return 当前方块是否是可直接替换的
+     */
+    private static boolean isReplaceableBlock(BlockState blockState) {
+        if (blockState.isAir()) {
+            return true;
+        }
+        if (blockState.isIn(BlockTags.REPLACEABLE)) {
+            if (blockState.isOf(Blocks.SNOW)) {
+                // 只有层数为1的雪片才能被替换
+                return blockState.get(SnowBlock.LAYERS) == 1;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
