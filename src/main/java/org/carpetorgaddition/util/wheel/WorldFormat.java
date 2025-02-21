@@ -72,6 +72,7 @@ public class WorldFormat {
      *
      * @param fileName 文件名，如果没有扩展名，则自动添加json作为扩展名
      */
+    @Deprecated(forRemoval = true)
     public File jsonFile(String fileName) {
         return new File(this.directory, suppJsonFileName(fileName));
     }
@@ -81,12 +82,14 @@ public class WorldFormat {
      *
      * @param fileName 文件的名称，如果没有扩展名，则自动添加一个.json作为扩展名
      */
+    @Deprecated(forRemoval = true)
     public File getJsonFile(String fileName) {
         fileName = suppJsonFileName(fileName);
         return new File(this.directory, fileName);
     }
 
     // 补全文件扩展名
+    @Deprecated(forRemoval = true)
     private static String suppJsonFileName(String fileName) {
         if (fileName.split("\\.").length == 1) {
             return fileName + IOUtils.JSON_EXTENSION;
@@ -131,6 +134,7 @@ public class WorldFormat {
     }
 
     // 检查该目录下的文件是否存在
+    @Deprecated(forRemoval = true)
     public boolean fileExists(String fileName) {
         fileName = suppJsonFileName(fileName);
         File file = this.jsonFile(fileName);
