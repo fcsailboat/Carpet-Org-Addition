@@ -14,7 +14,7 @@ def copy_the_latest_file():
     path = os.path.join(directory, "build\\libs")
     files = [os.path.join(path, file) for file in os.listdir(path) if file not in "source"]
     last = max(files, key=os.path.getmtime)
-    shutil.copy(last, os.path.join(directory, "python\\libs"))
+    shutil.copy(last, os.path.join(directory, "python\\libs\\version"))
 
 
 def build_jar():
