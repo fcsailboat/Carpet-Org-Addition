@@ -32,7 +32,7 @@ def build_jar():
         count += 1
         try:
             print(f"正在进行第{count}次尝试")
-            subprocess.run(args=["gradlew", "remapJar"], timeout=60, cwd=directory, shell=True)
+            subprocess.run(args=["gradlew", "remapJar"], timeout=600, cwd=directory, shell=True)
             copy_the_latest_file()
             global version_count
             version_count += 1
