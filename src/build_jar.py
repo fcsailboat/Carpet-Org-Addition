@@ -57,7 +57,7 @@ def build_all_version_jar():
     """
     构建所有版本
     """
-    branches = ["1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6"]
+    branches = ["1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8"]
     for branch in branches:
         print(f"正在切换到{branch}分支")
         switch_branch(branch)
