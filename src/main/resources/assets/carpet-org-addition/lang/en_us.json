@@ -71,7 +71,10 @@
   "carpet.rule.quickSettingFakePlayerCraft.extra.0": "false: Disable this rule",
   "carpet.rule.quickSettingFakePlayerCraft.extra.1": "sneaking: Only when sneaking",
   "carpet.rule.quickSettingFakePlayerCraft.extra.2": "true: Can always open",
-  "carpet.rule.fakePlayerKeepInventory.desc": "Keep inventories and experience when fake player dies",
+  "carpet.rule.fakePlayerKeepInventory.desc": "Controls whether fake players keep inventory on death (when set to false or true, it's controlled by fakePlayerKeepInventoryCondition and not affected by KeepInventory game rule, vanilla follows original logic)",
+  "carpet.rule.fakePlayerKeepInventory.extra.0": "false: Fake players drop inventory on death",
+  "carpet.rule.fakePlayerKeepInventory.extra.1": "true: Fake players keep inventory on death",
+  "carpet.rule.fakePlayerKeepInventory.extra.2": "vanilla: Fake player inventory drop controlled by vanilla rules"
   "carpet.rule.fakePlayerKeepInventoryCondition.desc": "Controls conditional for fake player death drops",
   "carpet.rule.fakePlayerKeepInventoryCondition.extra.0": "unconditional: Fake players never drop items",
   "carpet.rule.fakePlayerKeepInventoryCondition.extra.1": "killed_by_player_or_the_void: Only keep inventory when killed by players or void",
