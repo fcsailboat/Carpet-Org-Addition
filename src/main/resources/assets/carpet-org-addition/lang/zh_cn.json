@@ -132,6 +132,7 @@
   "carpet.rule.fakePlayerKeepInventoryCondition.desc": "控制假玩家死亡不掉落的条件",
   "carpet.rule.fakePlayerKeepInventoryCondition.extra.0": "unconditional：假玩家无条件不掉落",
   "carpet.rule.fakePlayerKeepInventoryCondition.extra.1": "killed_by_player_or_the_void：仅在假玩家死于玩家伤害或虚空伤害时不掉落",
+  "carpet.rule.fakePlayerKeepInventoryCondition.extra.2": "killed_by_player_or_the_void_or_fall_or_by_mobs：仅在假玩家死于玩家伤害或虚空伤害或摔落伤害或怪物伤害时不掉落",
   "carpet.rule.commandCreeper.name": "苦力怕命令",
   "carpet.rule.commandCreeper.desc": "启用/creeper命令用来在指定玩家周围制造一场苦力怕爆炸，爆炸只会伤害实体，不会破坏方块",
   "carpet.rule.commandRuleSearch.name": "规则搜索命令",

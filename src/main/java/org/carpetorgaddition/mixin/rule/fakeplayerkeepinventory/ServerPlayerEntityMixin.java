@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.rule.RuleUtils;
+import org.carpetorgaddition.rule.value.FakePlayerKeepInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,14 +19,21 @@ public class ServerPlayerEntityMixin {
 
     @WrapOperation(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
     private boolean keepItem(GameRules instance, GameRules.Key<GameRules.BooleanRule> rule, Operation<Boolean> original) {
-        return shouldKeepInventory() || original.call(instance, rule);
-    }
-
-    @Unique
-    private boolean shouldKeepInventory() {
-        if (CarpetOrgAdditionSettings.fakePlayerKeepInventory.get() && thisPlayer instanceof EntityPlayerMPFake fakePlayer) {
-            return RuleUtils.shouldKeepInventory(fakePlayer);
+        if(CarpetOrgAdditionSettings.fakePlayerKeepInventory.get() == FakePlayerKeepInventory.TRUE && thisPlayer instanceof EntityPlayerMPFake fakePlayer) {
+            if(RuleUtils.shouldKeepInventory(fakePlayer)){
+                return true;
+            }else{
+                original.call(instance, rule);
+            }
+        }else if (CarpetOrgAdditionSettings.fakePlayerKeepInventory.get() == FakePlayerKeepInventory.FALSE && thisPlayer instanceof EntityPlayerMPFake fakePlayer){
+            if(RuleUtils.shouldKeepInventory(fakePlayer)){
+                return true;
+            }else{
+                original.call(instance, rule);
+            }
         }
         return false;
     }
+
+
 }

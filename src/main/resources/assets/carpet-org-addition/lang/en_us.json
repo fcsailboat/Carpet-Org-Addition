@@ -75,6 +75,7 @@
   "carpet.rule.fakePlayerKeepInventoryCondition.desc": "Controls conditional for fake player death drops",
   "carpet.rule.fakePlayerKeepInventoryCondition.extra.0": "unconditional: Fake players never drop items",
   "carpet.rule.fakePlayerKeepInventoryCondition.extra.1": "killed_by_player_or_the_void: Only keep inventory when killed by players or void",
+  "carpet.rule.fakePlayerKeepInventoryCondition.extra.2": "killed_by_player_or_the_void_or_fall_or_by_mobs: Only keep inventory when killed by players, void, fall or by mobs",
   "carpet.rule.commandCreeper.desc": "Enable /creeper command to make a creeper explosion around the specified player. The explosion only damages entities, and cause no block damages",
   "carpet.rule.commandRuleSearch.desc": "Enable /ruleSearch to search for carpet rules with the specified string in the translated name",
   "carpet.rule.superChargedCreeper.desc": "Drop a head for each entity when killed by a charged creeper",

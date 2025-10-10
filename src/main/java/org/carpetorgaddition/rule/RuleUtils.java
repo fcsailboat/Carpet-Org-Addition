@@ -8,6 +8,7 @@ import carpet.utils.Translations;
 import net.minecraft.entity.damage.DamageRecord;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTracker;
+import net.minecraft.entity.mob.Monster;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -15,6 +16,7 @@ import net.minecraft.util.Formatting;
 import org.carpetorgaddition.CarpetOrgAddition;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 import org.carpetorgaddition.mixin.accessor.DamageTrackerAccessor;
+import org.carpetorgaddition.rule.value.FakePlayerKeepInventory;
 import org.carpetorgaddition.util.FetcherUtils;
 import org.carpetorgaddition.wheel.TextBuilder;
 import org.jetbrains.annotations.Nullable;
@@ -139,8 +141,8 @@ public class RuleUtils {
      */
     public static boolean shouldKeepInventory(EntityPlayerMPFake fakePlayer) {
         return switch (CarpetOrgAdditionSettings.fakePlayerKeepInventoryCondition.get()) {
-            // 无条件保留物品栏
-            case UNCONDITIONAL -> true;
+            // 无条件保留/掉落物品栏
+            case UNCONDITIONAL -> getFakePlayerKeepInventory();
             // 被玩家杀死或落入虚空时保留物品栏
             case KILLED_BY_PLAYER_OR_THE_VOID -> {
                 DamageTracker damageTracker = fakePlayer.getDamageTracker();
@@ -161,6 +163,40 @@ public class RuleUtils {
                 // 假玩家落入虚空时不掉落
                 yield directCause.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY);
             }
+            case KILLED_BY_PLAYER_OR_THE_VOID_OR_FALL_OR_BY_MOBS -> {
+                    DamageTracker damageTracker = fakePlayer.getDamageTracker();
+                    List<DamageRecord> records = ((DamageTrackerAccessor) damageTracker).getRecentDamage();
+                    DamageSource directCause = records.getLast().damageSource();
+                    // 伤害的源发实体为玩家时不掉落（例如玩家射出的箭）
+                    if (directCause.getSource() instanceof ServerPlayerEntity) {
+                        yield true;
+                    }
+                    // 伤害的直接实体为玩家时不掉落
+                    if (directCause.getAttacker() instanceof ServerPlayerEntity) {
+                        yield true;
+                    }
+                    // 假玩家最近一段时间曾受到来自玩家的伤害
+                    if (fakePlayer.getPrimeAdversary() instanceof ServerPlayerEntity) {
+                        yield true;
+                    }
+                    //摔死时不掉落
+                    if (directCause == fakePlayer.getDamageSources().fall()) {
+                        yield true;
+                    }
+                    // 被怪物杀死时不掉落
+                    if (directCause.getAttacker() instanceof Monster) {
+                        yield true;
+                    }
+                    // 假玩家落入虚空时不掉落
+                    yield directCause.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY);
+            }
         };
     }
-}
+    public static boolean getFakePlayerKeepInventory() {
+        if (CarpetOrgAdditionSettings.fakePlayerKeepInventory.get() == FakePlayerKeepInventory.TRUE) {
+            return true;
+        } else if (CarpetOrgAdditionSettings.fakePlayerKeepInventory.get() == FakePlayerKeepInventory.FALSE) {
+            return false;
+        }
+        return false;
+    }}
