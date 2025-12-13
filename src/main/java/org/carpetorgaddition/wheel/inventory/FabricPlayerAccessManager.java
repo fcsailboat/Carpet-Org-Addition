@@ -27,7 +27,7 @@ public class FabricPlayerAccessManager {
     /**
      * 配置文件对应的Fabric玩家访问器
      */
-    private final Map<GameProfile, FabricPlayerAccessor> accessors = new ConcurrentHashMap<>();
+    private final Map<PlayerConfigEntry, FabricPlayerAccessor> accessors = new ConcurrentHashMap<>();
     private final Queue<FabricPlayerAccessorEntry> queue = Queues.newConcurrentLinkedQueue();
     /**
      * 上次处理队列的时间
@@ -57,10 +57,10 @@ public class FabricPlayerAccessManager {
     }
 
     @NotNull
-    public FabricPlayerAccessor getOrCreateBlocking(GameProfile gameProfile) {
-        return this.accessors.computeIfAbsent(gameProfile, __ -> {
+    public FabricPlayerAccessor getOrCreateBlocking(PlayerConfigEntry playerConfigEntry) {
+        return this.accessors.computeIfAbsent(playerConfigEntry, __ -> {
             // 在多个线程调用构造方法存在并发问题
-            Supplier<FabricPlayerAccessor> supplier = () -> new FabricPlayerAccessor(this.server, gameProfile, this);
+            Supplier<FabricPlayerAccessor> supplier = () -> new FabricPlayerAccessor(this.server, playerConfigEntry, this);
             FabricPlayerAccessorEntry entry = new FabricPlayerAccessorEntry(supplier);
             this.queue.add(entry);
             Lock lock = entry.getLock();
@@ -86,7 +86,7 @@ public class FabricPlayerAccessManager {
                         // 长时间没有任务被处理，可能发生了阻塞
                         long time = System.currentTimeMillis() - this.lastProcessingTime;
                         if (time > HEALTH_CHECK_TIMEOUT_MS) {
-                            throw new IllegalStateException("FabricPlayerAccessManager blocked " + time + "ms, queue size:" + this.queue.size() + ", profile:" + gameProfile);
+                            throw new IllegalStateException("FabricPlayerAccessManager blocked " + time + "ms, queue size:" + this.queue.size() + ", profile:" + playerConfigEntry);
                         }
                     } else {
                         throw new IllegalStateException("The server has been shut down");

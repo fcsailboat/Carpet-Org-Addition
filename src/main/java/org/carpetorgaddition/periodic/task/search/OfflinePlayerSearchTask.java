@@ -260,7 +260,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
             INVALID_PLAYER_DATAS.add(uuid);
             return false;
         }
-        FabricPlayerAccessor accessor = this.accessManager.getOrCreateBlocking(gameProfile);
+        FabricPlayerAccessor accessor = this.accessManager.getOrCreateBlocking(entry);
         OfflinePlayerInventory inventory = new OfflinePlayerInventory(accessor);
         inventory.setShowLog(false);
         inventory.onOpen(this.player);
