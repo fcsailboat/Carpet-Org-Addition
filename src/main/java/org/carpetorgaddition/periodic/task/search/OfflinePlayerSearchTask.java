@@ -161,11 +161,13 @@ public class OfflinePlayerSearchTask extends ServerTask {
                 if (INVALID_PLAYER_DATAS.contains(uuid)) {
                     return;
                 }
-                NbtCompound nbt = readNbt(unsafe, uuid);
-                if (nbt == null) {
-                    return;
+                if (this.server.isRunning()) {
+                    NbtCompound nbt = readNbt(unsafe, uuid);
+                    if (nbt == null) {
+                        return;
+                    }
+                    this.searchItem(uuid, nbt);
                 }
-                this.searchItem(uuid, nbt);
             } catch (RuntimeException | IOException e) {
                 CarpetOrgAddition.LOGGER.error("Unable to read player data from file for file {}", unsafe.getName(), e);
                 addCorruptedPlayerUUID(uuid);
@@ -189,7 +191,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
         // 使用<而不是==，因为存档可能降级
         if (this.isCorruptedPlayerData(uuid) || version < GenericUtils.getNbtDataVersion()) {
             // 升级或修复玩家数据
-            if (this.backupAndUpdate(unsafe, uuid)) {
+            if (this.server.isRunning() && this.backupAndUpdate(unsafe, uuid)) {
                 return NbtIo.readCompressed(unsafe.toPath(), NbtSizeTracker.ofUnlimitedBytes());
             }
             return null;
@@ -248,7 +250,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
             INVALID_PLAYER_DATAS.add(uuid);
             return false;
         }
-        FabricPlayerAccessor accessor = this.accessManager.getOrCreate(gameProfile);
+        FabricPlayerAccessor accessor = this.accessManager.getOrCreateBlocking(gameProfile);
         OfflinePlayerInventory inventory = new OfflinePlayerInventory(accessor);
         inventory.setShowLog(false);
         inventory.onOpen(this.player);
