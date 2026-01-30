@@ -1,16 +1,12 @@
 package org.carpetorgaddition.mixin.rule;
 
 import carpet.patches.EntityPlayerMPFake;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.command.ServerCommandSource;
@@ -144,26 +140,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
     private void getEntityInteractionRange(CallbackInfoReturnable<Double> cir) {
         if (CarpetOrgAdditionSettings.maxBlockPlaceDistanceReferToEntity.get()) {
             cir.setReturnValue(RuleUtils.getPlayerMaxInteractionDistance());
-        }
-    }
-
-    // 玩家死亡产生的掉落物不会自然消失
-    @WrapOperation(method = "dropInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;dropAll()V"))
-    private void drop(PlayerInventory inventory, Operation<Void> original) {
-        if (CarpetOrgAdditionSettings.playerDropsNotDespawning.get()) {
-            for (ItemStack itemStack : inventory) {
-                if (!itemStack.isEmpty()) {
-                    ItemEntity itemEntity = inventory.player.dropItem(itemStack, true, false);
-                    if (itemEntity == null) {
-                        continue;
-                    }
-                    // 设置掉落物不消失
-                    itemEntity.setNeverDespawn();
-                }
-            }
-        } else {
-            // 掉落物正常消失
-            original.call(inventory);
         }
     }
 
