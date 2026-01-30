@@ -63,6 +63,7 @@
     "rule.PiglinBrainMixin",
     "rule.PistonBlockMixin",
     "rule.PlayerEntityMixin",
+    "rule.PlayerInventoryMixin",
     "rule.RedstoneWireBlockMixin",
     "rule.RepeaterBlockMixin",
     "rule.SeedCommandMixin",
