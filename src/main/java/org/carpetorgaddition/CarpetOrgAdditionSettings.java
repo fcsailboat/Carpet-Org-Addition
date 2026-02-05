@@ -1022,6 +1022,15 @@ public class CarpetOrgAdditionSettings {
                     .build()
     );
 
+    /**
+     * 易碎下界合金
+     */
+    public static final Supplier<Boolean> softNetherite = register(
+            RuleFactory.create(Boolean.class, "softNetherite", false)
+                    .addCategories(RuleCategory.SURVIVAL)
+                    .build()
+    );
+
     private static <T> Supplier<T> register(RuleContext<T> context) {
         RULES.add(context);
         return () -> (CarpetOrgAdditionExtension.isCarpetRuleLoaded() ? context.rule().value() : context.value());
