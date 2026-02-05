@@ -38,7 +38,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
-    @Inject(method = "getXpToDrop", at = @At("HEAD"), cancellable = true)
+    // 假玩家死亡不掉落经验
+    @Inject(method = "getExperienceToDrop", at = @At("HEAD"), cancellable = true)
     private void getXpToDrop(CallbackInfoReturnable<Integer> cir) {
         if (shouldKeepInventory()) {
             cir.setReturnValue(0);

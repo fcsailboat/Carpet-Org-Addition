@@ -110,6 +110,7 @@
   "carpet.rule.protectionEnchantmentCompatible.desc": "Allow all protection enchantments to be compatible",
   "carpet.rule.damageEnchantmentCompatible.desc": "Allow all damage enchantments to be compatible",
   "carpet.rule.maxLinesPerPage.desc": "Control the maximum number of lines allowed on each page of content",
+  "carpet.rule.villagerVoidTrading.desc": "Prevent the transaction window from closing after moving out of the villager's interaction range to restore void trading as it was before 24w44a",
   "carpet.rule.totemOfUndyingInvincibleTime.desc": "After activation, the Totem of Undying grants 2 seconds of Resistance V effect",
   "carpet.rule.playerCommandOpenPlayerInventory.desc": "Add the inventory subcommand to /player to open the player inventory interface",
   "carpet.rule.playerCommandOpenPlayerInventory.extra.0": "This rule is also the switch for the enderChest subcommand",

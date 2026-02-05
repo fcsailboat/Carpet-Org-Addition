@@ -194,6 +194,8 @@
   "carpet.rule.damageEnchantmentCompatible.desc": "允许伤害类魔咒共存",
   "carpet.rule.maxLinesPerPage.name": "每页内容最大行数",
   "carpet.rule.maxLinesPerPage.desc": "控制每一页内容最多可以有多少行",
+  "carpet.rule.villagerVoidTrading.name": "村民虚空交易",
+  "carpet.rule.villagerVoidTrading.desc": "阻止离开村民交互距离后交易窗口关闭以恢复24w44a之前的虚空交易",
   "carpet.rule.totemOfUndyingInvincibleTime.name": "不死图腾无敌时间",
   "carpet.rule.totemOfUndyingInvincibleTime.desc": "不死图腾触发后获得2秒的抗性提升V效果",
   "carpet.rule.playerCommandOpenPlayerInventory.name": "打开玩家物品栏",

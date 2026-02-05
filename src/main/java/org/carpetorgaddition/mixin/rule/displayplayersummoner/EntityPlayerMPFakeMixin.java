@@ -18,17 +18,17 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 @Mixin(value = EntityPlayerMPFake.class)
 public class EntityPlayerMPFakeMixin {
-    @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;thenAcceptAsync(Ljava/util/function/Consumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", remap = false))
-    private static <T> CompletableFuture<Void> thenAcceptAsync(CompletableFuture<T> instance, Consumer<? super T> action, Executor executor, Operation<CompletableFuture<Void>> original) {
+    @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;whenCompleteAsync(Ljava/util/function/BiConsumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", remap = false))
+    private static <T> CompletableFuture<T> thenAcceptAsync(CompletableFuture<T> instance, BiConsumer<? super T, ? super Throwable> action, Executor executor, Operation<CompletableFuture<T>> original) {
         ServerPlayerEntity player = CarpetOrgAdditionSettings.playerSummoner.get();
-        Consumer<? super T> consumer = value -> {
+        BiConsumer<? super T, ? super Throwable> consumer = (value, throwable) -> {
             try {
                 CarpetOrgAdditionSettings.internalPlayerSummoner.set(player);
-                action.accept(value);
+                action.accept(value, throwable);
             } finally {
                 CarpetOrgAdditionSettings.internalPlayerSummoner.remove();
             }

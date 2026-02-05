@@ -1,7 +1,5 @@
 package org.carpetorgaddition.mixin.network;
 
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 import org.carpetorgaddition.wheel.screen.BackgroundSpriteSyncSlot;
@@ -17,10 +15,10 @@ public class SlotMixin implements BackgroundSpriteSyncSlot {
     private Identifier identifier;
 
     @Inject(method = "getBackgroundSprite", at = @At("HEAD"), cancellable = true)
-    private void getBackgroundSprite(CallbackInfoReturnable<Pair<Identifier, Identifier>> cir) {
-        Pair<Identifier, Identifier> pair = cir.getReturnValue();
+    private void getBackgroundSprite(CallbackInfoReturnable<Identifier> cir) {
+        Identifier pair = cir.getReturnValue();
         if (pair == null && this.identifier != null) {
-            cir.setReturnValue(Pair.of(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, identifier));
+            cir.setReturnValue(identifier);
         }
     }
 

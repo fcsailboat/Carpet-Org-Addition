@@ -29,7 +29,7 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Inventory> 
             37, PlayerScreenHandler.EMPTY_CHESTPLATE_SLOT_TEXTURE,
             38, PlayerScreenHandler.EMPTY_LEGGINGS_SLOT_TEXTURE,
             39, PlayerScreenHandler.EMPTY_BOOTS_SLOT_TEXTURE,
-            40, PlayerScreenHandler.EMPTY_OFFHAND_ARMOR_SLOT
+            40, PlayerScreenHandler.EMPTY_OFF_HAND_SLOT_TEXTURE
     );
 
     /**

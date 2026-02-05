@@ -909,6 +909,15 @@ public class CarpetOrgAdditionSettings {
     );
 
     /**
+     * 村民虚空交易
+     */
+    public static final Supplier<Boolean> villagerVoidTrading = register(
+            RuleFactory.create(Boolean.class, "villagerVoidTrading", false)
+                    .addCategories(RuleCategory.FEATURE)
+                    .build()
+    );
+
+    /**
      * 经验球合并
      */
     public static final Supplier<Boolean> experienceOrbMerge = register(

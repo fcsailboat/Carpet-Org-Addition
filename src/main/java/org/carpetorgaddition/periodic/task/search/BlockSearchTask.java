@@ -118,9 +118,9 @@ public class BlockSearchTask extends ServerTask {
                         throw new TaskExecutionException(function);
                     }
                 }
-                return true;
+                return BlockPos.IterationState.ACCEPT;
             }
-            return false;
+            return BlockPos.IterationState.STOP;
         });
         for (Map.Entry<Block, Set<BlockPos>> entry : group.entrySet()) {
             this.results.add(new Result(entry.getKey(), entry.getValue()));
