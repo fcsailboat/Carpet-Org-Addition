@@ -128,6 +128,7 @@
   "carpet.rule.playerManagerForceComment.desc": "Forcefully add comments when saving player data",
   "carpet.rule.itemPickupRangeExpand.desc": "Extend range of item pickup by specified distance",
   "carpet.rule.itemPickupRangeExpandPlayerControl.desc": "Allow players to decide for themselves whether to enable \"itemPickupRangeExpand\"",
+  "carpet.rule.softNetherite.desc": "After the update is applied, the hardness of Ancient Debris and Netherite Blocks will be adjusted to 1/18 of their original values",
   "carpet.rule.message.disableRespawnBlocksExplode": "Respawn blocks explosion is disabled",
   "carpet.rule.message.CCEUpdateSuppression": "You cannot open the shulkerbox for update surpression",
   "carpet.rule.message.displayPlayerSummoner": "↑ Summoned by %s",
