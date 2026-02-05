@@ -7,7 +7,6 @@ import net.minecraft.world.BlockView;
 import org.carpetorgaddition.CarpetOrgAdditionSettings;
 
 import java.util.List;
-import java.util.Optional;
 
 public class BlockHardnessModifiers {
     /**
@@ -117,45 +116,49 @@ public class BlockHardnessModifiers {
     );
 
     // 获取方块硬度
-    public static Optional<Float> getHardness(Block block, BlockView world, BlockPos pos) {
+    public static float getHardness(Block block, BlockView world, BlockPos pos, float defaultValue) {
         // 设置基岩硬度
         if (block == Blocks.BEDROCK) {
             float hardness = CarpetOrgAdditionSettings.setBedrockHardness.get();
             if (CarpetOrgAdditionSettings.setBedrockHardness.get() != -1F) {
-                return Optional.of(hardness);
+                return hardness;
             }
         }
         // 易碎深板岩
         if (CarpetOrgAdditionSettings.softDeepslate.get()) {
             // 深板岩
             if (DEEPSLATE.contains(block)) {
-                return Optional.of(Blocks.STONE.getHardness());
+                return Blocks.STONE.getHardness();
             }
             // 深板岩圆石
             if (COBBLED_DEEPSLATE.contains(block)) {
-                return Optional.of(Blocks.COBBLESTONE.getHardness());
+                return Blocks.COBBLESTONE.getHardness();
             }
         }
         // 易碎黑曜石
         if (CarpetOrgAdditionSettings.softObsidian.get() && (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN)) {
-            return Optional.of(Blocks.END_STONE.getHardness());
+            return Blocks.END_STONE.getHardness();
         }
         // 易碎矿石
         if (CarpetOrgAdditionSettings.softOres.get()) {
             // 普通矿石
             if (ORE.contains(block)) {
-                return Optional.of(Blocks.STONE.getHardness());
+                return Blocks.STONE.getHardness();
             }
             // 深层矿石
             if (DEEPSLATE_ORE.contains(block)) {
                 // 让深板岩矿石硬度随着深板岩硬度的改变而改变，其他方块硬度不需要做此处理
-                return Optional.of(Blocks.DEEPSLATE.getDefaultState().getHardness(world, pos));
+                return Blocks.DEEPSLATE.getDefaultState().getHardness(world, pos);
             }
             // 下界矿石
             if (NETHER_ORE.contains(block)) {
-                return Optional.of(Blocks.NETHERRACK.getHardness());
+                return Blocks.NETHERRACK.getHardness();
             }
         }
-        return Optional.empty();
+        if (CarpetOrgAdditionSettings.softNetherite.get() && (block == Blocks.ANCIENT_DEBRIS || block == Blocks.NETHERITE_BLOCK)) {
+            // 调整硬度后，远古残骸比能改瞬间挖掘的方块略硬，避免瞬间挖掘
+            return defaultValue / 18F;
+        }
+        return defaultValue;
     }
 }
