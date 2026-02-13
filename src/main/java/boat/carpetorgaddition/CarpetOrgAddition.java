@@ -69,16 +69,16 @@ public class CarpetOrgAddition implements ModInitializer {
      */
     public static final boolean CARPET_TIS_ADDITION = FabricLoader.getInstance().isModLoaded("carpet-tis-addition");
     /**
+     * 日志
+     */
+    public static final Logger LOGGER = LoggerFactory.getLogger(COMPACT_MOD_NAME);
+    /**
      * 是否启用隐藏功能<br>
      * <p>
      * <b>请勿</b>传播解锁这些功能的方式。
      * </p>
      */
     public static final boolean ENABLE_HIDDEN_FUNCTION = GlobalConfigs.getInstance().isEnableHiddenFunction();
-    /**
-     * 日志
-     */
-    public static final Logger LOGGER = LoggerFactory.getLogger(COMPACT_MOD_NAME);
 
     /**
      * 模组初始化
