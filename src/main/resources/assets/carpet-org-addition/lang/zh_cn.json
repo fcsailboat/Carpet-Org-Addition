@@ -472,6 +472,7 @@
   "carpet-org-addition.command.playerManager.info.action": "动作：",
   "carpet-org-addition.command.playerManager.info.startup": "登录时：",
   "carpet-org-addition.command.playerManager.info.startup.delay": "延迟：%s刻",
+  "carpet-org-addition.command.playerManager.info.startup.run": "执行命令：%s",
   "carpet-org-addition.command.playerManager.info.startup.attack": "左键单击",
   "carpet-org-addition.command.playerManager.info.startup.use": "右键单击",
   "carpet-org-addition.command.playerManager.info.startup.kill": "退出游戏",
