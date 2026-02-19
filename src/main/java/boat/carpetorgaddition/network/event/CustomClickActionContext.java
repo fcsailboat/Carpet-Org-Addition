@@ -25,8 +25,8 @@ public class CustomClickActionContext {
      * 当前自定义动作是通过什么发送的
      */
     private final ActionSource actionSource;
-    public static final ThreadLocal<ServerPlayer> CURRENT_PLAYER = new ThreadLocal<>();
-    public static final ThreadLocal<ActionSource> ACTION_SOURCE = new ThreadLocal<>();
+    public static final ScopedValue<ServerPlayer> CURRENT_PLAYER = ScopedValue.newInstance();
+    public static final ScopedValue<ActionSource> ACTION_SOURCE = ScopedValue.newInstance();
 
     public CustomClickActionContext(MinecraftServer server, ServerPlayer player, NbtReader reader) {
         this.server = server;
@@ -37,12 +37,7 @@ public class CustomClickActionContext {
             this.actionSource = ActionSource.UNKNOWN;
         } else {
             Optional<ActionSource> optional = reader.getActionSourceNullable("action_source");
-            if (optional.isEmpty()) {
-                ActionSource source = ACTION_SOURCE.get();
-                this.actionSource = source == null ? ActionSource.UNKNOWN : source;
-            } else {
-                this.actionSource = optional.get();
-            }
+            this.actionSource = optional.orElseGet(() -> ACTION_SOURCE.isBound() ? ACTION_SOURCE.get() : ActionSource.UNKNOWN);
         }
     }
 

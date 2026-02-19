@@ -22,12 +22,8 @@ public class SignBlockEntityMixin {
     @WrapOperation(method = "executeClickCommandsIfPresent", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;handleCustomClickAction(Lnet/minecraft/resources/Identifier;Ljava/util/Optional;)V"))
     private void setPlayer(MinecraftServer instance, Identifier identifier, Optional<Tag> optional, Operation<Void> original, @Local(argsOnly = true) Player player) {
         if (player instanceof ServerPlayer) {
-            try {
-                CustomClickActionContext.CURRENT_PLAYER.set((ServerPlayer) player);
-                original.call(instance, identifier, optional);
-            } finally {
-                CustomClickActionContext.CURRENT_PLAYER.remove();
-            }
+            ScopedValue.where(CustomClickActionContext.CURRENT_PLAYER, (ServerPlayer) player)
+                    .run(() -> original.call(instance, identifier, optional));
         } else {
             original.call(instance, identifier, optional);
         }
@@ -35,11 +31,7 @@ public class SignBlockEntityMixin {
 
     @WrapOperation(method = "executeClickCommandsIfPresent", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;handleCustomClickAction(Lnet/minecraft/resources/Identifier;Ljava/util/Optional;)V"))
     private void setActionSource(MinecraftServer instance, Identifier identifier, Optional<Tag> optional, Operation<Void> original) {
-        try {
-            CustomClickActionContext.ACTION_SOURCE.set(ActionSource.SIGN);
-            original.call(instance, identifier, optional);
-        } finally {
-            CustomClickActionContext.ACTION_SOURCE.remove();
-        }
+        ScopedValue.where(CustomClickActionContext.ACTION_SOURCE, ActionSource.SIGN)
+                .run(() -> original.call(instance, identifier, optional));
     }
 }
