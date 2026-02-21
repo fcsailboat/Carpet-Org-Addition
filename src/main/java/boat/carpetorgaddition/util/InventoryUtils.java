@@ -6,8 +6,10 @@ import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -69,6 +71,32 @@ public class InventoryUtils {
         if (isOperableSulkerBox(shulkerBox)) {
             ContainerComponentInventory inventory = new ContainerComponentInventory(shulkerBox);
             return inventory.pinkStack(predicate, count);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    /**
+     * 尝试从非空的堆叠潜影盒中拿取物品
+     */
+    @CheckReturnValue
+    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(ServerPlayer player, ItemStack shulkerBox, Predicate<ItemStack> predicate) {
+        if (shulkerBox.getCount() == 1) {
+            return pickItemFromShulkerBox(shulkerBox, predicate);
+        }
+        if (isStackedNonEmptyShulkerBox(shulkerBox)) {
+            Inventory inventory = player.getInventory();
+            int slot = inventory.getFreeSlot();
+            if (slot == -1) {
+                return ItemStack.EMPTY;
+            }
+            ItemStack splitStack = shulkerBox.split(1);
+            ItemStack result = pickItemFromShulkerBox(splitStack, predicate);
+            inventory.add(splitStack);
+            if (!splitStack.isEmpty()) {
+                // 丢弃未插入物品栏的潜影盒，但不应该会插入失败
+                player.drop(splitStack, false, true);
+            }
+            return result;
         }
         return ItemStack.EMPTY;
     }
@@ -148,6 +176,20 @@ public class InventoryUtils {
             return true;
         }
         return !component.nonEmptyItems().iterator().hasNext();
+    }
+
+    /**
+     * 指定物品是否是非空的堆叠潜影盒
+     */
+    public static boolean isStackedNonEmptyShulkerBox(ItemStack shulker) {
+        if (shulker.isEmpty()) {
+            return false;
+        }
+        ItemContainerContents component = shulker.get(DataComponents.CONTAINER);
+        if (component == null) {
+            return false;
+        }
+        return component.nonEmptyItems().iterator().hasNext();
     }
 
     /**

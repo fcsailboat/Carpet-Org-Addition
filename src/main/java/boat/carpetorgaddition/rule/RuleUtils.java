@@ -49,6 +49,16 @@ public class RuleUtils {
      * 是否正在打开箱子
      */
     public static final ScopedValue<Boolean> OPENING_THE_CHEST = ScopedValue.newInstance();
+    /**
+     * 是否允许非空潜影盒堆叠
+     */
+    private static final boolean NON_EMPTY_SHULKER_BOX_STACKABLE = true;
+
+    static {
+        if (!CarpetOrgAddition.isDebugDevelopment() && NON_EMPTY_SHULKER_BOX_STACKABLE) {
+            throw new AssertionError();
+        }
+    }
 
     /**
      * 潜影盒是否可以触发更新抑制器
@@ -192,6 +202,6 @@ public class RuleUtils {
         return instance instanceof ItemStack itemStack
                && CarpetOrgAdditionSettings.shulkerBoxStackable.value()
                && InventoryUtils.isShulkerBoxItem(itemStack)
-               && InventoryUtils.isEmptyShulkerBox(itemStack);
+               && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isEmptyShulkerBox(itemStack));
     }
 }

@@ -93,7 +93,7 @@ public class InventoryCraftAction extends AbstractPlayerAction {
                             break;
                         }
                     } else if (CarpetOrgAdditionSettings.fakePlayerPickItemFromShulkerBox.value() && InventoryUtils.isShulkerBoxItem(itemStack)) {
-                        ItemStack contentItemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, matcher);
+                        ItemStack contentItemStack = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, matcher);
                         if (!contentItemStack.isEmpty()) {
                             // 丢弃光标上的物品（如果有）
                             FakePlayerUtils.dropCursorStack(playerScreenHandler, fakePlayer);

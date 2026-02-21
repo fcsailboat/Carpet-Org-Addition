@@ -127,8 +127,8 @@ public class CraftingTableCraftAction extends AbstractPlayerAction {
                                 successCount++;
                                 break;
                             }
-                        } else if (CarpetOrgAdditionSettings.fakePlayerPickItemFromShulkerBox.value() && InventoryUtils.isOperableSulkerBox(itemStack)) {
-                            ItemStack contentItemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, predicate);
+                        } else if (CarpetOrgAdditionSettings.fakePlayerPickItemFromShulkerBox.value() && InventoryUtils.isShulkerBoxItem(itemStack)) {
+                            ItemStack contentItemStack = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, predicate);
                             if (!contentItemStack.isEmpty()) {
                                 // 丢弃光标上的物品（如果有）
                                 FakePlayerUtils.dropCursorStack(screenHandler, fakePlayer);
