@@ -12,7 +12,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.EnumHashBiMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NonNull;
 
@@ -100,17 +99,15 @@ public class EntityPlayerActionPackSerial {
     /**
      * 将动作转换为文本
      */
-    public Component getDisplayText(LocalizationKey key) {
-        TextJoiner joiner = new TextJoiner();
+    public void joinDisplayText(TextJoiner joiner, LocalizationKey key) {
         for (Map.Entry<ActionType, EntityPlayerActionPack.Action> entry : this.actionMap.entrySet()) {
             ActionType type = entry.getKey();
             joiner.newline(key.then(ACTION_KEYS.get(type)).translate());
-            joiner.enter(() -> getDisplayText(key, entry.getValue(), joiner));
+            joiner.enter(() -> joinDisplayText(key, entry.getValue(), joiner));
         }
-        return joiner.join();
     }
 
-    private static void getDisplayText(LocalizationKey key, EntityPlayerActionPack.Action action, TextJoiner joiner) {
+    private static void joinDisplayText(LocalizationKey key, EntityPlayerActionPack.Action action, TextJoiner joiner) {
         if (((ActionAccessor) action).isContinuous()) {
             // 长按
             joiner.newline(key.then("continuous").translate());
