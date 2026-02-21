@@ -8,11 +8,15 @@ import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.helpers.EntityPlayerActionPack.ActionType;
 import carpet.patches.EntityPlayerMPFake;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.EnumHashBiMap;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +26,22 @@ public class EntityPlayerActionPackSerial {
     @Unmodifiable
     private final Map<ActionType, EntityPlayerActionPack.@NonNull Action> actionMap;
     public static final EntityPlayerActionPackSerial EMPTY = new EntityPlayerActionPackSerial();
+    private static final BiMap<ActionType, String> ACTION_KEYS = EnumHashBiMap.create(ActionType.class);
+
+    static {
+        Map<ActionType, String> map = Arrays.stream(ActionType.values())
+                // 不使用type.name().toLowerCase(Locale.ROOT)，防止Carpet重构影响加载和序列化
+                .map(type -> Map.entry(type, switch (type) {
+                    case USE -> "use";
+                    case ATTACK -> "attack";
+                    case JUMP -> "jump";
+                    case DROP_ITEM -> "drop_item";
+                    case DROP_STACK -> "drop_stack";
+                    case SWAP_HANDS -> "swap_hands";
+                }))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        ACTION_KEYS.putAll(map);
+    }
 
     private EntityPlayerActionPackSerial() {
         this.actionMap = Map.of();
@@ -40,28 +60,20 @@ public class EntityPlayerActionPackSerial {
      */
     public EntityPlayerActionPackSerial(JsonObject json) {
         EnumMap<ActionType, EntityPlayerActionPack.Action> actions = new EnumMap<>(ActionType.class);
-        // 设置假玩家左键
-        if (json.has("attack")) {
-            JsonObject attack = json.get("attack").getAsJsonObject();
-            if (attack.get("continuous").getAsBoolean()) {
+        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+            String key = entry.getKey();
+            ActionType type = ACTION_KEYS.inverse().get(key);
+            if (type == null) {
+                continue;
+            }
+            JsonObject data = entry.getValue().getAsJsonObject();
+            if (data.get("continuous").getAsBoolean()) {
                 // 左键长按
-                actions.put(ActionType.ATTACK, EntityPlayerActionPack.Action.continuous());
+                actions.put(type, EntityPlayerActionPack.Action.continuous());
             } else {
                 // 间隔左键
-                int interval = attack.get("interval").getAsInt();
-                actions.put(ActionType.ATTACK, EntityPlayerActionPack.Action.interval(interval));
-            }
-        }
-        // 设置假玩家右键
-        if (json.has("use")) {
-            JsonObject attack = json.get("use").getAsJsonObject();
-            if (attack.get("continuous").getAsBoolean()) {
-                // 右键长按
-                actions.put(ActionType.USE, EntityPlayerActionPack.Action.continuous());
-            } else {
-                // 间隔右键
-                int interval = attack.get("interval").getAsInt();
-                actions.put(ActionType.USE, EntityPlayerActionPack.Action.interval(interval));
+                int interval = data.get("interval").getAsInt();
+                actions.put(type, EntityPlayerActionPack.Action.interval(interval));
             }
         }
         this.actionMap = actions;
@@ -90,17 +102,10 @@ public class EntityPlayerActionPackSerial {
      */
     public Component getDisplayText(LocalizationKey key) {
         TextJoiner joiner = new TextJoiner();
-        // 左键行为
-        EntityPlayerActionPack.Action attack = this.actionMap.get(ActionType.ATTACK);
-        if (attack != null) {
-            joiner.newline(key.then("left_click").translate());
-            joiner.enter(() -> getDisplayText(key, attack, joiner));
-        }
-        // 右键行为
-        EntityPlayerActionPack.Action use = this.actionMap.get(ActionType.USE);
-        if (use != null) {
-            joiner.newline(key.then("right_click").translate());
-            joiner.enter(() -> getDisplayText(key, use, joiner));
+        for (Map.Entry<ActionType, EntityPlayerActionPack.Action> entry : this.actionMap.entrySet()) {
+            ActionType type = entry.getKey();
+            joiner.newline(key.then(ACTION_KEYS.get(type)).translate());
+            joiner.enter(() -> getDisplayText(key, entry.getValue(), joiner));
         }
         return joiner.join();
     }
@@ -117,21 +122,14 @@ public class EntityPlayerActionPackSerial {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        // 左键动作
-        EntityPlayerActionPack.Action attack = this.actionMap.get(ActionType.ATTACK);
-        if (attack != null) {
-            JsonObject attackJson = new JsonObject();
-            attackJson.addProperty("interval", attack.interval);
-            attackJson.addProperty("continuous", ((ActionAccessor) attack).isContinuous());
-            json.add("attack", attackJson);
-        }
-        // 右键动作
-        EntityPlayerActionPack.Action use = this.actionMap.get(ActionType.USE);
-        if (use != null) {
-            JsonObject useJson = new JsonObject();
-            useJson.addProperty("interval", use.interval);
-            useJson.addProperty("continuous", ((ActionAccessor) use).isContinuous());
-            json.add("use", useJson);
+        for (Map.Entry<ActionType, EntityPlayerActionPack.Action> entry : this.actionMap.entrySet()) {
+            ActionType type = entry.getKey();
+            String key = ACTION_KEYS.get(type);
+            JsonObject data = new JsonObject();
+            EntityPlayerActionPack.Action action = entry.getValue();
+            data.addProperty("interval", action.interval);
+            data.addProperty("continuous", ((ActionAccessor) action).isContinuous());
+            json.add(key, data);
         }
         return json;
     }
