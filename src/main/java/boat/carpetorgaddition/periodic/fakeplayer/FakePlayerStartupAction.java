@@ -9,11 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 
 import java.util.Locale;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
-    Object getKey();
+    String VALUE = "value";
 
     StartupActionType getType();
 
@@ -26,16 +26,13 @@ public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
         return json;
     }
 
-    static Optional<FakePlayerStartupAction> fromJson(JsonObject json) {
+    static FakePlayerStartupAction fromJson(JsonObject json) {
         StartupActionType type = StartupActionType.valueOf(json.get("type").getAsString().toUpperCase(Locale.ROOT));
-        try {
-            return Optional.of(switch (type) {
-                case COMMAND -> CommandAction.of(json.get("command").getAsString());
-                case SIMPLE -> SimpleAction.valueOf(json.get("action").getAsString().toUpperCase(Locale.ROOT));
-            });
-        } catch (RuntimeException e) {
-            return Optional.empty();
-        }
+        String value = json.get(VALUE).getAsString();
+        return switch (type) {
+            case COMMAND -> CommandAction.of(value);
+            case SIMPLE -> SimpleAction.valueOf(value.toUpperCase(Locale.ROOT));
+        };
     }
 
     class CommandAction implements FakePlayerStartupAction {
@@ -58,7 +55,7 @@ public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
         @Override
         public JsonObject toJson() {
             JsonObject json = FakePlayerStartupAction.super.toJson();
-            json.addProperty("command", this.command);
+            json.addProperty(VALUE, this.command);
             return json;
         }
 
@@ -73,8 +70,21 @@ public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
         }
 
         @Override
-        public Object getKey() {
-            return this.getClass();
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CommandAction that = (CommandAction) o;
+            return Objects.equals(command, that.command);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(command);
+        }
+
+        public String getCommand() {
+            return this.command;
         }
     }
 
@@ -91,7 +101,7 @@ public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
         @Override
         public JsonObject toJson() {
             JsonObject json = FakePlayerStartupAction.super.toJson();
-            json.addProperty("action", this.toString());
+            json.addProperty(VALUE, this.toString());
             return json;
         }
 
@@ -114,18 +124,25 @@ public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
         }
 
         @Override
-        public Object getKey() {
-            return this;
-        }
-
-        @Override
         public String toString() {
             return this.name().toLowerCase(Locale.ROOT);
         }
     }
 
     enum StartupActionType {
-        COMMAND,
-        SIMPLE
+        COMMAND(1),
+        SIMPLE(0);
+        /**
+         * 用于排序动作，使用自定义的序数是为了防止意外的更改枚举字段顺序
+         */
+        private final int priority;
+
+        StartupActionType(int priority) {
+            this.priority = priority;
+        }
+
+        public int getPriority() {
+            return this.priority;
+        }
     }
 }

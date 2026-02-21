@@ -108,16 +108,23 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                     .then(Commands.literal("clear")
                             .executes(context -> this.addStartupFunction(context, action, -1))));
         }
-        // TODO 允许添加多条命令
         // TODO 阻止在多人游戏中使用
         startupNode.then(Commands.literal("run")
                 .then(Commands.argument("command", StringArgumentType.string())
-                        .executes(context -> this.addStartupRunCommandFunction(context, 1, false))
+                        .suggests((context, builder) -> {
+                            String playerName = StringArgumentType.getString(context, "name");
+                            FakePlayerSerializer serializer = getFakePlayerSerializer(context, playerName);
+                            List<String> list = serializer.listCommandStartupFunction().stream()
+                                    .map(StringArgumentType::escapeIfRequired)
+                                    .toList();
+                            return SharedSuggestionProvider.suggest(list, builder);
+                        })
+                        .executes(context -> this.addStartupRunCommandFunction(context, 1))
                         .then(Commands.argument("delay", TimeArgument.time(1))
                                 .suggests((_, builder) -> SharedSuggestionProvider.suggest(times, builder))
-                                .executes(context -> this.addStartupRunCommandFunction(context, IntegerArgumentType.getInteger(context, "delay"), false))))
-                .then(Commands.literal("clear")
-                        .executes(context -> this.addStartupRunCommandFunction(context, -1, true))));
+                                .executes(context -> this.addStartupRunCommandFunction(context, IntegerArgumentType.getInteger(context, "delay"))))
+                        .then(Commands.literal("clear")
+                                .executes(context -> this.addStartupRunCommandFunction(context, -1)))));
         this.dispatcher.register(Commands.literal(name)
                 .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandPlayerManager))
                 .then(Commands.literal("save")
@@ -872,14 +879,9 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         return delay;
     }
 
-    private int addStartupRunCommandFunction(CommandContext<CommandSourceStack> context, int delay, boolean empty) throws CommandSyntaxException {
-        FakePlayerStartupAction action;
-        if (empty) {
-            action = FakePlayerStartupAction.CommandAction.EMPTY;
-        } else {
-            String command = StringArgumentType.getString(context, "command");
-            action = FakePlayerStartupAction.CommandAction.of(command);
-        }
+    private int addStartupRunCommandFunction(CommandContext<CommandSourceStack> context, int delay) throws CommandSyntaxException {
+        String command = StringArgumentType.getString(context, "command");
+        FakePlayerStartupAction action = FakePlayerStartupAction.CommandAction.of(command);
         return this.addStartupFunction(context, action, delay);
     }
 

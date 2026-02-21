@@ -51,7 +51,7 @@ public final class FakePlayerSerializerDataUpdater implements DataUpdater {
                                     if ("action".equals(actionPart.getKey())) {
                                         JsonObject function = new JsonObject();
                                         function.addProperty("type", "simple");
-                                        function.add("action", actionPart.getValue());
+                                        function.add("value", actionPart.getValue());
                                         newAction.add("function", function);
                                     } else {
                                         newAction.add(actionPart.getKey(), actionPart.getValue());

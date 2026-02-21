@@ -93,7 +93,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
     /**
      * 假玩家加入游戏时执行的动作
      */
-    private final Map<Object, Map.Entry<FakePlayerStartupAction, Integer>> startups = new HashMap<>();
+    private final Map<FakePlayerStartupAction, Integer> startups = new HashMap<>();
     /**
      * 玩家所在的组
      */
@@ -188,15 +188,16 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         JsonElement startup = json.get("startup_action");
         if (startup != null && startup.isJsonArray()) {
             JsonArray array = startup.getAsJsonArray();
-            for (JsonElement jsonElement : array) {
-                JsonObject object = jsonElement.getAsJsonObject();
-                int delay = object.has("delay") ? object.get("delay").getAsInt() : 1;
-                JsonObject function = object.get("function").getAsJsonObject();
-                Optional<FakePlayerStartupAction> optional = FakePlayerStartupAction.fromJson(function);
-                if (optional.isEmpty()) {
-                    continue;
+            try {
+                for (JsonElement jsonElement : array) {
+                    JsonObject object = jsonElement.getAsJsonObject();
+                    int delay = object.has("delay") ? object.get("delay").getAsInt() : 1;
+                    JsonObject function = object.get("function").getAsJsonObject();
+                    FakePlayerStartupAction action = FakePlayerStartupAction.fromJson(function);
+                    this.addStartupFunction(action, delay);
                 }
-                this.addStartupFunction(optional.get(), delay);
+            } catch (RuntimeException e) {
+                CarpetOrgAddition.LOGGER.warn("Unable to load startup action for {}", name);
             }
         }
         this.file = file;
@@ -243,7 +244,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
                     this.interactiveAction.startAction(fakePlayer);
                     this.autoAction.clearPlayer();
                     this.autoAction.startAction(fakePlayer);
-                    for (Map.Entry<FakePlayerStartupAction, Integer> entry : this.startups.values()) {
+                    for (Map.Entry<FakePlayerStartupAction, Integer> entry : this.startups.entrySet()) {
                         FakePlayerStartupActionTask task = new FakePlayerStartupActionTask(source, fakePlayer, entry.getKey(), entry.getValue());
                         CommandUtils.handlingException(() -> taskManager.addTask(task), source);
                     }
@@ -298,13 +299,15 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
             LocalizationKey startupKey = key.then("startup");
             joiner.newline(startupKey.translate());
             joiner.enter(() -> {
-                for (Map.Entry<FakePlayerStartupAction, Integer> entry : this.startups.values()) {
+                List<Map.Entry<FakePlayerStartupAction, Integer>> list = new ArrayList<>(this.startups.entrySet());
+                list.sort(Comparator.comparingInt(o -> o.getKey().getType().getPriority()));
+                list.forEach(entry -> {
                     joiner.newline(entry.getKey().getDisplayName(startupKey));
                     int delay = entry.getValue();
                     if (delay > 1) {
                         joiner.enter(startupKey.then("delay").translate(delay));
                     }
-                }
+                });
             });
         }
         if (!this.comment.isEmpty()) {
@@ -346,7 +349,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         json.add(PlayerSerializationManager.SCRIPT_ACTION, this.autoAction.toJson());
         // 添加启动时动作
         JsonArray startup = new JsonArray();
-        for (Map.Entry<FakePlayerStartupAction, Integer> entry : this.startups.values()) {
+        for (Map.Entry<FakePlayerStartupAction, Integer> entry : this.startups.entrySet()) {
             JsonObject action = new JsonObject();
             action.add("function", entry.getKey().toJson());
             action.addProperty("delay", entry.getValue());
@@ -490,7 +493,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         if (delay == -1) {
             this.startups.remove(action);
         } else {
-            this.startups.put(action.getKey(), Map.entry(action, delay));
+            this.startups.put(action, delay);
         }
         this.isChanged = true;
     }
@@ -548,6 +551,15 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
             return true;
         }
         return this.file.delete();
+    }
+
+    public List<String> listCommandStartupFunction() {
+        return this.startups.keySet().stream()
+                .filter(startup -> startup instanceof FakePlayerStartupAction.CommandAction)
+                .map(startup -> (FakePlayerStartupAction.CommandAction) startup)
+                .map(FakePlayerStartupAction.CommandAction::getCommand)
+                .toList();
+
     }
 
     public interface Listener {
