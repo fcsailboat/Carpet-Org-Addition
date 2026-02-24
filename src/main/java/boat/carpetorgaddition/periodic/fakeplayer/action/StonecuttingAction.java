@@ -8,13 +8,14 @@ import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
+import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
+import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.inventory.Slot;
@@ -37,7 +38,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
     /**
      * 要使用切石机切制的物品
      */
-    private final Item item;
+    private final ItemStackPredicate predicate;
     /**
      * 切石机内按钮的索引
      */
@@ -49,7 +50,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
     // TODO 支持物品谓词
     public StonecuttingAction(EntityPlayerMPFake fakePlayer, Item item, int button) {
         super(fakePlayer);
-        this.item = item;
+        this.predicate = new ItemStackPredicate(item);
         this.button = button;
     }
 
@@ -91,7 +92,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 Slot inputSlot = stonecutterMenu.getSlot(0);
                 if (inputSlot.hasItem()) {
                     ItemStack itemStack = inputSlot.getItem();
-                    if (itemStack.is(this.item)) {
+                    if (this.predicate.test(itemStack)) {
                         hasMaterials = true;
                     } else {
                         FakePlayerUtils.throwItem(stonecutterMenu, 0, fakePlayer);
@@ -136,7 +137,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         for (int index = start; index < end; index++) {
             ItemStack itemStack = screenHandler.getSlot(index).getItem();
-            if (itemStack.is(this.item)) {
+            if (this.predicate.test(itemStack)) {
                 if (FakePlayerUtils.withKeepPickupAndMoveItemStack(screenHandler, index, 0, fakePlayer)) {
                     return true;
                 }
@@ -152,11 +153,11 @@ public class StonecuttingAction extends AbstractPlayerAction {
             for (int i = 0; i < shulkerSlotIndex.size(); i++) {
                 int index = shulkerSlotIndex.getInt(i);
                 ItemStack itemStack = screenHandler.getSlot(index).getItem();
-                if (InventoryUtils.containsShulkerStackable(itemStack, stack -> stack.is(this.item)) && itemStack.getCount() > 1) {
+                if (InventoryUtils.containsShulkerStackable(itemStack, this.predicate) && itemStack.getCount() > 1) {
                     stackedNonEmptyShulkerIndex.add(index);
                 } else if (InventoryUtils.isOperableSulkerBox(itemStack)) {
                     // 从潜影盒中查找指定物品
-                    ItemStack content = InventoryUtils.pickItemFromShulkerBox(itemStack, stack -> stack.is(this.item));
+                    ItemStack content = InventoryUtils.pickItemFromShulkerBox(itemStack, this.predicate);
                     if (content.isEmpty()) {
                         continue;
                     }
@@ -168,7 +169,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 int index = stackedNonEmptyShulkerIndex.getInt(i);
                 ItemStack itemStack = screenHandler.getSlot(index).getItem();
                 // 仅在合成结束时合并一次空潜影盒，可能导致在合并潜影盒之前，空潜影盒把空槽位占满，进而导致无法从堆叠的非空潜影盒中取物，但不考虑这种情况
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, stack -> stack.is(this.item));
+                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, this.predicate);
                 if (content.isEmpty()) {
                     continue;
                 }
@@ -192,36 +193,26 @@ public class StonecuttingAction extends AbstractPlayerAction {
 
     @Override
     public List<Component> info() {
-        // 创建一个物品栏对象用来获取配方的输出物品
-        SingleRecipeInput input = new SingleRecipeInput(this.item.getDefaultInstance());
         // 获取假玩家所在的世界对象
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         Level world = ServerUtils.getWorld(fakePlayer);
-        ItemStack output;
-        try {
-            // 获取与配方对应的物品
-            output = this.getRecipeResult(fakePlayer, world, input);
-        } catch (IndexOutOfBoundsException e) {
-            // 如果索引越界了，将输出物品设置为空
-            output = ItemStack.EMPTY;
-        }
         // 获取输出物品的名称
         ArrayList<Component> list = new ArrayList<>();
         LocalizationKey key = this.getInfoLocalizationKey();
         list.add(key.translate(
                         fakePlayer.getDisplayName(),
                         ServerUtils.getName(Items.STONECUTTER),
-                        this.item.getDefaultInstance().getDisplayName(),
-                        output.getDisplayName()
+                        this.predicate.getDisplayName(),
+                        this.getRecipeResult(world)
                 )
         );
-        if (fakePlayer.containerMenu instanceof StonecutterMenu stonecutterScreenHandler) {
+        if (fakePlayer.containerMenu instanceof StonecutterMenu screenHandler) {
             // 将按钮索引的信息添加到集合，按钮在之前减去了1，这里再加回来
             list.add(key.then("button").translate(this.button + 1));
             // 将切石机当前输入输出槽位的状态
             list.add(TextBuilder.combineAll("    ",
-                    FakePlayerUtils.getWithCountHoverText(stonecutterScreenHandler.getSlot(0).getItem()), " -> ",
-                    FakePlayerUtils.getWithCountHoverText(stonecutterScreenHandler.getSlot(1).getItem())));
+                    FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(0).getItem()), " -> ",
+                    FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(1).getItem())));
         } else {
             // 假玩家没有打开切石机
             list.add(key.then("no_stonecutter").translate(fakePlayer.getDisplayName(), ServerUtils.getName(Items.STONECUTTER)));
@@ -230,25 +221,27 @@ public class StonecuttingAction extends AbstractPlayerAction {
     }
 
     // 获取切石机配方输出
-    private ItemStack getRecipeResult(EntityPlayerMPFake fakePlayer, Level world, SingleRecipeInput input) {
-        // TODO 配方结果错误
-        for (SelectableRecipe.SingleInputEntry<StonecutterRecipe> entry : world.recipeAccess().stonecutterRecipes().entries()) {
-            Optional<RecipeHolder<StonecutterRecipe>> optional = entry.recipe().recipe();
-            if (optional.isEmpty()) {
-                continue;
-            }
-            StonecutterRecipe recipe = optional.get().value();
-            if (recipe.matches(input, fakePlayer.level())) {
-                return recipe.assemble(input);
-            }
+    private Component getRecipeResult(Level world) {
+        Optional<Item> convert = this.predicate.getConvert();
+        if (convert.isEmpty()) {
+            return LocalizationKeys.Item.ITEM.translate();
         }
-        return ItemStack.EMPTY;
+        ItemStack itemStack = convert.get().getDefaultInstance();
+        List<SelectableRecipe.SingleInputEntry<StonecutterRecipe>> entries = world.recipeAccess().stonecutterRecipes().selectByInput(itemStack).entries();
+        if (this.button >= entries.size()) {
+            return TextBuilder.of("Invalid").setObfuscated().build();
+        }
+        ItemStack result = entries.get(this.button).recipe().recipe()
+                .map(RecipeHolder::value)
+                .map(recipe -> recipe.assemble(new SingleRecipeInput(itemStack)))
+                .orElse(ItemStack.EMPTY);
+        return ServerUtils.getDefaultName(result);
     }
 
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty(ITEM, BuiltInRegistries.ITEM.getKey(this.item).toString());
+        json.addProperty(ITEM, this.predicate.toString());
         json.addProperty(BUTTON, this.button);
         return json;
     }
@@ -269,11 +262,11 @@ public class StonecuttingAction extends AbstractPlayerAction {
             return false;
         }
         StonecuttingAction that = (StonecuttingAction) o;
-        return button == that.button && Objects.equals(item, that.item);
+        return button == that.button && Objects.equals(predicate, that.predicate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(item, button);
+        return Objects.hash(predicate, button);
     }
 }
