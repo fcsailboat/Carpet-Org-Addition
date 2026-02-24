@@ -4,6 +4,7 @@ import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
 import boat.carpetorgaddition.periodic.fakeplayer.action.StonecuttingAction;
+import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -47,7 +48,7 @@ public class StonecutterSetRecipeScreenHandler extends StonecutterMenu implement
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(this.fakePlayer);
             FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
             // 设置玩家动作
-            actionManager.setAction(new StonecuttingAction(this.fakePlayer, itemStack.getItem(), button));
+            actionManager.setAction(new StonecuttingAction(this.fakePlayer, new ItemStackPredicate(itemStack.getItem()), button));
         }
         // 调用父类方法返还物品
         super.removed(player);

@@ -128,7 +128,7 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
     /**
      * 从字符串解析物品谓词
      *
-     * @throws NullPointerException 如果在游戏外加载物品谓词则抛出
+     * @throws IllegalStateException 如果在游戏外加载物品谓词则抛出
      */
     public static ItemStackPredicate parse(String input) {
         Optional<MinecraftServer> optional = ServerUtils.getCurrentServer();

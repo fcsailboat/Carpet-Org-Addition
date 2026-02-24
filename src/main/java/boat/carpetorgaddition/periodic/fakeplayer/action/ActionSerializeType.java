@@ -90,9 +90,10 @@ public enum ActionSerializeType {
      * 自动使用切石机
      */
     STONECUTTING(json -> {
-        Item item = IdentifierUtils.getItem(json.get(StonecuttingAction.ITEM).getAsString());
+        String item = json.get(StonecuttingAction.ITEM).getAsString();
+        ItemStackPredicate predicate = ItemStackPredicate.parse(item);
         int index = json.get(StonecuttingAction.BUTTON).getAsInt();
-        return new StonecuttingAction(null, item, index);
+        return new StonecuttingAction(null, predicate, index);
     }),
     /**
      * 自动交易

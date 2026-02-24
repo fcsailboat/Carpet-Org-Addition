@@ -112,7 +112,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                                 .executes(this::setRename))))
                         .then(Commands.literal("stonecutting")
                                 .then(Commands.literal("item")
-                                        .then(Commands.argument("item", ItemArgument.item(this.access))
+                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
                                                 .then(Commands.argument("button", IntegerArgumentType.integer(1))
                                                         .executes(this::setStonecutting))))
                                 .then(Commands.literal("gui")
@@ -330,9 +330,9 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         // 获取要切割的物品和按钮的索引
-        Item item = ItemArgument.getItem(context, "item").item().value();
         int buttonIndex = IntegerArgumentType.getInteger(context, "button") - 1;
-        actionManager.setAction(new StonecuttingAction(fakePlayer, item, buttonIndex));
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        actionManager.setAction(new StonecuttingAction(fakePlayer, predicate, buttonIndex));
         return 1;
     }
 

@@ -47,10 +47,9 @@ public class StonecuttingAction extends AbstractPlayerAction {
     public static final String BUTTON = "button";
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("stonecutting");
 
-    // TODO 支持物品谓词
-    public StonecuttingAction(EntityPlayerMPFake fakePlayer, Item item, int button) {
+    public StonecuttingAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, int button) {
         super(fakePlayer);
-        this.predicate = new ItemStackPredicate(item);
+        this.predicate = predicate;
         this.button = button;
     }
 
