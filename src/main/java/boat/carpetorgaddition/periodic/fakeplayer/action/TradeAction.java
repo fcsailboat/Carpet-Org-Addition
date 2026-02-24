@@ -159,18 +159,18 @@ public class TradeAction extends AbstractPlayerAction {
     /**
      * 填充交易槽位
      *
-     * @param merchantScreenHandler 假玩家当前打开的交易GUI
-     * @param buyItem               村民的交易物品
-     * @param slotIndex             第几个交易物品
+     * @param screenHandler 假玩家当前打开的交易GUI
+     * @param buyItem       村民的交易物品
+     * @param slotIndex     第几个交易物品
      * @return 槽位上的物品是否已经足够参与交易
      */
-    private boolean fillTradeSlot(MerchantMenu merchantScreenHandler, ItemStack buyItem, int slotIndex) {
-        NonNullList<Slot> list = merchantScreenHandler.slots;
+    private boolean fillTradeSlot(MerchantMenu screenHandler, ItemStack buyItem, int slotIndex) {
+        NonNullList<Slot> list = screenHandler.slots;
         // 获取交易槽上的物品
-        Slot tradeSlot = merchantScreenHandler.getSlot(slotIndex);
+        Slot tradeSlot = screenHandler.getSlot(slotIndex);
         // 如果交易槽上的物品不是需要的物品，就丢弃槽位中的物品
         if (!tradeSlot.getItem().is(buyItem.getItem())) {
-            FakePlayerUtils.throwItem(merchantScreenHandler, slotIndex, this.getFakePlayer());
+            FakePlayerUtils.throwItem(screenHandler, slotIndex, this.getFakePlayer());
         }
         // 如果交易所需的物品为空，或者槽位的物品已经是所需的物品，直接跳过该物品
         if (buyItem.isEmpty() || slotItemCanTrade(tradeSlot.getItem(), buyItem)) {
@@ -184,10 +184,10 @@ public class TradeAction extends AbstractPlayerAction {
             Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlot.getItem());
             if (predicate.test(itemStack)) {
                 // 如果匹配，将当前物品移动到交易槽位
-                if (FakePlayerUtils.withKeepPickupAndMoveItemStack(merchantScreenHandler, index, slotIndex, this.getFakePlayer())) {
+                if (FakePlayerUtils.withKeepPickupAndMoveItemStack(screenHandler, index, slotIndex, this.getFakePlayer())) {
                     // 如果假玩家填充交易槽后光标上有剩余的物品，将剩余的物品放回原槽位
-                    if (!merchantScreenHandler.getCarried().isEmpty()) {
-                        FakePlayerUtils.pickupCursorStack(merchantScreenHandler, index, this.getFakePlayer());
+                    if (!screenHandler.getCarried().isEmpty()) {
+                        FakePlayerUtils.pickupCursorStack(screenHandler, index, this.getFakePlayer());
                     }
                     if (slotItemCanTrade(tradeSlot.getItem(), buyItem)) {
                         return true;
@@ -197,39 +197,40 @@ public class TradeAction extends AbstractPlayerAction {
         }
         // 从潜影盒寻找物品
         if (CarpetOrgAdditionSettings.fakePlayerPickItemFromShulkerBox.value()) {
-            return this.pickFromShulkerBox(merchantScreenHandler, buyItem, slotIndex, tradeSlot);
+            return this.takeFromShulkerBox(screenHandler, buyItem, slotIndex, tradeSlot, false);
         }
         return false;
     }
 
     // 从潜影盒拿取物品
-    private boolean pickFromShulkerBox(MerchantMenu screenHandler, ItemStack buyItem, int slotIndex, Slot tradeSlot) {
+    private boolean takeFromShulkerBox(MerchantMenu screenHandler, ItemStack buyItem, int slotIndex, Slot tradeSlot, boolean stacking) {
         NonNullList<Slot> list = screenHandler.slots;
         // 从潜影盒寻找物品
         for (int index = 3; index < list.size(); index++) {
             // 用来交易的物品还差多少个满一组
-            int difference = tradeSlot.getItem().getMaxStackSize() - tradeSlot.getItem().getCount();
+            ItemStack tradeSlotItem = tradeSlot.getItem();
+            int difference = tradeSlotItem.isEmpty() ? buyItem.getMaxStackSize() : (tradeSlotItem.getMaxStackSize() - tradeSlotItem.getCount());
+            if (difference <= 0) {
+                return true;
+            }
             // 获取当前槽位上的物品
             ItemStack itemStack = list.get(index).getItem();
-            Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlot.getItem());
-            if (InventoryUtils.isOperableSulkerBox(itemStack)) {
+            Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlotItem);
+            if (InventoryUtils.isShulkerBoxItem(itemStack) && (stacking || itemStack.getCount() == 1)) {
                 // 从潜影盒提取物品
-                ItemStack contentItemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, predicate, difference);
-                if (contentItemStack.isEmpty()) {
+                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.getFakePlayer(), itemStack, predicate, difference);
+                if (content.isEmpty()) {
                     continue;
                 }
-                // 丢弃光标上的物品（如果有）
                 FakePlayerUtils.dropCursorStack(screenHandler, this.getFakePlayer());
-                // 将光标上的物品设置为从潜影盒中取出来的物品
-                screenHandler.setCarried(contentItemStack);
-                // 将光标上的物品放在交易槽位上
+                screenHandler.setCarried(content);
                 FakePlayerUtils.pickupCursorStack(screenHandler, slotIndex, this.getFakePlayer());
-                if (slotItemCanTrade(tradeSlot.getItem(), buyItem)) {
+                if (slotItemCanTrade(tradeSlotItem, buyItem)) {
                     return true;
                 }
             }
         }
-        return false;
+        return !stacking && takeFromShulkerBox(screenHandler, buyItem, slotIndex, tradeSlot, true);
     }
 
     private Predicate<ItemStack> getStackPredicate(ItemStack buyItem, final ItemStack slotItem) {

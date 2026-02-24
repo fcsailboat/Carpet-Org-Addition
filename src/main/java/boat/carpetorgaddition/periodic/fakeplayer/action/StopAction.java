@@ -24,7 +24,6 @@ public final class StopAction extends AbstractPlayerAction {
     @Override
     public List<Component> info() {
         ArrayList<Component> list = new ArrayList<>();
-        // 直接将假玩家没有任何动作的信息加入集合然后返回
         list.add(this.getInfoLocalizationKey().translate(this.getFakePlayer().getDisplayName()));
         return list;
     }

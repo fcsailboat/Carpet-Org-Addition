@@ -65,7 +65,10 @@ public class InventoryUtils {
      */
     @CheckReturnValue
     public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
-        if (count <= 0) {
+        if (count == -1) {
+            return pickItemFromShulkerBox(shulkerBox, predicate);
+        }
+        if (count == 0) {
             return ItemStack.EMPTY;
         }
         if (isOperableSulkerBox(shulkerBox)) {
@@ -80,17 +83,22 @@ public class InventoryUtils {
      */
     @CheckReturnValue
     public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(ServerPlayer player, ItemStack shulkerBox, Predicate<ItemStack> predicate) {
+        return tryPickItemFromStackedNonEmptyShulkerBox(player, shulkerBox, predicate, -1);
+    }
+
+    @CheckReturnValue
+    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(ServerPlayer player, ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
         if (shulkerBox.getCount() == 1) {
-            return pickItemFromShulkerBox(shulkerBox, predicate);
+            return pickItemFromShulkerBox(shulkerBox, predicate, count);
         }
-        if (isStackedNonEmptyShulkerBox(shulkerBox)) {
+        if (containsShulkerStackable(shulkerBox, predicate)) {
             Inventory inventory = player.getInventory();
             int slot = inventory.getFreeSlot();
             if (slot == -1) {
                 return ItemStack.EMPTY;
             }
             ItemStack splitStack = shulkerBox.split(1);
-            ItemStack result = pickItemFromShulkerBox(splitStack, predicate);
+            ItemStack result = pickItemFromShulkerBox(splitStack, predicate, count);
             inventory.add(splitStack);
             if (!splitStack.isEmpty()) {
                 // 丢弃未插入物品栏的潜影盒，但不应该会插入失败
@@ -179,9 +187,9 @@ public class InventoryUtils {
     }
 
     /**
-     * 指定物品是否是非空的堆叠潜影盒
+     * 潜影盒中是否包含指定物品，潜影盒可以是堆叠的
      */
-    public static boolean isStackedNonEmptyShulkerBox(ItemStack shulker) {
+    public static boolean containsShulkerStackable(ItemStack shulker, Predicate<ItemStack> predicate) {
         if (shulker.isEmpty()) {
             return false;
         }
@@ -189,22 +197,14 @@ public class InventoryUtils {
         if (component == null) {
             return false;
         }
-        return component.nonEmptyItems().iterator().hasNext();
+        return component.nonEmptyItemCopyStream().anyMatch(predicate);
     }
 
     /**
      * @return 潜影盒中是否有指定物品
      */
-    public static boolean contains(ItemStack shulkerBox, Predicate<ItemStack> predicate) {
-        if (isOperableSulkerBox(shulkerBox)) {
-            ContainerComponentInventory inventory = new ContainerComponentInventory(shulkerBox);
-            for (ItemStack itemStack : inventory) {
-                if (predicate.test(itemStack)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public static boolean contains(ItemStack shulker, Predicate<ItemStack> predicate) {
+        return isOperableSulkerBox(shulker) && containsShulkerStackable(shulker, predicate);
     }
 
     /**

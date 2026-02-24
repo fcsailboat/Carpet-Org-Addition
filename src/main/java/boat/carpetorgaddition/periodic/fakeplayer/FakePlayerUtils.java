@@ -204,10 +204,6 @@ public class FakePlayerUtils {
         screenHandler.clicked(index, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, fakePlayer);
     }
 
-    public static void splitShulkerBox(AbstractContainerMenu screenHandler, int index, EntityPlayerMPFake fakePlayer) {
-
-    }
-
     /**
      * 让玩家看向某个方向
      */
