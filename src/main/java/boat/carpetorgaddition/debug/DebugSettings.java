@@ -85,6 +85,12 @@ public class DebugSettings {
                     .setDisplayName("显示物品标签工具提示")
                     .build()
     );
+    public static final Supplier<Boolean> mergeShulkerTooltip = register(
+            RuleFactory.create(Boolean.class, "mergeShulkerTooltip", false)
+                    .addCategories("Debug")
+                    .setDisplayName("合并潜影盒工具提示信息")
+                    .build()
+    );
 
     private static <T> Supplier<T> register(RuleContext<T> context) {
         CarpetRule<T> rule = context.rule();

@@ -4,7 +4,7 @@ import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.debug.DebugRuleRegistrar;
 import boat.carpetorgaddition.network.NetworkS2CPacketRegister;
 import boat.carpetorgaddition.util.IOUtils;
-import boat.carpetorgaddition.wheel.Counter;
+import boat.carpetorgaddition.wheel.SimpleCounter;
 import carpet.CarpetServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -128,7 +128,7 @@ public class CarpetOrgAddition implements ModInitializer {
         try {
             // 自有记录以来的启动次数
             int total = 0;
-            Counter<LocalDate> counter = new Counter<>();
+            SimpleCounter<LocalDate> counter = new SimpleCounter<>();
             if (file.isFile()) {
                 // 读取历史启动次数
                 List<String> list = Files.readAllLines(file.toPath());
@@ -148,7 +148,7 @@ public class CarpetOrgAddition implements ModInitializer {
             }
             LocalDate now = LocalDate.now();
             total++;
-            counter.add(now);
+            counter.increment(now);
             // 获取今天的启动次数
             int count = counter.getCount(now);
             CarpetOrgAddition.LOGGER.info("The game has been launched {} times today", count);

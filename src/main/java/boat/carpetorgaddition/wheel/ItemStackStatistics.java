@@ -30,7 +30,7 @@ public class ItemStackStatistics {
     /**
      * 每一种物品的数量
      */
-    private final Counter<Item> counter = new Counter<>();
+    private final Counter<Item> counter = new SimpleCounter<>();
     /**
      * 用来记录哪些物品是（或有些是）从嵌套的物品栏中找到的
      */

@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 @Mixin(LivingEntity.class)
@@ -104,16 +105,30 @@ public abstract class LivingEntityMixin {
         if (CarpetOrgAdditionSettings.betterTotemOfUndying.value() == BetterTotemOfUndying.INVENTORY) {
             return ItemStack.EMPTY;
         }
-        for (ItemStack shulkerBox : mainInventory) {
-            if (InventoryUtils.isOperableSulkerBox(shulkerBox)) {
+        ArrayList<ItemStack> list = new ArrayList<>(mainInventory.size());
+        for (ItemStack shulker : mainInventory) {
+            if (shulker.isEmpty()) {
+                continue;
+            }
+            if (InventoryUtils.isOperableSulkerBox(shulker)) {
                 // 从潜影盒中拿取不死图腾
-                ItemStack itemStack = InventoryUtils.pickItemFromShulkerBox(shulkerBox, InventoryUtils::isTotemItem, 1);
+                ItemStack itemStack = InventoryUtils.pickItemFromShulkerBox(shulker, InventoryUtils::isTotemItem, 1);
                 // 潜影盒中可能没有不死图腾
                 if (itemStack.isEmpty()) {
                     continue;
                 }
                 return itemStack.split(1);
+            } else if (InventoryUtils.isShulkerBoxItem(shulker)) {
+                list.add(shulker);
             }
+        }
+        // 从堆叠的非空潜影盒中获取不死图腾
+        for (ItemStack shulker : list) {
+            ItemStack itemStack = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(player, shulker, InventoryUtils::isTotemItem);
+            if (itemStack.isEmpty()) {
+                continue;
+            }
+            return itemStack;
         }
         return ItemStack.EMPTY;
     }

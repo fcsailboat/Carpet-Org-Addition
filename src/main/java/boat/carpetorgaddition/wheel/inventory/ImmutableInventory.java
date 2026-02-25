@@ -1,5 +1,7 @@
 package boat.carpetorgaddition.wheel.inventory;
 
+import boat.carpetorgaddition.wheel.Counter;
+import boat.carpetorgaddition.wheel.ItemStackCounter;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +29,7 @@ public final class ImmutableInventory implements Container, Iterable<ItemStack> 
         this.inventory = new SimpleContainer(list.toArray(ItemStack[]::new));
     }
 
+    @SuppressWarnings("unused")
     public ImmutableInventory(Container inventory) {
         ArrayList<ItemStack> list = new ArrayList<>();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
@@ -90,6 +93,12 @@ public final class ImmutableInventory implements Container, Iterable<ItemStack> 
     @Override
     public void clearContent() {
         throw new UnsupportedOperationException();
+    }
+
+    public Counter<ItemStack> statistics() {
+        ItemStackCounter counter = new ItemStackCounter();
+        this.inventory.forEach(counter::add);
+        return counter;
     }
 
     @Override

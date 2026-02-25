@@ -25,6 +25,7 @@
     "compat.fabricapi.AbstractNetworkAddonMixin",
     "debug.ExperienceOrbEntityMixin",
     "debug.FishingBobberEntityMixin",
+    "debug.ItemContainerContentsMixin",
     "debug.ItemStackMixin",
     "debug.PhantomSpawnerMixin",
     "debug.PlayerEntityMixin",

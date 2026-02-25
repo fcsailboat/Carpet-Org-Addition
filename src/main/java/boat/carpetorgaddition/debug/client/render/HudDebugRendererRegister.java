@@ -10,6 +10,7 @@ import boat.carpetorgaddition.mixin.debug.accessor.ScreenAccessor;
 import boat.carpetorgaddition.util.IdentifierUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.Counter;
+import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
@@ -140,7 +141,7 @@ public class HudDebugRendererRegister {
                         if (itemEntities.isEmpty()) {
                             return;
                         }
-                        Counter<Item> counter = new Counter<>();
+                        Counter<Item> counter = new SimpleCounter<>();
                         int experienceOrbEntityCount = 0;
                         int experienceOrbTotalValue = 0;
                         for (Entity entity : itemEntities) {

@@ -4,7 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.rule.RuleContext;
 import boat.carpetorgaddition.translate.TranslateParser.Entry;
 import boat.carpetorgaddition.util.IOUtils;
-import boat.carpetorgaddition.wheel.Counter;
+import boat.carpetorgaddition.wheel.SimpleCounter;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -118,7 +118,7 @@ public class TranslateTest {
     @Test
     public void testUsage() throws IOException {
         File rootPath = new File("src/main/java/boat/carpetorgaddition");
-        Counter<String> counter = new Counter<>();
+        SimpleCounter<String> counter = new SimpleCounter<>();
         List<String> keys = this.parsers.get(ZH_CN)
                 .listOtherTranslate()
                 .stream()
@@ -137,7 +137,7 @@ public class TranslateTest {
     }
 
     // 递归遍历所有源代码文件
-    private void checkUsage(File root, List<String> notRule, Counter<String> counter) throws IOException {
+    private void checkUsage(File root, List<String> notRule, SimpleCounter<String> counter) throws IOException {
         // 检查当前文件是否是文件夹
         File[] files = root.listFiles();
         if (files == null) {
@@ -156,7 +156,7 @@ public class TranslateTest {
         }
     }
 
-    private void readFile(File java, List<String> notRule, Counter<String> counter) throws IOException {
+    private void readFile(File java, List<String> notRule, SimpleCounter<String> counter) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(java));
         try (reader) {
             String line;
@@ -165,7 +165,7 @@ public class TranslateTest {
                     int index = 0;
                     while ((line.indexOf("\"" + key + "\"", index)) != -1) {
                         index++;
-                        counter.add(key);
+                        counter.increment(key);
                     }
                 }
             }

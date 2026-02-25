@@ -12,7 +12,7 @@ import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.Counter;
+import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
@@ -108,7 +108,7 @@ public class BedrockAction extends AbstractPlayerAction {
     /**
      * 因处于特殊位置而无法破除的基岩
      */
-    private final Counter<BlockPos> invalidBedrock = new Counter<>();
+    private final SimpleCounter<BlockPos> invalidBedrock = new SimpleCounter<>();
     /**
      * 周围的材料物品
      */
@@ -172,7 +172,6 @@ public class BedrockAction extends AbstractPlayerAction {
     }
 
     private void work() {
-        this.invalidBedrock.trim();
         this.hasAction = false;
         if (this.materialCollectionComplete) {
             this.materialCollectionComplete = false;

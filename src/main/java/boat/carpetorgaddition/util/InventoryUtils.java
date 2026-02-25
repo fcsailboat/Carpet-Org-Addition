@@ -2,14 +2,15 @@ package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.wheel.Counter;
+import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -82,12 +83,12 @@ public class InventoryUtils {
      * 尝试从非空的堆叠潜影盒中拿取物品
      */
     @CheckReturnValue
-    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(ServerPlayer player, ItemStack shulkerBox, Predicate<ItemStack> predicate) {
+    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(Player player, ItemStack shulkerBox, Predicate<ItemStack> predicate) {
         return tryPickItemFromStackedNonEmptyShulkerBox(player, shulkerBox, predicate, -1);
     }
 
     @CheckReturnValue
-    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(ServerPlayer player, ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
+    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(Player player, ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
         if (shulkerBox.getCount() == 1) {
             return pickItemFromShulkerBox(shulkerBox, predicate, count);
         }
@@ -353,7 +354,7 @@ public class InventoryUtils {
      * 根据条件获取物品栏中数量最多的物品
      */
     public static ItemStack findMostAbundantStack(Container inventory, Predicate<ItemStack> predicate) {
-        Counter<Counter.Wrapper<ItemStack>> counter = new Counter<>();
+        Counter<SimpleCounter.Wrapper<ItemStack>> counter = new SimpleCounter<>();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack itemStack = inventory.getItem(i);
             if (itemStack.isEmpty()) {
@@ -520,7 +521,7 @@ public class InventoryUtils {
         );
     }
 
-    public static class ItemStackWrapper extends Counter.Wrapper<ItemStack> {
+    public static class ItemStackWrapper extends SimpleCounter.Wrapper<ItemStack> {
         private static final ItemStackWrapper EMPTY = new ItemStackWrapper(ItemStack.EMPTY);
 
         public ItemStackWrapper(ItemStack value) {

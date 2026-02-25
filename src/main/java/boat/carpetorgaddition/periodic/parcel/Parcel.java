@@ -7,6 +7,7 @@ import boat.carpetorgaddition.command.MailCommand;
 import boat.carpetorgaddition.dataupdate.nbt.ParcelDataUpdater;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.Counter;
+import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
@@ -180,12 +181,12 @@ public class Parcel implements Comparable<Parcel> {
         // 接收之前的物品数量
         int count = this.getCount();
         Component name = this.getDisplayName();
-        Counter<Item> before = new Counter<>();
+        Counter<Item> before = new SimpleCounter<>();
         this.getParcels().forEach(itemStack -> before.add(itemStack.getItem(), itemStack.getCount()));
         InsertResult result = insertStack(player, false);
-        Counter<Item> after = new Counter<>();
+        Counter<Item> after = new SimpleCounter<>();
         this.getParcels().forEach(itemStack -> after.add(itemStack.getItem(), itemStack.getCount()));
-        Counter<Item> counter = new Counter<>();
+        Counter<Item> counter = new SimpleCounter<>();
         for (Item item : before) {
             int remaining = before.getCount(item) - after.getCount(item);
             if (remaining > 0) {
@@ -526,7 +527,7 @@ public class Parcel implements Comparable<Parcel> {
     }
 
     public Component getItemList() {
-        Counter<Item> counter = new Counter<>();
+        Counter<Item> counter = new SimpleCounter<>();
         for (ItemStack parcel : this.getParcels()) {
             if (parcel.isEmpty()) {
                 continue;
