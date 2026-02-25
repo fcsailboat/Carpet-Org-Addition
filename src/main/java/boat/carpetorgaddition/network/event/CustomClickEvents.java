@@ -49,7 +49,7 @@ public class CustomClickEvents {
         NbtReader reader = context.getReader();
         UUID uuid = reader.getUuidNullable(CustomClickKeys.UUID).orElseThrow(() -> unableToResolveUuid(reader));
         PlayerInventoryType type = reader.getPlayerInventoryTypeOrThrow(CustomClickKeys.INVENTORY_TYPE);
-        PlayerCommandExtension.openInventory(context.getPlayer(), type, new PlayerCommandExtension.PlayerInventoryAccessor(context.getServer(), uuid, context.getPlayer()));
+        PlayerCommandExtension.openInventory(context.getPlayer(), type, new PlayerCommandExtension.WithCheckPlayerInventoryAccessor(context.getServer(), uuid, context.getPlayer()));
     });
     /**
      * 查询玩家名称

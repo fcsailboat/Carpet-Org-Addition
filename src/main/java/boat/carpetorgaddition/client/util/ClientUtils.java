@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.client.util;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
@@ -10,6 +11,7 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
@@ -19,8 +21,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientUtils {
+    public static final Set<UUID> FAKE_PLAYERS = ConcurrentHashMap.newKeySet();
+
+    static {
+        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> FAKE_PLAYERS.clear());
+    }
+
     private ClientUtils() {
     }
 
@@ -147,5 +158,10 @@ public class ClientUtils {
      */
     public static MouseHandler getMouse() {
         return getClient().mouseHandler;
+    }
+
+    // TODO 快速设置合成配方是否需要检查假玩家
+    public static boolean isFakePlayer(Player player) {
+        return FAKE_PLAYERS.contains(player.getUUID());
     }
 }

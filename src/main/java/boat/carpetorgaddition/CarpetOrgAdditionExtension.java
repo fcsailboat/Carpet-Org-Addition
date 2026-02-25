@@ -5,6 +5,7 @@ import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.command.SpectatorCommand;
 import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.logger.LoggerRegister;
+import boat.carpetorgaddition.network.s2c.PlayerTypeSyncS2CPacket;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.parcel.ParcelManager;
 import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
@@ -19,6 +20,7 @@ import carpet.api.settings.SettingsManager;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
@@ -69,8 +71,23 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
         // 加载假玩家安全挂机
         PlayerManagerCommand.loadSafeAfk(player);
         this.teleportSpectatorPlayer(player, server);
-        if (player instanceof EntityPlayerMPFake fakePlayer) {
-            coordinator.getSavedFakePlayer().put(fakePlayer);
+        switch (player) {
+            case EntityPlayerMPFake fakePlayer -> {
+                coordinator.getSavedFakePlayer().put(fakePlayer);
+                for (ServerPlayer realPlayer : server.getPlayerList().getPlayers()) {
+                    if (realPlayer instanceof EntityPlayerMPFake) {
+                        continue;
+                    }
+                    ServerPlayNetworking.send(realPlayer, new PlayerTypeSyncS2CPacket(player.getUUID(), true));
+                }
+            }
+            case ServerPlayer _ -> {
+                for (ServerPlayer fakePlayer : server.getPlayerList().getPlayers()) {
+                    if (fakePlayer instanceof EntityPlayerMPFake) {
+                        ServerPlayNetworking.send(player, new PlayerTypeSyncS2CPacket(fakePlayer.getUUID(), true));
+                    }
+                }
+            }
         }
     }
 
@@ -96,6 +113,9 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
         ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
         if (player instanceof EntityPlayerMPFake fakePlayer) {
             coordinator.getSavedFakePlayer().remove(fakePlayer);
+            server.getPlayerList().getPlayers().stream()
+                    .filter(realPlayer -> !(realPlayer instanceof EntityPlayerMPFake))
+                    .forEach(realPlayer -> ServerPlayNetworking.send(realPlayer, new PlayerTypeSyncS2CPacket(player.getUUID(), false)));
         }
     }
 

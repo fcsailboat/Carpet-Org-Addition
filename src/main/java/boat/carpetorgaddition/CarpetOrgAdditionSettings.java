@@ -1005,8 +1005,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * /player命令打开玩家物品栏选项
      */
-    public static final RuleAccessor<OpenPlayerInventory> playerCommandOpenPlayerInventoryOption = register(
-            RuleFactory.create(OpenPlayerInventory.class, "playerCommandOpenPlayerInventoryOption", OpenPlayerInventory.FAKE_PLAYER)
+    public static final RuleAccessor<OpenPlayerInventoryCommandOption> playerCommandOpenPlayerInventoryOption = register(
+            RuleFactory.create(OpenPlayerInventoryCommandOption.class, "playerCommandOpenPlayerInventoryOption", OpenPlayerInventoryCommandOption.FAKE_PLAYER)
                     .addCategories(RuleCategory.COMMAND)
                     .build()
     );
@@ -1084,6 +1084,16 @@ public class CarpetOrgAdditionSettings {
             RuleFactory.create(String.class, "playerCommandSummonMannequin", FALSE)
                     .addCategories(RuleCategory.COMMAND)
                     .addOptions(COMMAND_OPTIONS)
+                    .build()
+    );
+
+    /**
+     * 打开玩家物品栏
+     */
+    public static final RuleAccessor<OpenPlayerInventory> openPlayerInventory = register(
+            RuleFactory.create(OpenPlayerInventory.class, "openPlayerInventory", OpenPlayerInventory.FALSE)
+                    .addCategories(RuleCategory.SURVIVAL)
+                    .setHidden()
                     .build()
     );
 

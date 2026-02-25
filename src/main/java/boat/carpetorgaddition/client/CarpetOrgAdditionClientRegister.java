@@ -6,6 +6,7 @@ import boat.carpetorgaddition.client.logger.ClientLogger;
 import boat.carpetorgaddition.client.renderer.waypoint.NavigatorWaypoint;
 import boat.carpetorgaddition.client.renderer.waypoint.Waypoint;
 import boat.carpetorgaddition.client.renderer.waypoint.WaypointRenderer;
+import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.debug.client.render.HudDebugRendererRegister;
 import boat.carpetorgaddition.network.s2c.*;
 import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncSlot;
@@ -88,6 +89,13 @@ public class CarpetOrgAdditionClientRegister {
         });
         // 记录器更新数据包
         ClientPlayNetworking.registerGlobalReceiver(LoggerUpdateS2CPacket.ID, (packet, _) -> ClientLogger.onPacketReceive(packet));
+        ClientPlayNetworking.registerGlobalReceiver(PlayerTypeSyncS2CPacket.ID, (packet, _) -> {
+            if (packet.fake()) {
+                ClientUtils.FAKE_PLAYERS.add(packet.uuid());
+            } else {
+                ClientUtils.FAKE_PLAYERS.remove(packet.uuid());
+            }
+        });
     }
 
     /**

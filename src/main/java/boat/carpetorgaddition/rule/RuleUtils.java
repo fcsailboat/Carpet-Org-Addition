@@ -52,7 +52,7 @@ public class RuleUtils {
     /**
      * 是否允许非空潜影盒堆叠
      */
-    private static final boolean NON_EMPTY_SHULKER_BOX_STACKABLE = true;
+    private static final boolean NON_EMPTY_SHULKER_BOX_STACKABLE = false;
 
     static {
         if (!CarpetOrgAddition.isDebugDevelopment() && NON_EMPTY_SHULKER_BOX_STACKABLE) {

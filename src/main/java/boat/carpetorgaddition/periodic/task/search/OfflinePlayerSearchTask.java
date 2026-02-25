@@ -9,7 +9,7 @@ import boat.carpetorgaddition.network.event.CustomClickEvents;
 import boat.carpetorgaddition.network.event.CustomClickKeys;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.task.ServerTask;
-import boat.carpetorgaddition.rule.value.OpenPlayerInventory;
+import boat.carpetorgaddition.rule.value.OpenPlayerInventoryCommandOption;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
@@ -567,7 +567,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
      */
     private boolean canOpenOfflinePlayerInventory(CommandSourceStack source) {
         return CommandUtils.canUseCommand(source, CarpetSettings.commandPlayer)
-               && OpenPlayerInventory.isEnable(source)
+               && OpenPlayerInventoryCommandOption.isEnable(source)
                && CarpetOrgAdditionSettings.playerCommandOpenPlayerInventoryOption.value().canOpenOfflinePlayer();
     }
 
