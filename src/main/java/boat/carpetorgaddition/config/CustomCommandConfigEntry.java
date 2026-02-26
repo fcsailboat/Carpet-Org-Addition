@@ -14,11 +14,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class CustomCommandConfig extends AbstractConfig<JsonObject> {
+public class CustomCommandConfigEntry implements ConfigEntry<JsonObject> {
     public static final String CUSTOM_COMMAND_NAME = "custom_command_name";
     private final Map<String, Set<String>> commands = new ConcurrentHashMap<>();
 
-    public CustomCommandConfig() {
+    public CustomCommandConfigEntry() {
     }
 
     @Override
@@ -27,7 +27,7 @@ public class CustomCommandConfig extends AbstractConfig<JsonObject> {
     }
 
     @Override
-    public JsonObject getJsonValue() {
+    public JsonObject getValue() {
         JsonObject json = new JsonObject();
         for (Map.Entry<String, Set<String>> entry : this.commands.entrySet()) {
             String key = entry.getKey();
@@ -51,7 +51,7 @@ public class CustomCommandConfig extends AbstractConfig<JsonObject> {
     }
 
     @Override
-    protected Class<JsonObject> getType() {
+    public Class<JsonObject> getType() {
         return JsonObject.class;
     }
 

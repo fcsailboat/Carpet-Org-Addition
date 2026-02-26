@@ -3,11 +3,11 @@ package boat.carpetorgaddition.config;
 import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.Nullable;
 
-public class HiddenFunctionConfig extends AbstractConfig<JsonPrimitive> {
+public class HiddenFunctionConfigEntry implements ConfigEntry<JsonPrimitive> {
     private boolean enable;
     private boolean shouldBeSaved = false;
 
-    public HiddenFunctionConfig() {
+    public HiddenFunctionConfigEntry() {
     }
 
     @Override
@@ -31,12 +31,12 @@ public class HiddenFunctionConfig extends AbstractConfig<JsonPrimitive> {
     }
 
     @Override
-    protected Class<JsonPrimitive> getType() {
+    public Class<JsonPrimitive> getType() {
         return JsonPrimitive.class;
     }
 
     @Override
-    public JsonPrimitive getJsonValue() {
+    public JsonPrimitive getValue() {
         return new JsonPrimitive(this.enable);
     }
 

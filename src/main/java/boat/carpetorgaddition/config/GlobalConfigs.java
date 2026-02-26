@@ -8,30 +8,33 @@ import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 public class GlobalConfigs {
     /**
      * 配置文件的路径
      */
     private final File configFile = IOUtils.CONFIGURE_DIRECTORY.resolve(CarpetOrgAddition.MOD_ID + ".json").toFile();
-    private final Set<AbstractConfig<?>> configs = new TreeSet<>();
+    private final List<ConfigEntry<?>> configs = new ArrayList<>();
     @NonNull
     private JsonObject json;
     private static final int CURRENT_VERSION = 3;
-    private static final List<AbstractConfig<?>> ALL_CONFIGS = new ArrayList<>();
+    private static final List<ConfigEntry<?>> ALL_CONFIGS = new ArrayList<>();
     /**
      * 自定义命令名称
      */
-    private static final CustomCommandConfig CUSTOM_COMMAND_CONFIG = register(new CustomCommandConfig());
+    private static final CustomCommandConfigEntry CUSTOM_COMMAND_CONFIG = register(new CustomCommandConfigEntry());
     /**
      * 启用隐藏功能
      */
-    private static final HiddenFunctionConfig HIDDEN_FUNCTION_CONFIG = register(new HiddenFunctionConfig());
+    private static final HiddenFunctionConfigEntry HIDDEN_FUNCTION_CONFIG = register(new HiddenFunctionConfigEntry());
     /**
      * 是否允许在多人游戏中使用{@code /playerManager}命令来设置玩家登录时执行命令
      */
-    private static final BooleanConfig ALLOW_MP_PLAYER_STARTUP_CMD = register(new BooleanConfig("allow_mp_player_startup_cmd"));
+    private static final BooleanConfigEntry ALLOW_MP_PLAYER_STARTUP_CMD = register(new BooleanConfigEntry("allow_mp_player_startup_cmd"));
     private static final GlobalConfigs INSTANCE = new GlobalConfigs();
 
     public static GlobalConfigs getInstance() {
@@ -61,13 +64,13 @@ public class GlobalConfigs {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends JsonElement, C extends AbstractConfig<E>> void load(C config) {
+    public <E extends JsonElement, C extends ConfigEntry<E>> void load(C config) {
         JsonElement element = this.json.get(config.getKey());
         try {
             config.load((E) element);
         } catch (RuntimeException e) {
             IOUtils.backupFile(this.configFile);
-            this.json.add(config.getKey(), config.getJsonValue());
+            this.json.add(config.getKey(), config.getValue());
             CarpetOrgAddition.LOGGER.warn("Global config partially corrupted - resetting damaged section", e);
         }
     }
@@ -76,8 +79,8 @@ public class GlobalConfigs {
         try {
             List<Map.Entry<String, JsonElement>> list = new ArrayList<>(this.json.entrySet());
             this.configs.stream()
-                    .filter(AbstractConfig::shouldBeSaved)
-                    .forEach(config -> list.add(Map.entry(config.getKey(), config.getJsonValue())));
+                    .filter(ConfigEntry::shouldBeSaved)
+                    .forEach(config -> list.add(Map.entry(config.getKey(), config.getValue())));
             JsonObject json = new JsonObject();
             list.stream().sorted(comparator()).forEach(entry -> json.add(entry.getKey(), entry.getValue()));
             IOUtils.write(this.configFile, json);
@@ -106,7 +109,7 @@ public class GlobalConfigs {
         };
     }
 
-    public static <T extends JsonElement> int getElementPriority(Class<T> type) {
+    private <T extends JsonElement> int getElementPriority(Class<T> type) {
         if (type == JsonPrimitive.class || type == JsonNull.class) {
             return 1;
         }
@@ -117,13 +120,13 @@ public class GlobalConfigs {
     }
 
     private void register() {
-        for (AbstractConfig<?> config : ALL_CONFIGS) {
+        for (ConfigEntry<?> config : ALL_CONFIGS) {
             this.configs.add(config);
             this.load(config);
         }
     }
 
-    private static <C extends AbstractConfig<T>, T extends JsonElement> C register(C config) {
+    private static <C extends ConfigEntry<T>, T extends JsonElement> C register(C config) {
         ALL_CONFIGS.add(config);
         return config;
     }
