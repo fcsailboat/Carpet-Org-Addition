@@ -18,8 +18,7 @@ public class CustomCommandConfig extends AbstractConfig<JsonObject> {
     public static final String CUSTOM_COMMAND_NAME = "custom_command_name";
     private final Map<String, Set<String>> commands = new ConcurrentHashMap<>();
 
-    protected CustomCommandConfig(GlobalConfigs globalConfigs) {
-        super(globalConfigs);
+    public CustomCommandConfig() {
     }
 
     @Override
@@ -49,6 +48,11 @@ public class CustomCommandConfig extends AbstractConfig<JsonObject> {
             }
         }
         return json;
+    }
+
+    @Override
+    protected Class<JsonObject> getType() {
+        return JsonObject.class;
     }
 
     /**

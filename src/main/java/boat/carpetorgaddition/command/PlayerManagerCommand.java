@@ -2,6 +2,7 @@ package boat.carpetorgaddition.command;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.exception.CommandExecuteIOException;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.*;
@@ -881,8 +882,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     private int addStartupRunCommandFunction(CommandContext<CommandSourceStack> context, int delay) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
-        // TODO 添加可以在多人游戏中使用的开关
-        if (server.isDedicatedServer()) {
+        if (server.isDedicatedServer() && !GlobalConfigs.getInstance().isAllowMpPlayerStartupCmd()) {
             String name = StringArgumentType.getString(context, "name");
             FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
             File file = serializer.getFile();

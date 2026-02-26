@@ -7,8 +7,7 @@ public class HiddenFunctionConfig extends AbstractConfig<JsonPrimitive> {
     private boolean enable;
     private boolean shouldBeSaved = false;
 
-    protected HiddenFunctionConfig(GlobalConfigs globalConfigs) {
-        super(globalConfigs);
+    public HiddenFunctionConfig() {
     }
 
     @Override
@@ -29,6 +28,11 @@ public class HiddenFunctionConfig extends AbstractConfig<JsonPrimitive> {
     @Override
     public boolean shouldBeSaved() {
         return this.shouldBeSaved;
+    }
+
+    @Override
+    protected Class<JsonPrimitive> getType() {
+        return JsonPrimitive.class;
     }
 
     @Override

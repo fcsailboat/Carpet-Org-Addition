@@ -2,12 +2,12 @@ package boat.carpetorgaddition.config;
 
 import com.google.gson.JsonElement;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
-public abstract class AbstractConfig<T extends JsonElement> {
-    protected final GlobalConfigs globalConfigs;
+import java.util.Objects;
 
-    protected AbstractConfig(GlobalConfigs globalConfigs) {
-        this.globalConfigs = globalConfigs;
+public abstract class AbstractConfig<T extends JsonElement> implements Comparable<AbstractConfig<T>> {
+    public AbstractConfig() {
     }
 
     public abstract void load(@Nullable T json);
@@ -26,13 +26,37 @@ public abstract class AbstractConfig<T extends JsonElement> {
         return true;
     }
 
+    protected abstract Class<T> getType();
+
+    private int getPriority() {
+        return GlobalConfigs.getElementPriority(this.getType());
+    }
+
     @Override
     public boolean equals(Object obj) {
-        return this == obj || (obj != null && this.getClass() == obj.getClass());
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() == obj.getClass()) {
+            AbstractConfig<?> that = (AbstractConfig<?>) obj;
+            return Objects.equals(this.getKey(), that.getKey()) && Objects.equals(this.getJsonValue(), that.getJsonValue());
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return this.getClass().hashCode();
+        return Objects.hash(this.getKey(), this.getJsonValue());
+    }
+
+    @Override
+    public int compareTo(@NonNull AbstractConfig<T> o) {
+        if (this.getType() == o.getType()) {
+            return String.CASE_INSENSITIVE_ORDER.compare(this.getKey(), o.getKey());
+        }
+        return Integer.compare(this.getPriority(), o.getPriority());
     }
 }
