@@ -1,8 +1,7 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
-import boat.carpetorgaddition.wheel.Counter;
-import boat.carpetorgaddition.wheel.SimpleCounter;
+import boat.carpetorgaddition.wheel.ItemStackCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import net.fabricmc.loader.api.FabricLoader;
@@ -354,17 +353,9 @@ public class InventoryUtils {
      * 根据条件获取物品栏中数量最多的物品
      */
     public static ItemStack findMostAbundantStack(Container inventory, Predicate<ItemStack> predicate) {
-        Counter<SimpleCounter.Wrapper<ItemStack>> counter = new SimpleCounter<>();
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            ItemStack itemStack = inventory.getItem(i);
-            if (itemStack.isEmpty()) {
-                continue;
-            }
-            if (predicate.test(itemStack)) {
-                counter.add(new ItemStackWrapper(itemStack), itemStack.getCount());
-            }
-        }
-        return counter.getMostOrDefault(ItemStackWrapper.EMPTY).getValue().copy();
+        ItemStackCounter counter = new ItemStackCounter();
+        InventoryUtils.stream(inventory).filter(predicate).forEach(counter::add);
+        return counter.getMostOrDefault(ItemStack.EMPTY);
     }
 
     /**
@@ -519,26 +510,5 @@ public class InventoryUtils {
                 },
                 list -> new SimpleContainer(list.toArray(ItemStack[]::new))
         );
-    }
-
-    public static class ItemStackWrapper extends SimpleCounter.Wrapper<ItemStack> {
-        private static final ItemStackWrapper EMPTY = new ItemStackWrapper(ItemStack.EMPTY);
-
-        public ItemStackWrapper(ItemStack value) {
-            super(value);
-        }
-
-        @Override
-        public boolean valueEquals(ItemStack value1, Object value2) {
-            if (value1.getClass() == value2.getClass()) {
-                return InventoryUtils.canMerge(value1, (ItemStack) value2);
-            }
-            return false;
-        }
-
-        @Override
-        public int valueHashCode(ItemStack value) {
-            return ItemStack.hashItemAndComponents(value);
-        }
     }
 }

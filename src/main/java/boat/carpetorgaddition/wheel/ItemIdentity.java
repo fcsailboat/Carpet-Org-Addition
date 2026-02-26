@@ -54,7 +54,7 @@ public final class ItemIdentity {
         if (obj == null || obj.getClass() != this.getClass()) {
             return false;
         }
-        var that = (ItemIdentity) obj;
+        ItemIdentity that = (ItemIdentity) obj;
         return Objects.equals(this.item, that.item) && Objects.equals(this.components, that.components);
     }
 

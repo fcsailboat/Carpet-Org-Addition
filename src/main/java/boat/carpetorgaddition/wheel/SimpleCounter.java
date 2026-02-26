@@ -49,7 +49,6 @@ public class SimpleCounter<E> implements Counter<E> {
     @Override
     public void set(E element, int count) {
         if (count == 0) {
-            // TODO 测试是否可以正确删除元素
             this.counter.removeInt(element);
         } else {
             this.counter.put(element, count);
@@ -121,55 +120,5 @@ public class SimpleCounter<E> implements Counter<E> {
     @Override
     public String toString() {
         return counter.toString();
-    }
-
-    /**
-     * 计数器是通过对象内的equals和hashCode方法来判断是否为相同的事物的，但是并不是所有对象equals都能满足当前的需要，
-     * 因此可以使用本类包装并根据实际情况来重写这个内部类中的方法
-     */
-    @Deprecated
-    public abstract static class Wrapper<T> {
-        private final T value;
-
-        public Wrapper(T value) {
-            this.value = value;
-        }
-
-        public final T getValue() {
-            return this.value;
-        }
-
-        @Override
-        public final boolean equals(Object obj) {
-            if (obj instanceof SimpleCounter.Wrapper<?> wrapper) {
-                return this.valueEquals(this.value, wrapper.value);
-            }
-            return false;
-        }
-
-        @Override
-        public final int hashCode() {
-            return this.valueHashCode(value);
-        }
-
-        /**
-         * 比较两个包装器内的值是否相等
-         *
-         * @param value1 当前包装器内的值
-         * @param value2 另一个包装器内的值，但它需要手动强制成对应的数据类型
-         */
-        public abstract boolean valueEquals(T value1, Object value2);
-
-        /**
-         * 获取当前包装器内值的哈希值，按照约定，只要重写了equals方法，都应该重写hashCode方法，相同的对象需要有相同的哈希值
-         *
-         * @param value 当前包装器内的值
-         */
-        public abstract int valueHashCode(T value);
-
-        @Override
-        public String toString() {
-            return value.toString();
-        }
     }
 }

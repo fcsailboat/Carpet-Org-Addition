@@ -45,23 +45,13 @@ public class ItemStackStatistics {
      * 如果物品栏内包含容器物品或者收纳袋，则同时统计嵌套的物品数量
      */
     public void statistics(Container inventory) {
-        this.statistics(inventory, false);
-    }
-
-    /**
-     * 统计物品栏内指定物品的数量<br>
-     * 如果物品栏内包含容器物品或者收纳袋，则同时统计嵌套的物品数量
-     *
-     * @param isNestingInventory 当前物品栏是否是潜影盒或收纳袋内部的物品栏
-     */
-    public void statistics(Container inventory, boolean isNestingInventory) {
         for (int i = 0; i < inventory.getContainerSize(); i++) {
-            this.tally(inventory.getItem(i), isNestingInventory);
+            this.tally(inventory.getItem(i));
         }
     }
 
-    public void statistics(Iterable<ItemStack> iterable, boolean isNestingInventory, int multiple) {
-        iterable.forEach(itemStack -> this.tally(itemStack, isNestingInventory, multiple));
+    private void statistics(Iterable<ItemStack> iterable, int multiple) {
+        iterable.forEach(itemStack -> this.tally(itemStack, true, multiple));
     }
 
     private void statistics(ItemStack itemStack) {
@@ -69,14 +59,14 @@ public class ItemStackStatistics {
         int count = itemStack.getCount();
         ItemContainerContents container = itemStack.get(DataComponents.CONTAINER);
         if (container != null) {
-            this.statistics(container.nonEmptyItemCopyStream().toList(), true, count);
+            this.statistics(container.nonEmptyItemCopyStream().toList(), count);
             // 不考虑一个物品同时有容器物品组件和收纳袋物品组件的情况
             return;
         }
         // 收纳袋物品
         BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
         if (bundleContents != null) {
-            this.statistics(bundleContents.itemCopyStream().toList(), true, count);
+            this.statistics(bundleContents.itemCopyStream().toList(), count);
         }
     }
 
@@ -84,10 +74,9 @@ public class ItemStackStatistics {
      * 累加该物品的数量
      *
      * @param itemStack 物品和物品的数量
-     * @param nesting   该物品是否是从嵌套的容器中获取的
      */
-    private void tally(ItemStack itemStack, boolean nesting) {
-        this.tally(itemStack, nesting, 1);
+    private void tally(ItemStack itemStack) {
+        this.tally(itemStack, false, 1);
     }
 
     /**
@@ -95,6 +84,7 @@ public class ItemStackStatistics {
      *
      * @param itemStack 物品和物品的数量
      * @param nesting   该物品是否是从嵌套的容器中获取的
+     * @param multiple  数量的倍数，用于堆叠的容器物品
      */
     private void tally(ItemStack itemStack, boolean nesting, int multiple) {
         if (this.predicate.test(itemStack)) {
