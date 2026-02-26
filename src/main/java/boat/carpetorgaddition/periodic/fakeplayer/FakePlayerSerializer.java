@@ -488,6 +488,11 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         return this.isChanged;
     }
 
+    @Nullable
+    public File getFile() {
+        return this.file;
+    }
+
     @Unmodifiable
     public Set<String> getGroups() {
         return Collections.unmodifiableSet(this.groups);

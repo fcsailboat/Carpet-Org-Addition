@@ -76,6 +76,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     public static final LocalizationKey SCHEDULE = KEY.then("schedule");
     public static final LocalizationKey BATCH = KEY.then("batch");
     private static final LocalizationKey SUMMON = KEY.then("summon");
+    private static final LocalizationKey STARTUP = KEY.then("info").then("startup");
 
     public PlayerManagerCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext access) {
         super(dispatcher, access);
@@ -108,7 +109,6 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                     .then(Commands.literal("clear")
                             .executes(context -> this.addStartupFunction(context, action, -1))));
         }
-        // TODO 阻止在多人游戏中使用
         startupNode.then(Commands.literal("run")
                 .then(Commands.argument("command", StringArgumentType.string())
                         .suggests((context, builder) -> {
@@ -880,6 +880,18 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int addStartupRunCommandFunction(CommandContext<CommandSourceStack> context, int delay) throws CommandSyntaxException {
+        MinecraftServer server = context.getSource().getServer();
+        // TODO 添加可以在多人游戏中使用的开关
+        if (server.isDedicatedServer()) {
+            String name = StringArgumentType.getString(context, "name");
+            FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
+            File file = serializer.getFile();
+            TextBuilder builder = STARTUP.then("run").then("multiplayer").builder();
+            if (file != null) {
+                builder.setHover(file.getAbsolutePath().replace("\\", "/"));
+            }
+            throw CommandUtils.createException(builder.build());
+        }
         String command = StringArgumentType.getString(context, "command");
         FakePlayerStartupAction action = FakePlayerStartupAction.CommandAction.of(command);
         return this.addStartupFunction(context, action, delay);

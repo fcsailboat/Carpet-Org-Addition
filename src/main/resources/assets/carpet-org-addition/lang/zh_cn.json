@@ -486,6 +486,7 @@
   "carpet-org-addition.command.playerManager.info.startup.attack": "左键单击",
   "carpet-org-addition.command.playerManager.info.startup.use": "右键单击",
   "carpet-org-addition.command.playerManager.info.startup.kill": "退出游戏",
+  "carpet-org-addition.command.playerManager.info.startup.run.multiplayer": "在多人游戏中，只能通过编辑配置文件来设置命令",
   "carpet-org-addition.command.playerManager.list.no_player": "没有玩家被列出",
   "carpet-org-addition.command.playerManager.list.expand": "点击组名称展开玩家列表：",
   "carpet-org-addition.command.playerManager.list.filter": "所有匹配“%s”的玩家：",
