@@ -1,12 +1,15 @@
 package boat.carpetorgaddition.mixin.rule;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.rule.RuleUtils;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.provider.CommandProvider;
 import carpet.patches.EntityPlayerMPFake;
 import com.llamalad7.mixinextras.sugar.Local;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.InteractionHand;
@@ -69,8 +72,33 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
                     break;
                 }
             case TRUE:
-                if (openQuickCraftGui(entity)) {
+                if (openQuickCraftGui(entity, hand)) {
                     cir.setReturnValue(InteractionResult.SUCCESS);
+                }
+            default: {
+            }
+        }
+    }
+
+    @Environment(EnvType.CLIENT)
+    @Inject(method = "interactOn", at = @At("HEAD"), cancellable = true)
+    private void interactClient(Entity entity, InteractionHand hand, Vec3 location, CallbackInfoReturnable<InteractionResult> cir) {
+        if (this.isSpectator()) {
+            return;
+        }
+        switch (CarpetOrgAdditionSettings.quickSettingFakePlayerCraft.value()) {
+            case FALSE:
+                break;
+            case SNEAKING:
+                if (!thisPlayer.isShiftKeyDown()) {
+                    break;
+                }
+            case TRUE:
+                if (entity instanceof Player player && ClientUtils.isFakePlayer(player)) {
+                    ItemStack itemStack = thisPlayer.getItemInHand(hand);
+                    if (this.hasOpenCraftGuiPermission() && (itemStack.is(Items.CRAFTING_TABLE) || itemStack.is(Items.STONECUTTER))) {
+                        cir.setReturnValue(InteractionResult.SUCCESS);
+                    }
                 }
             default: {
             }
@@ -83,23 +111,22 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
      * @return 是否执行成功
      */
     @Unique
-    private boolean openQuickCraftGui(Entity entity) {
-        Optional<Function<EntityPlayerMPFake, String>> optional = getOpenQuickCraftGuiCommand(thisPlayer.getMainHandItem());
+    private boolean openQuickCraftGui(Entity entity, InteractionHand hand) {
+        Optional<Function<EntityPlayerMPFake, String>> optional = getOpenQuickCraftGuiCommand(thisPlayer.getItemInHand(hand));
         if (optional.isEmpty()) {
             return false;
         }
         if (thisPlayer instanceof ServerPlayer player && entity instanceof EntityPlayerMPFake fakePlayer) {
             CommandUtils.execute(player, optional.get().apply(fakePlayer));
+            return true;
         }
-        // 客户端虽然不执行命令，但仍要返回true，否则不会显示摆动手动画
-        return true;
+        return false;
     }
 
     // 获取打开GUI所需要的命令
     @Unique
     private Optional<Function<EntityPlayerMPFake, String>> getOpenQuickCraftGuiCommand(ItemStack itemStack) {
-        PermissionSet predicate = thisPlayer.permissions();
-        boolean canUseCommand = CommandUtils.canUseCommand(predicate, CarpetOrgAdditionSettings.commandPlayerAction.value());
+        boolean canUseCommand = this.hasOpenCraftGuiPermission();
         if (canUseCommand) {
             if (itemStack.isEmpty()) {
                 return Optional.empty();
@@ -114,6 +141,12 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
             }
         }
         return Optional.empty();
+    }
+
+    @Unique
+    private boolean hasOpenCraftGuiPermission() {
+        PermissionSet predicate = thisPlayer.permissions();
+        return CommandUtils.canUseCommand(predicate, CarpetOrgAdditionSettings.commandPlayerAction.value());
     }
 
     // 最大方块交互距离

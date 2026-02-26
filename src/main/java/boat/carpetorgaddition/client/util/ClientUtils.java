@@ -160,7 +160,6 @@ public class ClientUtils {
         return getClient().mouseHandler;
     }
 
-    // TODO 快速设置合成配方是否需要检查假玩家
     public static boolean isFakePlayer(Player player) {
         return FAKE_PLAYERS.contains(player.getUUID());
     }
