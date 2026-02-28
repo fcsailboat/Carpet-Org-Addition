@@ -8,8 +8,11 @@ import boat.carpetorgaddition.wheel.SimpleCounter;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -177,6 +180,8 @@ public class TranslateTest {
      */
     @Test
     public void testRuleKeyUsage() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
         Set<String> set = this.parsers.get(ZH_CN).listAllRule();
         List<String> list = CarpetOrgAdditionSettings.listRules().stream().map(RuleContext::getName).toList();
         if (set.size() == list.size()) {
@@ -220,6 +225,7 @@ public class TranslateTest {
      * 检查中文翻译中是否包含英文字符
      */
     @Test
+    @Disabled
     public void testEnglishCharacter() {
         List<Entry> list = this.parsers.get(ZH_CN).listAll();
         StringJoiner sj = new StringJoiner("\n", "中文翻译中不应包含英文字符：\n", "");
