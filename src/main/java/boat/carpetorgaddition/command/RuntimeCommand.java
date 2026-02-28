@@ -145,6 +145,6 @@ public class RuntimeCommand extends AbstractServerCommand {
 
     @Override
     public boolean shouldRegister() {
-        return CarpetOrgAddition.isDebugDevelopment();
+        return CarpetOrgAddition.isDebugMode();
     }
 }

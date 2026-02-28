@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.logger;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.rule.Hidden;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import carpet.logging.HUDLogger;
 import carpet.logging.Logger;
 import carpet.logging.LoggerRegistry;
@@ -29,7 +29,7 @@ public class LoggerRegister {
             if (annotation == null) {
                 continue;
             }
-            if (!CarpetOrgAddition.isEnableHiddenFunction() && field.isAnnotationPresent(Hidden.class)) {
+            if (!CarpetOrgAdditionConstants.isEnableHiddenFunction() && field.isAnnotationPresent(Hidden.class)) {
                 continue;
             }
             // 记录器名称

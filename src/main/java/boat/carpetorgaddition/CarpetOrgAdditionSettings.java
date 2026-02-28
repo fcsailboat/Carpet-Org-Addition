@@ -799,7 +799,7 @@ public class CarpetOrgAdditionSettings {
                         if (CONFIRM_ENABLE.orElse(false)) {
                             return true;
                         }
-                        if (!CarpetOrgAddition.LITHIUM || !value || source == null) {
+                        if (!CarpetOrgAdditionConstants.LITHIUM || !value || source == null) {
                             return true;
                         }
                         ServerPlayer player = source.getPlayer();
@@ -1078,7 +1078,7 @@ public class CarpetOrgAdditionSettings {
     );
 
     /**
-     * /player命令召唤玩家模型
+     * {@code /player}命令召唤玩家模型
      */
     public static final RuleAccessor<String> playerCommandSummonMannequin = register(
             RuleFactory.create(String.class, "playerCommandSummonMannequin", FALSE)
@@ -1112,7 +1112,7 @@ public class CarpetOrgAdditionSettings {
                     settingManager.addCarpetRule(rule);
                     count++;
                 } catch (UnsupportedOperationException e) {
-                    CarpetOrgAddition.LOGGER.error("{}: {} conflicts with another Carpet extension, disabling rule", CarpetOrgAddition.MOD_NAME, rule.name());
+                    CarpetOrgAddition.LOGGER.error("{}: {} conflicts with another Carpet extension, disabling rule", CarpetOrgAdditionMetadata.MOD_NAME, rule.name());
                 }
                 CustomRuleControl<?> control = context.getCustomRuleControl();
                 if (control != null) {

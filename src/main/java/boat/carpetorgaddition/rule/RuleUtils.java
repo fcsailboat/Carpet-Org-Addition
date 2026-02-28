@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.mixin.accessor.DamageTrackerAccessor;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.CarpetServer;
@@ -55,7 +56,7 @@ public class RuleUtils {
     private static final boolean NON_EMPTY_SHULKER_BOX_STACKABLE = false;
 
     static {
-        if (!CarpetOrgAddition.isDebugDevelopment() && NON_EMPTY_SHULKER_BOX_STACKABLE) {
+        if (!CarpetOrgAddition.isDebugMode() && NON_EMPTY_SHULKER_BOX_STACKABLE) {
             throw new AssertionError();
         }
     }
@@ -105,7 +106,7 @@ public class RuleUtils {
     }
 
     private static Supplier<Boolean> getCarpetRule(String rule) {
-        if (CarpetOrgAddition.CARPET_TIS_ADDITION) {
+        if (CarpetOrgAdditionConstants.CARPET_TIS_ADDITION) {
             CarpetRule<?> carpetRule = CarpetServer.settingsManager.getCarpetRule(rule);
             if (carpetRule == null) {
                 return () -> false;

@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.client.command;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import boat.carpetorgaddition.client.CarpetOrgAdditionClient;
 import boat.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
 import boat.carpetorgaddition.client.renderer.waypoint.HighlightWaypoint;
@@ -37,7 +37,7 @@ public class HighlightCommand extends AbstractClientCommand {
                 return DEFAULT_COMMAND_NAME;
             }
         };
-        share.put("%s:%s".formatted(CarpetOrgAddition.MOD_ID, "highlight"), supplier);
+        share.put("%s:%s".formatted(CarpetOrgAdditionMetadata.MOD_ID, "highlight"), supplier);
     }
 
     @Override

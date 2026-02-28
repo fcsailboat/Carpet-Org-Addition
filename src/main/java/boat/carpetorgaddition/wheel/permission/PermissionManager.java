@@ -3,6 +3,7 @@ package boat.carpetorgaddition.wheel.permission;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.util.IOUtils;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.WorldFormat;
 import carpet.utils.CommandHelper;
 import com.google.gson.JsonElement;
@@ -29,7 +30,7 @@ public class PermissionManager {
     }
 
     public static CommandPermission registerHiddenCommand(String node, PermissionLevel level) {
-        if (CarpetOrgAddition.isEnableHiddenFunction()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             return register(node, level);
         }
         return new CommandPermission(level);

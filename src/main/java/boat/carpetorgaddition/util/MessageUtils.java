@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -73,7 +74,7 @@ public class MessageUtils {
 
 
     private static void writeLog(String name, String message) {
-        CarpetOrgAddition.LOGGER.info("({}) [{}] {}", CarpetOrgAddition.COMPACT_MOD_NAME, name, message);
+        CarpetOrgAddition.LOGGER.info("({}) [{}] {}", CarpetOrgAdditionMetadata.COMPACT_MOD_NAME, name, message);
     }
 
     public static void sendErrorMessage(CommandSourceStack source, Component message) {

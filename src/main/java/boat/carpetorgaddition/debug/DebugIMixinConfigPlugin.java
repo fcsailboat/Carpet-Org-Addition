@@ -33,7 +33,7 @@ public class DebugIMixinConfigPlugin implements IMixinConfigPlugin {
                 return true;
             }
             // 类被注解，且开发环境
-            if (CarpetOrgAddition.isDebugDevelopment()) {
+            if (CarpetOrgAddition.isDebugMode()) {
                 CarpetOrgAddition.LOGGER.debug("Mixin class has been allowed to load in development environment: {}", mixinClassName);
                 return true;
             }

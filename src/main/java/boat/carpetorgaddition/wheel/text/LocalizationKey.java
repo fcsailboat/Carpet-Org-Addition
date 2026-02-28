@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel.text;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NullMarked;
 
@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 
 @NullMarked
 public final class LocalizationKey {
-    private static final String ROOT = CarpetOrgAddition.MOD_ID;
+    private static final String ROOT = CarpetOrgAdditionMetadata.MOD_ID;
     private final String key;
 
     private LocalizationKey(String key) {

@@ -27,7 +27,7 @@ public class PlayerInventoryScreenHandler extends AbstractPlayerInventoryScreenH
 
     @Override
     public void clicked(int slotIndex, int button, @NonNull ContainerInput input, @NonNull Player player) {
-        if (CarpetOrgAddition.isDebugDevelopment() && MathUtils.isInRange(this.from(), this.to(), slotIndex) && this.player instanceof EntityPlayerMPFake fakePlayer) {
+        if (CarpetOrgAddition.isDebugMode() && MathUtils.isInRange(this.from(), this.to(), slotIndex) && this.player instanceof EntityPlayerMPFake fakePlayer) {
             PlayerStorageInventory inventory = new PlayerStorageInventory(fakePlayer);
             inventory.sort();
         }

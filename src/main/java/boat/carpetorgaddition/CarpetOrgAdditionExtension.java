@@ -33,9 +33,14 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Map;
 
 public class CarpetOrgAdditionExtension implements CarpetExtension {
-    private static boolean settingsLoaded = false;
+    private static final CarpetOrgAdditionExtension INSTANCE = new CarpetOrgAdditionExtension();
+    private boolean settingsLoaded = false;
 
-    public CarpetOrgAdditionExtension() {
+    private CarpetOrgAdditionExtension() {
+    }
+
+    public static CarpetOrgAdditionExtension getInstance() {
+        return INSTANCE;
     }
 
     // 在游戏开始时
@@ -43,21 +48,21 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     public void onGameStarted() {
         // 解析Carpet设置
         CarpetOrgAdditionSettings.register();
-        settingsLoaded = true;
+        this.settingsLoaded = true;
     }
 
     public static SettingsManager getSettingManager() {
         return CarpetServer.settingsManager;
     }
 
-    public static boolean isCarpetRuleLoaded() {
-        return settingsLoaded;
+    public boolean isCarpetRuleLoaded() {
+        return this.settingsLoaded;
     }
 
     // 当玩家登录时
     @Override
     public void onPlayerLoggedIn(ServerPlayer player) {
-        if (CarpetOrgAddition.isDebugDevelopment() && !FakePlayerSpawner.SILENCE.orElse(false)) {
+        if (CarpetOrgAddition.isDebugMode() && !FakePlayerSpawner.SILENCE.orElse(false)) {
             GameProfile gameProfile = player.getGameProfile();
             CarpetOrgAddition.LOGGER.info(new NameAndId(gameProfile).toString());
         }

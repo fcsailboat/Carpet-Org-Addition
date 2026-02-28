@@ -1,10 +1,10 @@
 package boat.carpetorgaddition.rule;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.rule.validator.ValueValidator;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import carpet.api.settings.CarpetRule;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -138,7 +138,7 @@ public class RuleFactory {
         }
 
         public Builder<T> setHidden() {
-            this.conditions.add(CarpetOrgAddition::isEnableHiddenFunction);
+            this.conditions.add(CarpetOrgAdditionConstants::isEnableHiddenFunction);
             this.addCategories(CarpetOrgAdditionSettings.HIDDEN);
             this.isHidden = true;
             return this;

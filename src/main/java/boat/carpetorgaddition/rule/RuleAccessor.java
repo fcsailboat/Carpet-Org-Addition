@@ -20,7 +20,7 @@ public class RuleAccessor<T> {
     private final CustomRuleControl<T> control;
 
     public RuleAccessor(RuleContext<T> context) {
-        this.value = () -> (CarpetOrgAdditionExtension.isCarpetRuleLoaded() ? context.rule().value() : context.value());
+        this.value = () -> (CarpetOrgAdditionExtension.getInstance().isCarpetRuleLoaded() ? context.rule().value() : context.value());
         this.rule = context.rule();
         this.key = this.rule.name();
         this.control = context.getCustomRuleControl();

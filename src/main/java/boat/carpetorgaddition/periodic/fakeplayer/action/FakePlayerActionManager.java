@@ -26,7 +26,7 @@ public class FakePlayerActionManager {
 
     public void tick() {
         try {
-            if (CarpetOrgAddition.isDebugDevelopment()) {
+            if (CarpetOrgAddition.isDebugMode()) {
                 String message = this.debugExceptionMessage;
                 if (message != null) {
                     this.debugExceptionMessage = null;

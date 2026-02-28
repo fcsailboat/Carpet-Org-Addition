@@ -82,7 +82,7 @@ public class MailCommand extends AbstractServerCommand {
                         .then(Commands.argument(CommandUtils.PLAYER, GameProfileArgument.gameProfile())
                                 .executes(this::sendMultipleParcel)))
                 .then(Commands.literal("override")
-                        .requires(_ -> CarpetOrgAddition.isDebugDevelopment())
+                        .requires(_ -> CarpetOrgAddition.isDebugMode())
                         .executes(this::override)));
     }
 
@@ -217,7 +217,7 @@ public class MailCommand extends AbstractServerCommand {
 
     // 调试：将快递数据写入文件
     private int override(CommandContext<CommandSourceStack> context) {
-        if (CarpetOrgAddition.isDebugDevelopment()) {
+        if (CarpetOrgAddition.isDebugMode()) {
             MinecraftServer server = ServerUtils.getServer(context.getSource());
             ParcelManager manager = ServerComponentCoordinator.getCoordinator(server).getParcelManager();
             manager.stream().forEach(parcel -> {
@@ -305,7 +305,7 @@ public class MailCommand extends AbstractServerCommand {
     // 检查玩家是否是自己或假玩家
     private void checkPlayer(ServerPlayer sourcePlayer, ServerPlayer targetPlayer) throws CommandSyntaxException {
         // 允许在开发环境下发送给自己
-        if (CarpetOrgAddition.isDebugDevelopment()) {
+        if (CarpetOrgAddition.isDebugMode()) {
             return;
         }
         if (sourcePlayer == targetPlayer || targetPlayer instanceof EntityPlayerMPFake) {

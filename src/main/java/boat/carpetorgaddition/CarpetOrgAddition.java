@@ -1,6 +1,5 @@
 package boat.carpetorgaddition;
 
-import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.debug.DebugRuleRegistrar;
 import boat.carpetorgaddition.network.NetworkS2CPacketRegister;
 import boat.carpetorgaddition.util.IOUtils;
@@ -8,7 +7,6 @@ import boat.carpetorgaddition.wheel.SimpleCounter;
 import carpet.CarpetServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.ModMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,74 +18,31 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.StringJoiner;
 
 public class CarpetOrgAddition implements ModInitializer {
     /**
-     * 模组ID
-     */
-    public static final String MOD_ID = "carpet-org-addition";
-    /**
-     * 模组元数据
-     */
-    public static final ModMetadata METADATA = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
-    /**
-     * 模组名称
-     */
-    public static final String MOD_NAME = METADATA.getName();
-    /**
-     * 不带空格的模组名称
-     */
-    public static final String COMPACT_MOD_NAME = MOD_NAME.replace(" ", "");
-    /**
-     * 模组当前的版本
-     */
-    public static final String VERSION = METADATA.getVersion().getFriendlyString();
-    /**
-     * 模组名称小写
-     */
-    public static final String MOD_NAME_LOWER_CASE = COMPACT_MOD_NAME.toLowerCase(Locale.ROOT);
-    /**
-     * 模组的构建时间戳
-     */
-    public static final String BUILD_TIMESTAMP = METADATA.getCustomValue("buildTimestamp").getAsString();
-    /**
      * 日志
      */
-    public static final Logger LOGGER = LoggerFactory.getLogger(COMPACT_MOD_NAME);
-    /**
-     * 当前jvm是否为调试模式
-     */
-    private static final boolean IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(s -> s.contains("jdwp"));
+    public static final Logger LOGGER = LoggerFactory.getLogger(CarpetOrgAdditionMetadata.COMPACT_MOD_NAME);
     /**
      * 当前游戏环境是否为开发环境
      */
-    public static final boolean IS_DEVELOPMENT = FabricLoader.getInstance().isDevelopmentEnvironment();
+    private static final boolean IS_DEVELOPMENT = FabricLoader.getInstance().isDevelopmentEnvironment();
     /**
-     * 是否同时加载了{@code Lithium}（锂）模组
+     * 当前jvm是否为调试模式
      */
-    public static final boolean LITHIUM = FabricLoader.getInstance().isModLoaded("lithium");
-    /**
-     * 是否同时加载了{@code Carpet TIS Addition}模组
-     */
-    public static final boolean CARPET_TIS_ADDITION = FabricLoader.getInstance().isModLoaded("carpet-tis-addition");
-
-    /**
-     * 是否启用隐藏功能<br>
-     * <p>
-     * <b>请勿</b>传播解锁这些功能的方式。
-     * </p>
-     */
-    public static boolean isEnableHiddenFunction() {
-        return HiddenFunctionHolder.ENABLE_HIDDEN_FUNCTION;
-    }
+    private static final boolean IS_DEBUG = IS_DEVELOPMENT && ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(s -> s.contains("jdwp"));
 
     /**
      * @return 当前环境是否为调试模式的开发环境
      */
-    public static boolean isDebugDevelopment() {
-        return IS_DEBUG && IS_DEVELOPMENT;
+    public static boolean isDebugMode() {
+        return IS_DEBUG;
+    }
+
+    public static boolean isDevelopment() {
+        return IS_DEVELOPMENT;
     }
 
     /**
@@ -103,20 +58,21 @@ public class CarpetOrgAddition implements ModInitializer {
      */
     @Override
     public void onInitialize() {
-        CarpetServer.manageExtension(new CarpetOrgAdditionExtension());
+        if (IS_DEBUG) {
+            CarpetOrgAddition.LOGGER.debug("The game is starting in debug mode");
+            // 如果当前为调试模式的开发环境，注册测试规则
+            DebugRuleRegistrar.getInstance().registrar();
+        }
+        CarpetServer.manageExtension(CarpetOrgAdditionExtension.getInstance());
         // 注册网络数据包
         NetworkS2CPacketRegister.register();
-        if (CarpetOrgAddition.isEnableHiddenFunction()) {
-            CarpetOrgAddition.LOGGER.info("Hidden feature enabled");
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
+            CarpetOrgAddition.LOGGER.debug("Hidden feature enabled");
         }
         if (IS_DEVELOPMENT) {
             this.runs();
         }
-        // 如果当前为调试模式的开发环境，注册测试规则
-        if (isDebugDevelopment()) {
-            DebugRuleRegistrar.getInstance().registrar();
-            CarpetOrgAddition.LOGGER.info("Build timestamp: {}", BUILD_TIMESTAMP);
-        }
+        CarpetOrgAddition.LOGGER.debug("Build timestamp: {}", CarpetOrgAdditionMetadata.BUILD_TIMESTAMP);
     }
 
     /**
@@ -164,9 +120,5 @@ public class CarpetOrgAddition implements ModInitializer {
         } catch (IOException e) {
             CarpetOrgAddition.LOGGER.warn("An unexpected error occurred while recording the number of game launches", e);
         }
-    }
-
-    private static class HiddenFunctionHolder {
-        private static final boolean ENABLE_HIDDEN_FUNCTION = GlobalConfigs.getInstance().isEnableHiddenFunction();
     }
 }

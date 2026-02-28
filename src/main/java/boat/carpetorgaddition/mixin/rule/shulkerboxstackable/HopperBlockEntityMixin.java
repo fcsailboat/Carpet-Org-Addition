@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.rule.RuleUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import carpet.CarpetSettings;
 import carpet.utils.WoolTool;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -281,7 +282,7 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
 
     @WrapOperation(method = "pushItemsTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;tryMoveItems(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/HopperBlockEntity;Ljava/util/function/BooleanSupplier;)Z"))
     private static boolean insert(Level world, BlockPos pos, BlockState state, HopperBlockEntity blockEntity, BooleanSupplier booleanSupplier, Operation<Boolean> original) {
-        if (CarpetOrgAddition.LITHIUM) {
+        if (CarpetOrgAdditionConstants.LITHIUM) {
             return original.call(world, pos, state, blockEntity, booleanSupplier);
         }
         return RuleUtils.shulkerBoxStackableWrap(() -> original.call(world, pos, state, blockEntity, booleanSupplier));
@@ -289,7 +290,7 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
 
     @WrapOperation(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;tryMoveItems(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/HopperBlockEntity;Ljava/util/function/BooleanSupplier;)Z"))
     private static boolean onEntityCollided(Level world, BlockPos pos, BlockState state, HopperBlockEntity blockEntity, BooleanSupplier booleanSupplier, Operation<Boolean> original) {
-        if (CarpetOrgAddition.LITHIUM) {
+        if (CarpetOrgAdditionConstants.LITHIUM) {
             return original.call(world, pos, state, blockEntity, booleanSupplier);
         }
         return RuleUtils.shulkerBoxStackableWrap(() -> original.call(world, pos, state, blockEntity, booleanSupplier));
@@ -319,7 +320,7 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
      */
     @Unique
     private static void compatible(Runnable runnable) {
-        if (CarpetOrgAdditionSettings.shulkerBoxStackable.value() && CarpetOrgAddition.LITHIUM) {
+        if (CarpetOrgAdditionSettings.shulkerBoxStackable.value() && CarpetOrgAdditionConstants.LITHIUM) {
             boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
             try {
                 CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);

@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.debug;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import boat.carpetorgaddition.exception.ProductionEnvironmentError;
 import carpet.CarpetExtension;
 import carpet.CarpetServer;
@@ -24,7 +24,7 @@ public class DebugRuleRegistrar implements CarpetExtension {
     private DebugRuleRegistrar() {
         ProductionEnvironmentError.assertDevelopmentEnvironment();
         this.settingsManager = new SettingsManager(
-                CarpetOrgAddition.VERSION,
+                CarpetOrgAdditionMetadata.VERSION,
                 "carpet-debug",
                 "Carpet Org Addition Debug"
         );

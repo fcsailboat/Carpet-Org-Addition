@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.config;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.util.IOUtils;
 import com.google.gson.*;
@@ -17,7 +18,7 @@ public class GlobalConfigs {
     /**
      * 配置文件的路径
      */
-    private final File configFile = IOUtils.CONFIGURE_DIRECTORY.resolve(CarpetOrgAddition.MOD_ID + ".json").toFile();
+    private final File configFile = IOUtils.CONFIGURE_DIRECTORY.resolve(CarpetOrgAdditionMetadata.MOD_ID + ".json").toFile();
     private final List<ConfigEntry<?>> configs = new ArrayList<>();
     @NonNull
     private JsonObject json;
@@ -86,7 +87,7 @@ public class GlobalConfigs {
             IOUtils.write(this.configFile, json);
             this.json = json;
         } catch (IOException e) {
-            CarpetOrgAddition.LOGGER.error("An unexpected error occurred while saving the global configuration file for {}", CarpetOrgAddition.MOD_NAME, e);
+            CarpetOrgAddition.LOGGER.error("An unexpected error occurred while saving the global configuration file for {}", CarpetOrgAdditionMetadata.MOD_NAME, e);
         }
     }
 

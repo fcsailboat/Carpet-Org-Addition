@@ -73,7 +73,7 @@ public class CustomClickAction {
                 }
                 case SIGN -> MessageUtils.sendErrorMessageToHud(context.getSource(), e);
                 case UNKNOWN -> {
-                    if (CarpetOrgAddition.isDebugDevelopment()) {
+                    if (CarpetOrgAddition.isDebugMode()) {
                         CarpetOrgAddition.LOGGER.warn("Unexpected problem while executing custom action from unknown source", e);
                     }
                 }

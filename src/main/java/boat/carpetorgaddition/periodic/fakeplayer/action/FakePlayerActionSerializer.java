@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
@@ -71,7 +71,7 @@ public class FakePlayerActionSerializer {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        if (this.action.isHidden() && !CarpetOrgAddition.isEnableHiddenFunction()) {
+        if (this.action.isHidden() && !CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             StopAction stopAction = new StopAction(null);
             json.add(stopAction.getActionSerializeType().getSerializedName(), stopAction.toJson());
         } else {

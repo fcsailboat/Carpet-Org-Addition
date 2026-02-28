@@ -10,6 +10,7 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.permission.CommandPermission;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
@@ -120,12 +121,12 @@ public class PlayerActionCommand extends AbstractServerCommand {
                         .then(Commands.literal("fishing")
                                 .executes(this::setFishing))
                         .then(Commands.literal("plant")
-                                .requires(_ -> CarpetOrgAddition.isEnableHiddenFunction())
+                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
                                 .executes(this::setPlant))
                         .then(register(Commands.literal("bedrock")
-                                .requires(_ -> CarpetOrgAddition.isEnableHiddenFunction())))
+                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())))
                         .then(Commands.literal("goto")
-                                .requires(_ -> CarpetOrgAddition.isEnableHiddenFunction())
+                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
                                 .then(Commands.literal("block")
                                         .then(Commands.argument("target", BlockPosArgument.blockPos())
                                                 .executes(this::setGotoBlockPos)))
@@ -133,7 +134,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                         .then(Commands.argument("target", EntityArgument.entity())
                                                 .executes(this::setGotoEntity))))
                         .then(Commands.literal("raise")
-                                .requires(_ -> CarpetOrgAddition.isDebugDevelopment())
+                                .requires(_ -> CarpetOrgAddition.isDebugMode())
                                 .executes(context -> this.raise(context, null))
                                 .then(Commands.argument("message", StringArgumentType.string())
                                         .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
@@ -361,7 +362,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
 
     // 设置自动种植
     private int setPlant(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        if (CarpetOrgAddition.isEnableHiddenFunction()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
             FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
@@ -373,7 +374,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
 
     // 设置破基岩
     private int setBreakBedrock(CommandContext<CommandSourceStack> context, BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) throws CommandSyntaxException {
-        if (CarpetOrgAddition.isEnableHiddenFunction()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             BedrockAction action = switch (regionType) {
                 case CUBOID -> {
@@ -403,7 +404,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
 
     // 设置寻路到方块
     private int setGotoBlockPos(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        if (CarpetOrgAddition.isEnableHiddenFunction()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             BlockPos target = BlockPosArgument.getBlockPos(context, "target");
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
@@ -416,7 +417,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
 
     // 设置寻路到实体
     private int setGotoEntity(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        if (CarpetOrgAddition.isEnableHiddenFunction()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             Entity target = EntityArgument.getEntity(context, "target");
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
@@ -484,7 +485,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
 
     // 调试：设置动作抛出异常
     private int raise(CommandContext<CommandSourceStack> context, @Nullable String message) throws CommandSyntaxException {
-        if (CarpetOrgAddition.isDebugDevelopment()) {
+        if (CarpetOrgAddition.isDebugMode()) {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
             FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();

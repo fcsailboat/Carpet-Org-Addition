@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.dialog;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import boat.carpetorgaddition.dialog.builder.*;
 import boat.carpetorgaddition.network.event.CustomClickEvents;
 import boat.carpetorgaddition.network.event.CustomClickKeys;
@@ -41,10 +41,10 @@ public class DialogProvider {
     private void init() {
         // 对话框主屏幕
         dialogs.put(START, () -> {
-            Component version = TextBuilder.of(CarpetOrgAddition.VERSION)
-                    .setHover(CarpetOrgAddition.BUILD_TIMESTAMP)
+            Component version = TextBuilder.of(CarpetOrgAdditionMetadata.VERSION)
+                    .setHover(CarpetOrgAdditionMetadata.BUILD_TIMESTAMP)
                     .build();
-            Component component = TextBuilder.create(CarpetOrgAddition.MOD_NAME);
+            Component component = TextBuilder.create(CarpetOrgAdditionMetadata.MOD_NAME);
             Component translate = LocalizationKeys.Dialog.Text.VERSION.translate(version);
             return DialogListDialogBuilder.of(component)
                     .addDialogBody(translate)

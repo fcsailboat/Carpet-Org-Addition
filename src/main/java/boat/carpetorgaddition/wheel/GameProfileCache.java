@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.wheel;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.util.IOUtils;
 import com.google.common.collect.BiMap;
@@ -336,7 +337,7 @@ public class GameProfileCache {
                 CarpetOrgAddition.LOGGER.error("Unable to write the mapping table between player UUID and name to the file", e);
             }
         }
-        if (CarpetOrgAddition.isEnableHiddenFunction()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             this.saveToCsv();
         }
     }

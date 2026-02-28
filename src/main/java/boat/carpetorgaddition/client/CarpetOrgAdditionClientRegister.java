@@ -118,7 +118,7 @@ public class CarpetOrgAdditionClientRegister {
      * 仅用于开发测试
      */
     private static void developed() {
-        if (CarpetOrgAddition.IS_DEVELOPMENT) {
+        if (CarpetOrgAddition.isDevelopment()) {
             HudDebugRendererRegister.register();
         }
     }

@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public class PacketUtils {
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> createId(String path) {
-        Identifier identifier = Identifier.fromNamespaceAndPath(CarpetOrgAddition.MOD_ID, path);
+        Identifier identifier = Identifier.fromNamespaceAndPath(CarpetOrgAdditionMetadata.MOD_ID, path);
         return new CustomPacketPayload.Type<>(identifier);
     }
 

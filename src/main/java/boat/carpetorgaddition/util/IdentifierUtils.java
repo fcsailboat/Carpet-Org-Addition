@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.util;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -87,6 +87,6 @@ public class IdentifierUtils {
     }
 
     public static Identifier ofIdentifier(String id) {
-        return Identifier.fromNamespaceAndPath(CarpetOrgAddition.MOD_ID, id);
+        return Identifier.fromNamespaceAndPath(CarpetOrgAdditionMetadata.MOD_ID, id);
     }
 }

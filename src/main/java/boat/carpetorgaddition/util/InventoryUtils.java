@@ -1,10 +1,10 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.ItemStackCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -31,11 +31,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class InventoryUtils {
-    /**
-     * 模组{@code gugle-carpet-addition}是否已加载
-     */
-    private static final boolean GCA_LOADED = FabricLoader.getInstance().isModLoaded("gca");
-
     /**
      * 物品栏工具类，私有化构造方法
      */
@@ -464,7 +459,7 @@ public class InventoryUtils {
      * 指定物品是否为{@code GCA}（假人背包）物品
      */
     public static boolean isGcaItem(ItemStack itemStack) {
-        if (GCA_LOADED || CarpetOrgAddition.isDebugDevelopment()) {
+        if (CarpetOrgAdditionConstants.GCA || CarpetOrgAddition.isDebugMode()) {
             CustomData component = itemStack.get(DataComponents.CUSTOM_DATA);
             if (component == null) {
                 return false;
