@@ -101,7 +101,10 @@ loom {
             )
         }
     }
+    // 访问加宽器
     accessWidenerPath = file("src/main/resources/carpet-org-addition.accesswidener")
+    // 调试级别日志
+    log4jConfigs.from "log4j-dev.xml"
 }
 
 fabricApi {

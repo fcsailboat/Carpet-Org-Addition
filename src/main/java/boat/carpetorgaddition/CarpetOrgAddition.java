@@ -151,7 +151,7 @@ public class CarpetOrgAddition implements ModInitializer {
             counter.increment(now);
             // 获取今天的启动次数
             int count = counter.getCount(now);
-            CarpetOrgAddition.LOGGER.info("The game has been launched {} times today", count);
+            CarpetOrgAddition.LOGGER.debug("The game has been launched {} times today", count);
             // 保存启动次数
             List<LocalDate> list = counter.keySet().stream().sorted().toList();
             StringJoiner joiner = new StringJoiner("\n");
@@ -160,7 +160,7 @@ public class CarpetOrgAddition implements ModInitializer {
             }
             IOUtils.write(file, joiner.toString());
             String earliest = list.getFirst().format(formatter);
-            CarpetOrgAddition.LOGGER.info("The game has been launched a total of {} times since {}", total, earliest);
+            CarpetOrgAddition.LOGGER.debug("The game has been launched a total of {} times since {}", total, earliest);
         } catch (IOException e) {
             CarpetOrgAddition.LOGGER.warn("An unexpected error occurred while recording the number of game launches", e);
         }

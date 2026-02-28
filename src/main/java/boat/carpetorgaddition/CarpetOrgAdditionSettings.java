@@ -1103,12 +1103,14 @@ public class CarpetOrgAdditionSettings {
     }
 
     public static void register() {
+        int count = 0;
         SettingsManager settingManager = CarpetOrgAdditionExtension.getSettingManager();
         for (RuleContext<?> context : RULES) {
             if (context.shouldRegister()) {
                 CarpetRule<?> rule = context.rule();
                 try {
                     settingManager.addCarpetRule(rule);
+                    count++;
                 } catch (UnsupportedOperationException e) {
                     CarpetOrgAddition.LOGGER.error("{}: {} conflicts with another Carpet extension, disabling rule", CarpetOrgAddition.MOD_NAME, rule.name());
                 }
@@ -1118,6 +1120,8 @@ public class CarpetOrgAdditionSettings {
                 }
             }
         }
+        CarpetOrgAddition.LOGGER.debug("{} rules registered", count);
+        CarpetOrgAddition.LOGGER.debug("Total {} rules", RULES.size());
     }
 
     public static Set<RuleContext<?>> listRules() {
