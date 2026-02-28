@@ -7,8 +7,8 @@ plugins {
 }
 
 // 时间戳
-def timeStamp = DateTimeFormatter.ofPattern("yyMMddHHmm").format(LocalDateTime.now())
-version = "v${project.mod_version}-${timeStamp}"
+def buildTimestamp = DateTimeFormatter.ofPattern("yyMMddHHmm").format(LocalDateTime.now())
+version = "v${project.mod_version}-${buildTimestamp}"
 
 repositories {
     maven {
@@ -40,7 +40,7 @@ processResources {
     inputs.property "minecraft_version", minecraft_version
     inputs.property "loader_version", loader_version
     inputs.property "depend_version", depend_version
-    inputs.property "buildTimestamp", timeStamp
+    inputs.property "build_timestamp", buildTimestamp
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
@@ -48,7 +48,7 @@ processResources {
                 "minecraft_version": minecraft_version,
                 "loader_version": loader_version,
                 "depend_version": depend_version,
-                "buildTimestamp": timeStamp
+                "build_timestamp": buildTimestamp
     }
 }
 

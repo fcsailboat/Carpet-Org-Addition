@@ -27,7 +27,7 @@ public class CarpetOrgAdditionMetadata {
     /**
      * 模组的构建时间戳
      */
-    public static final String BUILD_TIMESTAMP = METADATA.getCustomValue("buildTimestamp").getAsString();
+    public static final String BUILD_TIMESTAMP = METADATA.getCustomValue("build_timestamp").getAsString();
     /**
      * 模组当前的版本
      */

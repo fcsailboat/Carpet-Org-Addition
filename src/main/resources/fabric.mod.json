@@ -40,6 +40,6 @@
   },
   "accessWidener": "carpet-org-addition.accesswidener",
   "custom": {
-    "buildTimestamp": "${buildTimestamp}"
+    "build_timestamp": "${build_timestamp}"
   }
 }
