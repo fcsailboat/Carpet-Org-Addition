@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.logger;
 
-import boat.carpetorgaddition.rule.Hidden;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
+import boat.carpetorgaddition.rule.Hidden;
 import carpet.logging.HUDLogger;
 import carpet.logging.Logger;
 import carpet.logging.LoggerRegistry;

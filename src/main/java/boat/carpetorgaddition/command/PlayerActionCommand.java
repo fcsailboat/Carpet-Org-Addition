@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.command;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
@@ -10,7 +11,6 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.permission.CommandPermission;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;

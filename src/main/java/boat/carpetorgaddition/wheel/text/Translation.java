@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel.text;
 
-import carpet.CarpetSettings;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.IOUtils;
@@ -30,7 +30,7 @@ public class Translation {
 
     public Map<String, String> getTranslation() {
         // 每种语言只从文件读取一次
-        String lang = CarpetSettings.language;
+        String lang = CarpetOrgAdditionConstants.getCarpetLanguage();
         return this.translations.computeIfAbsent(lang, this::loadTranslation);
     }
 

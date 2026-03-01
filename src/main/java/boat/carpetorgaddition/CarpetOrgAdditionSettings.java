@@ -1112,7 +1112,7 @@ public class CarpetOrgAdditionSettings {
                     settingManager.addCarpetRule(rule);
                     count++;
                 } catch (UnsupportedOperationException e) {
-                    CarpetOrgAddition.LOGGER.error("{}: {} conflicts with another Carpet extension, disabling rule", CarpetOrgAdditionMetadata.MOD_NAME, rule.name());
+                    CarpetOrgAddition.LOGGER.error("{}: {} conflicts with another Carpet extension, disabling rule", CarpetOrgAdditionConstants.MOD_NAME, rule.name());
                 }
                 CustomRuleControl<?> control = context.getCustomRuleControl();
                 if (control != null) {

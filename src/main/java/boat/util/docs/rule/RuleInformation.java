@@ -13,7 +13,7 @@ public class RuleInformation {
     private final String[] extra;
     private final RuleContext<?> context;
 
-    RuleInformation(RuleContext<?> context, String translatedName, String docs, String[] extra) {
+    public RuleInformation(RuleContext<?> context, String translatedName, String docs, String[] extra) {
         this.context = context;
         this.translatedName = translatedName;
         this.docs = docs;
@@ -75,14 +75,14 @@ public class RuleInformation {
             return "字符串";
         }
         if (byte.class.isAssignableFrom(type) || short.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)
-                || Byte.class.isAssignableFrom(type) || Short.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type)) {
+            || Byte.class.isAssignableFrom(type) || Short.class.isAssignableFrom(type) || Integer.class.isAssignableFrom(type)) {
             return "整数";
         }
         if (long.class.isAssignableFrom(type) || Long.class.isAssignableFrom(type)) {
             return "长整数";
         }
         if (float.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)
-                || Float.class.isAssignableFrom(type) || Double.class.isAssignableFrom(type)) {
+            || Float.class.isAssignableFrom(type) || Double.class.isAssignableFrom(type)) {
             return "小数";
         }
         if (boolean.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type)) {

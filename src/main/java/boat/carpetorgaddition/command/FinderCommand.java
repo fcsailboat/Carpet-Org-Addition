@@ -1,12 +1,12 @@
 package boat.carpetorgaddition.command;
 
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.periodic.task.search.*;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
 import boat.carpetorgaddition.wheel.predicate.BlockStatePredicate;

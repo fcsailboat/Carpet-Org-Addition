@@ -4,6 +4,7 @@ import boat.carpetorgaddition.debug.DebugRuleRegistrar;
 import boat.carpetorgaddition.network.NetworkS2CPacketRegister;
 import boat.carpetorgaddition.util.IOUtils;
 import boat.carpetorgaddition.wheel.SimpleCounter;
+import boat.util.docs.rule.RuleDocumentGenerator;
 import carpet.CarpetServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -24,7 +25,7 @@ public class CarpetOrgAddition implements ModInitializer {
     /**
      * 日志
      */
-    public static final Logger LOGGER = LoggerFactory.getLogger(CarpetOrgAdditionMetadata.COMPACT_MOD_NAME);
+    public static final Logger LOGGER = LoggerFactory.getLogger(CarpetOrgAdditionConstants.COMPACT_MOD_NAME);
     /**
      * 当前游戏环境是否为开发环境
      */
@@ -33,6 +34,10 @@ public class CarpetOrgAddition implements ModInitializer {
      * 当前jvm是否为调试模式
      */
     private static final boolean IS_DEBUG = IS_DEVELOPMENT && ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(s -> s.contains("jdwp"));
+    /**
+     * 是否自动生成规则文档
+     */
+    private static final boolean AUTO_GENERATE_RULE_DOCUMENT = IS_DEVELOPMENT && Boolean.getBoolean("generateRuleDocument");
 
     /**
      * @return 当前环境是否为调试模式的开发环境
@@ -72,7 +77,12 @@ public class CarpetOrgAddition implements ModInitializer {
         if (IS_DEVELOPMENT) {
             this.runs();
         }
-        CarpetOrgAddition.LOGGER.debug("Build timestamp: {}", CarpetOrgAdditionMetadata.BUILD_TIMESTAMP);
+        CarpetOrgAddition.LOGGER.debug("Build timestamp: {}", CarpetOrgAdditionConstants.BUILD_TIMESTAMP);
+        if (AUTO_GENERATE_RULE_DOCUMENT) {
+            RuleDocumentGenerator generator = RuleDocumentGenerator.of();
+            generator.generate();
+            CarpetOrgAddition.LOGGER.debug("Rule document has been generated");
+        }
     }
 
     /**

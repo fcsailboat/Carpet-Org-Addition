@@ -1,10 +1,9 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
-import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.exception.FileOperationException;
 import com.google.gson.*;
-import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
 
@@ -26,7 +25,7 @@ public class IOUtils {
     /**
      * 模组配置文件路径
      */
-    public static final Path CONFIGURE_DIRECTORY = FabricLoader.getInstance().getConfigDir().resolve(CarpetOrgAdditionMetadata.COMPACT_MOD_NAME_LOWER_CASE);
+    public static final Path CONFIGURE_DIRECTORY = CarpetOrgAdditionConstants.getConfigDirectory().resolve(CarpetOrgAdditionConstants.COMPACT_MOD_NAME_LOWER_CASE);
     /**
      * 不能包含在文件名中的字符
      */
@@ -42,7 +41,7 @@ public class IOUtils {
     /**
      * {@code usercache.json}文件
      */
-    public static final File USERCACHE_JSON = FabricLoader.getInstance().getGameDir().resolve("usercache.json").toFile();
+    public static final File USERCACHE_JSON = CarpetOrgAdditionConstants.getGameDirectory().resolve("usercache.json").toFile();
 
     private IOUtils() {
     }

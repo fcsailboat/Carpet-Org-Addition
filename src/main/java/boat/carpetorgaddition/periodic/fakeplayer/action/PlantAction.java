@@ -1,11 +1,11 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;

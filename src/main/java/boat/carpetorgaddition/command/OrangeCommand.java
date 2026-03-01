@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.command;
 
-import boat.carpetorgaddition.CarpetOrgAdditionMetadata;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dialog.DialogProvider;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.rule.CustomRuleControl;
@@ -120,9 +120,9 @@ public class OrangeCommand extends AbstractServerCommand {
      * 显示模组版本
      */
     private int version(CommandContext<CommandSourceStack> context) {
-        String name = CarpetOrgAdditionMetadata.MOD_NAME;
-        Component version = TextBuilder.of(CarpetOrgAdditionMetadata.VERSION)
-                .setHover(CarpetOrgAdditionMetadata.BUILD_TIMESTAMP)
+        String name = CarpetOrgAdditionConstants.MOD_NAME;
+        Component version = TextBuilder.of(CarpetOrgAdditionConstants.VERSION)
+                .setHover(CarpetOrgAdditionConstants.BUILD_TIMESTAMP)
                 .build();
         MessageUtils.sendMessage(context, KEY.then("version").translate(name, version));
         return 1;

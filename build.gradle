@@ -76,8 +76,8 @@ jar {
     from("LICENSE") {
         rename { "${it}" }
     }
-    // 在构建jar时排除org.util包
-    exclude "org/util/**"
+    // 在构建jar时排除boat.util包
+    exclude "boat/util/**"
     // 构建模组前自动单元测试
     dependsOn test
     archiveBaseName = "${archives_base_name}-mc${minecraft_version}"
@@ -97,7 +97,8 @@ loom {
                     // 在日志中输出命令执行出错时的详细信息
                     "-DMC_DEBUG_VERBOSE_COMMAND_ERRORS=true",
                     // 导出Mixin类
-                    "-Dmixin.debug.export=true"
+                    "-Dmixin.debug.export=true",
+                    "-DgenerateRuleDocument=true"
             )
         }
     }

@@ -2,9 +2,9 @@ package boat.carpetorgaddition.rule;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.mixin.accessor.DamageTrackerAccessor;
 import boat.carpetorgaddition.util.InventoryUtils;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.CarpetServer;

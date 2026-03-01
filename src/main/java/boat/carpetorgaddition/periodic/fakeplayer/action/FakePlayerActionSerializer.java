@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;

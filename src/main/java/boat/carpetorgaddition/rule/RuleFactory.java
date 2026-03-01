@@ -1,10 +1,10 @@
 package boat.carpetorgaddition.rule;
 
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.rule.validator.ValueValidator;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import carpet.api.settings.CarpetRule;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
