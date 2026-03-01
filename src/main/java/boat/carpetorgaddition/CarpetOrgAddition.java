@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.StringJoiner;
 
+// TODO 测试非IDE下游戏是否正常启动
 public class CarpetOrgAddition implements ModInitializer {
     /**
      * 日志

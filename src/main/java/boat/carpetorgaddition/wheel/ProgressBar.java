@@ -1,10 +1,8 @@
 package boat.carpetorgaddition.wheel;
 
 import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.provider.TextProvider;
 import net.minecraft.network.chat.Component;
-
-import java.text.DecimalFormat;
 
 public class ProgressBar {
     private final double end;
@@ -23,8 +21,6 @@ public class ProgressBar {
     }
 
     public Component getDisplay() {
-        DecimalFormat formatter = new DecimalFormat("#.##");
-        String format = formatter.format(this.progress * 100.0);
-        return TextBuilder.create("%s%%".formatted(format));
+        return TextProvider.percentage(this.progress);
     }
 }

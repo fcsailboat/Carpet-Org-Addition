@@ -1,9 +1,11 @@
 package boat.carpetorgaddition.wheel.provider;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
+import boat.carpetorgaddition.wheel.text.LocalizationKeys.Dimension;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -173,6 +175,14 @@ public class TextProvider {
     }
 
     /**
+     * 将一个浮点数转换为百分比样式，百分数结尾的0会被抹除
+     */
+    public static Component percentage(double value) {
+        String percentage = MathUtils.formatToMaxTwoDecimals(100 * value);
+        return TextBuilder.create(percentage + "%");
+    }
+
+    /**
      * 获取维度名称
      *
      * @param world 要获取维度名称的世界对象
@@ -181,19 +191,18 @@ public class TextProvider {
     public static Component dimension(Level world) {
         String dimension = ServerUtils.getDimensionId(world);
         return switch (dimension) {
-            case ServerUtils.OVERWORLD -> LocalizationKeys.Dimension.OVERWORLD.translate();
-            case ServerUtils.THE_NETHER -> LocalizationKeys.Dimension.THE_NETHER.translate();
-            case ServerUtils.THE_END -> LocalizationKeys.Dimension.THE_END.translate();
+            case ServerUtils.OVERWORLD -> Dimension.OVERWORLD.translate();
+            case ServerUtils.THE_NETHER -> Dimension.THE_NETHER.translate();
+            case ServerUtils.THE_END -> Dimension.THE_END.translate();
             default -> TextBuilder.create(dimension);
         };
     }
 
     public static Component dimension(String dimension) {
         return switch (dimension) {
-            case ServerUtils.OVERWORLD, ServerUtils.SIMPLE_OVERWORLD -> LocalizationKeys.Dimension.OVERWORLD.translate();
-            case ServerUtils.THE_NETHER, ServerUtils.SIMPLE_THE_NETHER ->
-                    LocalizationKeys.Dimension.THE_NETHER.translate();
-            case ServerUtils.THE_END, ServerUtils.SIMPLE_THE_END -> LocalizationKeys.Dimension.THE_END.translate();
+            case ServerUtils.OVERWORLD, ServerUtils.SIMPLE_OVERWORLD -> Dimension.OVERWORLD.translate();
+            case ServerUtils.THE_NETHER, ServerUtils.SIMPLE_THE_NETHER -> Dimension.THE_NETHER.translate();
+            case ServerUtils.THE_END, ServerUtils.SIMPLE_THE_END -> Dimension.THE_END.translate();
             default -> TextBuilder.create(dimension);
         };
     }
