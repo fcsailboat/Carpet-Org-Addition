@@ -1,19 +1,25 @@
 package boat.carpetorgaddition.client.renderer.waypoint;
 
 import boat.carpetorgaddition.client.util.ClientUtils;
+import boat.carpetorgaddition.util.IdentifierUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.CommonColors;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.util.Objects;
@@ -59,6 +64,13 @@ public abstract class Waypoint {
     private static final long VANISHING_TIME = 4L;
     public static final Identifier HIGHLIGHT = Identifier.withDefaultNamespace("textures/map/decorations/red_x.png");
     public static final Identifier NAVIGATOR = Identifier.withDefaultNamespace("textures/map/decorations/target_x.png");
+    public static final RenderPipeline HIGHLIGHT_WAYPOINT_RENDER_PIPELINE = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+                    .withLocation(IdentifierUtils.ofIdentifier("highlight_waypoint"))
+                    .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))
+                    .build()
+    );
+    private final RenderType renderType;
 
     public Waypoint(@NotNull ResourceKey<Level> registryKey, @NotNull Vec3 target, Identifier icon, long duration, boolean persistent) {
         this.registryKey = registryKey;
@@ -67,13 +79,14 @@ public abstract class Waypoint {
         this.icon = icon;
         this.remaining = duration;
         this.persistent = persistent;
+        this.renderType = RenderType.create("waypoint", RenderSetup.builder(HIGHLIGHT_WAYPOINT_RENDER_PIPELINE).withTexture("Sampler0", icon).createRenderSetup());
     }
 
     public Waypoint(Level world, Vec3 target, Identifier icon, long duration, boolean persistent) {
         this(world.dimension(), target, icon, duration, persistent);
     }
 
-    public void render(PoseStack matrixStack, MultiBufferSource consumers, Camera camera, DeltaTracker tickCounter) {
+    public void render(PoseStack poseStack, SubmitNodeCollector collector, Camera camera, DeltaTracker deltaTracker) {
         if (this.isDone()) {
             return;
         }
@@ -81,7 +94,7 @@ public abstract class Waypoint {
         if (revised == null) {
             return;
         }
-        float tickDelta = tickCounter.getGameTimeDeltaPartialTick(false);
+        float tickDelta = deltaTracker.getGameTimeDeltaPartialTick(false);
         if (this.tickDelta > tickDelta) {
             this.tick();
         }
@@ -99,24 +112,23 @@ public abstract class Waypoint {
             // 将路径点位置限制在渲染距离内
             correction = correction.normalize().scale(renderDistance);
         }
-        matrixStack.pushPose();
-        this.transform(matrixStack, camera, correction);
-        this.render(matrixStack, consumers);
+        poseStack.pushPose();
+        this.transform(poseStack, camera, correction);
+        this.render(poseStack, collector);
         // 如果准星正在指向路径点，显示文本
         if (isWatching(camera, revised)) {
-            drawDistance(matrixStack, consumers, offset);
+            drawDistance(poseStack, collector, offset);
         }
-        matrixStack.popPose();
+        poseStack.popPose();
     }
 
-    private void render(PoseStack matrixStack, MultiBufferSource consumers) {
-        RenderType renderLayer = RenderTypes.fireScreenEffect(this.icon);
-        Matrix4f matrix4f = matrixStack.last().pose();
-        VertexConsumer vertexConsumer = consumers.getBuffer(renderLayer);
-        vertexConsumer.addVertex(matrix4f, -1F, -1F, 0F).setUv(0F, 0F).setColor(-1);
-        vertexConsumer.addVertex(matrix4f, -1F, 1F, 0F).setUv(0F, 1F).setColor(-1);
-        vertexConsumer.addVertex(matrix4f, 1F, 1F, 0F).setUv(1F, 1F).setColor(-1);
-        vertexConsumer.addVertex(matrix4f, 1F, -1F, 0F).setUv(1F, 0F).setColor(-1);
+    private void render(PoseStack matrixStack, SubmitNodeCollector submitNodeCollector) {
+        submitNodeCollector.submitCustomGeometry(matrixStack, this.renderType, (pose, buffer) -> {
+            buffer.addVertex(pose, -1F, -1F, 0F).setUv(0F, 0F).setColor(-1);
+            buffer.addVertex(pose, -1F, 1F, 0F).setUv(0F, 1F).setColor(-1);
+            buffer.addVertex(pose, 1F, 1F, 0F).setUv(1F, 1F).setColor(-1);
+            buffer.addVertex(pose, 1F, -1F, 0F).setUv(1F, 0F).setColor(-1);
+        });
     }
 
     /**
@@ -231,7 +243,7 @@ public abstract class Waypoint {
     /**
      * 绘制距离文本
      */
-    private void drawDistance(PoseStack matrixStack, MultiBufferSource consumers, Vec3 offset) {
+    private void drawDistance(PoseStack poseStack, SubmitNodeCollector collector, Vec3 offset) {
         Font textRenderer = ClientUtils.getTextRenderer();
         // 计算距离
         double distance = offset.length();
@@ -241,19 +253,35 @@ public abstract class Waypoint {
         if (!this.registryKey.equals(ClientUtils.getWorld().dimension())) {
             builder.setItalic();
         }
+        Component component = builder.build();
         // 获取文本宽度
         int width = textRenderer.width(formatted);
+        int height = textRenderer.wordWrapHeight(component, width);
+        float x = (-width) / 2F;
+        float y = 8F;
         // 获取背景不透明度
         float backgroundOpacity = ClientUtils.getGameOptions().getBackgroundOpacity(0.25F);
         int opacity = (int) (backgroundOpacity * 255.0F) << 24;
-        matrixStack.pushPose();
+        poseStack.pushPose();
         // 缩小文字
-        matrixStack.scale(0.15F, 0.15F, 0.15F);
+        poseStack.scale(0.15F, 0.15F, 0.15F);
+        FormattedCharSequence sequence = FormattedCharSequence.forward(component.getString(), component.getStyle());
+        // TODO 文本也无法透过方块显示，但原版也有同样的问题，需要在新版本中测试
         // 渲染文字
-        textRenderer.drawInBatch(builder.build(), -width / 2F, 8, CommonColors.WHITE, false,
-                matrixStack.last().pose(), consumers,
-                Font.DisplayMode.SEE_THROUGH, opacity, 1);
-        matrixStack.popPose();
+        if (opacity != 0) {
+            // 渲染文字背景
+            poseStack.pushPose();
+            poseStack.translate(x, y, 1);
+            collector.submitCustomGeometry(poseStack, RenderTypes.textBackgroundSeeThrough(), (pose, buffer) -> {
+                buffer.addVertex(pose, -1.0F, -1.0F, 0F).setColor(opacity).setLight(1);
+                buffer.addVertex(pose, -1.0F, height, 0F).setColor(opacity).setLight(1);
+                buffer.addVertex(pose, width, height, 0F).setColor(opacity).setLight(1);
+                buffer.addVertex(pose, width, -1.0F, 0F).setColor(opacity).setLight(1);
+            });
+            poseStack.popPose();
+        }
+        collector.submitText(poseStack, x, y, sequence, false, Font.DisplayMode.SEE_THROUGH, 0x00F00000, 0xFFFFFFFF, 0, 0);
+        poseStack.popPose();
     }
 
     /**

@@ -10,7 +10,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -53,12 +53,12 @@ public class WaypointRenderer {
      */
     public void render(LevelRenderContext context) {
         PoseStack matrixStack = context.poseStack();
+        SubmitNodeCollector submitNodeCollector = context.submitNodeCollector();
         for (Waypoint waypoint : waypoints.values()) {
             try {
                 // 绘制图标
-                MultiBufferSource consumers = context.bufferSource();
                 DeltaTracker tickCounter = ClientUtils.getTickCounter();
-                waypoint.render(matrixStack, consumers, this.camera, tickCounter);
+                waypoint.render(matrixStack, submitNodeCollector, this.camera, tickCounter);
             } catch (RuntimeException e) {
                 // 发送错误消息，然后停止渲染
                 ClientMessageUtils.sendErrorMessage(LocalizationKeys.Render.WAYPOINT.then("error").translate(), e);

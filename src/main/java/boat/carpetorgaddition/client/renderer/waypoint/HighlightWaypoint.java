@@ -6,7 +6,7 @@ import boat.carpetorgaddition.client.util.ClientUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -16,11 +16,11 @@ public class HighlightWaypoint extends Waypoint {
     }
 
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource consumers, Camera camera, DeltaTracker tickCounter) {
+    public void render(PoseStack poseStack, SubmitNodeCollector collector, Camera camera, DeltaTracker deltaTracker) {
         if (ClientKeyBindingUtils.isPressed(CarpetOrgAdditionClient.CLEAR_WAYPOINT) && ClientUtils.getCurrentScreen() == null) {
             this.stop();
         }
-        super.render(matrixStack, consumers, camera, tickCounter);
+        super.render(poseStack, collector, camera, deltaTracker);
     }
 
     @Override

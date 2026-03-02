@@ -6,7 +6,7 @@ import boat.carpetorgaddition.wheel.provider.CommandProvider;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -22,7 +22,7 @@ public class NavigatorWaypoint extends Waypoint {
     }
 
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource consumers, Camera camera, DeltaTracker tickCounter) {
+    public void render(PoseStack poseStack, SubmitNodeCollector collector, Camera camera, DeltaTracker deltaTracker) {
         // 计算帧间时间增量
         double delta = this.tickDelta - this.lastTickDelta;
         if (delta < 0) {
@@ -30,7 +30,7 @@ public class NavigatorWaypoint extends Waypoint {
             delta = delta - Math.floor(delta);
         }
         this.progress += delta;
-        super.render(matrixStack, consumers, camera, tickCounter);
+        super.render(poseStack, collector, camera, deltaTracker);
     }
 
     @Override
