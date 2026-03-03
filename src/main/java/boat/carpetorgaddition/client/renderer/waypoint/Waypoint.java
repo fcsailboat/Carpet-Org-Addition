@@ -62,6 +62,10 @@ public abstract class Waypoint {
      * 路径点消失时间
      */
     private static final long VANISHING_TIME = 4L;
+    /**
+     * 路径点开始闪烁的时间
+     */
+    private static final long FLICKER_TIME = 200L;
     public static final Identifier HIGHLIGHT = Identifier.withDefaultNamespace("textures/map/decorations/red_x.png");
     public static final Identifier NAVIGATOR = Identifier.withDefaultNamespace("textures/map/decorations/target_x.png");
     public static final RenderPipeline HIGHLIGHT_WAYPOINT_RENDER_PIPELINE = RenderPipelines.register(
@@ -116,18 +120,28 @@ public abstract class Waypoint {
         this.transform(poseStack, camera, correction);
         this.render(poseStack, collector);
         // 如果准星正在指向路径点，显示文本
-        if (isWatching(camera, revised)) {
+        if (this.isWatching(camera, revised)) {
             drawDistance(poseStack, collector, offset);
         }
         poseStack.popPose();
     }
 
-    private void render(PoseStack matrixStack, SubmitNodeCollector submitNodeCollector) {
-        submitNodeCollector.submitCustomGeometry(matrixStack, this.renderType, (pose, buffer) -> {
-            buffer.addVertex(pose, -1F, -1F, 0F).setUv(0F, 0F).setColor(-1);
-            buffer.addVertex(pose, -1F, 1F, 0F).setUv(0F, 1F).setColor(-1);
-            buffer.addVertex(pose, 1F, 1F, 0F).setUv(1F, 1F).setColor(-1);
-            buffer.addVertex(pose, 1F, -1F, 0F).setUv(1F, 0F).setColor(-1);
+    private void render(PoseStack poseStack, SubmitNodeCollector collector) {
+        float alpha;
+        if (this.persistent || this.remaining > FLICKER_TIME || this.remaining <= 0) {
+            alpha = 1F;
+        } else {
+            double time = FLICKER_TIME - (double) this.remaining + this.tickDelta;
+            double flicker = time / FLICKER_TIME;
+            double speed = 1 + Math.pow(flicker, 2.0) * 1.2;
+            double x = (0.5 * speed * time) + (Math.PI / 2.0);
+            alpha = (float) Math.max(((Math.sin(x) / 2.0)) + 0.5F, 0.0);
+        }
+        collector.submitCustomGeometry(poseStack, this.renderType, (pose, buffer) -> {
+            buffer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F).setColor(-1);
+            buffer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F).setColor(-1);
+            buffer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F).setColor(-1);
+            buffer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F).setColor(-1);
         });
     }
 
