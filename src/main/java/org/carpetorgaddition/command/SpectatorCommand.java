@@ -27,6 +27,7 @@ import org.carpetorgaddition.wheel.WorldFormat;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Locale;
 
 // 在生存模式和旁观模式间切换
@@ -161,22 +162,25 @@ public class SpectatorCommand extends AbstractServerCommand {
     public void loadPlayerPos(MinecraftServer server, ServerPlayerEntity player) {
         WorldFormat worldFormat = new WorldFormat(server, SPECTATOR);
         File file = worldFormat.file(player.getUuidAsString() + IOUtils.JSON_EXTENSION);
-        try {
-            BufferedReader reader = IOUtils.toReader(file);
-            try (reader) {
-                Gson gson = new Gson();
-                JsonObject json = gson.fromJson(reader, JsonObject.class);
-                double x = json.get("x").getAsDouble();
-                double y = json.get("y").getAsDouble();
-                double z = json.get("z").getAsDouble();
-                float yaw = json.get("yaw").getAsFloat();
-                float pitch = json.get("pitch").getAsFloat();
-                String dimension = json.get("dimension").getAsString();
-                ServerWorld world = WorldUtils.getWorld(server, dimension);
-                WorldUtils.teleport(player, world, x, y, z, yaw, pitch);
+        if (file.isFile()) {
+            try {
+                BufferedReader reader = IOUtils.toReader(file);
+                try (reader) {
+                    Gson gson = new Gson();
+                    JsonObject json = gson.fromJson(reader, JsonObject.class);
+                    double x = json.get("x").getAsDouble();
+                    double y = json.get("y").getAsDouble();
+                    double z = json.get("z").getAsDouble();
+                    float yaw = json.get("yaw").getAsFloat();
+                    float pitch = json.get("pitch").getAsFloat();
+                    String dimension = json.get("dimension").getAsString();
+                    ServerWorld world = WorldUtils.getWorld(server, dimension);
+                    WorldUtils.teleport(player, world, x, y, z, yaw, pitch);
+                }
+                Files.deleteIfExists(file.toPath());
+            } catch (IOException | NullPointerException e) {
+                CarpetOrgAddition.LOGGER.warn("Unable to read the location information of {} normally", FetcherUtils.getPlayerName(player));
             }
-        } catch (IOException | NullPointerException e) {
-            CarpetOrgAddition.LOGGER.warn("Unable to read the location information of {} normally", FetcherUtils.getPlayerName(player));
         }
     }
 
