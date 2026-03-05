@@ -12,6 +12,6 @@ qodana.yaml
 docs/backups
 remappedSrc/
 lib/
+/config/
 startlog.txt
 src/main/generated/
-/config/carpetorgaddition/carpet-org-addition.json
