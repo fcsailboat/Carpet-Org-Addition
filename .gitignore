@@ -12,5 +12,5 @@ qodana.yaml
 docs/backups
 remappedSrc/
 lib/
-config/
+/config/
 startlog.txt
