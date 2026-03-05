@@ -2,12 +2,14 @@ package org.carpetorgaddition.periodic;
 
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameMode;
 import org.carpetorgaddition.periodic.navigator.NavigatorManager;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerComponentCoordinator {
     private final ServerPlayerEntity player;
     private final NavigatorManager navigatorManager;
+    private GameMode nbtGameMode;
 
     public PlayerComponentCoordinator(ServerPlayerEntity player) {
         this.player = player;
@@ -54,5 +56,13 @@ public class PlayerComponentCoordinator {
 
     protected ServerPlayerEntity getPlayer() {
         return this.player;
+    }
+
+    public GameMode getNbtGameMode() {
+        return this.nbtGameMode;
+    }
+
+    public void setNbtGameMode(GameMode gameMode) {
+        this.nbtGameMode = gameMode;
     }
 }

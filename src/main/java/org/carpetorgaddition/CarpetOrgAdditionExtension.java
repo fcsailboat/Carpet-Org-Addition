@@ -17,6 +17,7 @@ import org.carpetorgaddition.command.PlayerManagerCommand;
 import org.carpetorgaddition.command.SpectatorCommand;
 import org.carpetorgaddition.config.GlobalConfigs;
 import org.carpetorgaddition.logger.LoggerRegister;
+import org.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import org.carpetorgaddition.periodic.ServerComponentCoordinator;
 import org.carpetorgaddition.periodic.express.ExpressManager;
 import org.carpetorgaddition.periodic.fakeplayer.FakePlayerSerializer;
@@ -58,8 +59,8 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
         // 加载假玩家安全挂机
         PlayerManagerCommand.loadSafeAfk(player);
         MinecraftServer server = FetcherUtils.getServer(player);
-        GameMode gameMode = server.getForcedGameMode();
-        if (gameMode != null) {
+        PlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getManager(player);
+        if (coordinator.getNbtGameMode() == GameMode.SPECTATOR && server.getForcedGameMode() != null) {
             SpectatorCommand instance = CommandRegister.getCommandInstance(SpectatorCommand.class);
             instance.loadPlayerPos(server, player);
         }
