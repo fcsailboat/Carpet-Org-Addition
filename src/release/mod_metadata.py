@@ -3,8 +3,10 @@ import os
 import re
 import zipfile
 
+from src import config_utils
+
 # 模组版本路径
-version_path = "..\\..\\libs\\version"
+output_path = "..\\..\\libs\\version"
 
 
 def read_fabric_mod_json(mod_file) -> dict:
@@ -22,9 +24,9 @@ def list_file() -> list[str]:
     """
     获取版本目录下的所有文件
     """
-    global version_path
-    listdir = os.listdir(version_path)
-    return [os.path.join(version_path, name) for name in listdir]
+    global output_path
+    listdir = os.listdir(config_utils.get_output())
+    return [os.path.join(config_utils.get_output(), name) for name in listdir]
 
 
 class ModMetadata:
@@ -95,4 +97,4 @@ class ModMetadata:
 if __name__ == '__main__':
     for file in list_file():
         metadata = ModMetadata(file)
-        print(metadata.get_game_versions())
+        print(metadata.get_file_name())

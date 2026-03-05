@@ -6,18 +6,7 @@ import requests
 from requests import Response
 
 from mod_metadata import ModMetadata
-
-to_be_deletion_path = "..\\..\\libs\\tobedeletion"
-version_path = "..\\..\\libs\\version"
-
-
-def get_token() -> str:
-    """
-    获取访问令牌
-    """
-    with open("..\\..\\libs\\token.txt", mode="r", encoding="UTF-8") as file:
-        token = file.read().strip()
-        return f"Bearer {token}"
+from src import config_utils
 
 
 def get_project():
@@ -33,7 +22,7 @@ def upload(data: ModMetadata) -> Response:
     """
     url = "https://api.modrinth.com/v2/version"
     request_head = {
-        "Authorization": get_token(),
+        "Authorization": config_utils.get_token(),
         "User-Agent": "https://github.com/fcsailboat/Carpet-Org-Addition"
     }
     body = {
@@ -76,7 +65,8 @@ def get_dependencies() -> list[dict]:
 
 def prepare_for_upload() -> list[ModMetadata]:
     metadata_list: list[ModMetadata] = []
-    files = [os.path.join(os.path.abspath(version_path), file) for file in os.listdir(version_path)]
+    output = config_utils.get_output()
+    files = [os.path.join(os.path.abspath(output), file) for file in os.listdir(output)]
     for file in files:
         metadata_list.append(ModMetadata(file))
     print("发布前检查：")
@@ -93,12 +83,12 @@ def prepare_for_upload() -> list[ModMetadata]:
 
 
 def move_file(file_name: str):
-    from_file = os.path.join(version_path, file_name)
-    to_file = os.path.join(to_be_deletion_path, file_name)
+    from_file = os.path.join(config_utils.get_output(), file_name)
+    to_file = os.path.join(config_utils.get_garbages(), file_name)
     shutil.move(from_file, to_file)
 
 
-if __name__ == '__main__':
+def release():
     all_metadata = prepare_for_upload()
     if all_metadata:
         count = 0
@@ -114,3 +104,7 @@ if __name__ == '__main__':
             move_file(metadatum.get_file_name())
     else:
         print("未发布模组")
+
+
+if __name__ == '__main__':
+    release()

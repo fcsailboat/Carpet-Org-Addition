@@ -6,13 +6,14 @@ from subprocess import TimeoutExpired, CompletedProcess
 
 from git import Repo
 
-# 项目Git根目录
-directory = os.path.abspath(os.path.join(os.getcwd(), "..\\.."))
+from src import config_utils
+from src.config_utils import parent_root
+
 # 模组输出目录
-version_path = os.path.join(directory, "python\\libs\\version")
+output_path = config_utils.get_output()
 # 构建出模组的数量
 version_count = 0
-repo = Repo(directory)
+repo = Repo(parent_root)
 
 
 def latest_file(files: list[str], branch: str):
@@ -39,15 +40,15 @@ def copy_the_latest_file(branch: str):
     将最新构建的文件复制到version文件夹
     :param branch:
     """
-    global directory, version_path
-    path = os.path.join(directory, "build\\libs")
+    global output_path
+    path = os.path.join(parent_root, "build\\libs")
     files = [os.path.join(path, file) for file in os.listdir(path)]
     last = latest_file(files, branch)
     print(f"正在将文件{os.path.basename(last)}复制到{path}")
-    shutil.copy(last, version_path)
+    shutil.copy(last, output_path)
 
 
-def build_jar(branch: str):
+def build(branch: str):
     """
     构建当前分支的模组jar
     """
@@ -61,7 +62,7 @@ def build_jar(branch: str):
             result: CompletedProcess[bytes] = subprocess.run(
                 args=["gradlew", "remapJar"],
                 timeout=600,
-                cwd=directory,
+                cwd=parent_root,
                 shell=True
             )
             return_code = result.returncode
@@ -91,12 +92,12 @@ def build_all_version_jar():
     """
     构建所有版本
     """
-    branches = ["1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10"]
+    branches = config_utils.get_versions()
     for branch in branches:
         print(f"正在切换到{branch}分支")
         switch_branch(branch)
         print(f"正在构建{branch}版本")
-        build_jar(branch)
+        build(branch)
         print("-" * 70)
     global version_count
     if version_count != len(branches):
@@ -107,11 +108,18 @@ def check_file_directory():
     """
     检查输出目录中是否有其他文件
     """
-    if len(os.listdir(version_path)) == 0:
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+        return
+    if len(os.listdir(output_path)) == 0:
         return
     raise RuntimeError("输出目录非空")
 
 
-if __name__ == '__main__':
+def start():
     check_file_directory()
     build_all_version_jar()
+
+
+if __name__ == '__main__':
+    start()
