@@ -6,6 +6,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -246,6 +247,17 @@ public class ServerUtils {
         if (target.level() instanceof ServerLevel world) {
             teleport(source, world, target.getX(), target.getY(), target.getZ(), target.getYRot(), target.getXRot());
         }
+    }
+
+    /**
+     * 让实体看向指定位置
+     */
+    public static void lookAt(Entity entity, Vec3 pos) {
+        lookAt(entity, EntityAnchorArgument.Anchor.EYES, pos);
+    }
+
+    public static void lookAt(Entity entity, EntityAnchorArgument.Anchor anchor, Vec3 pos) {
+        entity.lookAt(anchor, pos);
     }
 
     public static boolean isOverworld(ResourceKey<Level> key) {

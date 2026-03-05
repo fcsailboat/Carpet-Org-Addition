@@ -70,7 +70,10 @@ public class WaypointRenderer {
     }
 
     public Waypoint addOrUpdate(Waypoint waypoint) {
-        return this.waypoints.computeIfAbsent(waypoint.getIcon(), _ -> waypoint);
+        Waypoint value = this.waypoints.computeIfAbsent(waypoint.getIcon(), _ -> waypoint);
+        // 重置剩余持续时间
+        value.update(waypoint);
+        return value;
     }
 
     public Optional<Waypoint> addOrModify(Waypoint waypoint) {

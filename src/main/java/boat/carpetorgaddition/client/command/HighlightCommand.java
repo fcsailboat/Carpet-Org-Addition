@@ -7,6 +7,7 @@ import boat.carpetorgaddition.client.renderer.waypoint.HighlightWaypoint;
 import boat.carpetorgaddition.client.renderer.waypoint.Waypoint;
 import boat.carpetorgaddition.client.renderer.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,9 +16,9 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ObjectShare;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -67,8 +68,9 @@ public class HighlightCommand extends AbstractClientCommand {
             // 如果两个路径点指向同一个位置，就让玩家看向该路径点
             if (waypoint.equals(newWaypoint)) {
                 update = true;
-                // if语句结束后仍要设置新路径点，因为要重置持续时间
-                context.getSource().getEntity().lookAt(EntityAnchorArgument.Anchor.EYES, vec3d);
+                // 看向路径点
+                LocalPlayer player = context.getSource().getPlayer();
+                ServerUtils.lookAt(player, vec3d);
                 break;
             }
         }

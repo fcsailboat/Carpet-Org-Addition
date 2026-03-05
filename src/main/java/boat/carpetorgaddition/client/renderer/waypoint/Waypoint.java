@@ -337,6 +337,10 @@ public abstract class Waypoint {
         this.registryKey = registryKey;
     }
 
+    public void update(Waypoint waypoint) {
+        this.remaining = waypoint.remaining;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
