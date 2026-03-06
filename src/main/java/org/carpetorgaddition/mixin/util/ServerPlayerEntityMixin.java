@@ -68,7 +68,7 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
         }
     }
 
-    @WrapOperation(method = "readGameModeData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;gameModeFromData(Lnet/minecraft/storage/ReadView;Ljava/lang/String;)Lnet/minecraft/world/GameMode;", ordinal = 0))
+    @WrapOperation(method = "readCustomData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;gameModeFromData(Lnet/minecraft/storage/ReadView;Ljava/lang/String;)Lnet/minecraft/world/GameMode;", ordinal = 0))
     private GameMode setNbtGameMode(ReadView view, String key, Operation<GameMode> original) {
         GameMode gameMode = original.call(view, key);
         this.manager.setNbtGameMode(gameMode);
