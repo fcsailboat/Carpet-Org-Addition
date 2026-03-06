@@ -1,14 +1,18 @@
 package org.carpetorgaddition.mixin.util;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.GameMode;
 import org.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
 import org.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
 import org.carpetorgaddition.periodic.PeriodicTaskManagerInterface;
@@ -62,5 +66,12 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
             anInterface.getBackgroundSprite().forEach((index, identifier) ->
                     ServerPlayNetworking.send(thisPlayer, new BackgroundSpriteSyncS2CPacket(screenHandler.syncId, index, identifier)));
         }
+    }
+
+    @WrapOperation(method = "readGameModeNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;gameModeFromNbt(Lnet/minecraft/nbt/NbtCompound;Ljava/lang/String;)Lnet/minecraft/world/GameMode;", ordinal = 0))
+    private GameMode setNbtGameMode(NbtCompound nbt, String key, Operation<GameMode> original) {
+        GameMode gameMode = original.call(nbt, key);
+        this.manager.setNbtGameMode(gameMode);
+        return gameMode;
     }
 }
