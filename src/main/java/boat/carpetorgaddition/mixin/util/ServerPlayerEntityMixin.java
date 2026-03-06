@@ -8,6 +8,8 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncServer;
 import boat.carpetorgaddition.wheel.screen.UnavailableSlotSyncInterface;
 import boat.carpetorgaddition.wheel.screen.WithButtonPlayerInventoryScreenHandler;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -17,6 +19,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.storage.ValueInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -66,5 +70,12 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
             anInterface.getBackgroundSprite().forEach((index, identifier) ->
                     ServerPlayNetworking.send(thisPlayer, new BackgroundSpriteSyncS2CPacket(screenHandler.containerId, index, identifier)));
         }
+    }
+
+    @WrapOperation(method = "readAdditionalSaveData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;readPlayerMode(Lnet/minecraft/world/level/storage/ValueInput;Ljava/lang/String;)Lnet/minecraft/world/level/GameType;", ordinal = 0))
+    private GameType setNbtGameMode(ValueInput playerInput, String modeTag, Operation<GameType> original) {
+        GameType result = original.call(playerInput, modeTag);
+        this.manager.setNbtGameMode(result);
+        return result;
     }
 }

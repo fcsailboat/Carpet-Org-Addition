@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 // 在生存模式和旁观模式间切换
 public class SpectatorCommand extends AbstractServerCommand {
@@ -204,23 +205,26 @@ public class SpectatorCommand extends AbstractServerCommand {
     public void loadAndTeleportPlayer(MinecraftServer server, ServerPlayer player) {
         WorldFormat worldFormat = new WorldFormat(server, SPECTATOR);
         File file = worldFormat.file(player.getStringUUID() + IOUtils.JSON_EXTENSION);
-        try {
-            JsonObject oldJson = IOUtils.loadJson(file);
-            int version = DataUpdater.getVersion(oldJson);
-            SpectatorDataUpdater dataUpdater = SpectatorDataUpdater.getInstance();
-            JsonObject json = dataUpdater.update(oldJson, version);
-            JsonObject pos = json.getAsJsonObject("pos");
-            double x = pos.get("x").getAsDouble();
-            double y = pos.get("y").getAsDouble();
-            double z = pos.get("z").getAsDouble();
-            JsonObject direction = json.getAsJsonObject("direction");
-            float yaw = direction.get("yaw").getAsFloat();
-            float pitch = direction.get("pitch").getAsFloat();
-            String dimension = json.get("dimension").getAsString();
-            ServerLevel world = ServerUtils.getWorld(server, dimension);
-            ServerUtils.teleport(player, world, x, y, z, yaw, pitch);
-        } catch (IOException | NullPointerException e) {
-            CarpetOrgAddition.LOGGER.warn("Unable to read the location information of {} normally", ServerUtils.getPlayerName(player));
+        if (file.isFile()) {
+            try {
+                JsonObject oldJson = IOUtils.loadJson(file);
+                int version = DataUpdater.getVersion(oldJson);
+                SpectatorDataUpdater dataUpdater = SpectatorDataUpdater.getInstance();
+                JsonObject json = dataUpdater.update(oldJson, version);
+                JsonObject pos = json.getAsJsonObject("pos");
+                double x = pos.get("x").getAsDouble();
+                double y = pos.get("y").getAsDouble();
+                double z = pos.get("z").getAsDouble();
+                JsonObject direction = json.getAsJsonObject("direction");
+                float yaw = direction.get("yaw").getAsFloat();
+                float pitch = direction.get("pitch").getAsFloat();
+                String dimension = json.get("dimension").getAsString();
+                ServerLevel world = ServerUtils.getWorld(server, dimension);
+                ServerUtils.teleport(player, world, x, y, z, yaw, pitch);
+                Files.deleteIfExists(file.toPath());
+            } catch (IOException | NullPointerException e) {
+                CarpetOrgAddition.LOGGER.warn("Unable to read the location information of {} normally", ServerUtils.getPlayerName(player));
+            }
         }
     }
 
@@ -231,6 +235,6 @@ public class SpectatorCommand extends AbstractServerCommand {
 
     @Override
     public String getDefaultName() {
-        return "spectator";
+        return "";
     }
 }

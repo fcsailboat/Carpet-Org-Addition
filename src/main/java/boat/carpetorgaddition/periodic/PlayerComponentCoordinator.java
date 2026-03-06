@@ -6,7 +6,9 @@ import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public class PlayerComponentCoordinator {
@@ -14,6 +16,8 @@ public class PlayerComponentCoordinator {
     protected final MinecraftServer server;
     private final NavigatorManager navigatorManager;
     private final WithButtonPlayerInventory withButtonPlayerInventory;
+    @Nullable
+    private GameType nbtGameMode;
     /**
      * 客户端和服务端的自定义单击事件数据版本不匹配，是否已发送通知
      */
@@ -77,5 +81,14 @@ public class PlayerComponentCoordinator {
 
     public void markVersionMismatchNotified() {
         this.versionMismatchNotified = true;
+    }
+
+    @Nullable
+    public GameType getNbtGameMode() {
+        return this.nbtGameMode;
+    }
+
+    public void setNbtGameMode(GameType gameMode) {
+        this.nbtGameMode = gameMode;
     }
 }

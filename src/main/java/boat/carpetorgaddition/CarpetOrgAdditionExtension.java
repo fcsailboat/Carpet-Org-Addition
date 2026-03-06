@@ -6,6 +6,7 @@ import boat.carpetorgaddition.command.SpectatorCommand;
 import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.logger.LoggerRegister;
 import boat.carpetorgaddition.network.s2c.PlayerTypeSyncS2CPacket;
+import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.parcel.ParcelManager;
 import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
@@ -100,15 +101,18 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
      * 如果{@code server.properties}中，{@code force-gamemode}为{@code true}，则将被{@code /spectator}命令设置为旁观模式的玩家传送回原位置
      */
     private void teleportSpectatorPlayer(ServerPlayer player, MinecraftServer server) {
-        GameType gameMode = server.getForcedGameType();
-        if (gameMode == null) {
-            return;
-        }
-        SpectatorCommand instance = CommandRegister.getCommandInstance(SpectatorCommand.class);
-        try {
-            instance.loadAndTeleportPlayer(server, player);
-        } catch (RuntimeException e) {
-            CarpetOrgAddition.LOGGER.error("Unexpected error while attempting to teleport player back to original location", e);
+        PlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(player);
+        if (coordinator.getNbtGameMode() == GameType.SPECTATOR) {
+            GameType forcedGameMode = server.getForcedGameType();
+            if (forcedGameMode == null) {
+                return;
+            }
+            SpectatorCommand instance = CommandRegister.getCommandInstance(SpectatorCommand.class);
+            try {
+                instance.loadAndTeleportPlayer(server, player);
+            } catch (RuntimeException e) {
+                CarpetOrgAddition.LOGGER.error("Unexpected error while attempting to teleport player back to original location", e);
+            }
         }
     }
 
