@@ -1,12 +1,9 @@
-package boat.carpetorgaddition.client.renderer.waypoint;
+package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.client.util.ClientCommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -22,7 +19,7 @@ public class NavigatorWaypoint extends Waypoint {
     }
 
     @Override
-    public void render(PoseStack poseStack, SubmitNodeCollector collector, Camera camera, DeltaTracker deltaTracker) {
+    public void render(LevelRenderContext context) {
         // 计算帧间时间增量
         double delta = this.tickDelta - this.lastTickDelta;
         if (delta < 0) {
@@ -30,7 +27,7 @@ public class NavigatorWaypoint extends Waypoint {
             delta = delta - Math.floor(delta);
         }
         this.progress += delta;
-        super.render(poseStack, collector, camera, deltaTracker);
+        super.render(context);
     }
 
     @Override
@@ -47,7 +44,7 @@ public class NavigatorWaypoint extends Waypoint {
             this.lastTarget = this.getTarget();
             this.progress = 0d;
         }
-        super.setTarget(registryKey , vec3d);
+        super.setTarget(registryKey, vec3d);
     }
 
     @Override

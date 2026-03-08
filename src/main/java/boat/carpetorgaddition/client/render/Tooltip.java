@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.client.renderer;
+package boat.carpetorgaddition.client.render;
 
 import boat.carpetorgaddition.client.util.ClientUtils;
 import net.minecraft.client.Minecraft;

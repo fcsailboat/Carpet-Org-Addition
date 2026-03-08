@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -258,6 +259,13 @@ public class MathUtils {
         return new Vec3(x, y, z);
     }
 
+    public static Vector3f approach(Vector3f from, Vector3f to, float factor) {
+        float x = (float) approach(from.x(), to.x(), factor);
+        float y = (float) approach(from.y(), to.y(), factor);
+        float z = (float) approach(from.z(), to.z(), factor);
+        return new Vector3f(x, y, z);
+    }
+
     /**
      * 让一个数逐渐趋近于另一个数
      */
@@ -291,6 +299,11 @@ public class MathUtils {
      */
     public static double verticalDistance(Vec3 a, Vec3 b) {
         return Math.abs(a.y() - b.y());
+    }
+
+    @SuppressWarnings("unused")
+    public static Vector3f signum(Vector3f vector3f) {
+        return new Vector3f(Math.signum(vector3f.x), Math.signum(vector3f.y), Math.signum(vector3f.z));
     }
 
     /**

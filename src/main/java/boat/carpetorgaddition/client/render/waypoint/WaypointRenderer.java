@@ -1,16 +1,11 @@
-package boat.carpetorgaddition.client.renderer.waypoint;
+package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.client.util.ClientMessageUtils;
-import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -22,18 +17,16 @@ import java.util.Optional;
 
 public class WaypointRenderer {
     private final Map<Object, Waypoint> waypoints = new HashMap<>();
-    private final Camera camera;
     private static WaypointRenderer INSTANCE;
 
     static {
         // 断开连接时清除路径点
         ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> destroy());
         // 清除不再需要的渲染器
-        ClientTickEvents.START_CLIENT_TICK.register(_ -> getInstance().waypoints.values().removeIf(Waypoint::isDone));
+        ClientTickEvents.START_CLIENT_TICK.register(_ -> getInstance().waypoints.values().removeIf(Waypoint::isStopped));
     }
 
     private WaypointRenderer() {
-        this.camera = ClientUtils.getCamera();
     }
 
     @NotNull
@@ -52,13 +45,10 @@ public class WaypointRenderer {
      * 绘制路径点
      */
     public void render(LevelRenderContext context) {
-        PoseStack matrixStack = context.poseStack();
-        SubmitNodeCollector submitNodeCollector = context.submitNodeCollector();
         for (Waypoint waypoint : waypoints.values()) {
             try {
                 // 绘制图标
-                DeltaTracker tickCounter = ClientUtils.getTickCounter();
-                waypoint.render(matrixStack, submitNodeCollector, this.camera, tickCounter);
+                waypoint.render(context);
             } catch (RuntimeException e) {
                 // 发送错误消息，然后停止渲染
                 ClientMessageUtils.sendErrorMessage(LocalizationKeys.Render.WAYPOINT.then("error").translate(), e);

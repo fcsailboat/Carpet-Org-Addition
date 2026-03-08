@@ -3,9 +3,10 @@ package boat.carpetorgaddition.client;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.client.command.ClientCommandRegister;
 import boat.carpetorgaddition.client.logger.ClientLogger;
-import boat.carpetorgaddition.client.renderer.waypoint.NavigatorWaypoint;
-import boat.carpetorgaddition.client.renderer.waypoint.Waypoint;
-import boat.carpetorgaddition.client.renderer.waypoint.WaypointRenderer;
+import boat.carpetorgaddition.client.render.WorldComponentRenderer;
+import boat.carpetorgaddition.client.render.waypoint.NavigatorWaypoint;
+import boat.carpetorgaddition.client.render.waypoint.Waypoint;
+import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.debug.client.render.HudDebugRendererRegister;
 import boat.carpetorgaddition.network.s2c.*;
@@ -104,6 +105,7 @@ public class CarpetOrgAdditionClientRegister {
     private static void registerRenderer() {
         // 注册路径点渲染器
         LevelRenderEvents.COLLECT_SUBMITS.register(context -> WaypointRenderer.getInstance().render(context));
+        LevelRenderEvents.COLLECT_SUBMITS.register(WorldComponentRenderer::render);
     }
 
     /**

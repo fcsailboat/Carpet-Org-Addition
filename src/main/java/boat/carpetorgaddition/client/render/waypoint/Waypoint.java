@@ -1,5 +1,6 @@
-package boat.carpetorgaddition.client.renderer.waypoint;
+package boat.carpetorgaddition.client.render.waypoint;
 
+import boat.carpetorgaddition.client.render.WorldRenderComponent;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.IdentifierUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -8,8 +9,8 @@ import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -31,7 +32,7 @@ import org.joml.Quaternionf;
 
 import java.util.Objects;
 
-public abstract class Waypoint {
+public abstract class Waypoint implements WorldRenderComponent {
     /**
      * 路径点图标
      */
@@ -86,20 +87,24 @@ public abstract class Waypoint {
         this(world.dimension(), target, icon, duration, persistent);
     }
 
-    public void render(PoseStack poseStack, SubmitNodeCollector collector, Camera camera, DeltaTracker deltaTracker) {
-        if (this.isDone()) {
+    @Override
+    public void render(LevelRenderContext context) {
+        PoseStack poseStack = context.poseStack();
+        SubmitNodeCollector collector = context.submitNodeCollector();
+        Camera camera = ClientUtils.getCamera();
+        if (this.isStopped()) {
             return;
         }
         Vec3 revised = this.getRevisedPos();
         if (revised == null) {
             return;
         }
-        float tickDelta = deltaTracker.getGameTimeDeltaPartialTick(false);
-        if (this.tickDelta > tickDelta) {
+        float tickDelta1 = ClientUtils.getTickCounter().getGameTimeDeltaPartialTick(false);
+        if (this.tickDelta > tickDelta1) {
             this.tick();
         }
         this.lastTickDelta = this.tickDelta;
-        this.tickDelta = tickDelta;
+        this.tickDelta = tickDelta1;
         // 获取摄像机位置
         Vec3 cameraPos = camera.position();
         // 玩家距离目标的位置
@@ -125,6 +130,7 @@ public abstract class Waypoint {
     private void render(PoseStack poseStack, SubmitNodeCollector collector) {
         float alpha = this.getRenderAlpha();
         collector.submitCustomGeometry(poseStack, this.renderType, (pose, buffer) -> {
+            // TODO 两次setColor()？
             buffer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F).setColor(-1);
             buffer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F).setColor(-1);
             buffer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F).setColor(-1);
@@ -190,7 +196,7 @@ public abstract class Waypoint {
      * @param distance 摄像机到路径点的距离，用来抵消远小近大
      */
     private float getScale(double distance) {
-        if (this.isDone()) {
+        if (this.isStopped()) {
             return 0F;
         }
         // 修正路径点大小，使大小不会随着距离的改变而改变
@@ -302,7 +308,7 @@ public abstract class Waypoint {
      * 停止渲染但不播放消失动画
      */
     public void discard() {
-        if (this.isDone()) {
+        if (this.isStopped()) {
             return;
         }
         this.remaining = -Integer.MAX_VALUE;
@@ -311,7 +317,8 @@ public abstract class Waypoint {
     /**
      * @return 是否已经渲染完成，包括消失动画
      */
-    public boolean isDone() {
+    @Override
+    public boolean isStopped() {
         return -(this.remaining - 1) > VANISHING_TIME;
     }
 

@@ -1,12 +1,9 @@
-package boat.carpetorgaddition.client.renderer.waypoint;
+package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.client.CarpetOrgAdditionClient;
 import boat.carpetorgaddition.client.util.ClientKeyBindingUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -25,11 +22,11 @@ public class HighlightWaypoint extends Waypoint {
     }
 
     @Override
-    public void render(PoseStack poseStack, SubmitNodeCollector collector, Camera camera, DeltaTracker deltaTracker) {
+    public void render(LevelRenderContext context) {
         if (ClientKeyBindingUtils.isPressed(CarpetOrgAdditionClient.CLEAR_WAYPOINT) && ClientUtils.getCurrentScreen() == null) {
             this.stop();
         }
-        super.render(poseStack, collector, camera, deltaTracker);
+        super.render(context);
     }
 
     @Override

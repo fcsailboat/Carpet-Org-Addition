@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.debug.client.render;
 
-import boat.carpetorgaddition.client.renderer.Tooltip;
+import boat.carpetorgaddition.client.render.Tooltip;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.debug.DebugSettings;
 import boat.carpetorgaddition.exception.ProductionEnvironmentError;
