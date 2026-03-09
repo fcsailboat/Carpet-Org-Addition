@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccessor;
-import boat.carpetorgaddition.util.IdentifierUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -63,7 +63,7 @@ public class WithButtonPlayerInventory implements Container {
     /**
      * 没有任何作用，仅表示按钮功能
      */
-    private static final String BUTTON_ITEM = IdentifierUtils.ofIdentifier("button_item").toString();
+    private static final String BUTTON_ITEM = ServerUtils.ofIdentifier("button_item").toString();
     /**
      * 所有按钮的索引
      */

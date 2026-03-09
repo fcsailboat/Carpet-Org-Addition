@@ -1,6 +1,5 @@
 package boat.carpetorgaddition.wheel.predicate;
 
-import boat.carpetorgaddition.util.IdentifierUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -69,7 +68,7 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
 
     public ItemStackPredicate(@NotNull Item item) {
         this.predicate = itemStack -> itemStack.is(item);
-        this.input = IdentifierUtils.getIdAsString(item);
+        this.input = ServerUtils.getIdAsString(item);
         this.isWildcard = false;
         this.convert = item;
     }
@@ -87,7 +86,7 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
         this.predicate = itemStack -> set.contains(itemStack.getItem());
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
         for (Item item : set) {
-            joiner.add(IdentifierUtils.getIdAsString(item));
+            joiner.add(ServerUtils.getIdAsString(item));
         }
         this.input = joiner.toString();
         this.isWildcard = false;

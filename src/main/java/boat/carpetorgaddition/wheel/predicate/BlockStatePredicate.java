@@ -2,7 +2,7 @@ package boat.carpetorgaddition.wheel.predicate;
 
 import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.mixin.accessor.StateAccessor;
-import boat.carpetorgaddition.util.IdentifierUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -42,7 +42,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
     public static final BlockStatePredicate EMPTY = new BlockStatePredicate();
 
     public BlockStatePredicate(@NotNull Block block) {
-        this.content = IdentifierUtils.getIdAsString(block);
+        this.content = ServerUtils.getIdAsString(block);
         this.biPredicate = (world, blockPos) -> world.getBlockState(blockPos).is(block);
         this.block = block;
     }
@@ -51,7 +51,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
     public BlockStatePredicate(BlockState blockState) {
         StringBuilder builder = new StringBuilder();
         Block block = blockState.getBlock();
-        builder.append(IdentifierUtils.getIdAsString(block));
+        builder.append(ServerUtils.getIdAsString(block));
         Map<Property<?>, Comparable<?>> defaultEntries = block.defaultBlockState().getValues();
         List<String> list = new HashMap<>(blockState.getValues())
                 .entrySet()
@@ -74,7 +74,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
     }
 
     private BlockStatePredicate() {
-        this.content = IdentifierUtils.getIdAsString(Blocks.AIR);
+        this.content = ServerUtils.getIdAsString(Blocks.AIR);
         this.biPredicate = (_, _) -> false;
         this.block = Blocks.AIR;
     }
@@ -95,7 +95,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
     private BlockStatePredicate(LinkedHashSet<Block> blocks) {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
         for (Block block : blocks) {
-            joiner.add(IdentifierUtils.getIdAsString(block));
+            joiner.add(ServerUtils.getIdAsString(block));
         }
         this.content = joiner.toString();
         this.biPredicate = (world, blockPos) -> blocks.contains(world.getBlockState(blockPos).getBlock());
@@ -153,7 +153,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
             return Blocks.AIR;
         }
         try {
-            Block block = IdentifierUtils.getBlock(id);
+            Block block = ServerUtils.asBlock(id);
             // 不能使用isAir()，因为虚空空气和洞穴空气也是空气
             if (block == Blocks.AIR) {
                 return null;

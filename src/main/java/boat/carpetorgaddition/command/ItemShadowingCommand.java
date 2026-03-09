@@ -65,16 +65,16 @@ public class ItemShadowingCommand extends AbstractServerCommand {
             if (inventory.isEmpty()) {
                 CarpetOrgAddition.LOGGER.info("{} created an empty [{}] item shadow at {} | Coordinates: [{}]",
                         ServerUtils.getPlayerName(player), ServerUtils.getName(itemStack.getItem()).getString(),
-                        ServerUtils.getDimensionId(world), ServerUtils.toPosString(player.blockPosition()));
+                        ServerUtils.getWorldIdAsString(world), ServerUtils.toPosString(player.blockPosition()));
             } else {
                 CarpetOrgAddition.LOGGER.info("{} created a [{}] item shadow containing {} at {} | Coordinates: [{}]",
                         ServerUtils.getPlayerName(player), ServerUtils.getName(itemStack.getItem()).getString(),
-                        inventory, ServerUtils.getDimensionId(world), ServerUtils.toPosString(player.blockPosition()));
+                        inventory, ServerUtils.getWorldIdAsString(world), ServerUtils.toPosString(player.blockPosition()));
             }
         } else {
             CarpetOrgAddition.LOGGER.info("{} created a [{}] item shadow at {} | Coordinates: [{}]",
                     ServerUtils.getPlayerName(player), ServerUtils.getName(itemStack.getItem()).getString(),
-                    ServerUtils.getDimensionId(world), ServerUtils.toPosString(player.blockPosition()));
+                    ServerUtils.getWorldIdAsString(world), ServerUtils.toPosString(player.blockPosition()));
         }
     }
 

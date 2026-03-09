@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.util;
 
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import carpet.CarpetServer;
 import com.mojang.authlib.GameProfile;
@@ -8,7 +9,11 @@ import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -23,7 +28,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.phys.Vec3;
@@ -93,10 +100,6 @@ public class ServerUtils {
         return world.dimension();
     }
 
-    public static Identifier getWorldId(Level world) {
-        return world.dimension().identifier();
-    }
-
     /**
      * @return 当前游戏的NBT数据版本
      */
@@ -111,11 +114,13 @@ public class ServerUtils {
      * @return 如果是下界，返回红色；如果是末地，返回紫色；如果是主世界或者自定义维度，返回绿色
      */
     public static ChatFormatting getColor(Level world) {
-        return switch (getDimensionId(world)) {
-            case THE_NETHER -> ChatFormatting.RED;
-            case THE_END -> ChatFormatting.DARK_PURPLE;
-            default -> ChatFormatting.GREEN;
-        };
+        if (ServerUtils.isTheNether(world)) {
+            return ChatFormatting.RED;
+        }
+        if (ServerUtils.isTheEnd(world)) {
+            return ChatFormatting.DARK_PURPLE;
+        }
+        return ChatFormatting.GREEN;
     }
 
     /**
@@ -132,7 +137,7 @@ public class ServerUtils {
      * 将方块坐标转换为字符串形式，坐标前追加维度id
      */
     public static String toWorldPosString(Level world, BlockPos blockPos) {
-        return getDimensionId(world) + "[" + toPosString(blockPos) + "]";
+        return getWorldIdAsString(world) + "[" + toPosString(blockPos) + "]";
     }
 
     /**
@@ -141,8 +146,12 @@ public class ServerUtils {
      * @param world 当前世界的对象
      * @return 当前维度的ID
      */
-    public static String getDimensionId(Level world) {
-        return world.dimension().identifier().toString();
+    public static String getWorldIdAsString(Level world) {
+        return getWorldId(world).toString();
+    }
+
+    public static Identifier getWorldId(Level world) {
+        return world.dimension().identifier();
     }
 
     /**
@@ -200,28 +209,6 @@ public class ServerUtils {
     }
 
     /**
-     * @return 维度ID是否表示主世界
-     */
-    public static boolean isOverworld(Level world) {
-        return world.dimension() == Level.OVERWORLD;
-    }
-
-    /**
-     * @return 维度ID是否表示下界
-     */
-    public static boolean isTheNether(Level world) {
-        return world.dimension() == Level.NETHER;
-    }
-
-    /**
-     * @return 维度ID是否表示末地
-     */
-    @SuppressWarnings("unused")
-    public static boolean isTheEnd(Level world) {
-        return world.dimension() == Level.END;
-    }
-
-    /**
      * 将一个实体传送到目标维度的指定位置
      *
      * @param source 要传送的实体
@@ -260,6 +247,27 @@ public class ServerUtils {
         entity.lookAt(anchor, pos);
     }
 
+    /**
+     * @return 指定世界是否为主世界
+     */
+    public static boolean isOverworld(Level world) {
+        return isOverworld(world.dimension());
+    }
+
+    /**
+     * @return 指定世界是否为下界
+     */
+    public static boolean isTheNether(Level world) {
+        return isTheNether(world.dimension());
+    }
+
+    /**
+     * @return 指定世界是否为末地
+     */
+    public static boolean isTheEnd(Level world) {
+        return isTheEnd(world.dimension());
+    }
+
     public static boolean isOverworld(ResourceKey<Level> key) {
         return Level.OVERWORLD.equals(key);
     }
@@ -268,22 +276,18 @@ public class ServerUtils {
         return Level.NETHER.equals(key);
     }
 
+    public static boolean isTheEnd(ResourceKey<Level> key) {
+        return Level.END.equals(key);
+    }
+
     /**
      * 根据维度获取世界对象
      *
-     * @param server    游戏当前的服务器
-     * @param dimension 维度的id
+     * @param server 游戏当前的服务器
+     * @param id     维度的id
      */
-    public static ServerLevel getWorld(MinecraftServer server, String dimension) {
-        String[] split = dimension.split(":");
-        Identifier identifier;
-        if (split.length == 1) {
-            identifier = Identifier.fromNamespaceAndPath("minecraft", dimension);
-        } else if (split.length == 2) {
-            identifier = Identifier.fromNamespaceAndPath(split[0], split[1]);
-        } else {
-            throw new IllegalArgumentException();
-        }
+    public static ServerLevel getWorld(MinecraftServer server, String id) {
+        Identifier identifier = Identifier.parse(id);
         return server.getLevel(ResourceKey.create(Registries.DIMENSION, identifier));
     }
 
@@ -352,5 +356,71 @@ public class ServerUtils {
 
     public static String currentTimeFormat() {
         return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
+    }
+
+    public static Identifier getId(Item item) {
+        return BuiltInRegistries.ITEM.getKey(item);
+    }
+
+    public static Identifier getId(Block block) {
+        return BuiltInRegistries.BLOCK.getKey(block);
+    }
+
+    @SuppressWarnings("unused")
+    public static Optional<Identifier> getId(Level world, Enchantment enchantment) {
+        Holder<Enchantment> entry = Holder.direct(enchantment);
+        entry.unwrapKey().map(ResourceKey::identifier);
+        return getId(world.registryAccess(), enchantment);
+    }
+
+    public static Optional<Identifier> getId(MinecraftServer server, Enchantment enchantment) {
+        return getId(server.registryAccess(), enchantment);
+    }
+
+    public static Optional<Identifier> getId(RegistryAccess registryManager, Enchantment enchantment) {
+        Optional<Registry<Enchantment>> optional = registryManager.lookup(Registries.ENCHANTMENT);
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
+        Registry<Enchantment> enchantments = optional.get();
+        return Optional.ofNullable(enchantments.getKey(enchantment));
+    }
+
+    public static String getIdAsString(Item item) {
+        return getId(item).toString();
+    }
+
+    public static String getIdAsString(Block block) {
+        return getId(block).toString();
+    }
+
+    /**
+     * 将字符串ID转换为物品
+     */
+    public static Item asItem(String id) {
+        return BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
+    }
+
+    /**
+     * 将字符串ID转换为方块
+     */
+    public static Block asBlock(String id) {
+        return BuiltInRegistries.BLOCK.getValue(Identifier.parse(id));
+    }
+
+    @SuppressWarnings("unused")
+    public static Optional<UUID> uuidFromString(@Nullable String str) {
+        if (str == null || str.isEmpty()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(UUID.fromString(str));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
+    public static Identifier ofIdentifier(String id) {
+        return Identifier.fromNamespaceAndPath(CarpetOrgAdditionConstants.MOD_ID, id);
     }
 }

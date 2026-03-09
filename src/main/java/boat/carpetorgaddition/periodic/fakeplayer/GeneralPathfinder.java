@@ -1,9 +1,9 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
-import boat.carpetorgaddition.network.NetworkUtils;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
@@ -274,7 +274,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             EntityPlayerMPFake fakePlayer = this.getFakePlayer();
             MinecraftServer server = ServerUtils.getServer(fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                NetworkUtils.send(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), this.nodes));
+                PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), this.nodes));
             }
         }
     }
@@ -285,7 +285,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         if (CarpetOrgAddition.isDebugMode()) {
             MinecraftServer server = ServerUtils.getServer(fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                NetworkUtils.send(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), List.of()));
+                PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), List.of()));
             }
         }
         EntityPlayerActionPack actionPack = ((ServerPlayerInterface) fakePlayer).getActionPack();

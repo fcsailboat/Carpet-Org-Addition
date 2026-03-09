@@ -106,7 +106,7 @@ public class SpectatorCommand extends AbstractServerCommand {
             ServerUtils.teleport(player, dimension, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
         }
         // 发送命令反馈
-        MessageUtils.sendMessage(context, TELEPORT.then("success").translate(player.getDisplayName(), ServerUtils.getDimensionId(dimension)));
+        MessageUtils.sendMessage(context, TELEPORT.then("success").translate(player.getDisplayName(), ServerUtils.getWorldIdAsString(dimension)));
         return 1;
     }
 
@@ -192,7 +192,7 @@ public class SpectatorCommand extends AbstractServerCommand {
         direction.addProperty("yaw", player.getYRot());
         direction.addProperty("pitch", player.getXRot());
         json.add("direction", direction);
-        json.addProperty("dimension", ServerUtils.getDimensionId(ServerUtils.getWorld(player)));
+        json.addProperty("dimension", ServerUtils.getWorldIdAsString(ServerUtils.getWorld(player)));
         File file = worldFormat.file(player.getStringUUID() + IOUtils.JSON_EXTENSION);
         try {
             IOUtils.write(file, json);

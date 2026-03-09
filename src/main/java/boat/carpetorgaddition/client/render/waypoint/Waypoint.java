@@ -2,7 +2,6 @@ package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.client.render.WorldRenderComponent;
 import boat.carpetorgaddition.client.util.ClientUtils;
-import boat.carpetorgaddition.util.IdentifierUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
@@ -67,7 +66,7 @@ public abstract class Waypoint implements WorldRenderComponent {
     public static final Identifier NAVIGATOR = Identifier.withDefaultNamespace("textures/map/decorations/target_x.png");
     public static final RenderPipeline HIGHLIGHT_WAYPOINT_RENDER_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
-                    .withLocation(IdentifierUtils.ofIdentifier("highlight_waypoint"))
+                    .withLocation(ServerUtils.ofIdentifier("highlight_waypoint"))
                     .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))
                     .build()
     );

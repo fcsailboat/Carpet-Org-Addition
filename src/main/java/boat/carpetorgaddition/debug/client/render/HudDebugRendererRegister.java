@@ -7,7 +7,6 @@ import boat.carpetorgaddition.exception.ProductionEnvironmentError;
 import boat.carpetorgaddition.mixin.debug.accessor.ExperienceOrbEntityAccessor;
 import boat.carpetorgaddition.mixin.debug.accessor.HandledScreenAccessor;
 import boat.carpetorgaddition.mixin.debug.accessor.ScreenAccessor;
-import boat.carpetorgaddition.util.IdentifierUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.Counter;
 import boat.carpetorgaddition.wheel.SimpleCounter;
@@ -62,7 +61,7 @@ public class HudDebugRendererRegister {
 
     static {
         // 显示方块挖掘速度
-        renders.put(IdentifierUtils.ofIdentifier("block_destroy_speed"), (context, _) -> {
+        renders.put(ServerUtils.ofIdentifier("block_destroy_speed"), (context, _) -> {
             if (DebugSettings.showBlockBreakingSpeed.get()) {
                 HitResult hitResult = ClientUtils.getCrosshairTarget();
                 if (hitResult == null) {
@@ -91,7 +90,7 @@ public class HudDebugRendererRegister {
             }
         });
         // 渲染比较器强度
-        renders.put(IdentifierUtils.ofIdentifier("comparator_level"), (context, _) -> {
+        renders.put(ServerUtils.ofIdentifier("comparator_level"), (context, _) -> {
             if (DebugSettings.showComparatorLevel.get()) {
                 HitResult hitResult = ClientUtils.getCrosshairTarget();
                 if (hitResult == null) {
@@ -116,7 +115,7 @@ public class HudDebugRendererRegister {
             }
         });
         // 渲染灵魂沙物品数量
-        renders.put(IdentifierUtils.ofIdentifier("soul_sand_item_count"), (context, _) -> {
+        renders.put(ServerUtils.ofIdentifier("soul_sand_item_count"), (context, _) -> {
             if (showSoulSandItemCount()) {
                 HitResult hitResult = ClientUtils.getCrosshairTarget();
                 if (hitResult == null) {
@@ -174,7 +173,7 @@ public class HudDebugRendererRegister {
             }
         });
         // 渲染当前HUD信息
-        renders.put(IdentifierUtils.ofIdentifier("hud_information_display"), (context, _) -> {
+        renders.put(ServerUtils.ofIdentifier("hud_information_display"), (context, _) -> {
             if (DebugSettings.HUDInformationDisplay.get()) {
                 Minecraft client = ClientUtils.getClient();
                 Screen screen = ClientUtils.getCurrentScreen();
@@ -214,7 +213,7 @@ public class HudDebugRendererRegister {
             }
         });
         // 渲染当前HUD信息
-        renders.put(IdentifierUtils.ofIdentifier("show_player_experience"), (context, _) -> {
+        renders.put(ServerUtils.ofIdentifier("show_player_experience"), (context, _) -> {
             if (DebugSettings.showPlayerExperience.get() && ClientUtils.getCrosshairTarget() instanceof EntityHitResult hitResult) {
                 Entity entity = hitResult.getEntity();
                 if (entity instanceof Player) {

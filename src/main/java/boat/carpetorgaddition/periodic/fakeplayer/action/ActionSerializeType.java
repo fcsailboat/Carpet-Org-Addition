@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
-import boat.carpetorgaddition.util.IdentifierUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -82,7 +82,7 @@ public enum ActionSerializeType {
      * 自动重命名物品
      */
     RENAME(json -> {
-        Item item = IdentifierUtils.getItem(json.get(RenameAction.ITEM).getAsString());
+        Item item = ServerUtils.asItem(json.get(RenameAction.ITEM).getAsString());
         String newName = json.get(RenameAction.NEW_NAME).getAsString();
         return new RenameAction(null, item, newName);
     }),

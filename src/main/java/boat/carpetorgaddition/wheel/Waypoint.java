@@ -185,7 +185,7 @@ public class Waypoint {
     }
 
     public String getWorldAsString() {
-        return ServerUtils.getDimensionId(this.world);
+        return ServerUtils.getWorldIdAsString(this.world);
     }
 
     public String getName() {

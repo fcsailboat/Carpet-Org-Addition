@@ -118,7 +118,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         this.playerPos = ServerUtils.getFootPos(fakePlayer);
         this.yaw = fakePlayer.getYRot();
         this.pitch = fakePlayer.getXRot();
-        this.dimension = ServerUtils.getDimensionId(ServerUtils.getWorld(fakePlayer));
+        this.dimension = ServerUtils.getWorldIdAsString(ServerUtils.getWorld(fakePlayer));
         this.gameMode = fakePlayer.gameMode.getGameModeForPlayer();
         this.flying = fakePlayer.getAbilities().flying;
         this.sneaking = fakePlayer.isShiftKeyDown();
@@ -377,7 +377,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         this.playerPos = ServerUtils.getFootPos(fakePlayer);
         this.yaw = fakePlayer.getYRot();
         this.pitch = fakePlayer.getXRot();
-        this.dimension = ServerUtils.getDimensionId(ServerUtils.getWorld(fakePlayer));
+        this.dimension = ServerUtils.getWorldIdAsString(ServerUtils.getWorld(fakePlayer));
         this.gameMode = fakePlayer.gameMode.getGameModeForPlayer();
         this.flying = fakePlayer.getAbilities().flying;
         this.sneaking = fakePlayer.isShiftKeyDown();

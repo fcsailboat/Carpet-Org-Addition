@@ -9,8 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
 // 记录器更新数据包
-public record LoggerUpdateS2CPacket(String logName, @Nullable String option,
-                                    boolean isRemove) implements CustomPacketPayload {
+public record LoggerUpdateS2CPacket(String logName, @Nullable String option, boolean isRemove) implements CustomPacketPayload {
     public static final Type<LoggerUpdateS2CPacket> ID = NetworkUtils.createPacketId("logger_update");
     public static final StreamCodec<RegistryFriendlyByteBuf, LoggerUpdateS2CPacket> CODEC = new StreamCodec<>() {
         @Override

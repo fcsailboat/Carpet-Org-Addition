@@ -5,10 +5,7 @@ import boat.carpetorgaddition.command.PlayerCommandExtension;
 import boat.carpetorgaddition.dialog.DialogProvider;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.rule.RuleAccessor;
-import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.util.IdentifierUtils;
-import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
 import boat.carpetorgaddition.wheel.nbt.NbtReader;
@@ -142,7 +139,7 @@ public class CustomClickEvents {
     }
 
     private static Identifier register(String id, CustomClickAction.CustomClickActionProcessor processor) {
-        Identifier identifier = IdentifierUtils.ofIdentifier(id);
+        Identifier identifier = ServerUtils.ofIdentifier(id);
         CustomClickAction.register(identifier, processor);
         return identifier;
     }

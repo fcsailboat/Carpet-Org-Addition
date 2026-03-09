@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.codec;
 
-import boat.carpetorgaddition.util.IdentifierUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,7 +27,7 @@ public class ObjectSearchTaskCodecs {
             JsonArray array = json.get("items").getAsJsonArray();
             List<Item> list = array.asList().stream()
                     .map(JsonElement::getAsString)
-                    .map(IdentifierUtils::getItem)
+                    .map(ServerUtils::asItem)
                     .toList();
             return new ItemSearchContext(range, list);
         }
@@ -49,7 +49,7 @@ public class ObjectSearchTaskCodecs {
                     .asList()
                     .stream()
                     .map(JsonElement::getAsString)
-                    .map(IdentifierUtils::getItem)
+                    .map(ServerUtils::asItem)
                     .toList();
             return new OfflinePlayerItemSearchContext(list);
         }
@@ -64,7 +64,7 @@ public class ObjectSearchTaskCodecs {
             List<Block> list = value.list;
             int len = 0;
             for (Block block : list) {
-                String id = IdentifierUtils.getIdAsString(block);
+                String id = ServerUtils.getIdAsString(block);
                 len += id.length();
                 if (len >= 2000) {
                     break;
@@ -83,7 +83,7 @@ public class ObjectSearchTaskCodecs {
                     .asList()
                     .stream()
                     .map(JsonElement::getAsString)
-                    .map(IdentifierUtils::getBlock)
+                    .map(ServerUtils::asBlock)
                     .toList();
             return new BlockSearchContext(range, list);
         }
@@ -107,7 +107,7 @@ public class ObjectSearchTaskCodecs {
                     .asList()
                     .stream()
                     .map(JsonElement::getAsString)
-                    .map(IdentifierUtils::getItem)
+                    .map(ServerUtils::asItem)
                     .toList();
             return new TradeItemSearchContext(range, list);
         }
@@ -117,7 +117,7 @@ public class ObjectSearchTaskCodecs {
         JsonArray array = new JsonArray();
         int len = 0;
         for (Item item : list) {
-            String id = IdentifierUtils.getIdAsString(item);
+            String id = ServerUtils.getIdAsString(item);
             len += id.length();
             if (len >= 2000) {
                 break;

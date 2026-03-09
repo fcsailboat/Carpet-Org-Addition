@@ -10,8 +10,10 @@ import carpet.api.settings.SettingsManager;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -139,5 +141,15 @@ public class PlayerUtils {
 
     public static void logout(EntityPlayerMPFake fakePlayer) {
         fakePlayer.kill(ServerUtils.getWorld(fakePlayer));
+    }
+
+    /**
+     * 向玩家发送一个网络数据包
+     */
+    public static void sendNetworkPacket(ServerPlayer player, CustomPacketPayload payload) {
+        if (player instanceof EntityPlayerMPFake) {
+            return;
+        }
+        ServerPlayNetworking.send(player, payload);
     }
 }
