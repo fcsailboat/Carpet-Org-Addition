@@ -42,7 +42,7 @@ public final class WaypointDataUpdater implements DataUpdater {
             newJson.addProperty("creator", creator);
             newJson.addProperty("comment", illustrate);
             newJson.add("another_pos", anotherPos);
-            return this.update(oldJson, 3);
+            return this.update(newJson, 3);
         } else {
             return oldJson;
         }
