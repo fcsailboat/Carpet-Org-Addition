@@ -142,10 +142,16 @@ public class Waypoint {
                         Dimension.OVERWORLD.translate(),
                         TextProvider.blockPos(this.anotherBlockPos, ChatFormatting.GREEN)
                 );
-                case ServerUtils.THE_END ->
-                        where.translate(this.formatName(), TextProvider.blockPos(this.blockPos, ChatFormatting.DARK_PURPLE));
-                default ->
-                        where.translate(this.formatName(), TextProvider.blockPos(this.blockPos, ChatFormatting.GREEN));
+                case ServerUtils.THE_END -> where.translate(
+                        this.formatName(),
+                        Dimension.THE_END.translate(),
+                        TextProvider.blockPos(this.blockPos, ChatFormatting.DARK_PURPLE)
+                );
+                default -> where.translate(
+                        this.formatName(),
+                        TextBuilder.create(worldId),
+                        TextProvider.blockPos(this.blockPos, ChatFormatting.GREEN)
+                );
             };
         }
     }
