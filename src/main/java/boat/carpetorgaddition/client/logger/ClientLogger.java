@@ -2,16 +2,18 @@ package boat.carpetorgaddition.client.logger;
 
 
 import boat.carpetorgaddition.network.s2c.LoggerUpdateS2CPacket;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class ClientLogger {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    private static final HashMap<String, String> subscriptions = new HashMap<>();
+    private static final HashMap<String, Optional<String>> subscriptions = new HashMap<>();
 
-    private static void put(String logger, String option) {
-        subscriptions.put(logger, option);
+    private static void put(String logger, @Nullable String option) {
+        subscriptions.put(logger, Optional.ofNullable(option));
     }
 
     private static void remove(String logger) {
@@ -20,10 +22,10 @@ public class ClientLogger {
     }
 
     public static void onPacketReceive(LoggerUpdateS2CPacket packet) {
-        if (packet.isRemove()) {
-            remove(packet.logName());
+        if (packet.remove()) {
+            remove(packet.name());
         } else {
-            put(packet.logName(), packet.option());
+            put(packet.name(), packet.option());
         }
     }
 

@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.s2c;
 
-import boat.carpetorgaddition.network.NetworkUtils;
+import boat.carpetorgaddition.network.NetworkPacketRegister;
 import boat.carpetorgaddition.util.MathUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @NullMarked
 public final class FakePlayerPathfinderS2CPacket implements CustomPacketPayload {
-    public static final Type<FakePlayerPathfinderS2CPacket> ID = NetworkUtils.createPacketId("fake_player_pathfinder");
+    public static final Type<FakePlayerPathfinderS2CPacket> ID = NetworkPacketRegister.ofType("fake_player_pathfinder");
     public static final StreamCodec<RegistryFriendlyByteBuf, FakePlayerPathfinderS2CPacket> CODEC = new StreamCodec<>() {
         @Override
         public void encode(RegistryFriendlyByteBuf output, FakePlayerPathfinderS2CPacket value) {

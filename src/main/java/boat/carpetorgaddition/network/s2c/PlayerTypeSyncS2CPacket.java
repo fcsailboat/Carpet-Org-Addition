@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.s2c;
 
-import boat.carpetorgaddition.network.NetworkUtils;
+import boat.carpetorgaddition.network.NetworkPacketRegister;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @NullMarked
 public record PlayerTypeSyncS2CPacket(UUID uuid, boolean fake) implements CustomPacketPayload {
-    public static final Type<PlayerTypeSyncS2CPacket> ID = NetworkUtils.createPacketId("player_type_sync");
+    public static final Type<PlayerTypeSyncS2CPacket> ID = NetworkPacketRegister.ofType("player_type_sync");
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayerTypeSyncS2CPacket> CODEC = new StreamCodec<>() {
 
         @Override

@@ -1,7 +1,7 @@
 package boat.carpetorgaddition;
 
 import boat.carpetorgaddition.debug.DebugRuleRegistrar;
-import boat.carpetorgaddition.network.NetworkS2CPacketRegister;
+import boat.carpetorgaddition.network.NetworkPacketRegister;
 import boat.carpetorgaddition.util.IOUtils;
 import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.util.docs.rule.RuleDocumentGenerator;
@@ -71,7 +71,7 @@ public class CarpetOrgAddition implements ModInitializer {
         }
         CarpetServer.manageExtension(CarpetOrgAdditionExtension.getInstance());
         // 注册网络数据包
-        NetworkS2CPacketRegister.register();
+        NetworkPacketRegister.register();
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             CarpetOrgAddition.LOGGER.debug("Hidden feature enabled");
         }

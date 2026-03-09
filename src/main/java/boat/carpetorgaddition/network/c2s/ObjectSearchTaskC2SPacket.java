@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.c2s;
 
-import boat.carpetorgaddition.network.NetworkUtils;
+import boat.carpetorgaddition.network.NetworkPacketRegister;
 import boat.carpetorgaddition.util.IOUtils;
 import com.google.gson.JsonObject;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -10,7 +10,7 @@ import org.jspecify.annotations.NonNull;
 
 public record ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type key, String name, JsonObject json) implements CustomPacketPayload {
     public static final int CURRENT_VERSION = 1;
-    public static final CustomPacketPayload.Type<ObjectSearchTaskC2SPacket> ID = NetworkUtils.createPacketId("object_search_task");
+    public static final CustomPacketPayload.Type<ObjectSearchTaskC2SPacket> ID = NetworkPacketRegister.ofType("object_search_task");
     public static final StreamCodec<RegistryFriendlyByteBuf, ObjectSearchTaskC2SPacket> CODEC = new StreamCodec<>() {
         @Override
         public void encode(RegistryFriendlyByteBuf buf, ObjectSearchTaskC2SPacket value) {

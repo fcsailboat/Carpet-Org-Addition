@@ -3,10 +3,13 @@ package boat.carpetorgaddition.network;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket;
 import boat.carpetorgaddition.network.handler.ObjectSearchTaskPacketHandler;
 import boat.carpetorgaddition.network.s2c.*;
+import boat.carpetorgaddition.util.ServerUtils;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
-public class NetworkS2CPacketRegister {
+public class NetworkPacketRegister {
     /**
      * 注册数据包
      */
@@ -26,5 +29,10 @@ public class NetworkS2CPacketRegister {
         PayloadTypeRegistry.clientboundPlay().register(PlayerTypeSyncS2CPacket.ID, PlayerTypeSyncS2CPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(ObjectSearchTaskC2SPacket.ID, ObjectSearchTaskC2SPacket.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ObjectSearchTaskC2SPacket.ID, new ObjectSearchTaskPacketHandler());
+    }
+
+    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> ofType(String id) {
+        Identifier identifier = ServerUtils.ofIdentifier(id);
+        return new CustomPacketPayload.Type<>(identifier);
     }
 }
