@@ -3,6 +3,7 @@ package boat.carpetorgaddition.client;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.client.command.ClientCommandRegister;
 import boat.carpetorgaddition.client.logger.ClientLogger;
+import boat.carpetorgaddition.client.render.PathfinderRenderComponent;
 import boat.carpetorgaddition.client.render.WorldComponentRenderer;
 import boat.carpetorgaddition.client.render.waypoint.NavigatorWaypoint;
 import boat.carpetorgaddition.client.render.waypoint.Waypoint;
@@ -95,6 +96,14 @@ public class CarpetOrgAdditionClientRegister {
                 ClientUtils.FAKE_PLAYERS.add(packet.uuid());
             } else {
                 ClientUtils.FAKE_PLAYERS.remove(packet.uuid());
+            }
+        });
+        ClientPlayNetworking.registerGlobalReceiver(FakePlayerPathfinderS2CPacket.ID, (packet, _) -> {
+            int id = packet.getEntityId();
+            if (packet.getVec3List().isEmpty()) {
+                WorldComponentRenderer.remove(id);
+            } else {
+                WorldComponentRenderer.add(id, new PathfinderRenderComponent(id, packet.getVec3List()));
             }
         });
     }

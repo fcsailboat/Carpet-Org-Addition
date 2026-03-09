@@ -4,21 +4,28 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Unmodifiable;
 
-public class BoxRenderComponent implements WorldRenderComponent {
+import java.util.List;
+
+public class BoxRenderComponent implements WorldRenderComponent, RgbaSettable {
     @Unmodifiable
-    private final CompositeWorldRenderComponent component;
+    private final List<PlaneRenderComponent> components;
 
     public BoxRenderComponent(AABB box) {
-        this.component = new CompositeWorldRenderComponent(ShapePlane.ofPlaces(box).stream().map(PlaneRenderComponent::new).toList());
+        this.components = ShapePlane.ofPlaces(box).stream().map(PlaneRenderComponent::new).toList();
     }
 
     @Override
     public void render(LevelRenderContext context) {
-        this.component.render(context);
+        this.components.forEach(component -> component.render(context));
     }
 
     @Override
     public boolean isStopped() {
-        return this.component.isStopped();
+        return this.components.stream().allMatch(PlaneRenderComponent::isStopped);
+    }
+
+    @Override
+    public void setRgba(int rgba) {
+        this.components.forEach(component -> component.setRgba(rgba));
     }
 }

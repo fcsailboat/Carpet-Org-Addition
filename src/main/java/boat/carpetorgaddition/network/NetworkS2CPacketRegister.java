@@ -22,6 +22,7 @@ public class NetworkS2CPacketRegister {
         PayloadTypeRegistry.clientboundPlay().register(BackgroundSpriteSyncS2CPacket.ID, BackgroundSpriteSyncS2CPacket.CODEC);
         // 记录器更新数据包
         PayloadTypeRegistry.clientboundPlay().register(LoggerUpdateS2CPacket.ID, LoggerUpdateS2CPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(FakePlayerPathfinderS2CPacket.ID,FakePlayerPathfinderS2CPacket.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(PlayerTypeSyncS2CPacket.ID, PlayerTypeSyncS2CPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(ObjectSearchTaskC2SPacket.ID, ObjectSearchTaskC2SPacket.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ObjectSearchTaskC2SPacket.ID, new ObjectSearchTaskPacketHandler());

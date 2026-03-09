@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.s2c;
 
-import boat.carpetorgaddition.network.PacketUtils;
+import boat.carpetorgaddition.network.NetworkUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -8,7 +8,7 @@ import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public record WithButtonScreenSyncS2CPacket(int syncId) implements CustomPacketPayload {
-    public static final Type<WithButtonScreenSyncS2CPacket> ID = PacketUtils.createId("with_button_screen_sync");
+    public static final Type<WithButtonScreenSyncS2CPacket> ID = NetworkUtils.createPacketId("with_button_screen_sync");
     public static final StreamCodec<RegistryFriendlyByteBuf, WithButtonScreenSyncS2CPacket> CODEC = new StreamCodec<>() {
         @Override
         public WithButtonScreenSyncS2CPacket decode(RegistryFriendlyByteBuf input) {

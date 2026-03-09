@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.s2c;
 
-import boat.carpetorgaddition.network.PacketUtils;
+import boat.carpetorgaddition.network.NetworkUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,13 +11,13 @@ import org.jspecify.annotations.NonNull;
 // 记录器更新数据包
 public record LoggerUpdateS2CPacket(String logName, @Nullable String option,
                                     boolean isRemove) implements CustomPacketPayload {
-    public static final Type<LoggerUpdateS2CPacket> ID = PacketUtils.createId("logger_update");
+    public static final Type<LoggerUpdateS2CPacket> ID = NetworkUtils.createPacketId("logger_update");
     public static final StreamCodec<RegistryFriendlyByteBuf, LoggerUpdateS2CPacket> CODEC = new StreamCodec<>() {
         @Override
         public LoggerUpdateS2CPacket decode(RegistryFriendlyByteBuf buf) {
             String logName = buf.readUtf();
             boolean isRemove = buf.readBoolean();
-            String option = isRemove ? null : PacketUtils.readNullable(buf, FriendlyByteBuf::readUtf);
+            String option = isRemove ? null : NetworkUtils.readNullable(buf, FriendlyByteBuf::readUtf);
             return new LoggerUpdateS2CPacket(logName, option, isRemove);
         }
 
@@ -28,7 +28,7 @@ public record LoggerUpdateS2CPacket(String logName, @Nullable String option,
             if (value.isRemove()) {
                 return;
             }
-            PacketUtils.writeNullable(value.option, buf, buf::writeUtf);
+            NetworkUtils.writeNullable(value.option, buf, buf::writeUtf);
         }
     };
 

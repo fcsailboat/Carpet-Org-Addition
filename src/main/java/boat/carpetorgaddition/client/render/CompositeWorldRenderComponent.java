@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class CompositeWorldRenderComponent implements WorldRenderComponent {
     private final List<WorldRenderComponent> components;
 

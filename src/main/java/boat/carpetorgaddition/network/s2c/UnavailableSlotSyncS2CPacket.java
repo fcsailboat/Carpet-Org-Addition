@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.s2c;
 
-import boat.carpetorgaddition.network.PacketUtils;
+import boat.carpetorgaddition.network.NetworkUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -14,7 +14,7 @@ import org.jspecify.annotations.NonNull;
  * @param to     槽位的结束索引
  */
 public record UnavailableSlotSyncS2CPacket(int syncId, int from, int to) implements CustomPacketPayload {
-    public static final Type<UnavailableSlotSyncS2CPacket> ID = PacketUtils.createId("unavailable_slot_sync");
+    public static final Type<UnavailableSlotSyncS2CPacket> ID = NetworkUtils.createPacketId("unavailable_slot_sync");
     public static final StreamCodec<RegistryFriendlyByteBuf, UnavailableSlotSyncS2CPacket> CODEC = new StreamCodec<>() {
         @Override
         public UnavailableSlotSyncS2CPacket decode(RegistryFriendlyByteBuf buf) {

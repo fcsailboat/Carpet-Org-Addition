@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.network.s2c;
 
-import boat.carpetorgaddition.network.PacketUtils;
+import boat.carpetorgaddition.network.NetworkUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,7 +21,7 @@ public final class WaypointUpdateS2CPacket implements CustomPacketPayload {
     private final Vec3 target;
     private final Identifier worldId;
     private final int entityId;
-    public static final Type<WaypointUpdateS2CPacket> ID = PacketUtils.createId("waypoint_update");
+    public static final Type<WaypointUpdateS2CPacket> ID = NetworkUtils.createPacketId("waypoint_update");
     public static final StreamCodec<RegistryFriendlyByteBuf, WaypointUpdateS2CPacket> CODEC = new StreamCodec<>() {
         @Override
         public WaypointUpdateS2CPacket decode(RegistryFriendlyByteBuf buf) {

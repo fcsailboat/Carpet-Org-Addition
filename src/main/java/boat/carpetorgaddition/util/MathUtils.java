@@ -4,12 +4,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Range;
 import org.joml.Vector3f;
 
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public class MathUtils {
     /**
      * 数学工具类，私有化构造方法
@@ -159,7 +161,6 @@ public class MathUtils {
     /**
      * 计算两个方块坐标的最大边界点
      */
-    @SuppressWarnings("unused")
     public static BlockPos toMaxBlockPos(BlockPos pos1, BlockPos pos2) {
         return new BlockPos(
                 Math.max(pos1.getX(), pos2.getX()),
@@ -203,6 +204,14 @@ public class MathUtils {
         return max >= number && number >= min;
     }
 
+    public static boolean isInRange(double first, double second, double mid) {
+        return (first >= mid && mid >= second) || (first <= mid && mid <= second);
+    }
+
+    public static boolean isInRange(Vec3 first, Vec3 second, Vec3 mid) {
+        return isInRange(first.x(), second.x(), mid.x()) && isInRange(first.y(), second.y(), mid.y()) && isInRange(first.z(), second.z(), mid.z());
+    }
+
     /**
      * @return 指定时间到当前时间相差的毫秒数
      */
@@ -241,6 +250,16 @@ public class MathUtils {
     }
 
     /**
+     * 让一个数逐渐趋近于另一个数
+     */
+    public static int approach(int start, int target) {
+        if (start == target) {
+            return start;
+        }
+        return start > target ? start - 1 : start + 1;
+    }
+
+    /**
      * 根据比例因子使一个数逐渐趋近于另一个数
      *
      * @param start  起始数值
@@ -267,16 +286,41 @@ public class MathUtils {
     }
 
     /**
-     * 让一个数逐渐趋近于另一个数
+     * 将一个坐标向指定位置移动一段距离
+     *
+     * @param start    起始位置
+     * @param target   目标位置
+     * @param distance 移动的距离
+     * @return 移动后的新位置
      */
-    @SuppressWarnings("unused")
-    public static int approach(int start, int target) {
-        if (start == target) {
-            return start;
-        }
-        return start > target ? start - 1 : start + 1;
+    public static Vec3 move(Vec3 start, Vec3 target, double distance) {
+        Vec3 step = target.subtract(start).normalize().multiply(distance, distance, distance);
+        return start.add(step);
     }
 
+    public static Vector3f move(Vector3f start, Vector3f target, float distance) {
+        Vector3f step = new Vector3f(target).sub(start).normalize().mul(distance, distance, distance);
+        return new Vector3f(start).add(step);
+    }
+
+    /**
+     * 判断三个点是否在同一条直线上
+     *
+     * @author DeepSeek
+     */
+    public static boolean collinear(Vec3 first, Vec3 second, Vec3 third) {
+        double dx1 = second.x - first.x;
+        double dy1 = second.y - first.y;
+        double dz1 = second.z - first.z;
+        double dx2 = third.x - first.x;
+        double dy2 = third.y - first.y;
+        double dz2 = third.z - first.z;
+        double cx = dy1 * dz2 - dz1 * dy2;
+        double cy = dz1 * dx2 - dx1 * dz2;
+        double cz = dx1 * dy2 - dy1 * dx2;
+        double epsilon = 1e-9;
+        return Math.abs(cx) < epsilon && Math.abs(cy) < epsilon && Math.abs(cz) < epsilon;
+    }
 
     /**
      * 计算{@code current}相对于({@code end}-{@code start})区间长度的比例
@@ -309,7 +353,6 @@ public class MathUtils {
     /**
      * @return 获取数组中的随机元素
      */
-    @SuppressWarnings("unused")
     public static <T> T getRandomElement(T[] array) {
         int len = array.length;
         return array[RANDOM.nextInt(len)];
@@ -331,7 +374,6 @@ public class MathUtils {
      * @param number 等差数列的项数
      * @return 等差数列的和
      */
-    @SuppressWarnings("unused")
     public static int sumOfArithmeticProgression(int start, int end, int number) {
         return ((start + end) * number) >>> 1;
     }
@@ -402,5 +444,29 @@ public class MathUtils {
         } catch (NumberFormatException e) {
             return OptionalInt.empty();
         }
+    }
+
+    public static int rgba(@Range(from = 0, to = 255) int red, @Range(from = 0, to = 255) int green, @Range(from = 0, to = 255) int blue, @Range(from = 0, to = 255) int alpha) {
+        return (red & 0xFF) << 24 | (green & 0xFF) << 16 | (blue & 0xFF) << 8 | (alpha & 0xFF);
+    }
+
+    public static int rgba(int rgb, int alpha) {
+        return rgba(red(rgb << 8), green(rgb << 8), blue(rgb << 8), alpha);
+    }
+
+    public static int red(int rgba) {
+        return rgba >> 24 & 0xFF;
+    }
+
+    public static int green(int rgba) {
+        return rgba >> 16 & 0xFF;
+    }
+
+    public static int blue(int rgba) {
+        return rgba >> 8 & 0xFF;
+    }
+
+    public static int alpha(int rgba) {
+        return rgba & 0xFF;
     }
 }

@@ -1,5 +1,8 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
+import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.network.NetworkUtils;
+import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.fakes.ServerPlayerInterface;
@@ -8,6 +11,8 @@ import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -21,10 +26,7 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class GeneralPathfinder implements FakePlayerPathfinder {
@@ -267,11 +269,26 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
 
     @Override
     public void onStart() {
+        // TODO
+        if (CarpetOrgAddition.isDebugMode()) {
+            EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+            MinecraftServer server = ServerUtils.getServer(fakePlayer);
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                NetworkUtils.send(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), this.nodes));
+            }
+        }
     }
 
     @Override
     public void onStop() {
-        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) getFakePlayer()).getActionPack();
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        if (CarpetOrgAddition.isDebugMode()) {
+            MinecraftServer server = ServerUtils.getServer(fakePlayer);
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                NetworkUtils.send(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), List.of()));
+            }
+        }
+        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) fakePlayer).getActionPack();
         actionPack.setForward(0F);
         actionPack.setSneaking(false);
     }

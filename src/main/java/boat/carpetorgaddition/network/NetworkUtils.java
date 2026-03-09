@@ -1,17 +1,19 @@
 package boat.carpetorgaddition.network;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class PacketUtils {
-    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> createId(String path) {
+public class NetworkUtils {
+    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> createPacketId(String path) {
         Identifier identifier = Identifier.fromNamespaceAndPath(CarpetOrgAdditionConstants.MOD_ID, path);
         return new CustomPacketPayload.Type<>(identifier);
     }
@@ -34,5 +36,9 @@ public class PacketUtils {
     @Nullable
     public static <T> T readNullable(RegistryFriendlyByteBuf buf, Function<RegistryFriendlyByteBuf, T> function) {
         return buf.readBoolean() ? function.apply(buf) : null;
+    }
+
+    public static void send(ServerPlayer player, CustomPacketPayload payload) {
+        ServerPlayNetworking.send(player, payload);
     }
 }
