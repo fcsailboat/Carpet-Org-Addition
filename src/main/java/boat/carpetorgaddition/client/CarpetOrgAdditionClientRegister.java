@@ -2,7 +2,6 @@ package boat.carpetorgaddition.client;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.client.command.ClientCommandRegister;
-import boat.carpetorgaddition.client.logger.ClientLogger;
 import boat.carpetorgaddition.client.render.PathfinderRenderComponent;
 import boat.carpetorgaddition.client.render.WorldComponentRenderer;
 import boat.carpetorgaddition.client.render.waypoint.NavigatorWaypoint;
@@ -89,8 +88,6 @@ public class CarpetOrgAdditionClientRegister {
                 slot.carpet_Org_Addition$setIdentifier(payload.identifier());
             }
         });
-        // 记录器更新数据包
-        ClientPlayNetworking.registerGlobalReceiver(LoggerUpdateS2CPacket.ID, (packet, _) -> ClientLogger.onPacketReceive(packet));
         ClientPlayNetworking.registerGlobalReceiver(PlayerTypeSyncS2CPacket.ID, (packet, _) -> {
             if (packet.fake()) {
                 ClientUtils.FAKE_PLAYERS.add(packet.uuid());
@@ -100,10 +97,14 @@ public class CarpetOrgAdditionClientRegister {
         });
         ClientPlayNetworking.registerGlobalReceiver(FakePlayerPathfinderS2CPacket.ID, (packet, _) -> {
             int id = packet.getEntityId();
+            if (id == -1) {
+                WorldComponentRenderer.remove(WorldComponentRenderer.ENTITY_ID_KEY);
+                return;
+            }
             if (packet.getVec3List().isEmpty()) {
-                WorldComponentRenderer.remove(id);
+                WorldComponentRenderer.remove(WorldComponentRenderer.ENTITY_ID_KEY, id);
             } else {
-                WorldComponentRenderer.add(id, new PathfinderRenderComponent(id, packet.getVec3List()));
+                WorldComponentRenderer.add(WorldComponentRenderer.ENTITY_ID_KEY, id, new PathfinderRenderComponent(id, packet.getVec3List()));
             }
         });
     }

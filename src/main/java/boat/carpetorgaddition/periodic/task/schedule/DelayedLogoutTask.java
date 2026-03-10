@@ -2,7 +2,7 @@ package boat.carpetorgaddition.periodic.task.schedule;
 
 import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -55,7 +55,7 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
 
     @Override
     public String getPlayerName() {
-        return ServerUtils.getPlayerName(this.fakePlayer);
+        return PlayerUtils.getName(this.fakePlayer);
     }
 
     @Override

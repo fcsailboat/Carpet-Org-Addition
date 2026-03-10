@@ -86,7 +86,7 @@ public class Parcel implements Comparable<Parcel> {
     }
 
     public Parcel(MinecraftServer server, ServerPlayer sender, GameProfile gameProfile, ItemStack itemStack, int id) {
-        this(server, ServerUtils.getPlayerName(sender), gameProfile.name(), gameProfile.id(), itemStack, id, LocalDateTime.now());
+        this(server, PlayerUtils.getName(sender), gameProfile.name(), gameProfile.id(), itemStack, id, LocalDateTime.now());
     }
 
     public Parcel(MinecraftServer server, ServerPlayer sender, GameProfile gameProfile, int id) throws CommandSyntaxException {
@@ -116,7 +116,7 @@ public class Parcel implements Comparable<Parcel> {
     }
 
     public Parcel(MinecraftServer server, ServerPlayer sourcePlayer, GameProfile recipient, AutoGrowInventory autoGrowInventory, int id) {
-        this(server, ServerUtils.getPlayerName(sourcePlayer), recipient.name(), recipient.id(), autoGrowInventory, id, LocalDateTime.now());
+        this(server, PlayerUtils.getName(sourcePlayer), recipient.name(), recipient.id(), autoGrowInventory, id, LocalDateTime.now());
     }
 
     private static ItemStack getPlayerHandStack(ServerPlayer player) throws CommandSyntaxException {
@@ -464,14 +464,14 @@ public class Parcel implements Comparable<Parcel> {
      * @return 指定玩家是否是当前快递的发送者
      */
     public boolean isSender(ServerPlayer player) {
-        return Objects.equals(this.sender, ServerUtils.getPlayerName(player));
+        return Objects.equals(this.sender, PlayerUtils.getName(player));
     }
 
     /**
      * @return 指定玩家是否是当前快递的接收者
      */
     public boolean isRecipient(ServerPlayer player) {
-        return Objects.equals(this.recipient, ServerUtils.getPlayerName(player));
+        return Objects.equals(this.recipient, PlayerUtils.getName(player));
     }
 
     /**

@@ -4,6 +4,7 @@ import boat.carpetorgaddition.command.LocationsCommand;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.dataupdate.json.WaypointDataUpdater;
 import boat.carpetorgaddition.util.IOUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -46,7 +47,7 @@ public class Waypoint {
     }
 
     public Waypoint(BlockPos blockPos, String name, ServerPlayer player) {
-        this(blockPos, name, ServerUtils.getWorld(player), ServerUtils.getPlayerName(player), ServerUtils.getServer(player));
+        this(blockPos, name, ServerUtils.getWorld(player), PlayerUtils.getName(player), ServerUtils.getServer(player));
     }
 
     // 将路径点写入本地文件

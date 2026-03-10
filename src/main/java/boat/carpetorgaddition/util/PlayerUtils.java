@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAdditionExtension;
+import boat.carpetorgaddition.mixin.accessor.carpet.LoggerAccessor;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
@@ -9,6 +10,8 @@ import carpet.api.settings.RuleHelper;
 import carpet.api.settings.SettingsManager;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
+import carpet.logging.Logger;
+import carpet.logging.LoggerRegistry;
 import carpet.patches.EntityPlayerMPFake;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Holder;
@@ -28,6 +31,16 @@ import java.util.stream.Stream;
 
 public class PlayerUtils {
     private PlayerUtils() {
+    }
+
+    /**
+     * 获取一名玩家的字符串形式的玩家名
+     *
+     * @param player 要获取字符串形式玩家名的玩家
+     * @return 玩家名的字符串形式
+     */
+    public static String getName(Player player) {
+        return player.getGameProfile().name();
     }
 
     /**
@@ -151,5 +164,17 @@ public class PlayerUtils {
             return;
         }
         ServerPlayNetworking.send(player, payload);
+    }
+
+    public static boolean isSubscribeLogger(ServerPlayer player, String name) {
+        Logger logger = LoggerRegistry.getLogger(name);
+        if (logger == null) {
+            return false;
+        }
+        if (logger.hasOnlineSubscribers()) {
+            LoggerAccessor accessor = (LoggerAccessor) logger;
+            return accessor.getSubscribedOnlinePlayers().containsKey(getName(player));
+        }
+        return false;
     }
 }

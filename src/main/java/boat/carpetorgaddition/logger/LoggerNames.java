@@ -16,6 +16,7 @@ public class LoggerNames {
      * 黑曜石生成记录器
      */
     public static final String OBSIDIAN = "obsidian";
+    public static final String FAKE_PLAYER_PATHFINDING = "fakePlayerPathfinding";
 
     /**
      * @return 指定名称的记录器

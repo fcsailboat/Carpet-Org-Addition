@@ -197,7 +197,7 @@ public class SpectatorCommand extends AbstractServerCommand {
         try {
             IOUtils.write(file, json);
         } catch (IOException e) {
-            CarpetOrgAddition.LOGGER.warn("Unable to write the location information of {} to the file normally", ServerUtils.getPlayerName(player), e);
+            CarpetOrgAddition.LOGGER.warn("Unable to write the location information of {} to the file normally", PlayerUtils.getName(player), e);
         }
     }
 
@@ -223,7 +223,7 @@ public class SpectatorCommand extends AbstractServerCommand {
                 ServerUtils.teleport(player, world, x, y, z, yaw, pitch);
                 Files.deleteIfExists(file.toPath());
             } catch (IOException | NullPointerException e) {
-                CarpetOrgAddition.LOGGER.warn("Unable to read the location information of {} normally", ServerUtils.getPlayerName(player));
+                CarpetOrgAddition.LOGGER.warn("Unable to read the location information of {} normally", PlayerUtils.getName(player));
             }
         }
     }

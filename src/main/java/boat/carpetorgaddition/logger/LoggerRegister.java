@@ -1,10 +1,13 @@
 package boat.carpetorgaddition.logger;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
+import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
 import boat.carpetorgaddition.rule.Hidden;
+import boat.carpetorgaddition.util.PlayerUtils;
 import carpet.logging.HUDLogger;
 import carpet.logging.Logger;
 import carpet.logging.LoggerRegistry;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.lang.reflect.Field;
 
@@ -19,6 +22,11 @@ public class LoggerRegister {
 
     @LoggerConfig(name = LoggerNames.OBSIDIAN, type = LoggerType.FUNCTION)
     public static boolean obsidian = false;
+
+    @SuppressWarnings("unused")
+    @Hidden
+    @LoggerConfig(name = LoggerNames.FAKE_PLAYER_PATHFINDING, type = LoggerType.FUNCTION)
+    public static boolean fakePlayerPathfinding = false;
 
     /**
      * 注册记录器
@@ -54,5 +62,11 @@ public class LoggerRegister {
             case HUD -> new HUDLogger(field, name, defaultOption, options, strictOptions);
             case FUNCTION -> new FunctionLogger(field, name, defaultOption, options, strictOptions);
         };
+    }
+
+    public static void onUnsubscribe(ServerPlayer player, String name) {
+        if (LoggerNames.FAKE_PLAYER_PATHFINDING.equals(name)) {
+            PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of());
+        }
     }
 }

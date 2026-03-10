@@ -3,6 +3,7 @@ package boat.carpetorgaddition.mixin.rule.displayplayersummoner;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
@@ -58,7 +59,7 @@ public class EntityPlayerMPFakeMixin {
             Component pos = TextBuilder.combineAll(dimension, ": ", blockPos);
             builder.setHover(pos);
             MessageUtils.sendMessage(ServerUtils.getServer(player), builder.build());
-            CarpetOrgAddition.LOGGER.info("{} has summoned {} at {}", ServerUtils.getPlayerName(player), ServerUtils.getPlayerName(fakePlayer), pos.getString());
+            CarpetOrgAddition.LOGGER.info("{} has summoned {} at {}", PlayerUtils.getName(player), PlayerUtils.getName(fakePlayer), pos.getString());
         }
     }
 }

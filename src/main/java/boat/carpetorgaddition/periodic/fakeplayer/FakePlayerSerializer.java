@@ -8,10 +8,7 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionSerializer;
 import boat.carpetorgaddition.periodic.task.FakePlayerStartupActionTask;
 import boat.carpetorgaddition.periodic.task.ServerTaskManager;
-import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.util.IOUtils;
-import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.provider.CommandProvider;
@@ -114,7 +111,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
      * @apiNote 使用此构造方法会丢失玩家所在组，启动时动作等信息
      */
     public FakePlayerSerializer(EntityPlayerMPFake fakePlayer) {
-        this.name = ServerUtils.getPlayerName(fakePlayer);
+        this.name = PlayerUtils.getName(fakePlayer);
         this.playerPos = ServerUtils.getFootPos(fakePlayer);
         this.yaw = fakePlayer.getYRot();
         this.pitch = fakePlayer.getXRot();
@@ -373,7 +370,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
      * 更新玩家数据
      */
     public void update(EntityPlayerMPFake fakePlayer) {
-        this.name = ServerUtils.getPlayerName(fakePlayer);
+        this.name = PlayerUtils.getName(fakePlayer);
         this.playerPos = ServerUtils.getFootPos(fakePlayer);
         this.yaw = fakePlayer.getYRot();
         this.pitch = fakePlayer.getXRot();

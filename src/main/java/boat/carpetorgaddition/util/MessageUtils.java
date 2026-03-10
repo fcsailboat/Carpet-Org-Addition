@@ -54,7 +54,7 @@ public class MessageUtils {
      */
     public static void sendMessage(ServerPlayer player, Component message) {
         player.sendSystemMessage(message);
-        writeLog(ServerUtils.getPlayerName(player), message.getString());
+        writeLog(PlayerUtils.getName(player), message.getString());
     }
 
     /**

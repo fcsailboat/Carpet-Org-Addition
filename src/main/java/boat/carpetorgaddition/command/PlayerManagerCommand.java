@@ -330,7 +330,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             List<String> onlineList = server.getPlayerList()
                     .getPlayers()
                     .stream()
-                    .map(ServerUtils::getPlayerName)
+                    .map(PlayerUtils::getName)
                     .toList();
             HashSet<String> players = new HashSet<>();
             players.addAll(taskList);
@@ -576,7 +576,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 保存或删除安全挂机阈值
     private void saveSafeAfkThreshold(CommandContext<CommandSourceStack> context, float threshold, EntityPlayerMPFake fakePlayer) throws IOException {
-        String playerName = ServerUtils.getPlayerName(fakePlayer);
+        String playerName = PlayerUtils.getName(fakePlayer);
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), null);
         File file = worldFormat.file(SAFEAFK_PROPERTIES);
         // 文件存在或者文件成功创建
@@ -624,7 +624,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 try {
                     // 设置安全挂机阈值
                     FakePlayerSafeAfkInterface safeAfk = (FakePlayerSafeAfkInterface) player;
-                    String value = properties.getProperty(ServerUtils.getPlayerName(player));
+                    String value = properties.getProperty(PlayerUtils.getName(player));
                     if (value == null) {
                         return;
                     }
@@ -635,7 +635,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                     builder.setGrayItalic();
                     MessageUtils.sendMessage(ServerUtils.getServer(player), builder.build());
                 } catch (NumberFormatException e) {
-                    CarpetOrgAddition.LOGGER.error("Failed to set the AFK safety threshold for {}", ServerUtils.getPlayerName(player), e);
+                    CarpetOrgAddition.LOGGER.error("Failed to set the AFK safety threshold for {}", PlayerUtils.getName(player), e);
                 }
             }
         }
@@ -768,7 +768,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         MinecraftServer server = context.getSource().getServer();
         PlayerSerializationManager manager = getSerializationManager(server);
         // 玩家数据是否已存在
-        String name = ServerUtils.getPlayerName(fakePlayer);
+        String name = PlayerUtils.getName(fakePlayer);
         if (IOUtils.isValidFileName(name)) {
             throw CommandUtils.createException(LocalizationKeys.File.INVALID_NAME.translate());
         }
@@ -883,6 +883,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int addStartupRunCommandFunction(CommandContext<CommandSourceStack> context, int delay) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
         if (server.isDedicatedServer() && !GlobalConfigs.getInstance().isAllowMpPlayerStartupCmd()) {
+            // TODO 在多人游戏中设置自动执行命令需要管理员权限
             String name = StringArgumentType.getString(context, "name");
             FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
             File file = serializer.getFile();

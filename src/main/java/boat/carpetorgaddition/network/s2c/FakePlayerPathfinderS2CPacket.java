@@ -54,6 +54,10 @@ public final class FakePlayerPathfinderS2CPacket implements CustomPacketPayload 
         this.list = list;
     }
 
+    public static FakePlayerPathfinderS2CPacket of() {
+        return new FakePlayerPathfinderS2CPacket(-1, List.of());
+    }
+
     public static FakePlayerPathfinderS2CPacket of(int entityId, List<Vec3> list) {
         if (list.isEmpty()) {
             return new FakePlayerPathfinderS2CPacket(entityId, List.of());

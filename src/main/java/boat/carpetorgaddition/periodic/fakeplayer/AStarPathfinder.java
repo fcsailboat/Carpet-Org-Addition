@@ -189,17 +189,14 @@ public class AStarPathfinder implements FakePlayerPathfinder {
 
     @Override
     public void stop() {
-
     }
 
     @Override
     public void onStart() {
-
     }
 
     @Override
     public void onStop() {
-
     }
 
     @Override

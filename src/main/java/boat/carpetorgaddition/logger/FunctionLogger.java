@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.logger;
 
 import boat.carpetorgaddition.mixin.accessor.carpet.LoggerAccessor;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import carpet.logging.Logger;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -16,6 +16,6 @@ public class FunctionLogger extends Logger {
     }
 
     public boolean isSubscribed(ServerPlayer player) {
-        return this.onlinePlayers.containsKey(ServerUtils.getPlayerName(player));
+        return this.onlinePlayers.containsKey(PlayerUtils.getName(player));
     }
 }

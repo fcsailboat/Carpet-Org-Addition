@@ -1,9 +1,8 @@
 package boat.carpetorgaddition.mixin.util.carpet;
 
-import boat.carpetorgaddition.network.s2c.LoggerUpdateS2CPacket;
+import boat.carpetorgaddition.logger.LoggerRegister;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.logging.LoggerRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,7 +23,7 @@ public class LoggerRegistryMixin {
         }
         ServerPlayer player = server.get().getPlayerList().getPlayerByName(playerName);
         if (player != null) {
-            ServerPlayNetworking.send(player, new LoggerUpdateS2CPacket(logName, null, true));
+            LoggerRegister.onUnsubscribe(player, logName);
         }
     }
 }

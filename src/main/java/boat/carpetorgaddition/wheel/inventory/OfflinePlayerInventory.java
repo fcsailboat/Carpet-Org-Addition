@@ -2,7 +2,7 @@ package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.GameProfileCache;
 import com.google.gson.JsonParseException;
 import com.mojang.authlib.GameProfile;
@@ -93,7 +93,7 @@ public class OfflinePlayerInventory extends AbstractCustomSizeInventory {
                 // 译：{}打开了离线玩家{}的物品栏
                 CarpetOrgAddition.LOGGER.info(
                         "{} opened the inventory of the offline player {}.",
-                        ServerUtils.getPlayerName(player),
+                        PlayerUtils.getName(player),
                         this.accessor.getPlayerConfigEntry().name()
                 );
             }

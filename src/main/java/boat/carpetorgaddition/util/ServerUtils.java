@@ -25,7 +25,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -289,16 +288,6 @@ public class ServerUtils {
     public static ServerLevel getWorld(MinecraftServer server, String id) {
         Identifier identifier = Identifier.parse(id);
         return server.getLevel(ResourceKey.create(Registries.DIMENSION, identifier));
-    }
-
-    /**
-     * 获取一名玩家的字符串形式的玩家名
-     *
-     * @param player 要获取字符串形式玩家名的玩家
-     * @return 玩家名的字符串形式
-     */
-    public static String getPlayerName(Player player) {
-        return player.getGameProfile().name();
     }
 
     @Contract("_ -> !null")

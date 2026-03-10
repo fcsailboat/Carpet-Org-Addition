@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.exception;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -26,7 +27,7 @@ public class CCEUpdateSuppressException extends ClassCastException {
      */
     public void onCatch(ServerPlayer player, Packet<ServerGamePacketListener> packet) {
         StringBuilder builder = new StringBuilder();
-        builder.append(ServerUtils.getPlayerName(player)).append(" triggered CCE update suppression while ");
+        builder.append(PlayerUtils.getName(player)).append(" triggered CCE update suppression while ");
         if (packet instanceof ServerboundPlayerActionPacket actionC2SPacket) {
             // 破坏方块
             switch (actionC2SPacket.getAction()) {

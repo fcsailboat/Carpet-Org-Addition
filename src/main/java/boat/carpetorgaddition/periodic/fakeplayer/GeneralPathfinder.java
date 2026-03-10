@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
-import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
+import boat.carpetorgaddition.logger.LoggerNames;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
@@ -269,12 +270,13 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
 
     @Override
     public void onStart() {
-        // TODO
-        if (CarpetOrgAddition.isDebugMode()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             EntityPlayerMPFake fakePlayer = this.getFakePlayer();
             MinecraftServer server = ServerUtils.getServer(fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), this.nodes));
+                if (PlayerUtils.isSubscribeLogger(player, LoggerNames.FAKE_PLAYER_PATHFINDING)) {
+                    PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), this.nodes));
+                }
             }
         }
     }
@@ -282,10 +284,12 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
     @Override
     public void onStop() {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        if (CarpetOrgAddition.isDebugMode()) {
+        if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             MinecraftServer server = ServerUtils.getServer(fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), List.of()));
+                if (PlayerUtils.isSubscribeLogger(player, LoggerNames.FAKE_PLAYER_PATHFINDING)) {
+                    PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), List.of()));
+                }
             }
         }
         EntityPlayerActionPack actionPack = ((ServerPlayerInterface) fakePlayer).getActionPack();

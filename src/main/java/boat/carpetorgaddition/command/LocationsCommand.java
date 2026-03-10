@@ -121,7 +121,7 @@ public class LocationsCommand extends AbstractServerCommand {
             // 成功添加路径点
             MessageUtils.sendMessage(context.getSource(), key.then("success").translate(name, ServerUtils.toPosString(blockPos)));
         } catch (IOException e) {
-            CarpetOrgAddition.LOGGER.error("{} encountered an unexpected issue while attempting to write waypoints to the local file: ", ServerUtils.getPlayerName(player), e);
+            CarpetOrgAddition.LOGGER.error("{} encountered an unexpected issue while attempting to write waypoints to the local file: ", PlayerUtils.getName(player), e);
         }
         return 1;
     }
