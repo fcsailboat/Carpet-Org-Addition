@@ -12,7 +12,6 @@ import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import boat.carpetorgaddition.wheel.nbt.NbtReader;
-import boat.carpetorgaddition.wheel.nbt.NbtVersion;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
 import boat.carpetorgaddition.wheel.provider.CommandProvider;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
@@ -79,7 +78,7 @@ public class Parcel implements Comparable<Parcel> {
     private final LocalDateTime time;
     private final WorldFormat worldFormat;
     public static final String EXPRESS = "express";
-    private static final NbtVersion CURRENT_VERSION = new NbtVersion(3, 0);
+    private static final int CURRENT_VERSION = 3;
 
     public Parcel(MinecraftServer server, ServerPlayer sender, ServerPlayer recipient, int id) throws CommandSyntaxException {
         this(server, sender, recipient.getGameProfile(), getPlayerHandStack(sender), id);
@@ -252,8 +251,7 @@ public class Parcel implements Comparable<Parcel> {
         }
         // 如果接收者存在，向接收者发送物品被撤回的消息
         MessageUtils.sendMessageIfPlayerOnline(this.server, this.recipient,
-                () -> TextBuilder.of(MailCommand.NOTICE.then("recall")
-                        .translate(player.getDisplayName()))
+                () -> TextBuilder.of(MailCommand.NOTICE.then("recall").translate(player.getDisplayName()))
                         .setGrayItalic()
                         .build()
         );
@@ -420,7 +418,7 @@ public class Parcel implements Comparable<Parcel> {
      */
     public static Parcel readNbt(MinecraftServer server, CompoundTag nbt, int id) {
         ParcelDataUpdater updater = new ParcelDataUpdater(server);
-        NbtVersion version = ParcelDataUpdater.getVersion(nbt);
+        int version = ParcelDataUpdater.getVersion(nbt);
         int vanillaVersion = ParcelDataUpdater.getVanillaVersion(nbt);
         NbtReader reader = new NbtReader(server, updater.update(nbt, version, vanillaVersion));
         String sender = reader.getStringOrElse("sender", UNKNOWN);

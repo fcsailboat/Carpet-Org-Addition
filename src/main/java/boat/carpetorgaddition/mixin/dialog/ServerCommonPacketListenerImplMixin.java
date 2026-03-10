@@ -13,8 +13,7 @@ public class ServerCommonPacketListenerImplMixin {
     @WrapMethod(method = "handleCustomClickAction")
     private void handleCustomClickAction(ServerboundCustomClickActionPacket packet, Operation<Void> original) {
         if ((Object) this instanceof ServerGamePacketListenerImpl listener) {
-            ScopedValue.where(CustomClickActionContext.CURRENT_PLAYER, listener.player)
-                    .run(() -> original.call(packet));
+            ScopedValue.where(CustomClickActionContext.CURRENT_PLAYER, listener.player).run(() -> original.call(packet));
         } else {
             original.call(packet);
         }

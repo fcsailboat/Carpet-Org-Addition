@@ -7,7 +7,6 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.nbt.NbtReader;
-import boat.carpetorgaddition.wheel.nbt.NbtVersion;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
@@ -23,7 +22,7 @@ import java.util.Map;
 @NullMarked
 public class CustomClickAction {
     private static final Map<Identifier, CustomClickActionProcessor> ACTIONS = new HashMap<>();
-    public static final NbtVersion CURRENT_VERSION = new NbtVersion(1, 0);
+    public static final int CURRENT_VERSION = 1;
 
     static {
         CustomClickEvents.init();
@@ -43,7 +42,7 @@ public class CustomClickAction {
         }
         try {
             NbtReader reader = context.getReader();
-            if (reader.getVersion().compareTo(CURRENT_VERSION) > 0) {
+            if (reader.getVersion() > CURRENT_VERSION) {
                 ServerPlayer player = context.getPlayer();
                 if (context.getActionSource() == ActionSource.DIALOG) {
                     // 关闭当前对话框（等待服务器响应屏幕）

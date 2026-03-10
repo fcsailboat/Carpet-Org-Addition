@@ -114,7 +114,7 @@ public class NbtReader {
         return optional.map(ImmutableInventory::new);
     }
 
-    public NbtVersion getVersion() {
-        return this.input.read(DataUpdater.DATA_VERSION, NbtVersion.CODEC).orElseThrow(() -> new NbtFormatException("Missing version number information"));
+    public int getVersion() {
+        return this.input.getInt(DataUpdater.DATA_VERSION).orElseThrow(() -> new NbtFormatException("Missing version number information"));
     }
 }

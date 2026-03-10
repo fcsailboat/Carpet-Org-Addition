@@ -24,6 +24,7 @@ public class WorldFormat {
      * 文件是否为{@code json}扩展名
      */
     public static final Predicate<File> JSON_EXTENSIONS = file -> file.getName().endsWith(IOUtils.JSON_EXTENSION);
+    public static final Predicate<File> NBT_EXTENSIONS = file -> file.getName().endsWith(IOUtils.NBT_EXTENSION);
     /**
      * 文件所在文件夹
      */

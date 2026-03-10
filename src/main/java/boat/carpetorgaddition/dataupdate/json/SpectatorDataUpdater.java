@@ -24,7 +24,7 @@ public final class SpectatorDataUpdater implements DataUpdater {
                 double pitch = oldJson.get("pitch").getAsDouble();
                 String dimension = oldJson.get("dimension").getAsString();
                 JsonObject newJson = new JsonObject();
-                newJson.addProperty(DATA_VERSION, 1);
+                newJson.addProperty("data_version", 1);
                 JsonObject pos = new JsonObject();
                 pos.addProperty("x", x);
                 pos.addProperty("y", y);

@@ -1,6 +1,5 @@
 package boat.carpetorgaddition.dataupdate.nbt;
 
-import boat.carpetorgaddition.wheel.nbt.NbtVersion;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,8 +14,8 @@ public class ParcelDataUpdater extends NbtDataUpdater {
     }
 
     @Override
-    protected CompoundTag updateDataFormat(CompoundTag old, NbtVersion version) {
-        if (version.compareTo(NbtVersion.VERSION_3) < 0) {
+    protected CompoundTag updateDataFormat(CompoundTag old, int version) {
+        if (version < 3) {
             CompoundTag nbt = new CompoundTag();
             for (Map.Entry<String, Tag> entry : old.entrySet()) {
                 String key = entry.getKey();
@@ -32,14 +31,16 @@ public class ParcelDataUpdater extends NbtDataUpdater {
                     default -> nbt.put(key, value);
                 }
             }
-            return nbt;
+            nbt.putInt("data_version", 3);
+            return this.updateDataFormat(nbt, 3);
         }
-        return old;
+        return super.updateDataFormat(old, version);
     }
 
     @Override
     protected CompoundTag updateVanillaDataFormat(CompoundTag old, int version) {
-        if (version < CURRENT_VANILLA_DATA_VERSION) {
+        int minecraftDataVersion = CURRENT_VANILLA_DATA_VERSION;
+        if (version < minecraftDataVersion) {
             CompoundTag nbt = new CompoundTag();
             for (Map.Entry<String, Tag> entry : old.entrySet()) {
                 String key = entry.getKey();
@@ -53,17 +54,17 @@ public class ParcelDataUpdater extends NbtDataUpdater {
                         }
                         nbt.put(key, newTags);
                     }
-                    case "vanilla_data_version" -> nbt.putInt(key, CURRENT_VANILLA_DATA_VERSION);
+                    case "vanilla_data_version" -> nbt.putInt(key, minecraftDataVersion);
                     default -> nbt.put(key, entry.getValue());
                 }
             }
-            return nbt;
+            return this.updateVanillaDataFormat(nbt, minecraftDataVersion);
         }
-        return old;
+        return super.updateVanillaDataFormat(old, version);
     }
 
-    public static NbtVersion getVersion(CompoundTag nbt) {
-        return nbt.read("data_version", NbtVersion.CODEC).orElse(NbtVersion.ZERO);
+    public static int getVersion(CompoundTag nbt) {
+        return nbt.getIntOr("data_version", 0);
     }
 
     public static int getVanillaVersion(CompoundTag nbt) {

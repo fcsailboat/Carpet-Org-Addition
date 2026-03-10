@@ -23,9 +23,9 @@ public class NbtWriter {
     private final TagValueOutput output;
     private static final ProblemReporter REPORTER = new ProblemReporter.ScopedCollector(NbtWriter.class::toString, CarpetOrgAddition.LOGGER);
 
-    public NbtWriter(MinecraftServer server, NbtVersion version) {
+    public NbtWriter(MinecraftServer server, int version) {
         this.output = TagValueOutput.createWithContext(REPORTER, server.registryAccess());
-        this.output.store(NbtDataUpdater.DATA_VERSION, NbtVersion.CODEC, version);
+        this.output.putInt(NbtDataUpdater.DATA_VERSION, version);
         this.output.putInt(NbtDataUpdater.VANILLA_DATA_VERSION, NbtDataUpdater.CURRENT_VANILLA_DATA_VERSION);
     }
 
