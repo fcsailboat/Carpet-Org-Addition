@@ -9,7 +9,8 @@ import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -84,7 +85,7 @@ public abstract class AbstractNavigator {
 
     /**
      * @param target 玩家看向的位置
-     * @see net.minecraft.client.gui.components.SubtitleOverlay#render(GuiGraphics)
+     * @see SubtitleOverlay#extractRenderState(GuiGraphicsExtractor)
      */
     private static int forwardAngle(Player player, Vec3 target) {
         double x = target.x() - player.getX();

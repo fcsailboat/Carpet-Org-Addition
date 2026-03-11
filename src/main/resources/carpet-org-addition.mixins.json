@@ -12,7 +12,6 @@
     "accessor.MerchantScreenHandlerAccessor",
     "accessor.PlayerManagerAccessor",
     "accessor.SpawnHelperInfoAccessor",
-    "accessor.StateAccessor",
     "accessor.carpet.EntityPlayerActionPackAccessor",
     "accessor.carpet.EntityPlayerActionPackAccessor$ActionAccessor",
     "accessor.carpet.LoggerAccessor",

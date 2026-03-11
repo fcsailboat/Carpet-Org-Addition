@@ -11,7 +11,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -76,7 +77,7 @@ public class ParticleLineCommand {
     /**
      * 发送箭头文本用来指示方向
      *
-     * @see net.minecraft.client.gui.components.SubtitleOverlay#render(GuiGraphics)
+     * @see SubtitleOverlay#extractRenderState(GuiGraphicsExtractor)
      */
     private static void sendArrow(ServerPlayer player, Vec3 to) {
         // 获取玩家眼睛的位置

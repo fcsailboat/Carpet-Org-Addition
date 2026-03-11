@@ -242,7 +242,7 @@ public class HudDebugRendererRegister {
                     HandledScreenAccessor accessor = (HandledScreenAccessor) handledScreen;
                     int x = accessor.getX();
                     int y = accessor.getY();
-                    context.drawString(
+                    context.text(
                             screen.getFont(),
                             String.valueOf(slot.index),
                             slot.x + x + 1,

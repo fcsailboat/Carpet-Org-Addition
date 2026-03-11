@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.wheel.predicate;
 
 import boat.carpetorgaddition.command.FinderCommand;
-import boat.carpetorgaddition.mixin.accessor.StateAccessor;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -33,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
     protected final String content;
@@ -52,14 +52,12 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
         StringBuilder builder = new StringBuilder();
         Block block = blockState.getBlock();
         builder.append(ServerUtils.getIdAsString(block));
-        Map<Property<?>, Comparable<?>> defaultEntries = block.defaultBlockState().getValues();
-        List<String> list = new HashMap<>(blockState.getValues())
-                .entrySet()
-                .stream()
+        Map<? extends Property<?>, ?> defaultEntries = block.defaultBlockState().getValues().collect(Collectors.toMap(Property.Value::property, Property.Value::value));
+        List<String> list = blockState.getValues()
                 // 过滤默认方块状态
-                .filter(entry -> !entry.getValue().equals(defaultEntries.get(entry.getKey())))
-                .filter(Objects::nonNull)
-                .map(StateAccessor.getPropertyMapPrinter())
+                .filter(entry -> !entry.value().equals(defaultEntries.get(entry.property())))
+                .map(Property.Value::property)
+                .map(Property::getName)
                 .toList();
         if (list.isEmpty()) {
             this.block = block;

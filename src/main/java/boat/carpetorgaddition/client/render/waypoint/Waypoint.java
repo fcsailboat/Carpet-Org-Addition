@@ -276,7 +276,6 @@ public abstract class Waypoint implements WorldRenderComponent {
         // 缩小文字
         poseStack.scale(0.15F, 0.15F, 0.15F);
         FormattedCharSequence sequence = FormattedCharSequence.forward(component.getString(), component.getStyle());
-        // TODO 文本也无法透过方块显示，但原版也有同样的问题，需要在新版本中测试
         // 渲染文字
         if (opacity != 0) {
             // 渲染文字背景
