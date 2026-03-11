@@ -21,7 +21,7 @@ public class ParcelDataUpdater extends NbtDataUpdater {
                 String key = entry.getKey();
                 Tag value = entry.getValue();
                 switch (key) {
-                    case "NbtDataVersion" -> nbt.put("vanilla_data_version", value);
+                    case "NbtDataVersion" -> nbt.put("minecraft_data_version", value);
                     case "cancel" -> nbt.put("recall", value);
                     case "item" -> {
                         ListTag tags = new ListTag();
@@ -39,7 +39,7 @@ public class ParcelDataUpdater extends NbtDataUpdater {
 
     @Override
     protected CompoundTag updateVanillaDataFormat(CompoundTag old, int version) {
-        int minecraftDataVersion = CURRENT_VANILLA_DATA_VERSION;
+        int minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
         if (version < minecraftDataVersion) {
             CompoundTag nbt = new CompoundTag();
             for (Map.Entry<String, Tag> entry : old.entrySet()) {
@@ -54,7 +54,7 @@ public class ParcelDataUpdater extends NbtDataUpdater {
                         }
                         nbt.put(key, newTags);
                     }
-                    case "vanilla_data_version" -> nbt.putInt(key, minecraftDataVersion);
+                    case "minecraft_data_version" -> nbt.putInt(key, minecraftDataVersion);
                     default -> nbt.put(key, entry.getValue());
                 }
             }
@@ -68,7 +68,7 @@ public class ParcelDataUpdater extends NbtDataUpdater {
     }
 
     public static int getVanillaVersion(CompoundTag nbt) {
-        Optional<Integer> optional = nbt.getInt("vanilla_data_version").or(() -> nbt.getInt("NbtDataVersion"));
+        Optional<Integer> optional = nbt.getInt(NbtDataUpdater.MINECRAFT_DATA_VERSION).or(() -> nbt.getInt("NbtDataVersion"));
         if (optional.isPresent()) {
             return optional.get();
         }

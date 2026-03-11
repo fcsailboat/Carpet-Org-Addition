@@ -251,7 +251,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
         CompoundTag nbt = readNbt(unsafe);
         int version = NbtUtils.getDataVersion(nbt, -1);
         // 使用<而不是==，因为存档可能降级
-        if (this.isCorruptedPlayerData(uuid) || version < ServerUtils.getVanillaDataVersion()) {
+        if (this.isCorruptedPlayerData(uuid) || version < ServerUtils.getMinecraftDataVersion()) {
             // 升级或修复玩家数据
             if (this.server.isRunning() && this.backupAndUpdate(unsafe, uuid)) {
                 return readNbt(unsafe);
@@ -577,7 +577,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
     private WorldFormat getBackupFileDirectory() {
         if (this.backupFileDirectory == null) {
             synchronized (this.backupInitLock) {
-                String time = LocalDateTime.now().format(FORMATTER) + "_" + ServerUtils.getVanillaDataVersion();
+                String time = LocalDateTime.now().format(FORMATTER) + "_" + ServerUtils.getMinecraftDataVersion();
                 this.backupFileDirectory = this.worldFormat.resolve(time);
             }
         }

@@ -23,12 +23,11 @@ public abstract class NbtDataUpdater {
     /**
      * {@code Minecraft}的数据版本
      */
-    // TODO 重命名为minecraft_data_version
-    public static final String VANILLA_DATA_VERSION = "vanilla_data_version";
+    public static final String MINECRAFT_DATA_VERSION = "minecraft_data_version";
     /**
      * 当前{@code Minecraft}的NBT数据版本
      */
-    public static final int CURRENT_VANILLA_DATA_VERSION = ServerUtils.getVanillaDataVersion();
+    public static final int CURRENT_MINECRAFT_DATA_VERSION = ServerUtils.getMinecraftDataVersion();
 
     public NbtDataUpdater(MinecraftServer server) {
         this.server = server;
@@ -51,7 +50,7 @@ public abstract class NbtDataUpdater {
 
     @MustBeInvokedByOverriders
     protected CompoundTag updateVanillaDataFormat(CompoundTag old, int version) {
-        Optional<Integer> optional = old.getInt(VANILLA_DATA_VERSION);
+        Optional<Integer> optional = old.getInt(MINECRAFT_DATA_VERSION);
         if (optional.isEmpty()) {
             throw new NbtFormatException("Missing minecraft nbt version information");
         }
@@ -60,7 +59,7 @@ public abstract class NbtDataUpdater {
 
     protected Tag updateItemStack(Tag nbt, int version) {
         Dynamic<Tag> input = new Dynamic<>(NbtOps.INSTANCE, nbt);
-        Dynamic<Tag> result = this.fixerUpper.update(References.ITEM_STACK, input, version, CURRENT_VANILLA_DATA_VERSION);
+        Dynamic<Tag> result = this.fixerUpper.update(References.ITEM_STACK, input, version, CURRENT_MINECRAFT_DATA_VERSION);
         return result.getValue();
     }
 }

@@ -45,7 +45,7 @@ public class ServerUtils {
     /**
      * 当前{@code Minecraft}的NBT数据版本
      */
-    public static final int CURRENT_DATA_VERSION = getVanillaDataVersion();
+    public static final int CURRENT_DATA_VERSION = getMinecraftDataVersion();
     public static final String OVERWORLD = "minecraft:overworld";
     public static final String THE_NETHER = "minecraft:the_nether";
     public static final String THE_END = "minecraft:the_end";
@@ -103,7 +103,7 @@ public class ServerUtils {
      * @return 当前游戏的NBT数据版本
      */
     @Contract(pure = true)
-    public static int getVanillaDataVersion() {
+    public static int getMinecraftDataVersion() {
         return SharedConstants.getCurrentVersion().dataVersion().version();
     }
 

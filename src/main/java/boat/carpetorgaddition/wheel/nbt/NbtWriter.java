@@ -26,7 +26,7 @@ public class NbtWriter {
     public NbtWriter(MinecraftServer server, int version) {
         this.output = TagValueOutput.createWithContext(REPORTER, server.registryAccess());
         this.output.putInt(NbtDataUpdater.DATA_VERSION, version);
-        this.output.putInt(NbtDataUpdater.VANILLA_DATA_VERSION, NbtDataUpdater.CURRENT_VANILLA_DATA_VERSION);
+        this.output.putInt(NbtDataUpdater.MINECRAFT_DATA_VERSION, NbtDataUpdater.CURRENT_MINECRAFT_DATA_VERSION);
     }
 
     public void putInt(String key, int value) {

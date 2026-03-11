@@ -59,7 +59,13 @@ public class ParcelManager {
             if (nbt == null) {
                 continue;
             }
-            Parcel parcel = Parcel.readNbt(this.server, nbt, id);
+            Parcel parcel;
+            try {
+                parcel = Parcel.readNbt(this.server, nbt, id);
+            } catch (RuntimeException e) {
+                CarpetOrgAddition.LOGGER.warn("Unable to load parcel data: ", e);
+                continue;
+            }
             // 快递对象物品为空，删除对应的文件
             if (parcel.isComplete()) {
                 parcel.delete();
