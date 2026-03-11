@@ -210,7 +210,7 @@ public class SpectatorCommand extends AbstractServerCommand {
                 JsonObject oldJson = IOUtils.loadJson(file);
                 int version = DataUpdater.getVersion(oldJson);
                 SpectatorDataUpdater dataUpdater = SpectatorDataUpdater.getInstance();
-                JsonObject json = dataUpdater.update(oldJson, version);
+                JsonObject json = dataUpdater.update(oldJson, version, CURRENT_VERSION);
                 JsonObject pos = json.getAsJsonObject("pos");
                 double x = pos.get("x").getAsDouble();
                 double y = pos.get("y").getAsDouble();

@@ -3,7 +3,7 @@ package boat.carpetorgaddition.dataupdate.json;
 import boat.carpetorgaddition.util.IOUtils;
 import com.google.gson.JsonObject;
 
-public final class WaypointDataUpdater implements DataUpdater {
+public final class WaypointDataUpdater extends DataUpdater {
     private static final WaypointDataUpdater INSTANCE = new WaypointDataUpdater();
 
     private WaypointDataUpdater() {
@@ -14,7 +14,7 @@ public final class WaypointDataUpdater implements DataUpdater {
     }
 
     @Override
-    public JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject oldJson, int version) {
         if (version == 0) {
             int x = IOUtils.getJsonElement(oldJson, "x", Integer.class).orElseThrow();
             int y = IOUtils.getJsonElement(oldJson, "y", Integer.class).orElseThrow();
@@ -36,7 +36,7 @@ public final class WaypointDataUpdater implements DataUpdater {
             pos.addProperty("x", x);
             pos.addProperty("y", y);
             pos.addProperty("z", z);
-            newJson.addProperty(DATA_VERSION, 3);
+            newJson.addProperty("data_version", 3);
             newJson.add("pos", pos);
             newJson.addProperty("dimension", dimension);
             newJson.addProperty("creator", creator);

@@ -2,7 +2,7 @@ package boat.carpetorgaddition.dataupdate.json;
 
 import com.google.gson.JsonObject;
 
-public final class SpectatorDataUpdater implements DataUpdater {
+public final class SpectatorDataUpdater extends DataUpdater {
     private static final SpectatorDataUpdater INSTANCE = new SpectatorDataUpdater();
 
     private SpectatorDataUpdater() {
@@ -14,7 +14,7 @@ public final class SpectatorDataUpdater implements DataUpdater {
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     @Override
-    public JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject oldJson, int version) {
         return switch (version) {
             case 0 -> {
                 double x = oldJson.get("x").getAsDouble();

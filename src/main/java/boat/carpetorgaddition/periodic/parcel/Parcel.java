@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.CommandRegister;
 import boat.carpetorgaddition.command.MailCommand;
+import boat.carpetorgaddition.dataupdate.nbt.NbtDataUpdater;
 import boat.carpetorgaddition.dataupdate.nbt.ParcelDataUpdater;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.Counter;
@@ -418,9 +419,8 @@ public class Parcel implements Comparable<Parcel> {
      */
     public static Parcel readNbt(MinecraftServer server, CompoundTag nbt, int id) {
         ParcelDataUpdater updater = new ParcelDataUpdater(server);
-        int version = ParcelDataUpdater.getVersion(nbt);
-        int vanillaVersion = ParcelDataUpdater.getVanillaVersion(nbt);
-        NbtReader reader = new NbtReader(server, updater.update(nbt, version, vanillaVersion));
+        int version = NbtDataUpdater.getVersion(nbt);
+        NbtReader reader = new NbtReader(server, updater.update(nbt, version, CURRENT_VERSION));
         String sender = reader.getStringOrElse("sender", UNKNOWN);
         String recipient = reader.getStringOrElse("recipient", UNKNOWN);
         UUID uuid = reader.getUuidNullable("uuid").orElse(null);

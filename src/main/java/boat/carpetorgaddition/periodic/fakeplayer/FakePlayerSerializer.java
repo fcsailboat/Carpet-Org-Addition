@@ -134,7 +134,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         int version = DataUpdater.getVersion(oldJson);
         FakePlayerSerializerDataUpdater dataUpdater = FakePlayerSerializerDataUpdater.getInstance();
         // 需要重新保存吗？这可能会提高下一次读取文件的效率，但是会导致配置文件与低版本不兼容
-        JsonObject json = dataUpdater.update(oldJson, version);
+        JsonObject json = dataUpdater.update(oldJson, version, CURRENT_VERSION);
         // 玩家名
         this.name = name;
         // 玩家位置

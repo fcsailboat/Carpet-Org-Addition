@@ -69,7 +69,7 @@ public class RuleConfig {
             try {
                 JsonObject json = IOUtils.loadJson(this.file);
                 CarpetConfDataUpdater updater = CarpetConfDataUpdater.getInstance();
-                json = updater.update(json, DataUpdater.getVersion(json));
+                json = updater.update(json, DataUpdater.getVersion(json), CURRENT_VERSION);
                 for (Map.Entry<String, JsonElement> entry : json.get(RULES).getAsJsonObject().entrySet()) {
                     map.put(entry.getKey(), entry.getValue().getAsString());
                 }
@@ -102,7 +102,7 @@ public class RuleConfig {
         json.addProperty(DataUpdater.DATA_VERSION, DataUpdater.ZERO);
         json.add(RULES, rules);
         CarpetConfDataUpdater dataUpdater = CarpetConfDataUpdater.getInstance();
-        JsonObject update = dataUpdater.update(json, DataUpdater.getVersion(json));
+        JsonObject update = dataUpdater.update(json, DataUpdater.getVersion(json), CURRENT_VERSION);
         this.save(update);
         CarpetOrgAddition.LOGGER.info("The Carpet Org Addition rules have been migrated from carpet.conf to carpetorgaddition/config.json");
     }

@@ -86,7 +86,7 @@ public class Waypoint {
         File file = worldFormat.file(name, IOUtils.JSON_EXTENSION);
         JsonObject json = IOUtils.loadJson(file);
         WaypointDataUpdater dataUpdater = WaypointDataUpdater.getInstance();
-        json = dataUpdater.update(json, DataUpdater.getVersion(json));
+        json = dataUpdater.update(json, DataUpdater.getVersion(json), CURRENT_VERSION);
         // 路径点的位置
         JsonObject pos = json.get("pos").getAsJsonObject();
         int x = pos.get("x").getAsInt();

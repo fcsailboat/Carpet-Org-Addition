@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Map;
 
-public final class CarpetConfDataUpdater implements DataUpdater {
+public final class CarpetConfDataUpdater extends DataUpdater {
     /**
      * 所有规则，截至{@code 2025年6月19日}
      */
@@ -114,7 +114,7 @@ public final class CarpetConfDataUpdater implements DataUpdater {
     }
 
     @Override
-    public JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject oldJson, int version) {
         return switch (version) {
             case 0, 1 -> {
                 JsonObject newJson = new JsonObject();

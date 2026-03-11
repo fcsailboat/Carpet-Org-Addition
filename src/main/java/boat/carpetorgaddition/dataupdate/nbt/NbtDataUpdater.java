@@ -4,12 +4,10 @@ import boat.carpetorgaddition.util.ServerUtils;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtFormatException;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.fixes.References;
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
 
 import java.util.Optional;
 
@@ -34,32 +32,32 @@ public abstract class NbtDataUpdater {
         this.fixerUpper = this.server.getFixerUpper();
     }
 
-    public CompoundTag update(CompoundTag nbt, int version, int vanillaVersion) {
-        CompoundTag newNbt = this.updateDataFormat(nbt, version);
-        return this.updateVanillaDataFormat(newNbt, vanillaVersion);
+    public final CompoundTag update(CompoundTag oldNbt, int version, int targetVersion) {
+        CompoundTag newNbt = this.updateDataFormat(oldNbt, version);
+        int minecraftVersion = this.getMinecraftNbtVersion(oldNbt);
+        CompoundTag result = this.updateMinecraftDataFormat(newNbt, minecraftVersion);
+        if (NbtDataUpdater.getVersion(result) != targetVersion) {
+            throw new IllegalStateException("Nbt has not been updated to the target version");
+        }
+        return result;
     }
 
-    @MustBeInvokedByOverriders
-    protected CompoundTag updateDataFormat(CompoundTag old, int version) {
-        Optional<Integer> optional = old.getInt(DATA_VERSION);
-        if (optional.isEmpty()) {
-            throw new NbtFormatException("Missing nbt version information");
-        }
-        return old;
-    }
+    protected abstract CompoundTag updateDataFormat(CompoundTag old, int version);
 
-    @MustBeInvokedByOverriders
-    protected CompoundTag updateVanillaDataFormat(CompoundTag old, int version) {
-        Optional<Integer> optional = old.getInt(MINECRAFT_DATA_VERSION);
-        if (optional.isEmpty()) {
-            throw new NbtFormatException("Missing minecraft nbt version information");
-        }
-        return old;
-    }
+    protected abstract CompoundTag updateMinecraftDataFormat(CompoundTag old, int version);
 
     protected Tag updateItemStack(Tag nbt, int version) {
         Dynamic<Tag> input = new Dynamic<>(NbtOps.INSTANCE, nbt);
         Dynamic<Tag> result = this.fixerUpper.update(References.ITEM_STACK, input, version, CURRENT_MINECRAFT_DATA_VERSION);
         return result.getValue();
+    }
+
+    public static int getVersion(CompoundTag nbt) {
+        return nbt.getIntOr("data_version", 0);
+    }
+
+    protected int getMinecraftNbtVersion(CompoundTag nbt) {
+        Optional<Integer> optional = nbt.getInt(NbtDataUpdater.MINECRAFT_DATA_VERSION).or(() -> nbt.getInt("NbtDataVersion"));
+        return optional.orElse(-1);
     }
 }

@@ -6,9 +6,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.Map;
-import java.util.Optional;
 
-public class ParcelDataUpdater extends NbtDataUpdater {
+public final class ParcelDataUpdater extends NbtDataUpdater {
     public ParcelDataUpdater(MinecraftServer server) {
         super(server);
     }
@@ -34,11 +33,11 @@ public class ParcelDataUpdater extends NbtDataUpdater {
             nbt.putInt("data_version", 3);
             return this.updateDataFormat(nbt, 3);
         }
-        return super.updateDataFormat(old, version);
+        return old;
     }
 
     @Override
-    protected CompoundTag updateVanillaDataFormat(CompoundTag old, int version) {
+    protected CompoundTag updateMinecraftDataFormat(CompoundTag old, int version) {
         int minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
         if (version < minecraftDataVersion) {
             CompoundTag nbt = new CompoundTag();
@@ -58,19 +57,16 @@ public class ParcelDataUpdater extends NbtDataUpdater {
                     default -> nbt.put(key, entry.getValue());
                 }
             }
-            return this.updateVanillaDataFormat(nbt, minecraftDataVersion);
+            return this.updateMinecraftDataFormat(nbt, minecraftDataVersion);
         }
-        return super.updateVanillaDataFormat(old, version);
+        return old;
     }
 
-    public static int getVersion(CompoundTag nbt) {
-        return nbt.getIntOr("data_version", 0);
-    }
-
-    public static int getVanillaVersion(CompoundTag nbt) {
-        Optional<Integer> optional = nbt.getInt(NbtDataUpdater.MINECRAFT_DATA_VERSION).or(() -> nbt.getInt("NbtDataVersion"));
-        if (optional.isPresent()) {
-            return optional.get();
+    @Override
+    protected int getMinecraftNbtVersion(CompoundTag nbt) {
+        int version = super.getMinecraftNbtVersion(nbt);
+        if (version != -1) {
+            return version;
         }
         if (nbt.get("item") instanceof CompoundTag itemNbt) {
             if (itemNbt.contains("Count") || itemNbt.contains("tag")) {

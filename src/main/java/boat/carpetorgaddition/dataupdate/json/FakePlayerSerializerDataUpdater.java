@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.Map;
 
-public final class FakePlayerSerializerDataUpdater implements DataUpdater {
+public final class FakePlayerSerializerDataUpdater extends DataUpdater {
     private static final FakePlayerSerializerDataUpdater INSTANCE = new FakePlayerSerializerDataUpdater();
 
     private FakePlayerSerializerDataUpdater() {
@@ -19,7 +19,7 @@ public final class FakePlayerSerializerDataUpdater implements DataUpdater {
     }
 
     @Override
-    public JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject oldJson, int version) {
         return switch (version) {
             case 0, 1, 2 -> {
                 // 更新玩家动作数据

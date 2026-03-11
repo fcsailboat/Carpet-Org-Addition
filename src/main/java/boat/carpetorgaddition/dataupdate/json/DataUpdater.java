@@ -2,17 +2,24 @@ package boat.carpetorgaddition.dataupdate.json;
 
 import com.google.gson.JsonObject;
 
-@FunctionalInterface
-public interface DataUpdater {
-    String DATA_VERSION = "data_version";
+public abstract class DataUpdater {
+    public static final String DATA_VERSION = "data_version";
     @Deprecated(forRemoval = true)
-    int VERSION = 3;
-    int ZERO = 0;
-    DataUpdater UNCHANGED = (json, _) -> json;
+    public static final int VERSION = 3;
+    public static final int ZERO = 0;
+    public static final DataUpdater UNCHANGED = new UnchangedDataUpdater();
 
-    JsonObject update(JsonObject oldJson, int version);
+    protected abstract JsonObject update(JsonObject oldJson, int version);
 
-    static int getVersion(JsonObject json) {
+    public final JsonObject update(JsonObject oldJson, int currentVersion, int targetVersion) {
+        JsonObject newJson = this.update(oldJson, currentVersion);
+        if (DataUpdater.getVersion(newJson) != targetVersion) {
+            throw new IllegalStateException("Json has not been updated to the target version");
+        }
+        return newJson;
+    }
+
+    public static int getVersion(JsonObject json) {
         if (json.has(DATA_VERSION)) {
             return json.get(DATA_VERSION).getAsInt();
         }
@@ -20,5 +27,15 @@ public interface DataUpdater {
             return json.get("DataVersion").getAsInt();
         }
         return 0;
+    }
+
+    private static class UnchangedDataUpdater extends DataUpdater {
+        private UnchangedDataUpdater() {
+        }
+
+        @Override
+        protected JsonObject update(JsonObject oldJson, int version) {
+            return oldJson;
+        }
     }
 }

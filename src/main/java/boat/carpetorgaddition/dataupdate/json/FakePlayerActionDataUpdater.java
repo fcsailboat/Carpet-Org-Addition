@@ -10,7 +10,7 @@ import com.google.gson.JsonObject;
 import java.util.HashSet;
 import java.util.Map;
 
-public final class FakePlayerActionDataUpdater implements DataUpdater {
+public final class FakePlayerActionDataUpdater extends DataUpdater {
     private static final FakePlayerActionDataUpdater INSTANCE = new FakePlayerActionDataUpdater();
 
     private FakePlayerActionDataUpdater() {
@@ -21,7 +21,7 @@ public final class FakePlayerActionDataUpdater implements DataUpdater {
     }
 
     @Override
-    public JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject oldJson, int version) {
         if (version == 0) {
             HashSet<Map.Entry<String, JsonObject>> entries = new HashSet<>();
             // 通常只会循环一次，因为一名玩家只能同时有一个动作
@@ -62,14 +62,14 @@ public final class FakePlayerActionDataUpdater implements DataUpdater {
     /**
      * 清空容器动作数据更新器
      */
-    public static final class EmptyTheContainerActionDataUpdater implements DataUpdater {
+    public static final class EmptyTheContainerActionDataUpdater extends DataUpdater {
         private static final EmptyTheContainerActionDataUpdater INSTANCE = new EmptyTheContainerActionDataUpdater();
 
         private EmptyTheContainerActionDataUpdater() {
         }
 
         @Override
-        public JsonObject update(JsonObject oldJson, int version) {
+        protected JsonObject update(JsonObject oldJson, int version) {
             if (version == 0) {
                 if (oldJson.has("allItem") && oldJson.get("allItem").getAsBoolean()) {
                     // 匹配任意物品
@@ -95,14 +95,14 @@ public final class FakePlayerActionDataUpdater implements DataUpdater {
         }
     }
 
-    public static final class FillTheContainerActionDataUpdater implements DataUpdater {
+    public static final class FillTheContainerActionDataUpdater extends DataUpdater {
         private static final FillTheContainerActionDataUpdater INSTANCE = new FillTheContainerActionDataUpdater();
 
         private FillTheContainerActionDataUpdater() {
         }
 
         @Override
-        public JsonObject update(JsonObject oldJson, int version) {
+        protected JsonObject update(JsonObject oldJson, int version) {
             if (version == 0) {
                 String key = FillTheContainerAction.DROP_OTHER;
                 // dropOther默认为true
