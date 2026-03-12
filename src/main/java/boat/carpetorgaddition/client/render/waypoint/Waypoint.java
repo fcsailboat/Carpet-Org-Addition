@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -129,11 +128,10 @@ public abstract class Waypoint implements WorldRenderComponent {
     private void render(PoseStack poseStack, SubmitNodeCollector collector) {
         float alpha = this.getRenderAlpha();
         collector.submitCustomGeometry(poseStack, this.renderType, (pose, buffer) -> {
-            // TODO 两次setColor()？
-            buffer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F).setColor(-1);
-            buffer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F).setColor(-1);
-            buffer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F).setColor(-1);
-            buffer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F).setColor(-1);
+            buffer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F);
+            buffer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F);
+            buffer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F);
+            buffer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F);
         });
     }
 
@@ -264,12 +262,11 @@ public abstract class Waypoint implements WorldRenderComponent {
             builder.setItalic();
         }
         Component component = builder.build();
-        // 获取文本宽度
+        // 文本宽度
         int width = textRenderer.width(formatted);
-        int height = textRenderer.wordWrapHeight(component, width);
         float x = (-width) / 2F;
         float y = 8F;
-        // 获取背景不透明度
+        // 背景不透明度
         float backgroundOpacity = ClientUtils.getGameOptions().getBackgroundOpacity(0.25F);
         int opacity = (int) (backgroundOpacity * 255.0F) << 24;
         poseStack.pushPose();
@@ -277,19 +274,7 @@ public abstract class Waypoint implements WorldRenderComponent {
         poseStack.scale(0.15F, 0.15F, 0.15F);
         FormattedCharSequence sequence = FormattedCharSequence.forward(component.getString(), component.getStyle());
         // 渲染文字
-        if (opacity != 0) {
-            // 渲染文字背景
-            poseStack.pushPose();
-            poseStack.translate(x, y, 1);
-            collector.submitCustomGeometry(poseStack, RenderTypes.textBackgroundSeeThrough(), (pose, buffer) -> {
-                buffer.addVertex(pose, -1.0F, -1.0F, 0F).setColor(opacity).setLight(1);
-                buffer.addVertex(pose, -1.0F, height, 0F).setColor(opacity).setLight(1);
-                buffer.addVertex(pose, width, height, 0F).setColor(opacity).setLight(1);
-                buffer.addVertex(pose, width, -1.0F, 0F).setColor(opacity).setLight(1);
-            });
-            poseStack.popPose();
-        }
-        collector.submitText(poseStack, x, y, sequence, false, Font.DisplayMode.SEE_THROUGH, 0x00F00000, 0xFFFFFFFF, 0, 0);
+        collector.submitText(poseStack, x, y, sequence, false, Font.DisplayMode.SEE_THROUGH, 0x00F00000, 0xFFFFFFFF, opacity, 0);
         poseStack.popPose();
     }
 
