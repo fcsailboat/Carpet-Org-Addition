@@ -235,6 +235,6 @@ public class SpectatorCommand extends AbstractServerCommand {
 
     @Override
     public String getDefaultName() {
-        return "";
+        return "spectator";
     }
 }

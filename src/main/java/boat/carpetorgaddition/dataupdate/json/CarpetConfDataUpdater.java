@@ -162,7 +162,7 @@ public final class CarpetConfDataUpdater extends DataUpdater {
             }
             case 2 -> {
                 JsonObject newJson = new JsonObject();
-                newJson.addProperty(DataUpdater.DATA_VERSION, 2);
+                newJson.addProperty(DataUpdater.DATA_VERSION, 3);
                 JsonObject newRules = new JsonObject();
                 for (Map.Entry<String, JsonElement> entry : oldJson.getAsJsonObject("rules").entrySet()) {
                     String key = entry.getKey();
@@ -178,7 +178,7 @@ public final class CarpetConfDataUpdater extends DataUpdater {
             }
             case 3 -> {
                 JsonObject newJson = new JsonObject();
-                newJson.addProperty(DataUpdater.DATA_VERSION, 3);
+                newJson.addProperty(DataUpdater.DATA_VERSION, 4);
                 JsonObject newRules = new JsonObject();
                 for (Map.Entry<String, JsonElement> entry : oldJson.getAsJsonObject("rules").entrySet()) {
                     String key = entry.getKey();

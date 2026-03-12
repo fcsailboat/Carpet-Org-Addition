@@ -881,21 +881,32 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int addStartupRunCommandFunction(CommandContext<CommandSourceStack> context, int delay) throws CommandSyntaxException {
-        MinecraftServer server = context.getSource().getServer();
-        if (server.isDedicatedServer() && !GlobalConfigs.getInstance().isAllowMpPlayerStartupCmd()) {
-            // TODO 在多人游戏中设置自动执行命令需要管理员权限
-            String name = StringArgumentType.getString(context, "name");
-            FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
-            File file = serializer.getFile();
-            TextBuilder builder = STARTUP.then("run").then("multiplayer").builder();
-            if (file != null) {
-                builder.setHover(file.getAbsolutePath().replace("\\", "/"));
-            }
-            throw CommandUtils.createException(builder.build());
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
+        if (server.isDedicatedServer()) {
+            this.validateMultiPlayerUsability(context, source);
         }
         String command = StringArgumentType.getString(context, "command");
         FakePlayerStartupAction action = FakePlayerStartupAction.CommandAction.of(command);
         return this.addStartupFunction(context, action, delay);
+    }
+
+    private void validateMultiPlayerUsability(CommandContext<CommandSourceStack> context, CommandSourceStack source) throws CommandSyntaxException {
+        LocalizationKey key = STARTUP.then("run");
+        if (GlobalConfigs.getInstance().isAllowMpPlayerStartupCmd()) {
+            if (Commands.LEVEL_OWNERS.check(source.permissions())) {
+                return;
+            }
+            throw key.then("permission").raise();
+        }
+        String name = StringArgumentType.getString(context, "name");
+        FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
+        File file = serializer.getFile();
+        TextBuilder builder = key.then("multiplayer").builder();
+        if (file != null) {
+            builder.setHover(file.getAbsolutePath().replace("\\", "/"));
+        }
+        throw CommandUtils.createException(builder.build());
     }
 
     // 设置不断重新上线下线

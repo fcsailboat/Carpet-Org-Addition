@@ -37,7 +37,6 @@
     "logger.FluidBlockMixin",
     "logger.HUDControllerMixin",
     "logger.WanderingTraderManagerMixin",
-    "network.ChestMenuMixin",
     "rule.AbstractBlockStateMixin",
     "rule.AbstractFurnaceBlockEntityMixin",
     "rule.BatEntityMixin",
@@ -131,6 +130,7 @@
   ],
   "client": [
     "debug.accessor.ScreenAccessor",
+    "network.ChestMenuMixin",
     "network.ScreenHandlerMixin",
     "network.SlotMixin",
     "rule.client.carpet.SettingsManagerMixin",
