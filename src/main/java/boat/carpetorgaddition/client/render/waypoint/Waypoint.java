@@ -63,7 +63,7 @@ public abstract class Waypoint implements WorldRenderComponent {
     private static final long VANISHING_TIME = 4L;
     public static final Identifier HIGHLIGHT = Identifier.withDefaultNamespace("textures/map/decorations/red_x.png");
     public static final Identifier NAVIGATOR = Identifier.withDefaultNamespace("textures/map/decorations/target_x.png");
-    public static final RenderPipeline HIGHLIGHT_WAYPOINT_RENDER_PIPELINE = RenderPipelines.register(
+    private static final RenderPipeline HIGHLIGHT_WAYPOINT_RENDER_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
                     .withLocation(ServerUtils.ofIdentifier("highlight_waypoint"))
                     .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))

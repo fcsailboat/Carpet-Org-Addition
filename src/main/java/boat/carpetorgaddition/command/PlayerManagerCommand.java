@@ -137,6 +137,9 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                         .then(Commands.argument("name", StringArgumentType.string())
                                 .suggests(playerSuggests())
                                 .executes(this::spawnPlayer)))
+                .then(Commands.literal("kill")
+                        .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
+                                .executes(this::killPlayer)))
                 .then(Commands.literal("modify")
                         .then(Commands.argument("name", StringArgumentType.string())
                                 .suggests(playerSuggests())
@@ -826,6 +829,12 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         } finally {
             CarpetOrgAdditionSettings.playerSummoner.remove();
         }
+        return 1;
+    }
+
+    private int killPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        PlayerUtils.kill(fakePlayer);
         return 1;
     }
 
