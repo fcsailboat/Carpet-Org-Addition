@@ -241,6 +241,8 @@
   "carpet.rule.playerCommandSummonMannequin.desc": "为/player命令添加mannequin子命令用来召唤玩家模型",
   "carpet.rule.openPlayerInventory.name": "打开玩家物品栏",
   "carpet.rule.openPlayerInventory.desc": "允许右键打开玩家物品栏",
+  "carpet.rule.playerCommandCloseScreen.name": "关闭当前屏幕界面",
+  "carpet.rule.playerCommandCloseScreen.desc": "为/player命令添加esc子命令用来关闭当前打开的屏幕界面",
   "carpet.rule.openPlayerInventory.extra.0": "潜行右键可以打开玩家末影箱",
   "carpet.rule.openPlayerInventory.extra.1": "false：禁用本条规则",
   "carpet.rule.openPlayerInventory.extra.2": "fake_player：允许打开假玩家物品栏",

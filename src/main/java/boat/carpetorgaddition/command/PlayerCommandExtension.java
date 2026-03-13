@@ -50,7 +50,10 @@ public class PlayerCommandExtension {
                         .executes(PlayerCommandExtension::fakePlayerTeleport))
                 .then(Commands.literal("mannequin")
                         .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.playerCommandSummonMannequin))
-                        .executes(PlayerCommandExtension::summonMannequin));
+                        .executes(PlayerCommandExtension::summonMannequin))
+                .then(Commands.literal("esc")
+                        .requires(_ -> CarpetOrgAdditionSettings.playerCommandCloseScreen.value())
+                        .executes(PlayerCommandExtension::closeScreen));
     }
 
     private static int openInventory(CommandContext<CommandSourceStack> context, PlayerInventoryType type) throws CommandSyntaxException {
@@ -109,6 +112,16 @@ public class PlayerCommandExtension {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         ServerUtils.teleport(mannequin, player);
         world.addFreshEntity(mannequin);
+        return 1;
+    }
+
+    /**
+     * 关闭当前屏幕
+     */
+    private static int closeScreen(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = getPlayer(context);
+        CommandUtils.requireFakePlayer(player);
+        player.closeContainer();
         return 1;
     }
 

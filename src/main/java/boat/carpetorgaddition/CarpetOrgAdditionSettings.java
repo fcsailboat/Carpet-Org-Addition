@@ -1097,6 +1097,15 @@ public class CarpetOrgAdditionSettings {
                     .build()
     );
 
+    /**
+     * 关闭当前屏幕界面
+     */
+    public static final RuleAccessor<Boolean> playerCommandCloseScreen = register(
+            RuleFactory.create(Boolean.class, "playerCommandCloseScreen", false)
+                    .addCategories(RuleCategory.COMMAND)
+                    .build()
+    );
+
     private static <T> RuleAccessor<T> register(RuleContext<T> context) {
         RULES.add(context);
         return new RuleAccessor<>(context);

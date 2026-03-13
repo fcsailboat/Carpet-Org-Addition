@@ -817,3 +817,12 @@ _non_whitelist：允许打开离线玩家和假玩家的物品栏，对于白名
 - 参考选项：`true`，`false`，`ops`，`0`，`1`，`2`，`3`，`4`
 - 分类：`Org`，`命令`
 
+### 关闭当前屏幕界面(playerCommandCloseScreen)
+
+为/player命令添加esc子命令用来关闭当前打开的屏幕界面
+
+- 类型：`布尔值`
+- 默认值：`false`
+- 参考选项：`true`，`false`
+- 分类：`Org`，`命令`
+

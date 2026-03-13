@@ -137,9 +137,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                 .requires(_ -> CarpetOrgAddition.isDebugMode())
                                 .executes(context -> this.raise(context, null))
                                 .then(Commands.argument("message", StringArgumentType.string())
-                                        .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
-                        .then(Commands.literal("esc")
-                                .executes(this::closeScreen))));
+                                        .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))));
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> register(LiteralArgumentBuilder<CommandSourceStack> node) {
@@ -473,13 +471,6 @@ public class PlayerActionCommand extends AbstractServerCommand {
                 ),
                 CraftingTableCraftAction.KEY.then("gui").translate()
         );
-        return 1;
-    }
-
-    // 关闭当前屏幕
-    private int closeScreen(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        fakePlayer.closeContainer();
         return 1;
     }
 
