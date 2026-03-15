@@ -26,7 +26,7 @@ public class CreeperCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandCreeper))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_CREEPER))
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(this::creeperExplosion)));
     }

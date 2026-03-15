@@ -19,7 +19,7 @@ public interface MerchantMixin {
 
     @Inject(method = "openTradingScreen", at = @At("HEAD"))
     private void restock(Player player, Component title, int level, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.villagerInfiniteTrade.value()) {
+        if (CarpetOrgAdditionSettings.VILLAGER_INFINITE_TRADE.value()) {
             this.getOffers().forEach(MerchantOffer::resetUses);
         }
     }

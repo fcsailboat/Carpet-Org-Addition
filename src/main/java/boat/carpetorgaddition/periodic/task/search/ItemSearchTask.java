@@ -149,7 +149,7 @@ public class ItemSearchTask extends ServerTask {
                     }
                 }
                 // 村民
-                case Villager villager when CarpetOrgAdditionSettings.openVillagerInventory.value() -> {
+                case Villager villager when CarpetOrgAdditionSettings.OPEN_VILLAGER_INVENTORY.value() -> {
                     SimpleContainer inventory = villager.getInventory();
                     this.count(inventory, villager.blockPosition(), villager.getName());
                 }

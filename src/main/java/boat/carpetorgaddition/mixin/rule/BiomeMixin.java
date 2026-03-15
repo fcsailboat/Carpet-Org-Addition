@@ -14,7 +14,7 @@ public class BiomeMixin {
     // 禁止水结冰
     @Inject(method = "shouldFreeze(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;)Z", at = @At("HEAD"), cancellable = true)
     private void canSetIce(LevelReader world, BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.disableWaterFreezes.value()) {
+        if (CarpetOrgAdditionSettings.DISABLE_WATER_FREEZES.value()) {
             cir.setReturnValue(false);
         }
     }

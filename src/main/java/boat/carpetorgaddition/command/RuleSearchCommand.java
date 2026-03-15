@@ -28,7 +28,7 @@ public class RuleSearchCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandRuleSearch))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_RULE_SEARCH))
                 .then(Commands.argument("rule", StringArgumentType.greedyString())
                         .executes(this::listRule)));
     }

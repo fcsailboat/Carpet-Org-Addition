@@ -21,7 +21,7 @@ public class ServerExplosionMixin {
 
     @Inject(method = "canTriggerBlocks", at = @At("HEAD"), cancellable = true)
     private void disableTriggerEffect(CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.disableWindChargeEffect.value() && this.source instanceof WindCharge charge && charge.getOwner() instanceof Player) {
+        if (CarpetOrgAdditionSettings.DISABLE_WIND_CHARGE_EFFECT.value() && this.source instanceof WindCharge charge && charge.getOwner() instanceof Player) {
             cir.setReturnValue(false);
         }
     }

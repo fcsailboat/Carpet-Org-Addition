@@ -27,12 +27,12 @@ public abstract class ServerPlayerEntityMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     private void tick(CallbackInfo ci) {
         // 强制补货
-        if (CarpetOrgAdditionSettings.forceRestock.value()) {
+        if (CarpetOrgAdditionSettings.FORCE_RESTOCK.value()) {
             Inventory inventory = thisPlayer.getInventory();
             restock(inventory);
         }
         // 自动同步玩家状态
-        if (CarpetOrgAdditionSettings.autoSyncPlayerStatus.value() && ServerUtils.getWorld(thisPlayer).getGameTime() % 30 == 0) {
+        if (CarpetOrgAdditionSettings.AUTO_SYNC_PLAYER_STATUS.value() && ServerUtils.getWorld(thisPlayer).getGameTime() % 30 == 0) {
             ServerUtils.getServer(thisPlayer).getPlayerList().sendAllPlayerInfo(thisPlayer);
             BlockPos blockPos = thisPlayer.blockPosition();
             int range = (int) Math.min(thisPlayer.blockInteractionRange() + 1, 8);

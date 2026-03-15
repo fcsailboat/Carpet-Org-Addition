@@ -29,7 +29,7 @@ public class PlayerMixin {
     private void openPlayerInventory(Entity entity, InteractionHand hand, Vec3 location, CallbackInfoReturnable<InteractionResult> cir) {
         if (entity instanceof Player interviewee) {
             PlayerInventoryType type = this.self.isShiftKeyDown() ? PlayerInventoryType.ENDER_CHEST : PlayerInventoryType.INVENTORY;
-            switch (CarpetOrgAdditionSettings.openPlayerInventory.value()) {
+            switch (CarpetOrgAdditionSettings.OPEN_PLAYER_INVENTORY.value()) {
                 case FALSE -> {
                 }
                 case FAKE_PLAYER -> {
@@ -62,7 +62,7 @@ public class PlayerMixin {
     @Inject(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getItemInHand(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"), cancellable = true)
     private void openPlayerInventoryClient(Entity entity, InteractionHand hand, Vec3 location, CallbackInfoReturnable<InteractionResult> cir) {
         if (entity instanceof Player player) {
-            switch (CarpetOrgAdditionSettings.openPlayerInventory.value()) {
+            switch (CarpetOrgAdditionSettings.OPEN_PLAYER_INVENTORY.value()) {
                 case FALSE -> {
                 }
                 case FAKE_PLAYER -> {

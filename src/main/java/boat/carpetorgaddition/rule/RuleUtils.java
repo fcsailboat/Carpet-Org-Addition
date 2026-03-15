@@ -65,21 +65,21 @@ public class RuleUtils {
      * 潜影盒是否可以触发更新抑制器
      */
     public static boolean canUpdateSuppression(@Nullable String blockName) {
-        if ("false".equalsIgnoreCase(CarpetOrgAdditionSettings.CCEUpdateSuppression.value())) {
+        if ("false".equalsIgnoreCase(CarpetOrgAdditionSettings.CCE_UPDATE_SUPPRESSION.value())) {
             return false;
         }
         if (blockName == null) {
             return false;
         }
-        if ("true".equalsIgnoreCase(CarpetOrgAdditionSettings.CCEUpdateSuppression.value())) {
+        if ("true".equalsIgnoreCase(CarpetOrgAdditionSettings.CCE_UPDATE_SUPPRESSION.value())) {
             return "更新抑制器".equals(blockName) || "updateSuppression".equalsIgnoreCase(blockName);
         }
         // 比较字符串并忽略大小写
-        return Objects.equals(CarpetOrgAdditionSettings.CCEUpdateSuppression.value().toLowerCase(), blockName.toLowerCase());
+        return Objects.equals(CarpetOrgAdditionSettings.CCE_UPDATE_SUPPRESSION.value().toLowerCase(), blockName.toLowerCase());
     }
 
     public static boolean isDefaultDistance() {
-        return CarpetOrgAdditionSettings.maxBlockPlaceDistance.value() == -1;
+        return CarpetOrgAdditionSettings.MAX_BLOCK_PLACE_DISTANCE.value() == -1;
     }
 
     /**
@@ -88,7 +88,7 @@ public class RuleUtils {
      * @return 当前设置的最大交互距离，最大不超过256.0
      */
     public static double getPlayerMaxInteractionDistance() {
-        double distance = CarpetOrgAdditionSettings.maxBlockPlaceDistance.value();
+        double distance = CarpetOrgAdditionSettings.MAX_BLOCK_PLACE_DISTANCE.value();
         if (distance < 0) {
             return 6.0;
         }
@@ -96,12 +96,12 @@ public class RuleUtils {
     }
 
     public static <T> T shulkerBoxStackableWrap(Supplier<T> supplier) {
-        boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
+        boolean changed = CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get();
         try {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
+            CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(false);
             return supplier.get();
         } finally {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
+            CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(changed);
         }
     }
 
@@ -170,7 +170,7 @@ public class RuleUtils {
      * 如果{@code 假玩家死亡不掉落条件}启用，则是否应该保留物品栏
      */
     public static boolean shouldKeepInventory(EntityPlayerMPFake fakePlayer) {
-        return switch (CarpetOrgAdditionSettings.fakePlayerKeepInventoryCondition.value()) {
+        return switch (CarpetOrgAdditionSettings.FAKE_PLAYER_KEEP_INVENTORY_CONDITION.value()) {
             // 无条件保留物品栏
             case UNCONDITIONAL -> true;
             // 被玩家杀死或落入虚空时保留物品栏
@@ -201,7 +201,7 @@ public class RuleUtils {
      */
     public static boolean shulkerBoxStackableEnabled(ItemInstance instance) {
         return instance instanceof ItemStack itemStack
-               && CarpetOrgAdditionSettings.shulkerBoxStackable.value()
+               && CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value()
                && InventoryUtils.isShulkerBoxItem(itemStack)
                && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isEmptyShulkerBox(itemStack));
     }

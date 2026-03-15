@@ -22,7 +22,7 @@ public class CompatibilityDialogProvider {
         ChatFormatting color = ChatFormatting.GRAY;
         Component tis = key.then("tis").translate();
         return ConfirmationDialogBuilder.of(component)
-                .addDialogBody(key.then("line").then("0").translate(CarpetOrgAdditionSettings.shulkerBoxStackable.getDisplayName()), width)
+                .addDialogBody(key.then("line").then("0").translate(CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.getDisplayName()), width)
                 .addDialogBody(key.then("line").then("1").builder().setColor(color).build(), width)
                 .addDialogBody(key.then("line").then("2").builder().setHover(tis).setColor(color).setStrikethrough().build(), width)
                 .addDialogBody(key.then("line").then("3").builder().setHover(tis).setColor(color).setStrikethrough().build(), width)

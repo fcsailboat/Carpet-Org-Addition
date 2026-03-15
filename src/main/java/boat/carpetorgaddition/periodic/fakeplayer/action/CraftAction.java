@@ -139,7 +139,7 @@ public abstract class CraftAction extends AbstractPlayerAction {
                 shulkerSlotIndex.add(index);
             }
         }
-        if (CarpetOrgAdditionSettings.fakePlayerPickItemFromShulkerBox.value()) {
+        if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
             IntList stackedNonEmptyShulkerIndex = new IntArrayList(shulkerSlotIndex.size());
             // 优先从未堆叠的非空潜影盒中拿取物品
             for (int i = 0; i < shulkerSlotIndex.size(); i++) {
@@ -216,10 +216,10 @@ public abstract class CraftAction extends AbstractPlayerAction {
      * @return 是否应该停止
      */
     private boolean shouldStop(int craftCount) {
-        if (CarpetOrgAdditionSettings.fakePlayerMaxItemOperationCount.value() < 0) {
+        if (CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value() < 0) {
             return false;
         }
-        return craftCount >= CarpetOrgAdditionSettings.fakePlayerMaxItemOperationCount.value();
+        return craftCount >= CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
     }
 
     /**

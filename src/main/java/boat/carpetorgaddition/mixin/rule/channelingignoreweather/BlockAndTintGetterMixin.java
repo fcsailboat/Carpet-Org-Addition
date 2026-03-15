@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public interface BlockAndTintGetterMixin {
     @Inject(method = "canSeeSky", at = @At("HEAD"), cancellable = true)
     private void canSeeSky(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.channelingIgnoreConditions.value().isIgnoreSky() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
+        if (CarpetOrgAdditionSettings.CHANNELING_IGNORE_CONDITIONS.value().isIgnoreSky() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
             cir.setReturnValue(true);
         }
     }

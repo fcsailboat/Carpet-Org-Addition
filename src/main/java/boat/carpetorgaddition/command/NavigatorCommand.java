@@ -54,7 +54,7 @@ public class NavigatorCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandNavigate))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_NAVIGATE))
                 .then(Commands.literal("entity")
                         .then(Commands.argument("entity", EntityArgument.entity())
                                 .executes(context -> navigateToEntity(context, false, "entity"))
@@ -66,7 +66,7 @@ public class NavigatorCommand extends AbstractServerCommand {
                                 .then(Commands.literal("continue")
                                         .executes(context -> navigateToEntity(context, true, "player")))))
                 .then(Commands.literal("waypoint")
-                        .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandLocations))
+                        .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_LOCATIONS))
                         .then(Commands.argument("waypoint", StringArgumentType.string())
                                 .suggests(LocationsCommand.suggestion())
                                 .executes(this::navigateToWaypoint)))

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class BlockItemMixin {
     @WrapOperation(method = "updateCustomBlockEntityTag(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/item/ItemStack;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BlockEntityType;onlyOpCanSetNbt()Z"))
     private static boolean writeNbtToBlockEntity(BlockEntityType<?> instance, Operation<Boolean> original, @Local(name = "blockEntity") BlockEntity blockEntity) {
-        if (CarpetOrgAdditionSettings.canMineSpawner.value() && blockEntity instanceof Spawner) {
+        if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && blockEntity instanceof Spawner) {
             return false;
         }
         return original.call(instance);

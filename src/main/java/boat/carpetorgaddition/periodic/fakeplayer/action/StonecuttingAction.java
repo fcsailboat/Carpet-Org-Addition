@@ -106,7 +106,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                         FakePlayerUtils.collectItem(stonecutterMenu, 1, inventory, fakePlayer);
                         craftCount++;
                         // 限制每个游戏刻合成次数
-                        int maxCount = CarpetOrgAdditionSettings.fakePlayerMaxItemOperationCount.value();
+                        int maxCount = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
                         if (maxCount > 0 && craftCount >= maxCount) {
                             return;
                         }
@@ -147,7 +147,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 shulkerSlotIndex.add(index);
             }
         }
-        if (CarpetOrgAdditionSettings.fakePlayerPickItemFromShulkerBox.value()) {
+        if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
             IntList stackedNonEmptyShulkerIndex = new IntArrayList(shulkerSlotIndex.size());
             for (int i = 0; i < shulkerSlotIndex.size(); i++) {
                 int index = shulkerSlotIndex.getInt(i);

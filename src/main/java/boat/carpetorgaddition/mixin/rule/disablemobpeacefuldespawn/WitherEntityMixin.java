@@ -17,7 +17,7 @@ public class WitherEntityMixin {
     // 禁止特定生物在和平模式下被清除（凋灵）
     @WrapOperation(method = "checkDespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;isAllowedInPeaceful()Z"))
     private boolean isDisallowedInPeaceful(EntityType<?> instance, Operation<Boolean> original) {
-        if (CarpetOrgAdditionSettings.disableMobPeacefulDespawn.value() && (thisWither.isPersistenceRequired() || thisWither.requiresCustomPersistence())) {
+        if (CarpetOrgAdditionSettings.DISABLE_MOB_PEACEFUL_DESPAWN.value() && (thisWither.isPersistenceRequired() || thisWither.requiresCustomPersistence())) {
             return true;
         }
         return original.call(instance);

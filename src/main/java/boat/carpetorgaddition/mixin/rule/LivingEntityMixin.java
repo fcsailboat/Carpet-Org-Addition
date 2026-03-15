@@ -50,7 +50,7 @@ public abstract class LivingEntityMixin {
     // 禁用伤害免疫
     @WrapOperation(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;invulnerableTime:I", opcode = Opcodes.GETFIELD))
     private int setTimeUntilRegen(LivingEntity instance, Operation<Integer> original) {
-        if (CarpetOrgAdditionSettings.disableDamageImmunity.value()) {
+        if (CarpetOrgAdditionSettings.DISABLE_DAMAGE_IMMUNITY.value()) {
             return 0;
         }
         return original.call(instance);
@@ -59,7 +59,7 @@ public abstract class LivingEntityMixin {
     // 不死图腾无敌时间
     @Inject(method = "checkTotemDeathProtection", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"))
     private void setInvincibleTime(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.totemOfUndyingInvincibleTime.value()) {
+        if (CarpetOrgAdditionSettings.TOTEM_OF_UNDYING_INVINCIBLE_TIME.value()) {
             this.self.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4));
         }
     }
@@ -72,7 +72,7 @@ public abstract class LivingEntityMixin {
         if (original) {
             return true;
         }
-        if (CarpetOrgAdditionSettings.betterTotemOfUndying.value() == BetterTotemOfUndying.VANILLA) {
+        if (CarpetOrgAdditionSettings.BETTER_TOTEM_OF_UNDYING.value() == BetterTotemOfUndying.VANILLA) {
             return false;
         }
         if (this.self instanceof Player player) {
@@ -102,7 +102,7 @@ public abstract class LivingEntityMixin {
             }
         }
         // 如果这里规则值为true，或者说规则值不是shulker_box，那就没有必要继续向下执行
-        if (CarpetOrgAdditionSettings.betterTotemOfUndying.value() == BetterTotemOfUndying.INVENTORY) {
+        if (CarpetOrgAdditionSettings.BETTER_TOTEM_OF_UNDYING.value() == BetterTotemOfUndying.INVENTORY) {
             return ItemStack.EMPTY;
         }
         ArrayList<ItemStack> list = new ArrayList<>(mainInventory.size());

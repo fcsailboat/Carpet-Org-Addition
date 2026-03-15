@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 public class ParticleLineCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("particleLine")
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandParticleLine))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PARTICLE_LINE))
                 .then(Commands.argument("from", Vec3Argument.vec3())
                         .then(Commands.argument("to", Vec3Argument.vec3())
                                 .executes(context -> draw(context, false)))

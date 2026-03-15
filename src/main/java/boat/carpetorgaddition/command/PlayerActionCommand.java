@@ -63,7 +63,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandPlayerAction))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION))
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.literal("sorting")
                                 .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))

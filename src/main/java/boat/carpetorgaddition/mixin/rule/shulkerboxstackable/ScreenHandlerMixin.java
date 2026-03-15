@@ -20,12 +20,12 @@ public abstract class ScreenHandlerMixin {
         // 如果与其它try...finally嵌套，可能导致本方法执行完毕，但是外层的try...finally代码块没有执行完时
         // CarpetOrgAdditionSettings.shulkerBoxStackCountChanged的值为true
         // 因此，在finally块中不直接设置true，而且设置为try之前记录的值
-        boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
+        boolean changed = CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get();
         try {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
+            CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(false);
             return original.call(inventory);
         } finally {
-            CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
+            CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(changed);
         }
     }
 }

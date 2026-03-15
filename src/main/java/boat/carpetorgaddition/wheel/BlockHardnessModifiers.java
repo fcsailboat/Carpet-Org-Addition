@@ -119,13 +119,13 @@ public class BlockHardnessModifiers {
     public static float getHardness(Block block, BlockGetter world, BlockPos pos, float defaultValue) {
         // 设置基岩硬度
         if (block == Blocks.BEDROCK) {
-            float hardness = CarpetOrgAdditionSettings.setBedrockHardness.value();
-            if (CarpetOrgAdditionSettings.setBedrockHardness.value() != -1F) {
+            float hardness = CarpetOrgAdditionSettings.SET_BEDROCK_HARDNESS.value();
+            if (CarpetOrgAdditionSettings.SET_BEDROCK_HARDNESS.value() != -1F) {
                 return hardness;
             }
         }
         // 易碎深板岩
-        if (CarpetOrgAdditionSettings.softDeepslate.value()) {
+        if (CarpetOrgAdditionSettings.SOFT_DEEPSLATE.value()) {
             // 深板岩
             if (DEEPSLATE.contains(block)) {
                 return Blocks.STONE.defaultDestroyTime();
@@ -136,11 +136,11 @@ public class BlockHardnessModifiers {
             }
         }
         // 易碎黑曜石
-        if (CarpetOrgAdditionSettings.softObsidian.value() && (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN)) {
+        if (CarpetOrgAdditionSettings.SOFT_OBSIDIAN.value() && (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN)) {
             return Blocks.END_STONE.defaultDestroyTime();
         }
         // 易碎矿石
-        if (CarpetOrgAdditionSettings.softOres.value()) {
+        if (CarpetOrgAdditionSettings.SOFT_ORES.value()) {
             // 普通矿石
             if (ORE.contains(block)) {
                 return Blocks.STONE.defaultDestroyTime();
@@ -156,7 +156,7 @@ public class BlockHardnessModifiers {
             }
         }
         // 易碎下界合金
-        if (CarpetOrgAdditionSettings.softNetherite.value() && (block == Blocks.ANCIENT_DEBRIS || block == Blocks.NETHERITE_BLOCK)) {
+        if (CarpetOrgAdditionSettings.SOFT_NETHERITE.value() && (block == Blocks.ANCIENT_DEBRIS || block == Blocks.NETHERITE_BLOCK)) {
             // 调整硬度后，远古残骸比能改瞬间挖掘的方块略硬，避免瞬间挖掘
             return defaultValue / 18F;
         }

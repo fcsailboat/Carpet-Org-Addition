@@ -52,7 +52,7 @@ public class TextProvider {
         TextBuilder builder = TextBuilder.of(simpleBlockPos(blockPos));
         // 添加单击事件，复制方块坐标
         builder.setCopyToClipboard(ServerUtils.toPosString(blockPos));
-        switch (CarpetOrgAdditionSettings.canHighlightBlockPos.value()) {
+        switch (CarpetOrgAdditionSettings.CAN_HIGHLIGHT_BLOCK_POS.value()) {
             case OMMC -> builder.append(TextBuilder.of(" [H]")
                     .setCommand(CommandProvider.highlightWaypointByOmmc(blockPos))
                     .setHover(LocalizationKey.literal("ommc.highlight_waypoint.tooltip").translate()));

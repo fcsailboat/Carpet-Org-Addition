@@ -13,10 +13,10 @@ public class PlayerCommandMixin {
     @WrapMethod(method = "spawn")
     private static int spawn(CommandContext<CommandSourceStack> context, Operation<Integer> original) {
         try {
-            CarpetOrgAdditionSettings.playerSummoner.set(context.getSource().getPlayer());
+            CarpetOrgAdditionSettings.PLAYER_SUMMONER.set(context.getSource().getPlayer());
             return original.call(context);
         } finally {
-            CarpetOrgAdditionSettings.playerSummoner.remove();
+            CarpetOrgAdditionSettings.PLAYER_SUMMONER.remove();
         }
     }
 }

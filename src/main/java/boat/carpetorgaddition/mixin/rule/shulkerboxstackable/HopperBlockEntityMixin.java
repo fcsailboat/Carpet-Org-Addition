@@ -299,10 +299,10 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
     // 让漏斗一次从一堆掉落物中只吸取一个潜影盒
     @WrapOperation(method = "addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/item/ItemEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"))
     private static ItemStack extract(Container from, Container to, ItemStack stack, Direction side, Operation<ItemStack> original, @Local(name = "changed") LocalBooleanRef bl) {
-        if (CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get()) {
+        if (CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get()) {
             return original.call(from, to, stack, side);
         }
-        if (CarpetOrgAdditionSettings.shulkerBoxStackable.value() && InventoryUtils.isShulkerBoxItem(stack)) {
+        if (CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value() && InventoryUtils.isShulkerBoxItem(stack)) {
             ItemStack split = stack.split(stack.getMaxStackSize());
             int count = split.getCount();
             ItemStack result = original.call(from, to, split.copy(), side);
@@ -320,13 +320,13 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
      */
     @Unique
     private static void compatible(Runnable runnable) {
-        if (CarpetOrgAdditionSettings.shulkerBoxStackable.value() && CarpetOrgAdditionConstants.LITHIUM) {
-            boolean changed = CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.get();
+        if (CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value() && CarpetOrgAdditionConstants.LITHIUM) {
+            boolean changed = CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get();
             try {
-                CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(false);
+                CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(false);
                 runnable.run();
             } finally {
-                CarpetOrgAdditionSettings.shulkerBoxStackCountChanged.set(changed);
+                CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(changed);
             }
         }
     }

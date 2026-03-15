@@ -76,7 +76,7 @@ public abstract class WanderingTraderManagerMixin {
                 }
                 // 广播流浪商人生成成功
                 LocalizationKey key = WanderingTraderSpawnLogger.KEY;
-                if (CommandUtils.canUseCommand(player.createCommandSourceStack(), CarpetOrgAdditionSettings.commandNavigate)) {
+                if (CommandUtils.canUseCommand(player.createCommandSourceStack(), CarpetOrgAdditionSettings.COMMAND_NAVIGATE)) {
                     // 带点击导航的消息
                     Component button = TextBuilder.of(LocalizationKeys.Button.NAVIGATE.translate())
                             .setCommand(CommandProvider.navigateToUuidEntity(trader.getUUID()))

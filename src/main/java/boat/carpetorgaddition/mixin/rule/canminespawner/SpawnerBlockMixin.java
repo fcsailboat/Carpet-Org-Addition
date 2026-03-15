@@ -37,7 +37,7 @@ public abstract class SpawnerBlockMixin extends BaseEntityBlock {
     @Inject(method = "spawnAfterBreak", at = @At("HEAD"), cancellable = true)
     // 使用精准采集工具挖掘时不会掉落经验
     private void onStacksDropped(BlockState state, ServerLevel world, BlockPos pos, ItemStack tool, boolean dropExperience, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.canMineSpawner.value() && EnchantmentUtils.hasEnchantment(world, Enchantments.SILK_TOUCH, tool)) {
+        if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && EnchantmentUtils.hasEnchantment(world, Enchantments.SILK_TOUCH, tool)) {
             super.spawnAfterBreak(state, world, pos, tool, dropExperience);
             ci.cancel();
         }
@@ -47,7 +47,7 @@ public abstract class SpawnerBlockMixin extends BaseEntityBlock {
     // 使用精准采集挖掘时掉落带NBT的物品
     public @NonNull BlockState playerWillDestroy(@NonNull Level world, @NonNull BlockPos pos, @NonNull BlockState state, Player player) {
         boolean hasSilkTouch = EnchantmentUtils.hasEnchantment(world, Enchantments.SILK_TOUCH, player.getMainHandItem());
-        if (CarpetOrgAdditionSettings.canMineSpawner.value() && !player.isCreative() && hasSilkTouch) {
+        if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && !player.isCreative() && hasSilkTouch) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (!world.isClientSide() && blockEntity instanceof SpawnerBlockEntity spawner) {
                 ItemStack itemStack = new ItemStack(Items.SPAWNER);

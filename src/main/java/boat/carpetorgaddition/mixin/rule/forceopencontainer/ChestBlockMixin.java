@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ChestBlockMixin {
     @WrapOperation(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/ChestBlock;getMenuProvider(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/MenuProvider;"))
     private static MenuProvider isChestBlockedAt(ChestBlock instance, BlockState state, Level level, BlockPos pos, Operation<MenuProvider> original) {
-        return ScopedValue.where(RuleUtils.OPENING_THE_CHEST, CarpetOrgAdditionSettings.forceOpenContainer.value().canOpenChest())
+        return ScopedValue.where(RuleUtils.OPENING_THE_CHEST, CarpetOrgAdditionSettings.FORCE_OPEN_CONTAINER.value().canOpenChest())
                 .call(() -> original.call(instance, state, level, pos));
     }
 

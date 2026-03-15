@@ -27,8 +27,8 @@ public class EnchantmentMixin {
     // 击退棒
     @Inject(method = "canEnchant", at = @At("HEAD"), cancellable = true)
     public void isAcceptableItem(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.knockbackStick.value() && stack.is(Items.STICK)) {
-            Player player = CarpetOrgAdditionSettings.enchanter.get();
+        if (CarpetOrgAdditionSettings.KNOCKBACK_STICK.value() && stack.is(Items.STICK)) {
+            Player player = CarpetOrgAdditionSettings.ENCHANTER.get();
             if (player == null) {
                 return;
             }
@@ -41,7 +41,7 @@ public class EnchantmentMixin {
     // 保护类魔咒兼容
     @Inject(method = "areCompatible", at = @At("HEAD"), cancellable = true)
     private static void protectionEnchantmentCompatible(Holder<Enchantment> first, Holder<Enchantment> second, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.protectionEnchantmentCompatible.value() && !first.equals(second)) {
+        if (CarpetOrgAdditionSettings.PROTECTION_ENCHANTMENT_COMPATIBLE.value() && !first.equals(second)) {
             Optional<ResourceKey<Enchantment>> firstKey = first.unwrapKey();
             Optional<ResourceKey<Enchantment>> secondKey = second.unwrapKey();
             if (firstKey.isEmpty() || secondKey.isEmpty()) {
@@ -56,7 +56,7 @@ public class EnchantmentMixin {
     // 伤害类魔咒兼容
     @Inject(method = "areCompatible", at = @At("HEAD"), cancellable = true)
     private static void damageEnchantmentCompatible(Holder<Enchantment> first, Holder<Enchantment> second, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.damageEnchantmentCompatible.value() && !first.equals(second)) {
+        if (CarpetOrgAdditionSettings.DAMAGE_ENCHANTMENT_COMPATIBLE.value() && !first.equals(second)) {
             Optional<ResourceKey<Enchantment>> firstKey = first.unwrapKey();
             Optional<ResourceKey<Enchantment>> secondKey = second.unwrapKey();
             if (firstKey.isEmpty() || secondKey.isEmpty()) {

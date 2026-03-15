@@ -568,7 +568,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
     private boolean canOpenOfflinePlayerInventory(CommandSourceStack source) {
         return CommandUtils.canUseCommand(source, CarpetSettings.commandPlayer)
                && OpenPlayerInventoryCommandOption.isEnable(source)
-               && CarpetOrgAdditionSettings.playerCommandOpenPlayerInventoryOption.value().canOpenOfflinePlayer();
+               && CarpetOrgAdditionSettings.PLAYER_COMMAND_OPEN_PLAYER_INVENTORY_OPTION.value().canOpenOfflinePlayer();
     }
 
     /**

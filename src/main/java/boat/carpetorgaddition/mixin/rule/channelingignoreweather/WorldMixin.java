@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class WorldMixin {
     @WrapOperation(method = "isRaining", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getRainLevel(F)F"))
     private float raining(Level instance, float value, Operation<Float> original) {
-        if (CarpetOrgAdditionSettings.channelingIgnoreConditions.value().isIgnoreWeather() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
+        if (CarpetOrgAdditionSettings.CHANNELING_IGNORE_CONDITIONS.value().isIgnoreWeather() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
             return 1F;
         }
         return original.call(instance, value);
@@ -21,7 +21,7 @@ public class WorldMixin {
 
     @WrapOperation(method = "isThundering", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getThunderLevel(F)F"))
     private float thundering(Level instance, float value, Operation<Float> original) {
-        if (CarpetOrgAdditionSettings.channelingIgnoreConditions.value().isIgnoreWeather() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
+        if (CarpetOrgAdditionSettings.CHANNELING_IGNORE_CONDITIONS.value().isIgnoreWeather() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
             return 1F;
         }
         return original.call(instance, value);
@@ -29,7 +29,7 @@ public class WorldMixin {
 
     @Inject(method = "canHaveWeather", at = @At("HEAD"), cancellable = true)
     private void ignoreSky(CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.channelingIgnoreConditions.value().isIgnoreSky() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
+        if (CarpetOrgAdditionSettings.CHANNELING_IGNORE_CONDITIONS.value().isIgnoreSky() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
             cir.setReturnValue(true);
         }
     }

@@ -98,7 +98,7 @@ public class CustomClickEvents {
      * 启用潜影盒堆叠
      */
     public static final Identifier ENABLE_SHULKER_BOX_STACKABLE = register("enable_shulker_box_stackable", context -> {
-        RuleAccessor<Boolean> accessor = CarpetOrgAdditionSettings.shulkerBoxStackable;
+        RuleAccessor<Boolean> accessor = CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE;
         CommandSourceStack source = context.getSource();
         ScopedValue.where(CarpetOrgAdditionSettings.CONFIRM_ENABLE, true).run(() -> accessor.setRuleValue(source, true));
     });

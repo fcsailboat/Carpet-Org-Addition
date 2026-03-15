@@ -115,7 +115,7 @@ public class BatchSpawnFakePlayerTask extends ServerTask {
         }
         PlayerManagerCommand.sendPlayerJoinMessage(this.server, this.count);
         // 显示玩家召唤者
-        if (CarpetOrgAdditionSettings.displayPlayerSummoner.value()) {
+        if (CarpetOrgAdditionSettings.DISPLAY_PLAYER_SUMMONER.value()) {
             Component summoner = LocalizationKeys.Rule.Message.DISPLAY_PLAYER_SUMMONER
                     .builder(this.source.getDisplayName())
                     .setGrayItalic()

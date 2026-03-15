@@ -31,7 +31,7 @@ public abstract class VillagerEntityMixin extends AbstractVillager {
     // 打开村民物品栏
     @Inject(method = "mobInteract", at = @At(value = "HEAD"), cancellable = true)
     private void clearVillagerInventory(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (CarpetOrgAdditionSettings.openVillagerInventory.value() && player.isShiftKeyDown()) {
+        if (CarpetOrgAdditionSettings.OPEN_VILLAGER_INVENTORY.value() && player.isShiftKeyDown()) {
             PlayerUtils.openScreenHandler(
                     player,
                     (syncId, inventory, _) -> new VillagerScreenHandler(syncId, inventory, thisVillager),
@@ -44,7 +44,7 @@ public abstract class VillagerEntityMixin extends AbstractVillager {
     // 村民回血
     @Inject(method = "customServerAiStep", at = @At("HEAD"))
     private void heal(CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.villagerHeal.value()) {
+        if (CarpetOrgAdditionSettings.VILLAGER_HEAL.value()) {
             long worldTime = ServerUtils.getWorld(thisVillager).getGameTime();
             // 每四秒回一次血
             if (worldTime % 80 == 0) {

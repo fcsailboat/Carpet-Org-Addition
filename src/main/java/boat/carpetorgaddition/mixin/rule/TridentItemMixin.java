@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class TridentItemMixin {
     @WrapOperation(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isInWaterOrRain()Z"))
     private boolean isTouchingWaterOrRain(Player instance, Operation<Boolean> original) {
-        if (CarpetOrgAdditionSettings.riptideIgnoreConditions.value()) {
+        if (CarpetOrgAdditionSettings.RIPTIDE_IGNORE_CONDITIONS.value()) {
             return true;
         }
         return original.call(instance);
@@ -21,7 +21,7 @@ public class TridentItemMixin {
 
     @WrapOperation(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isInWaterOrRain()Z"))
     private boolean useIsTouchingWaterOrRain(Player instance, Operation<Boolean> original) {
-        if (CarpetOrgAdditionSettings.riptideIgnoreConditions.value()) {
+        if (CarpetOrgAdditionSettings.RIPTIDE_IGNORE_CONDITIONS.value()) {
             return true;
         }
         return original.call(instance);

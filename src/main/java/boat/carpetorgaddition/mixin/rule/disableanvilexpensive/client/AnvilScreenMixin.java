@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class AnvilScreenMixin {
     @ModifyExpressionValue(method = "extractLabels", at = @At(value = "CONSTANT", args = "intValue=40"))
     private int disableExpensive(int original) {
-        int value = CarpetOrgAdditionSettings.setAnvilCostLimit.value();
+        int value = CarpetOrgAdditionSettings.SET_ANVIL_EXPERIENCE_CONSUMPTION_LIMIT.value();
         return value == -1 ? original : value;
     }
 }

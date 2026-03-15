@@ -21,7 +21,7 @@ public abstract class FireworkRocketItemMixin {
             return;
         }
         //烟花火箭使用冷却(对方块使用)
-        if (CarpetOrgAdditionSettings.fireworkRocketUseCooldown.value()) {
+        if (CarpetOrgAdditionSettings.FIREWORK_ROCKET_USE_COOLDOWN.value()) {
             player.getCooldowns().addCooldown(context.getItemInHand(), 5);
         }
     }
@@ -29,7 +29,7 @@ public abstract class FireworkRocketItemMixin {
     //烟花火箭使用冷却(使用鞘翅飞行时)
     @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;consume(ILnet/minecraft/world/entity/LivingEntity;)V"))
     private void use(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (CarpetOrgAdditionSettings.fireworkRocketUseCooldown.value() && user != null && user.isFallFlying()) {
+        if (CarpetOrgAdditionSettings.FIREWORK_ROCKET_USE_COOLDOWN.value() && user != null && user.isFallFlying()) {
             user.getCooldowns().addCooldown(user.getItemInHand(hand), 5);
         }
     }

@@ -20,7 +20,7 @@ public class ItemMixin {
     @Inject(method = "overrideStackedOnOther", at = @At("HEAD"), cancellable = true)
     private void onStackClicked(ItemStack stack, Slot slot, ClickAction clickType, Player player, CallbackInfoReturnable<Boolean> cir) {
         // 使用潜影盒单击物品
-        if (CarpetOrgAdditionSettings.quickShulker.value()) {
+        if (CarpetOrgAdditionSettings.QUICK_SHULKER.value()) {
             if (clickType == ClickAction.PRIMARY || stack.isEmpty()) {
                 return;
             }
@@ -66,7 +66,7 @@ public class ItemMixin {
     @Inject(method = "overrideOtherStackedOnMe", at = @At("HEAD"), cancellable = true)
     private void onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, Player player, SlotAccess reference, CallbackInfoReturnable<Boolean> cir) {
         // 使用物品单击潜影盒
-        if (CarpetOrgAdditionSettings.quickShulker.value()) {
+        if (CarpetOrgAdditionSettings.QUICK_SHULKER.value()) {
             if (clickType == ClickAction.PRIMARY || stack.isEmpty()) {
                 return;
             }

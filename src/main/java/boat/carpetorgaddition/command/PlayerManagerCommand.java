@@ -127,7 +127,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                         .then(Commands.literal("clear")
                                 .executes(context -> this.addStartupRunCommandFunction(context, -1)))));
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandPlayerManager))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PLAYER_MANAGER))
                 .then(Commands.literal("save")
                         .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                 .executes(context -> savePlayerData(context, false))
@@ -785,7 +785,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             return 0;
         } else {
             String comment = hasComment ? StringArgumentType.getString(context, "comment") : "";
-            if (CarpetOrgAdditionSettings.playerManagerForceComment.value() && comment.isBlank()) {
+            if (CarpetOrgAdditionSettings.PLAYER_MANAGER_FORCE_COMMENT.value() && comment.isBlank()) {
                 throw CommandUtils.createException(LocalizationKeys.Rule.Message.PLAYER_MANAGER_FORCE_COMMENT.translate());
             }
             FakePlayerSerializer serializer = new FakePlayerSerializer(fakePlayer);
@@ -817,7 +817,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         try {
             // 生成假玩家
             FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
-            CarpetOrgAdditionSettings.playerSummoner.set(context.getSource().getPlayer());
+            CarpetOrgAdditionSettings.PLAYER_SUMMONER.set(context.getSource().getPlayer());
             MinecraftServer server = context.getSource().getServer();
             if (ServerUtils.getPlayer(server, name).isPresent()) {
                 throw CommandUtils.createException(PlayerManagerCommand.KEY.then("spawn").then("player_exist").translate());
@@ -827,7 +827,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             // 尝试生成假玩家时出现意外问题
             throw CommandUtils.createException(KEY.then("spawn").then("fail").translate(), e);
         } finally {
-            CarpetOrgAdditionSettings.playerSummoner.remove();
+            CarpetOrgAdditionSettings.PLAYER_SUMMONER.remove();
         }
         return 1;
     }
@@ -1109,7 +1109,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 启用内存泄漏修复
     private boolean fixMemoryLeak(CommandContext<CommandSourceStack> context) {
-        if (CarpetOrgAdditionSettings.fakePlayerSpawnMemoryLeakFix.value()) {
+        if (CarpetOrgAdditionSettings.FAKE_PLAYER_SPAWN_MEMORY_LEAK_FIX.value()) {
             return true;
         }
         // 单击后输入的命令

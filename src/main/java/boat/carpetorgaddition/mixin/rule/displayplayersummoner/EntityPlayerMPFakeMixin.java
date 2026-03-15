@@ -27,13 +27,13 @@ import java.util.function.BiConsumer;
 public class EntityPlayerMPFakeMixin {
     @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;whenCompleteAsync(Ljava/util/function/BiConsumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", remap = false))
     private static <T> CompletableFuture<T> thenAcceptAsync(CompletableFuture<T> instance, BiConsumer<? super T, ? super Throwable> action, Executor executor, Operation<CompletableFuture<T>> original) {
-        ServerPlayer player = CarpetOrgAdditionSettings.playerSummoner.get();
+        ServerPlayer player = CarpetOrgAdditionSettings.PLAYER_SUMMONER.get();
         BiConsumer<? super T, ? super Throwable> consumer = (value, throwable) -> {
             try {
-                CarpetOrgAdditionSettings.internalPlayerSummoner.set(player);
+                CarpetOrgAdditionSettings.INTERNAL_PLAYER_SUMMONER.set(player);
                 action.accept(value, throwable);
             } finally {
-                CarpetOrgAdditionSettings.internalPlayerSummoner.remove();
+                CarpetOrgAdditionSettings.INTERNAL_PLAYER_SUMMONER.remove();
             }
         };
         return original.call(instance, consumer, executor);
@@ -47,8 +47,8 @@ public class EntityPlayerMPFakeMixin {
 
     @Unique
     private static void broadcastSummoner(EntityPlayerMPFake fakePlayer) {
-        if (CarpetOrgAdditionSettings.displayPlayerSummoner.value()) {
-            ServerPlayer player = CarpetOrgAdditionSettings.internalPlayerSummoner.get();
+        if (CarpetOrgAdditionSettings.DISPLAY_PLAYER_SUMMONER.value()) {
+            ServerPlayer player = CarpetOrgAdditionSettings.INTERNAL_PLAYER_SUMMONER.get();
             if (player == null || FakePlayerSpawner.SILENCE.orElse(false)) {
                 return;
             }

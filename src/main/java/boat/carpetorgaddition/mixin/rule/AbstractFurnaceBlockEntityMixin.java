@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class AbstractFurnaceBlockEntityMixin {
     @Inject(method = "createExperience", at = @At("HEAD"), cancellable = true)
     private static void dropExperience(ServerLevel world, Vec3 pos, int multiplier, float experience, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.disableFurnaceDropExperience.value()) {
+        if (CarpetOrgAdditionSettings.DISABLE_FURNACE_DROP_EXPERIENCE.value()) {
             ci.cancel();
         }
     }

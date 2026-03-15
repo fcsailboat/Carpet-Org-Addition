@@ -77,7 +77,7 @@ public class FinderCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandFinder))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_FINDER))
                 .then(Commands.literal("block")
                         .requires(PermissionManager.register(FINDER_BLOCK, PermissionLevel.PASS))
                         .then(Commands.argument("blockState", BlockPredicateArgument.blockPredicate(this.access))

@@ -18,7 +18,7 @@ public class ServerWorldMixin {
     private void collect(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.BLOCK_BREAKER.isBound() && entity instanceof ItemEntity itemEntity) {
             ServerPlayer player = CarpetOrgAdditionSettings.BLOCK_BREAKER.get();
-            if (CarpetOrgAdditionSettings.blockDropsDirectlyEnterInventory.value(player).isEnabled()) {
+            if (CarpetOrgAdditionSettings.BLOCK_DROPS_DIRECTLY_ENTER_INVENTORY.value(player).isEnabled()) {
                 Inventory inventory = player.getInventory();
                 ItemStack itemStack = itemEntity.getItem();
                 inventory.add(itemStack);

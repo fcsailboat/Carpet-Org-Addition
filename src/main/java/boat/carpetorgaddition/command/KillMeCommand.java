@@ -23,7 +23,7 @@ public class KillMeCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.commandKillMe))
+                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_KILL_ME))
                 .executes(this::killMe));
     }
 
@@ -32,10 +32,10 @@ public class KillMeCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 广播自杀消息
         try {
-            CarpetOrgAdditionSettings.committingSuicide.set(true);
+            CarpetOrgAdditionSettings.COMMITTING_SUICIDE.set(true);
             player.kill(player.level());
         } finally {
-            CarpetOrgAdditionSettings.committingSuicide.set(false);
+            CarpetOrgAdditionSettings.COMMITTING_SUICIDE.set(false);
         }
         return 1;
     }

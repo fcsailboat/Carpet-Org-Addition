@@ -29,7 +29,7 @@ public abstract class CreeperEntityMixin {
     //和平的苦力怕
     @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
     private void setTarget(LivingEntity target, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.peacefulCreeper.value() && target instanceof Player) {
+        if (CarpetOrgAdditionSettings.PEACEFUL_CREEPER.value() && target instanceof Player) {
             ci.cancel();
         }
     }
@@ -37,11 +37,11 @@ public abstract class CreeperEntityMixin {
     @Inject(method = "killedEntity", at = @At("HEAD"))
     private void onHeadDropped(ServerLevel world, LivingEntity other, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         // 闪电苦力怕同时炸死多个生物时每个都掉落头颅
-        if (CarpetOrgAdditionSettings.superChargedCreeper.value()) {
+        if (CarpetOrgAdditionSettings.SUPER_CHARGED_CREEPER.value()) {
             this.droppedSkulls = false;
         }
         // 玩家被闪电苦力怕炸死掉落头颅
-        if (CarpetOrgAdditionSettings.playerDropHead.value() && this.isPowered() && !this.droppedSkulls && other instanceof ServerPlayer player) {
+        if (CarpetOrgAdditionSettings.PLAYER_DROP_HEAD.value() && this.isPowered() && !this.droppedSkulls && other instanceof ServerPlayer player) {
             ItemStack itemStack = new ItemStack(Items.PLAYER_HEAD);
             itemStack.set(DataComponents.PROFILE, ResolvableProfile.createResolved(player.getGameProfile()));
             player.spawnAtLocation(player.level(), itemStack);

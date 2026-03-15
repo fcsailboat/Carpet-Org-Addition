@@ -13,7 +13,7 @@ public class ServerPlayerInteractionManagerMixin {
     @WrapOperation(method = "handleBlockBreakAction", at = @At(value = "INVOKE", remap = false, target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
     private void suppressionLogOut(Logger instance, String s, Object o1, Object o2, Operation<Void> original) {
         // 抑制方块破坏位置不匹配输出
-        if (CarpetOrgAdditionSettings.suppressionMismatchInDestroyBlockPosWarn.value()) {
+        if (CarpetOrgAdditionSettings.SUPPRESSION_MISMATCH_IN_DESTROY_BLOCK_POS_WARN.value()) {
             return;
         }
         original.call(instance, s, o1, o2);

@@ -21,7 +21,7 @@ public abstract class AbstractNetworkAddonMixin {
     @SuppressWarnings("RedundantIfStatement")
     @WrapWithCondition(method = "lateInit", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/impl/networking/GlobalReceiverRegistry;startSession(Lnet/fabricmc/fabric/impl/networking/AbstractNetworkAddon;)V"))
     private boolean notStartSession_ifFakeClientConnection(GlobalReceiverRegistry<?> instance, AbstractNetworkAddon<?> addon) {
-        if (CarpetOrgAdditionSettings.fakePlayerSpawnMemoryLeakFix.value() && addon instanceof AbstractChanneledNetworkAddon<?>) {
+        if (CarpetOrgAdditionSettings.FAKE_PLAYER_SPAWN_MEMORY_LEAK_FIX.value() && addon instanceof AbstractChanneledNetworkAddon<?>) {
             Connection connection = ((AbstractChanneledNetworkAddonAccessor) addon).getConnection();
             if (connection instanceof FakeClientConnection) {
                 return false;

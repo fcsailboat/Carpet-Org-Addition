@@ -36,7 +36,7 @@ public class PlayerInventoryAccessor {
                 .join();
         this.gameProfile = interviewee.getGameProfile();
         this.inventory = (containerId, inventory, _) -> {
-            if (CarpetOrgAdditionSettings.playerCommandOpenPlayerInventoryGcaStyle.value()) {
+            if (CarpetOrgAdditionSettings.PLAYER_COMMAND_OPEN_PLAYER_INVENTORY_GCA_STYLE.value()) {
                 return new WithButtonPlayerInventoryScreenHandler(containerId, interviewee, visitor);
             } else {
                 return new PlayerInventoryScreenHandler(containerId, inventory, interviewee);
@@ -66,7 +66,7 @@ public class PlayerInventoryAccessor {
                     .append(interviewee.getDisplayName())
                     .join();
             this.inventory = (containerId, inventory, _) -> {
-                if (CarpetOrgAdditionSettings.playerCommandOpenPlayerInventoryGcaStyle.value()) {
+                if (CarpetOrgAdditionSettings.PLAYER_COMMAND_OPEN_PLAYER_INVENTORY_GCA_STYLE.value()) {
                     return new WithButtonPlayerInventoryScreenHandler(containerId, interviewee, visitor);
                 } else {
                     return new PlayerInventoryScreenHandler(containerId, inventory, interviewee);

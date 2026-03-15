@@ -15,7 +15,7 @@ public class EnchantmentHelperMixin {
     // 绑定诅咒无效化
     @Inject(method = "has", at = @At("HEAD"), cancellable = true)
     private static void hasAnyEnchantmentsWith(ItemStack stack, DataComponentType<?> componentType, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.bindingCurseInvalidation.value() && EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE.equals(componentType)) {
+        if (CarpetOrgAdditionSettings.BINDING_CURSE_INVALIDATION.value() && EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE.equals(componentType)) {
             cir.setReturnValue(false);
         }
     }
