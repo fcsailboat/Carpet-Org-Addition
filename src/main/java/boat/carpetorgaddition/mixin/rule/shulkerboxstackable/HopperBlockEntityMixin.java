@@ -1,10 +1,10 @@
 package boat.carpetorgaddition.mixin.rule.shulkerboxstackable;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.rule.RuleUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import carpet.CarpetSettings;
 import carpet.utils.WoolTool;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -299,7 +299,7 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
     // 让漏斗一次从一堆掉落物中只吸取一个潜影盒
     @WrapOperation(method = "addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/item/ItemEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"))
     private static ItemStack extract(Container from, Container to, ItemStack stack, Direction side, Operation<ItemStack> original, @Local(name = "changed") LocalBooleanRef bl) {
-        if (CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get()) {
+        if (CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.orElse(true)) {
             return original.call(from, to, stack, side);
         }
         if (CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value() && InventoryUtils.isShulkerBoxItem(stack)) {
@@ -321,13 +321,7 @@ public abstract class HopperBlockEntityMixin extends BlockEntity {
     @Unique
     private static void compatible(Runnable runnable) {
         if (CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value() && CarpetOrgAdditionConstants.LITHIUM) {
-            boolean changed = CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get();
-            try {
-                CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(false);
-                runnable.run();
-            } finally {
-                CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(changed);
-            }
+            ScopedValue.where(CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED, false).run(runnable);
         }
     }
 

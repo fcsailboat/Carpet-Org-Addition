@@ -24,7 +24,7 @@ public class CarpetOrgAdditionSettings {
     /**
      * 潜影盒是否允许被堆叠，这还需要同时启用{@link CarpetOrgAdditionSettings#SHULKER_BOX_STACKABLE}
      */
-    public static final ThreadLocal<Boolean> SHULKER_BOX_STACK_COUNT_CHANGED = ThreadLocal.withInitial(() -> true);
+    public static final ScopedValue<Boolean> SHULKER_BOX_STACK_COUNT_CHANGED = ScopedValue.newInstance();
     /**
      * 玩家是否正在执行{@code /killMe}命令
      */

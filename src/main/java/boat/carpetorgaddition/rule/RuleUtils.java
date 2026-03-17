@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.rule;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
-import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
+import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.mixin.accessor.DamageTrackerAccessor;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -96,13 +96,7 @@ public class RuleUtils {
     }
 
     public static <T> T shulkerBoxStackableWrap(Supplier<T> supplier) {
-        boolean changed = CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get();
-        try {
-            CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(false);
-            return supplier.get();
-        } finally {
-            CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.set(changed);
-        }
+        return ScopedValue.where(CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED, false).call(supplier::get);
     }
 
     private static Supplier<Boolean> getCarpetRule(String rule) {

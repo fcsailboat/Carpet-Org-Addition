@@ -16,7 +16,7 @@ public class ItemStackMixin {
 
     @Inject(method = "limitSize", at = @At("HEAD"), cancellable = true)
     private void capCount(int maxCount, CallbackInfo ci) {
-        if (!CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.get() && RuleUtils.shulkerBoxStackableEnabled(this.self)) {
+        if (!CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED.orElse(true) && RuleUtils.shulkerBoxStackableEnabled(this.self)) {
             ci.cancel();
         }
     }
