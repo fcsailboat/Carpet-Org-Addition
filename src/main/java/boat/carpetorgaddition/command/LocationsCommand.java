@@ -281,7 +281,7 @@ public class LocationsCommand extends AbstractServerCommand {
         BlockPos blockPos = player.blockPosition();
         Level world = ServerUtils.getWorld(player);
         LocalizationKey key = KEY.then("here");
-        Component text = switch (ServerUtils.getWorldIdAsString(world)) {
+        Component text = switch (ServerUtils.getIdAsString(world)) {
             case ServerUtils.OVERWORLD -> key.then("cross").translate(
                     player.getDisplayName(),
                     LocalizationKeys.Dimension.OVERWORLD.translate(),
@@ -301,7 +301,7 @@ public class LocationsCommand extends AbstractServerCommand {
             );
             default -> key.translate(
                     player.getDisplayName(),
-                    ServerUtils.getWorldIdAsString(world),
+                    ServerUtils.getIdAsString(world),
                     TextProvider.blockPos(blockPos, null)
             );
         };

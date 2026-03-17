@@ -136,21 +136,7 @@ public class ServerUtils {
      * 将方块坐标转换为字符串形式，坐标前追加维度id
      */
     public static String toWorldPosString(Level world, BlockPos blockPos) {
-        return getWorldIdAsString(world) + "[" + toPosString(blockPos) + "]";
-    }
-
-    /**
-     * 获取当前维度的ID
-     *
-     * @param world 当前世界的对象
-     * @return 当前维度的ID
-     */
-    public static String getWorldIdAsString(Level world) {
-        return getWorldId(world).toString();
-    }
-
-    public static Identifier getWorldId(Level world) {
-        return world.dimension().identifier();
+        return getIdAsString(world) + "[" + toPosString(blockPos) + "]";
     }
 
     /**
@@ -335,6 +321,10 @@ public class ServerUtils {
         return entity.getEyePosition();
     }
 
+    public static BlockPos getBlockPos(Entity entity) {
+        return entity.blockPosition();
+    }
+
     public static Component getName(Item item) {
         return item.components().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
     }
@@ -375,12 +365,26 @@ public class ServerUtils {
         return Optional.ofNullable(enchantments.getKey(enchantment));
     }
 
+    public static Identifier getId(Level world) {
+        return world.dimension().identifier();
+    }
+
     public static String getIdAsString(Item item) {
         return getId(item).toString();
     }
 
     public static String getIdAsString(Block block) {
         return getId(block).toString();
+    }
+
+    /**
+     * 获取当前维度的ID
+     *
+     * @param world 当前世界的对象
+     * @return 当前维度的ID
+     */
+    public static String getIdAsString(Level world) {
+        return getId(world).toString();
     }
 
     /**

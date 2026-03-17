@@ -9,10 +9,14 @@ import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Abilities;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,13 +55,22 @@ public class EntityPlayerMPFakeMixin {
             ServerPlayer player = optional.get();
             TextBuilder builder = LocalizationKeys.Rule.Message.DISPLAY_PLAYER_SUMMONER.builder(player.getDisplayName());
             builder.setGrayItalic();
-            Component dimension = TextProvider.dimension(ServerUtils.getWorld(fakePlayer));
-            Component blockPos = TextProvider.simpleBlockPos(fakePlayer.blockPosition());
-            Component pos = TextBuilder.combineAll(dimension, ": ", blockPos);
-            builder.setHover(pos);
-            MessageUtils.sendMessage(ServerUtils.getServer(player), builder.build());
-            // TODO 维度名称无需翻译
-            CarpetOrgAddition.LOGGER.info("{} has summoned {} at {}", PlayerUtils.getName(player), PlayerUtils.getName(fakePlayer), pos.getString());
+            MinecraftServer server = ServerUtils.getServer(player);
+            ServerLevel world = ServerUtils.getWorld(fakePlayer);
+            BlockPos blockPos = ServerUtils.getBlockPos(fakePlayer);
+            Component hover = new TextJoiner()
+                    .append(TextProvider.dimension(world))
+                    .append(": ")
+                    .append(TextProvider.simpleBlockPos(blockPos))
+                    .join();
+            builder.setHover(hover);
+            MessageUtils.sendMessage(server, builder.build());
+            CarpetOrgAddition.LOGGER.info(
+                    "{} has summoned {} at {}",
+                    PlayerUtils.getName(player),
+                    PlayerUtils.getName(fakePlayer),
+                    "%s [%s]".formatted(ServerUtils.getIdAsString(world), blockPos.toShortString())
+            );
         }
     }
 }

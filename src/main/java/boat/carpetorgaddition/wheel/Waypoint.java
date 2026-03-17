@@ -192,7 +192,7 @@ public class Waypoint {
     }
 
     public String getWorldAsString() {
-        return ServerUtils.getWorldIdAsString(this.world);
+        return ServerUtils.getIdAsString(this.world);
     }
 
     public String getName() {

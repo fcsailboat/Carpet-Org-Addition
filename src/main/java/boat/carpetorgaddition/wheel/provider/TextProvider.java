@@ -189,7 +189,7 @@ public class TextProvider {
      * @return 如果是原版的3个维度，返回本Mod翻译后的名称，否则自己返回维度ID
      */
     public static Component dimension(Level world) {
-        String dimension = ServerUtils.getWorldIdAsString(world);
+        String dimension = ServerUtils.getIdAsString(world);
         return switch (dimension) {
             case ServerUtils.OVERWORLD -> Dimension.OVERWORLD.translate();
             case ServerUtils.THE_NETHER -> Dimension.THE_NETHER.translate();
