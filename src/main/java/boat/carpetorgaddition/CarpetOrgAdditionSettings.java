@@ -29,8 +29,6 @@ public class CarpetOrgAdditionSettings {
      * 玩家是否正在执行{@code /killMe}命令
      */
     public static final ThreadLocal<Boolean> COMMITTING_SUICIDE = ThreadLocal.withInitial(() -> false);
-    public static final ThreadLocal<ServerPlayer> PLAYER_SUMMONER = new ThreadLocal<>();
-    public static final ThreadLocal<ServerPlayer> INTERNAL_PLAYER_SUMMONER = new ThreadLocal<>();
     /**
      * 当前正在使用铁砧附魔的玩家
      */

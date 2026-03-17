@@ -11,6 +11,7 @@ import net.minecraft.network.Connection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+@SuppressWarnings("UnstableApiUsage")
 @Mixin(value = AbstractNetworkAddon.class, priority = 998, remap = false)
 public abstract class AbstractNetworkAddonMixin {
     /**
@@ -18,14 +19,11 @@ public abstract class AbstractNetworkAddonMixin {
      *
      * @see <a href="https://github.com/FabricMC/fabric/issues/3974">Memory leaks occur when players log in or log out.</a>
      */
-    @SuppressWarnings("RedundantIfStatement")
     @WrapWithCondition(method = "lateInit", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/impl/networking/GlobalReceiverRegistry;startSession(Lnet/fabricmc/fabric/impl/networking/AbstractNetworkAddon;)V"))
-    private boolean notStartSession_ifFakeClientConnection(GlobalReceiverRegistry<?> instance, AbstractNetworkAddon<?> addon) {
+    private boolean notStartSessionIfFakeClientConnection(GlobalReceiverRegistry<?> instance, AbstractNetworkAddon<?> addon) {
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SPAWN_MEMORY_LEAK_FIX.value() && addon instanceof AbstractChanneledNetworkAddon<?>) {
             Connection connection = ((AbstractChanneledNetworkAddonAccessor) addon).getConnection();
-            if (connection instanceof FakeClientConnection) {
-                return false;
-            }
+            return !(connection instanceof FakeClientConnection);
         }
         return true;
     }

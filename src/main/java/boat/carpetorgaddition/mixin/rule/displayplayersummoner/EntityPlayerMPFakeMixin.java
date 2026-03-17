@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -27,15 +28,10 @@ import java.util.function.BiConsumer;
 public class EntityPlayerMPFakeMixin {
     @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;whenCompleteAsync(Ljava/util/function/BiConsumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", remap = false))
     private static <T> CompletableFuture<T> thenAcceptAsync(CompletableFuture<T> instance, BiConsumer<? super T, ? super Throwable> action, Executor executor, Operation<CompletableFuture<T>> original) {
-        ServerPlayer player = CarpetOrgAdditionSettings.PLAYER_SUMMONER.get();
-        BiConsumer<? super T, ? super Throwable> consumer = (value, throwable) -> {
-            try {
-                CarpetOrgAdditionSettings.INTERNAL_PLAYER_SUMMONER.set(player);
-                action.accept(value, throwable);
-            } finally {
-                CarpetOrgAdditionSettings.INTERNAL_PLAYER_SUMMONER.remove();
-            }
-        };
+        Optional<ServerPlayer> optional = FakePlayerSpawner.SUMMONER.orElse(Optional.empty());
+        BiConsumer<? super T, ? super Throwable> consumer = (value, throwable) ->
+                ScopedValue.where(FakePlayerSpawner.SUMMONER, optional)
+                        .run(() -> action.accept(value, throwable));
         return original.call(instance, consumer, executor);
     }
 
@@ -48,10 +44,11 @@ public class EntityPlayerMPFakeMixin {
     @Unique
     private static void broadcastSummoner(EntityPlayerMPFake fakePlayer) {
         if (CarpetOrgAdditionSettings.DISPLAY_PLAYER_SUMMONER.value()) {
-            ServerPlayer player = CarpetOrgAdditionSettings.INTERNAL_PLAYER_SUMMONER.get();
-            if (player == null || FakePlayerSpawner.SILENCE.orElse(false)) {
+            Optional<ServerPlayer> optional = FakePlayerSpawner.SUMMONER.orElse(Optional.empty());
+            if (optional.isEmpty() || FakePlayerSpawner.SILENCE.orElse(false)) {
                 return;
             }
+            ServerPlayer player = optional.get();
             TextBuilder builder = LocalizationKeys.Rule.Message.DISPLAY_PLAYER_SUMMONER.builder(player.getDisplayName());
             builder.setGrayItalic();
             Component dimension = TextProvider.dimension(ServerUtils.getWorld(fakePlayer));
@@ -59,6 +56,7 @@ public class EntityPlayerMPFakeMixin {
             Component pos = TextBuilder.combineAll(dimension, ": ", blockPos);
             builder.setHover(pos);
             MessageUtils.sendMessage(ServerUtils.getServer(player), builder.build());
+            // TODO 维度名称无需翻译
             CarpetOrgAddition.LOGGER.info("{} has summoned {} at {}", PlayerUtils.getName(player), PlayerUtils.getName(fakePlayer), pos.getString());
         }
     }

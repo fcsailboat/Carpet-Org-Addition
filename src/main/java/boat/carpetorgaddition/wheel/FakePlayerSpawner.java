@@ -5,12 +5,14 @@ import boat.carpetorgaddition.util.ServerUtils;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @NullMarked
@@ -27,6 +29,10 @@ public class FakePlayerSpawner {
      * 假玩家是否在上次下线的位置生成
      */
     public static final ScopedValue<Boolean> ORIGINAL_POSITION = ScopedValue.newInstance();
+    /**
+     * 假玩家的召唤者
+     */
+    public static final ScopedValue<Optional<ServerPlayer>> SUMMONER = ScopedValue.newInstance();
     /**
      * 玩家的名称
      */
@@ -69,6 +75,8 @@ public class FakePlayerSpawner {
      * 是否隐藏登录消息
      */
     private boolean silence;
+    @Nullable
+    private ServerPlayer summoner;
 
     private FakePlayerSpawner(MinecraftServer server, String name) {
         this.server = server;
@@ -131,6 +139,11 @@ public class FakePlayerSpawner {
         return this;
     }
 
+    public FakePlayerSpawner setSummoner(@Nullable ServerPlayer summoner) {
+        this.summoner = summoner;
+        return this;
+    }
+
     /**
      * 如果玩家不存在，则召唤玩家
      *
@@ -146,6 +159,7 @@ public class FakePlayerSpawner {
         return ScopedValue.where(SILENCE, this.silence)
                 .where(CALLBACK, this.callback)
                 .where(ORIGINAL_POSITION, this.position == null)
+                .where(SUMMONER, Optional.ofNullable(this.summoner))
                 .call(() -> EntityPlayerMPFake.createFake(
                         this.name,
                         this.server,

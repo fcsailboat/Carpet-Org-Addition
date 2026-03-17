@@ -817,17 +817,16 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         try {
             // 生成假玩家
             FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
-            CarpetOrgAdditionSettings.PLAYER_SUMMONER.set(context.getSource().getPlayer());
             MinecraftServer server = context.getSource().getServer();
             if (ServerUtils.getPlayer(server, name).isPresent()) {
                 throw CommandUtils.createException(PlayerManagerCommand.KEY.then("spawn").then("player_exist").translate());
             }
-            serializer.spawn(server, true);
+            serializer.getSpawner(server)
+                    .setSummoner(context.getSource().getPlayer())
+                    .spawn();
         } catch (RuntimeException e) {
             // 尝试生成假玩家时出现意外问题
             throw CommandUtils.createException(KEY.then("spawn").then("fail").translate(), e);
-        } finally {
-            CarpetOrgAdditionSettings.PLAYER_SUMMONER.remove();
         }
         return 1;
     }

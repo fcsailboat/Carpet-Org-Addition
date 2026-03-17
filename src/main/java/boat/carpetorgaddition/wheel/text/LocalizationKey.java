@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 @NullMarked
 public final class LocalizationKey {
@@ -24,17 +23,6 @@ public final class LocalizationKey {
 
     public static LocalizationKey literal(String key) {
         return new LocalizationKey(key);
-    }
-
-    @Deprecated
-    public LocalizationKey then(String key, String... keys) {
-        StringJoiner joiner = new StringJoiner(".");
-        joiner.add(this.key);
-        joiner.add(key);
-        for (String str : keys) {
-            joiner.add(str);
-        }
-        return new LocalizationKey(joiner.toString());
     }
 
     public LocalizationKey then(String key) {
