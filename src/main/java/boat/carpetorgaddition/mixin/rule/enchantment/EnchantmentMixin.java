@@ -27,11 +27,8 @@ public class EnchantmentMixin {
     // 击退棒
     @Inject(method = "canEnchant", at = @At("HEAD"), cancellable = true)
     public void isAcceptableItem(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.KNOCKBACK_STICK.value() && stack.is(Items.STICK)) {
+        if (CarpetOrgAdditionSettings.KNOCKBACK_STICK.value() && stack.is(Items.STICK) && CarpetOrgAdditionSettings.ENCHANTER.isBound()) {
             Player player = CarpetOrgAdditionSettings.ENCHANTER.get();
-            if (player == null) {
-                return;
-            }
             if (EnchantmentUtils.isSpecified(ServerUtils.getWorld(player), Enchantments.KNOCKBACK, thisEnchantment)) {
                 cir.setReturnValue(true);
             }

@@ -18,7 +18,7 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
     /**
      * 正在使用Shift移动物品
      */
-    public static final ThreadLocal<Boolean> isQuickMovingItem = ThreadLocal.withInitial(() -> false);
+    public static final ScopedValue<Boolean> QUICK_MOVING_ITEM = ScopedValue.newInstance();
     /**
      * 容器的背景精灵图
      */
@@ -155,12 +155,7 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
      * @return 是否有物品移动了
      */
     private boolean quickMove(ItemStack stack, int startIndex, int endIndex, boolean fromLast) {
-        try {
-            isQuickMovingItem.set(true);
-            return !this.moveItemStackTo(stack, startIndex, endIndex, fromLast);
-        } finally {
-            isQuickMovingItem.set(false);
-        }
+        return ScopedValue.where(QUICK_MOVING_ITEM, true).call(() -> !this.moveItemStackTo(stack, startIndex, endIndex, fromLast));
     }
 
     @Override

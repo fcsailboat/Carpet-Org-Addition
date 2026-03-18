@@ -17,10 +17,9 @@ public class DataResultErrorMixin<R> {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void init(Supplier<String> messageSupplier, Optional<R> partialValue, Lifecycle lifecycle, CallbackInfo ci) {
-        UUID uuid = OfflinePlayerSearchTask.CURRENT_UUID.get();
-        if (uuid == null) {
-            return;
+        if (OfflinePlayerSearchTask.CURRENT_UUID.isBound()) {
+            UUID uuid = OfflinePlayerSearchTask.CURRENT_UUID.get();
+            OfflinePlayerSearchTask.addCorruptedPlayerUUID(uuid);
         }
-        OfflinePlayerSearchTask.addCorruptedPlayerUUID(uuid);
     }
 }

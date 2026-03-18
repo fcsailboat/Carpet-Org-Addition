@@ -48,7 +48,7 @@ public abstract class ServerPlayerEntityMixin implements FakePlayerSafeAfkInterf
 
     @WrapOperation(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;getDeathMessage()Lnet/minecraft/network/chat/Component;"))
     private Component getDeathMessage(CombatTracker instance, Operation<Component> original) {
-        if (CarpetOrgAdditionSettings.COMMITTING_SUICIDE.get()) {
+        if (CarpetOrgAdditionSettings.COMMITTING_SUICIDE.orElse(false)) {
             return KillMeCommand.KEY.then("suicide").translate(thisPlayer.getDisplayName());
         }
         return original.call(instance);

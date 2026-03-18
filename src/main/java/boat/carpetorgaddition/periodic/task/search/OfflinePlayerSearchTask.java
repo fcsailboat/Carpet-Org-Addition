@@ -76,7 +76,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
      * 备份失败的文件，跳过查询
      */
     public static final Set<UUID> INVALID_PLAYER_DATAS = ConcurrentHashMap.newKeySet();
-    public static final ThreadLocal<UUID> CURRENT_UUID = new ThreadLocal<>();
+    public static final ScopedValue<UUID> CURRENT_UUID = ScopedValue.newInstance();
     public static final String UNKNOWN = "[Unknown]";
     private static final DateTimeFormatter FORMATTER = FileNameDateFormatter.FORMATTER;
     private static final ThreadPoolExecutor CPU_TASK_EXECUTOR = new ThreadPoolExecutor(
@@ -397,24 +397,23 @@ public class OfflinePlayerSearchTask extends ServerTask {
         // 获取玩家配置文件
         GameProfileCache cache = GameProfileCache.getInstance();
         Optional<NameAndId> optional = cache.getPlayerConfigEntry(uuid);
-        boolean unknownPlayer = false;
+        boolean unknownPlayer;
         if (optional.isEmpty()) {
             optional = Optional.of(new NameAndId(uuid, UNKNOWN));
             unknownPlayer = true;
+        } else {
+            unknownPlayer = false;
         }
         NameAndId entry = optional.get();
         // 不从在线玩家物品栏查找物品
         if (this.server.getPlayerList().getPlayerByName(entry.name()) != null) {
             return;
         }
-        try {
-            CURRENT_UUID.set(uuid);
+        ScopedValue.where(CURRENT_UUID, uuid).run(() -> {
             // 统计物品栏物品
             statistics(this.getInventory(nbt), entry, unknownPlayer, PlayerInventoryType.INVENTORY);
             statistics(this.getEnderChest(nbt), entry, unknownPlayer, PlayerInventoryType.ENDER_CHEST);
-        } finally {
-            CURRENT_UUID.remove();
-        }
+        });
     }
 
     /**

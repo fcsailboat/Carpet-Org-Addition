@@ -114,12 +114,8 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
      * @return 是否无法移动物品
      */
     private static boolean quickMove(AbstractContainerMenu menu, ItemStack itemStack, int start, int end, boolean reverse) {
-        try {
-            AbstractPlayerInventoryScreenHandler.isQuickMovingItem.set(true);
-            return !menu.moveItemStackTo(itemStack, start, end, reverse);
-        } finally {
-            AbstractPlayerInventoryScreenHandler.isQuickMovingItem.set(false);
-        }
+        ScopedValue<Boolean> value = AbstractPlayerInventoryScreenHandler.QUICK_MOVING_ITEM;
+        return ScopedValue.where(value, true).call(() -> !menu.moveItemStackTo(itemStack, start, end, reverse));
     }
 
     @Override

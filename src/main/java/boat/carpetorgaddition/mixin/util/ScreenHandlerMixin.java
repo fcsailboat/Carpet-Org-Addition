@@ -18,7 +18,7 @@ public class ScreenHandlerMixin {
      */
     @WrapOperation(method = "moveItemStackTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isSameItemSameComponents(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"))
     private boolean isEqual(ItemStack stack, ItemStack otherStack, Operation<Boolean> original) {
-        if (AbstractPlayerInventoryScreenHandler.isQuickMovingItem.get() && stack == otherStack) {
+        if (AbstractPlayerInventoryScreenHandler.QUICK_MOVING_ITEM.orElse(false) && stack == otherStack) {
             return false;
         }
         return original.call(stack, otherStack);

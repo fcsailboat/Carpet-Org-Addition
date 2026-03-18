@@ -31,12 +31,7 @@ public class KillMeCommand extends AbstractServerCommand {
     private int killMe(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 广播自杀消息
-        try {
-            CarpetOrgAdditionSettings.COMMITTING_SUICIDE.set(true);
-            player.kill(player.level());
-        } finally {
-            CarpetOrgAdditionSettings.COMMITTING_SUICIDE.set(false);
-        }
+        ScopedValue.where(CarpetOrgAdditionSettings.COMMITTING_SUICIDE, true).run(() -> player.kill(player.level()));
         return 1;
     }
 

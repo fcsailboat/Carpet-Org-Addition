@@ -28,11 +28,11 @@ public class CarpetOrgAdditionSettings {
     /**
      * 玩家是否正在执行{@code /killMe}命令
      */
-    public static final ThreadLocal<Boolean> COMMITTING_SUICIDE = ThreadLocal.withInitial(() -> false);
+    public static final ScopedValue<Boolean> COMMITTING_SUICIDE = ScopedValue.newInstance();
     /**
      * 当前正在使用铁砧附魔的玩家
      */
-    public static final ThreadLocal<Player> ENCHANTER = new ThreadLocal<>();
+    public static final ScopedValue<Player> ENCHANTER = ScopedValue.newInstance();
     /**
      * 当前方块的破坏者，启用{@link CarpetOrgAdditionSettings#BLOCK_DROPS_DIRECTLY_ENTER_INVENTORY}后，方块掉落物会直接进入玩家物品栏
      */
