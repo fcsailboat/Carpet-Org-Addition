@@ -1091,7 +1091,6 @@ public class CarpetOrgAdditionSettings {
     public static final RuleAccessor<OpenPlayerInventory> OPEN_PLAYER_INVENTORY = register(
             RuleFactory.create(OpenPlayerInventory.class, "openPlayerInventory", OpenPlayerInventory.FALSE)
                     .addCategories(RuleCategory.SURVIVAL)
-                    .setHidden()
                     .build()
     );
 

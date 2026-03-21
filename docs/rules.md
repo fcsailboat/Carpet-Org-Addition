@@ -817,6 +817,21 @@ _non_whitelist：允许打开离线玩家和假玩家的物品栏，对于白名
 - 参考选项：`true`，`false`，`ops`，`0`，`1`，`2`，`3`，`4`
 - 分类：`Org`，`命令`
 
+### 打开玩家物品栏(openPlayerInventory)
+
+允许右键打开玩家物品栏<br>
+_潜行右键可以打开玩家末影箱_<br>
+_false：禁用本条规则_<br>
+_fake_player：允许打开假玩家物品栏_<br>
+_any_player：允许打开任意玩家物品栏_<br>
+_此规则是为了解决Gugle Carpet Addition中“假人背包”规则的一个问题，即右键打开假玩家物品栏时，会应用手上的物品效果_<br>
+_如果未来GCA修复了此问题，则该规则可能会被移除_<br>
+
+- 类型：`枚举`
+- 默认值：`false`
+- 参考选项：`false`，`fake_player`，`any_player`
+- 分类：`Org`，`生存`
+
 ### 关闭当前屏幕界面(playerCommandCloseScreen)
 
 为/player命令添加esc子命令用来关闭当前打开的屏幕界面
