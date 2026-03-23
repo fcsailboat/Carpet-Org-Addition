@@ -15,7 +15,10 @@ import net.minecraft.server.players.NameAndId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -106,26 +109,19 @@ public class GameProfileCache {
      * 通过Mojang API查询玩家名称
      */
     public static String queryPlayerNameFromMojangApi(UUID uuid) throws IOException {
-        BufferedReader reader = openMojangApiConnection(uuid);
-        try (reader) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            // 解析json字符串
-            JsonObject json = IOUtils.GSON.fromJson(sb.toString(), JsonObject.class);
-            if (json.has("name")) {
-                return json.get("name").getAsString();
-            }
+        String result = openMojangApiConnection(uuid);
+        // 解析json字符串
+        JsonObject json = IOUtils.GSON.fromJson(result, JsonObject.class);
+        if (json.has("name")) {
+            return json.get("name").getAsString();
         }
         throw new IllegalStateException("Player name not returned");
     }
 
     /**
-     * 连接到Mojang Api
+     * 连接到{@code Mojang API}
      */
-    private static BufferedReader openMojangApiConnection(UUID uuid) throws IOException {
+    private static String openMojangApiConnection(UUID uuid) throws IOException {
         URL url;
         try {
             URI uri = new URI(MOJANG_API.formatted(uuid.toString()));
@@ -135,9 +131,10 @@ public class GameProfileCache {
         }
         // 连接到Mojang API
         URLConnection connection = url.openConnection();
-        // 获取字节流并转换为字符流
         InputStream input = connection.getInputStream();
-        return new BufferedReader(new InputStreamReader(input));
+        try (input) {
+            return IOUtils.readInputStream(input);
+        }
     }
 
     /**

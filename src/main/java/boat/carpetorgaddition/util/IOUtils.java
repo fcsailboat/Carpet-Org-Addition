@@ -436,4 +436,14 @@ public class IOUtils {
             return false;
         }
     }
+
+    public static String readInputStream(InputStream input) throws IOException {
+        StringBuilder builder = new StringBuilder();
+        byte[] bytes = new byte[1024];
+        int len;
+        while ((len = input.read(bytes)) != -1) {
+            builder.append(new String(bytes, 0, len, StandardCharsets.UTF_8));
+        }
+        return builder.toString();
+    }
 }
