@@ -7,7 +7,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -63,13 +62,7 @@ public class Translation {
         if (input == null) {
             return Map.of();
         }
-        byte[] bytes = new byte[1024];
-        StringBuilder builder = new StringBuilder();
-        int len;
-        while ((len = input.read(bytes)) != -1) {
-            builder.append(new String(bytes, 0, len, StandardCharsets.UTF_8));
-        }
-        String result = builder.toString();
+        String result = IOUtils.readInputStreamAsString(input);
         JsonObject json = IOUtils.stringAsJson(result);
         return json.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getAsString()));
     }

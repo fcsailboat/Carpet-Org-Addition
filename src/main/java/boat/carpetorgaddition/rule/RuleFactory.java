@@ -32,7 +32,7 @@ public class RuleFactory {
         private final List<ValueValidator<T>> validators = new ArrayList<>();
         private final List<SilenceValueValidator<T>> silenceValidators = new ArrayList<>();
         private final List<RuleListener<T>> listeners = new ArrayList<>();
-        private final List<Supplier<Boolean>> conditions = new ArrayList<>();
+        private final List<BooleanSupplier> conditions = new ArrayList<>();
         private boolean canBeToggledClientSide = false;
         private boolean strict = true;
         private boolean isHidden;

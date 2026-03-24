@@ -4,6 +4,7 @@ import carpet.api.settings.CarpetRule;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class RuleContext<T> {
@@ -16,7 +17,7 @@ public class RuleContext<T> {
     private final T value;
     private final String name;
     private final Supplier<CarpetRule<T>> ruleSupplier;
-    private final List<Supplier<Boolean>> conditions;
+    private final List<BooleanSupplier> conditions;
     private volatile CarpetRule<T> rule;
 
     public RuleContext(
@@ -24,7 +25,7 @@ public class RuleContext<T> {
             T value,
             String name,
             Supplier<CarpetRule<T>> ruleSupplier,
-            List<Supplier<Boolean>> conditions,
+            List<BooleanSupplier> conditions,
             Collection<String> categories,
             Collection<String> suggestions,
             boolean isRemove,
@@ -90,6 +91,6 @@ public class RuleContext<T> {
     }
 
     public boolean shouldRegister() {
-        return this.conditions.stream().allMatch(Supplier::get);
+        return this.conditions.stream().allMatch(BooleanSupplier::getAsBoolean);
     }
 }

@@ -133,7 +133,7 @@ public class GameProfileCache {
         URLConnection connection = url.openConnection();
         InputStream input = connection.getInputStream();
         try (input) {
-            return IOUtils.readInputStream(input);
+            return IOUtils.readInputStreamAsString(input);
         }
     }
 
