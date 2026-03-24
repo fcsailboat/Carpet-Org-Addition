@@ -6,7 +6,6 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.*;
-import boat.carpetorgaddition.periodic.fakeplayer.action.bedrock.BedrockRegionType;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
@@ -141,7 +140,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> register(LiteralArgumentBuilder<CommandSourceStack> node) {
-        for (BedrockRegionType value : BedrockRegionType.values()) {
+        for (BedrockAction.BedrockRegionType value : BedrockAction.BedrockRegionType.values()) {
             node.then(Commands.literal(value.name().toLowerCase(Locale.ROOT))
                     .then(register(value).apply(
                             Commands.argument("ai", BoolArgumentType.bool())
@@ -160,7 +159,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         return node;
     }
 
-    private Function<RequiredArgumentBuilder<CommandSourceStack, ?>, RequiredArgumentBuilder<CommandSourceStack, ?>> register(BedrockRegionType value) {
+    private Function<RequiredArgumentBuilder<CommandSourceStack, ?>, RequiredArgumentBuilder<CommandSourceStack, ?>> register(BedrockAction.BedrockRegionType value) {
         Command<CommandSourceStack> command = context -> setBreakBedrock(context, value, false, false);
         return switch (value) {
             case CUBOID -> argument ->
@@ -371,7 +370,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     }
 
     // 设置破基岩
-    private int setBreakBedrock(CommandContext<CommandSourceStack> context, BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) throws CommandSyntaxException {
+    private int setBreakBedrock(CommandContext<CommandSourceStack> context, BedrockAction.BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) throws CommandSyntaxException {
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             BedrockAction action = switch (regionType) {

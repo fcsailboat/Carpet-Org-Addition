@@ -7,7 +7,6 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerPathfinder;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
-import boat.carpetorgaddition.periodic.fakeplayer.action.bedrock.*;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MathUtils;
@@ -1235,5 +1234,131 @@ public class BedrockAction extends AbstractPlayerAction {
         if (this.recycleTimer != -1 && phase == PlayerWorkPhase.WORK) {
             this.recycleTimer = MATERIAL_RECYCLING_TIME;
         }
+    }
+
+    public static final class BedrockBreakingContext {
+        private final BlockPos bedrockPos;
+        private BlockPos leverPos;
+        private BreakingState breakingState = BreakingState.PLACE_THE_PISTON_FACING_UP;
+
+        private BedrockBreakingContext(BlockPos bedrockPos) {
+            this.bedrockPos = bedrockPos;
+        }
+
+        public BlockPos getBedrockPos() {
+            return this.bedrockPos;
+        }
+
+        public BlockPos getLeverPos() {
+            return this.leverPos;
+        }
+
+        public void setLeverPos(BlockPos leverPos) {
+            this.leverPos = leverPos;
+        }
+
+        public BreakingState getState() {
+            return this.breakingState;
+        }
+
+        public void nextStep() {
+            BreakingState[] values = BreakingState.values();
+            if (this.breakingState.ordinal() == values.length) {
+                throw new IllegalStateException();
+            }
+            this.breakingState = values[this.breakingState.ordinal() + 1];
+        }
+
+        public void fail() {
+            this.breakingState = BreakingState.COMPLETE;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            BedrockBreakingContext that = (BedrockBreakingContext) o;
+            return Objects.equals(bedrockPos, that.bedrockPos);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(bedrockPos);
+        }
+    }
+
+    public enum BedrockRegionType {
+        /**
+         * 立方体范围
+         */
+        CUBOID,
+        /**
+         * 圆柱体范围
+         */
+        CYLINDER
+    }
+
+    public enum BreakingState {
+        /**
+         * 放置朝上的活塞
+         */
+        PLACE_THE_PISTON_FACING_UP,
+        /**
+         * 在基岩方块侧面放置并激活一个拉杆
+         */
+        PLACE_AND_ACTIVATE_THE_LEVER,
+        /**
+         * 挖掘基岩上方的活塞，并在挖掘完成前关闭拉杆，然后完成挖掘，接着放置一个朝下的活塞
+         */
+        PISTON_BREAK_BEDROCK,
+        /**
+         * 清理掉基岩上方的活塞
+         */
+        CLEAN_PISTON,
+        /**
+         * 已完成破基岩
+         */
+        COMPLETE
+    }
+
+    public enum PlayerWorkPhase {
+        /**
+         * 进食
+         */
+        EAT,
+        /**
+         * 破基岩
+         */
+        WORK,
+        /**
+         * 收集材料
+         */
+        COLLECT
+    }
+
+    /**
+     * 当前步骤的执行结果
+     */
+    public enum StepResult {
+        /**
+         * 当前步骤执行完毕，应继续执行下一步
+         */
+        CONTINUE,
+        /**
+         * 不再执行下一步，但是应继续执行下一个位置
+         */
+        COMPLETION,
+        /**
+         * 不再执行下一步，并且应该结束当前tick
+         */
+        TICK_COMPLETION,
+        /**
+         * 破基岩失败，重新开始
+         */
+        FAIL
     }
 }
