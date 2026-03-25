@@ -116,7 +116,7 @@ public abstract class ServerTask {
         if (slice == -1L) {
             return true;
         }
-        return DebugSettings.prohibitTaskTimeout.get() || this.getTickExecutionTime() < slice;
+        return (CarpetOrgAddition.isDevelopment() && DebugSettings.prohibitTaskTimeout.get()) || this.getTickExecutionTime() < slice;
     }
 
     /**
