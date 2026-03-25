@@ -28,7 +28,7 @@ public class WaypointDataUpdaterTest {
                 """;
         JsonObject json = IOUtils.GSON.fromJson(oldWaypoint, JsonObject.class);
         WaypointDataUpdater dataUpdater = WaypointDataUpdater.getInstance();
-        JsonObject update = dataUpdater.update(json, DataUpdater.getVersion(json));
+        JsonObject update = dataUpdater.update(json, DataUpdater.getVersion(json), 1);
         // 路径点坐标已被合并
         Assertions.assertNull(update.get("x"));
         Assertions.assertNull(update.get("y"));
