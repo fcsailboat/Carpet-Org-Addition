@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.config;
 
 import com.google.gson.JsonElement;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface ConfigEntry<T extends JsonElement> {
     void load(@Nullable T json);
@@ -16,9 +16,9 @@ public interface ConfigEntry<T extends JsonElement> {
      */
     T getValue();
 
+    Class<T> getType();
+
     default boolean shouldBeSaved() {
         return true;
     }
-
-    Class<T> getType();
 }

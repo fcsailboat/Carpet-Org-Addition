@@ -912,7 +912,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         File file = serializer.getFile();
         TextBuilder builder = key.then("multiplayer").builder();
         if (file != null) {
-            builder.setHover(file.getAbsolutePath().replace("\\", "/"));
+            builder.setHover(file.toPath().toAbsolutePath().normalize().toString());
         }
         throw CommandUtils.createException(builder.build());
     }
