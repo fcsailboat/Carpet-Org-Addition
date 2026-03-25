@@ -22,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,9 +42,10 @@ public abstract class LivingEntityMixin {
      * 在 {@link PlayerEntityMixin#getBlockBreakingSpeed(BlockState, CallbackInfoReturnable)}中被使用
      */
     @Shadow
-    @Nullable
-    @SuppressWarnings("all")
-    protected abstract Map<EquipmentSlot, ItemStack> collectEquipmentChanges();
+    @SuppressWarnings("JavadocReference")
+    private Map<EquipmentSlot, ItemStack> collectEquipmentChanges() {
+        return Map.of();
+    }
 
     // 禁用伤害免疫
     @WrapOperation(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;invulnerableTime:I", opcode = Opcodes.GETFIELD))
@@ -131,5 +131,11 @@ public abstract class LivingEntityMixin {
             return itemStack;
         }
         return ItemStack.EMPTY;
+    }
+
+    @Unique
+    @SuppressWarnings("UnusedReturnValue")
+    protected Map<EquipmentSlot, ItemStack> applyToolEffects() {
+        return this.collectEquipmentChanges();
     }
 }
