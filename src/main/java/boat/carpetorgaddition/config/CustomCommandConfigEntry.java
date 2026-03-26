@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 public class CustomCommandConfigEntry implements ConfigEntry<JsonObject> {
     public static final String CUSTOM_COMMAND_NAME = "custom_command_name";
+    // 并发集合：客户端命令也会添加到这里
     private final Map<String, Set<String>> commands = new ConcurrentHashMap<>();
 
     public CustomCommandConfigEntry() {
