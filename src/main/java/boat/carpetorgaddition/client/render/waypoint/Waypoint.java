@@ -8,17 +8,16 @@ import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
@@ -66,7 +65,7 @@ public abstract class Waypoint implements WorldRenderComponent {
     private static final RenderPipeline HIGHLIGHT_WAYPOINT_RENDER_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
                     .withLocation(ServerUtils.ofIdentifier("highlight_waypoint"))
-                    .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))
+                    .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
                     .build()
     );
     private final RenderType renderType;
@@ -78,7 +77,10 @@ public abstract class Waypoint implements WorldRenderComponent {
         this.icon = icon;
         this.remaining = duration;
         this.persistent = persistent;
-        this.renderType = RenderType.create("waypoint", RenderSetup.builder(HIGHLIGHT_WAYPOINT_RENDER_PIPELINE).withTexture("Sampler0", icon).createRenderSetup());
+        RenderSetup setup = RenderSetup.builder(HIGHLIGHT_WAYPOINT_RENDER_PIPELINE)
+                .withTexture("Sampler0", icon)
+                .createRenderSetup();
+        this.renderType = RenderType.create("waypoint", setup);
     }
 
     public Waypoint(Level world, Vec3 target, Identifier icon, long duration, boolean persistent) {
@@ -88,7 +90,6 @@ public abstract class Waypoint implements WorldRenderComponent {
     @Override
     public void render(LevelRenderContext context) {
         PoseStack poseStack = context.poseStack();
-        SubmitNodeCollector collector = context.submitNodeCollector();
         Camera camera = ClientUtils.getCamera();
         if (this.isStopped()) {
             return;
@@ -97,12 +98,12 @@ public abstract class Waypoint implements WorldRenderComponent {
         if (revised == null) {
             return;
         }
-        float tickDelta1 = ClientUtils.getTickCounter().getGameTimeDeltaPartialTick(false);
-        if (this.tickDelta > tickDelta1) {
+        float tickDelta = ClientUtils.getTickCounter().getGameTimeDeltaPartialTick(false);
+        if (this.tickDelta > tickDelta) {
             this.tick();
         }
         this.lastTickDelta = this.tickDelta;
-        this.tickDelta = tickDelta1;
+        this.tickDelta = tickDelta;
         // 获取摄像机位置
         Vec3 cameraPos = camera.position();
         // 玩家距离目标的位置
@@ -117,22 +118,22 @@ public abstract class Waypoint implements WorldRenderComponent {
         }
         poseStack.pushPose();
         this.transform(poseStack, camera, correction);
-        this.render(poseStack, collector);
+        this.drawIcon(context);
         // 如果准星正在指向路径点，显示文本
         if (this.isWatching(camera, revised)) {
-            drawDistance(poseStack, collector, offset);
+            drawText(context, poseStack, offset);
         }
         poseStack.popPose();
     }
 
-    private void render(PoseStack poseStack, SubmitNodeCollector collector) {
+    private void drawIcon(LevelRenderContext context) {
         float alpha = this.getRenderAlpha();
-        collector.submitCustomGeometry(poseStack, this.renderType, (pose, buffer) -> {
-            buffer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F);
-            buffer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F);
-            buffer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F);
-            buffer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F);
-        });
+        VertexConsumer consumer = context.bufferSource().getBuffer(this.renderType);
+        PoseStack.Pose pose = context.poseStack().last();
+        consumer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F);
+        consumer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F);
+        consumer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F);
+        consumer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F);
     }
 
     protected float getRenderAlpha() {
@@ -251,7 +252,7 @@ public abstract class Waypoint implements WorldRenderComponent {
     /**
      * 绘制距离文本
      */
-    private void drawDistance(PoseStack poseStack, SubmitNodeCollector collector, Vec3 offset) {
+    private void drawText(LevelRenderContext context, PoseStack poseStack, Vec3 offset) {
         Font textRenderer = ClientUtils.getTextRenderer();
         // 计算距离
         double distance = offset.length();
@@ -261,7 +262,6 @@ public abstract class Waypoint implements WorldRenderComponent {
         if (!this.registryKey.equals(ClientUtils.getWorld().dimension())) {
             builder.setItalic();
         }
-        Component component = builder.build();
         // 文本宽度
         int width = textRenderer.width(formatted);
         float x = (-width) / 2F;
@@ -272,9 +272,10 @@ public abstract class Waypoint implements WorldRenderComponent {
         poseStack.pushPose();
         // 缩小文字
         poseStack.scale(0.15F, 0.15F, 0.15F);
-        FormattedCharSequence sequence = FormattedCharSequence.forward(component.getString(), component.getStyle());
         // 渲染文字
-        collector.submitText(poseStack, x, y, sequence, false, Font.DisplayMode.SEE_THROUGH, 0x00F00000, 0xFFFFFFFF, opacity, 0);
+        textRenderer.drawInBatch(builder.build(), x, y, CommonColors.WHITE, false,
+                poseStack.last().pose(), context.bufferSource(),
+                Font.DisplayMode.SEE_THROUGH, opacity, 1);
         poseStack.popPose();
     }
 
