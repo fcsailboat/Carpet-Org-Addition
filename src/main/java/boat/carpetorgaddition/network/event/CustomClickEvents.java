@@ -5,7 +5,10 @@ import boat.carpetorgaddition.command.PlayerCommandExtension;
 import boat.carpetorgaddition.dialog.DialogProvider;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.rule.RuleAccessor;
-import boat.carpetorgaddition.util.*;
+import boat.carpetorgaddition.util.CommandUtils;
+import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
 import boat.carpetorgaddition.wheel.nbt.NbtReader;
@@ -44,9 +47,13 @@ public class CustomClickEvents {
      */
     public static final Identifier OPEN_INVENTORY = register("open_inventory", context -> {
         NbtReader reader = context.getReader();
+        ServerPlayer player = context.getPlayer();
+        // 关闭当前屏幕界面，一般是关闭当前聊天界面
+        // 这样做是为了让游戏在关闭聊天栏时自动禁用输入法，避免在打开玩家物品栏界面时造成输入法冲突
+        PlayerUtils.closeScreen(player);
         UUID uuid = reader.getUuidNullable(CustomClickKeys.UUID).orElseThrow(() -> unableToResolveUuid(reader));
         PlayerInventoryType type = reader.getPlayerInventoryTypeOrThrow(CustomClickKeys.INVENTORY_TYPE);
-        PlayerCommandExtension.openInventory(context.getPlayer(), type, new PlayerCommandExtension.WithCheckPlayerInventoryAccessor(context.getServer(), uuid, context.getPlayer()));
+        PlayerCommandExtension.openInventory(player, type, new PlayerCommandExtension.WithCheckPlayerInventoryAccessor(context.getServer(), uuid, player));
     });
     /**
      * 查询玩家名称
@@ -58,7 +65,7 @@ public class CustomClickEvents {
             ServerPlayer player = context.getPlayer();
             if (context.getActionSource() == ActionSource.DIALOG) {
                 // 关闭当前对话框（等待服务器响应屏幕）
-                player.closeContainer();
+                PlayerUtils.closeScreen(player);
             }
             GameProfileCache cache = GameProfileCache.getInstance();
             Optional<String> optional = cache.get(uuid);

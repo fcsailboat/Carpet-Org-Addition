@@ -180,4 +180,8 @@ public class PlayerUtils {
         }
         return false;
     }
+
+    public static void closeScreen(ServerPlayer player) {
+        player.closeContainer();
+    }
 }
