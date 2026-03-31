@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.util.IOUtils;
+import boat.carpetorgaddition.util.MathUtils;
 import com.google.gson.*;
 import org.jspecify.annotations.NonNull;
 
@@ -35,7 +36,11 @@ public class GlobalConfigs {
     /**
      * 是否允许在多人游戏中使用{@code /playerManager}命令来设置玩家登录时执行命令
      */
-    private static final BooleanConfigEntry ALLOW_MP_PLAYER_STARTUP_CMD = register(new BooleanConfigEntry("allow_mp_player_startup_cmd"));
+    private static final BooleanConfigEntry ALLOW_MP_PLAYER_STARTUP_CMD = register(new BooleanConfigEntry("allow_mp_player_startup_cmd", false));
+    /**
+     * {@code /playerAction}命令中，物品分拣支持的最大物品数量
+     */
+    private static final IntegerConfigEntry PLAYER_ACTION_MAX_SORTING_ITEMS = register(new IntegerConfigEntry("player_action_max_sorting_items", 16));
     private static final GlobalConfigs INSTANCE = new GlobalConfigs();
 
     public static GlobalConfigs getInstance() {
@@ -145,5 +150,10 @@ public class GlobalConfigs {
 
     public boolean isAllowMpPlayerStartupCmd() {
         return ALLOW_MP_PLAYER_STARTUP_CMD.getBooleanValue();
+    }
+
+    public int getPlayerActionMaxSortingItemCount() {
+        int value = PLAYER_ACTION_MAX_SORTING_ITEMS.getIntValue();
+        return MathUtils.clamp(value, 1, 256);
     }
 }

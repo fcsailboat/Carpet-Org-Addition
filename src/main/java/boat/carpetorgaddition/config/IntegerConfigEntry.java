@@ -3,12 +3,12 @@ package boat.carpetorgaddition.config;
 import com.google.gson.JsonPrimitive;
 import org.jspecify.annotations.Nullable;
 
-public class BooleanConfigEntry implements ConfigEntry<JsonPrimitive> {
+public class IntegerConfigEntry implements ConfigEntry<JsonPrimitive> {
     private final String key;
-    private final boolean defaultValue;
-    private boolean value;
+    private final int defaultValue;
+    private int value;
 
-    public BooleanConfigEntry(String key, boolean defaultValue) {
+    public IntegerConfigEntry(String key, int defaultValue) {
         this.key = key;
         this.defaultValue = defaultValue;
         this.value = defaultValue;
@@ -16,7 +16,7 @@ public class BooleanConfigEntry implements ConfigEntry<JsonPrimitive> {
 
     @Override
     public void load(@Nullable JsonPrimitive json) {
-        this.value = json == null ? this.defaultValue : json.getAsBoolean();
+        this.value = json == null ? this.defaultValue : json.getAsInt();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class BooleanConfigEntry implements ConfigEntry<JsonPrimitive> {
         return JsonPrimitive.class;
     }
 
-    public boolean getBooleanValue() {
+    public int getIntValue() {
         return this.value;
     }
 }

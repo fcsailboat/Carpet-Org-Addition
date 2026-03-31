@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
@@ -22,8 +23,18 @@ public enum ActionSerializeType {
      * 物品分拣
      */
     CATEGORIZE(json -> {
-        String item = json.get(ItemCategorizeAction.ITEM).getAsString();
-        ItemStackPredicate predicate = ItemStackPredicate.parse(item);
+        JsonElement element = json.get(ItemCategorizeAction.ITEM);
+        List<ItemStackPredicate> predicates;
+        if (element.isJsonPrimitive()) {
+            predicates = List.of(ItemStackPredicate.parse(element.getAsString()));
+        } else {
+            predicates = element.getAsJsonArray()
+                    .asList()
+                    .stream()
+                    .map(JsonElement::getAsString)
+                    .map(ItemStackPredicate::parse)
+                    .toList();
+        }
         JsonArray thisVecArray = json.get(ItemCategorizeAction.THIS_VEC).getAsJsonArray();
         Vec3 thisVec = new Vec3(
                 thisVecArray.get(0).getAsDouble(),
@@ -36,7 +47,7 @@ public enum ActionSerializeType {
                 otherVecArray.get(1).getAsDouble(),
                 otherVecArray.get(2).getAsDouble()
         );
-        return new ItemCategorizeAction(null, predicate, thisVec, otherVec);
+        return new ItemCategorizeAction(null, predicates, thisVec, otherVec);
     }),
     /**
      * 清空潜影盒

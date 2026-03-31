@@ -25,11 +25,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public class ItemStackPredicate implements Predicate<ItemStack> {
+public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<ItemStackPredicate> {
     private final Predicate<ItemStack> predicate;
     private final String input;
     private final boolean isWildcard;
@@ -63,7 +64,7 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
                 return;
             }
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Argument '%s' not found in command context".formatted(arguments));
     }
 
     public ItemStackPredicate(@NotNull Item item) {
@@ -261,6 +262,20 @@ public class ItemStackPredicate implements Predicate<ItemStack> {
     @Override
     public int hashCode() {
         return this.isEmpty() ? 0 : Objects.hashCode(input);
+    }
+
+    @Override
+    public int compareTo(@NonNull ItemStackPredicate o) {
+        if (this.isEmpty() && o.isEmpty()) {
+            return 0;
+        }
+        if (this.isEmpty() && !o.isEmpty()) {
+            return 1;
+        }
+        if (!this.isEmpty() && o.isEmpty()) {
+            return -1;
+        }
+        return String.CASE_INSENSITIVE_ORDER.compare(this.input, o.input);
     }
 
     public static class AnyOfItemPredicate extends ItemStackPredicate {

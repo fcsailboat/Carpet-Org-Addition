@@ -6,7 +6,9 @@ import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
+import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -25,9 +27,9 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
     public static final String THIS_VEC = "thisVec";
     public static final String OTHER_VEC = "otherVec";
     /**
-     * 要分拣的物品
+     * 要分拣的物品，元素已排序，用于在{@link ItemCategorizeAction#equals(Object)}方法中忽略元素顺序
      */
-    private final ItemStackPredicate predicate;
+    private final List<ItemStackPredicate> predicates;
     /**
      * 如果当前物品是要分拣的物品，则将该物品向这个方向丢出
      */
@@ -38,30 +40,33 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
     private final Vec3 otherVec;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("sorting");
 
-    public ItemCategorizeAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, Vec3 thisVec, Vec3 otherVec) {
+    public ItemCategorizeAction(EntityPlayerMPFake fakePlayer, List<ItemStackPredicate> predicates, Vec3 thisVec, Vec3 otherVec) {
+        if (predicates.isEmpty()) {
+            throw new IllegalArgumentException("At least one item predicate is required");
+        }
         super(fakePlayer);
-        this.predicate = predicate;
+        this.predicates = predicates.stream().distinct().sorted().toList();
         this.thisVec = thisVec;
         this.otherVec = otherVec;
     }
 
     @Override
     protected void tick() {
-        //获取玩家物品栏对象
+        // 获取玩家物品栏对象
         Inventory inventory = this.getFakePlayer().getInventory();
-        //遍历玩家物品栏，找到要丢出的物品
+        // 遍历玩家物品栏，找到要丢出的物品
         for (int index = 0; index < inventory.getContainerSize(); index++) {
-            //定义变量记录当前槽位的物品堆栈对象
+            // 定义变量记录当前槽位的物品堆栈对象
             ItemStack itemStack = inventory.getItem(index);
             if (itemStack.isEmpty()) {
                 continue;
             }
-            //如果是要分拣的物品，就转向一边，否则转身向另一边
-            if (this.predicate.test(itemStack)) {
+            // 如果是要分拣的物品，就转向一边，否则转身向另一边
+            if (this.test(itemStack)) {
                 this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, thisVec);
             } else {
-                //丢弃潜影盒内的物品
-                //判断当前物品是不是潜影盒
+                // 丢弃潜影盒内的物品
+                // 判断当前物品是不是潜影盒
                 if (InventoryUtils.isShulkerBoxItem(itemStack)) {
                     itemStack = pickItemFromShulkerBox(inventory, index);
                 } else {
@@ -69,9 +74,13 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
                     this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, otherVec);
                 }
             }
-            //丢弃该物品堆栈
+            // 丢弃该物品堆栈
             FakePlayerUtils.dropItem(this.getFakePlayer(), itemStack);
         }
+    }
+
+    private boolean test(ItemStack itemStack) {
+        return this.predicates.stream().anyMatch(predicate -> predicate.test(itemStack));
     }
 
     // 从潜影盒中拿取并分拣物品
@@ -102,7 +111,7 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
                     break;
                 }
                 // 根据当前物品设置朝向
-                this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, this.predicate.test(itemStack) ? this.thisVec : this.otherVec);
+                this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, this.test(itemStack) ? this.thisVec : this.otherVec);
             }
             // 丢弃潜影盒内物品堆栈
             FakePlayerUtils.dropItem(this.getFakePlayer(), itemStack);
@@ -114,7 +123,16 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
     public List<Component> info() {
         ArrayList<Component> list = new ArrayList<>();
         // 获取要分拣的物品名称
-        Component itemName = this.predicate.getDisplayName();
+        Component itemName;
+        if (this.predicates.size() == 1) {
+            itemName = this.predicates.getFirst().getDisplayName();
+        } else {
+            TextJoiner joiner = new TextJoiner();
+            for (ItemStackPredicate predicate : this.predicates) {
+                joiner.newline(predicate.getDisplayName());
+            }
+            itemName = LocalizationKeys.Item.ITEM.builder().setItalic().setBold().setHover(joiner.join()).build();
+        }
         // 获取假玩家的显示名称
         Component fakeName = this.getFakePlayer().getDisplayName();
         // 将假玩家正在分拣物品的消息添加到集合中
@@ -134,8 +152,16 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        // 要分拣的物品
-        json.addProperty(ITEM, this.predicate.toString());
+        if (this.predicates.size() == 1) {
+            // 要分拣的物品
+            json.addProperty(ITEM, this.predicates.getFirst().toString());
+        } else {
+            JsonArray array = new JsonArray();
+            for (ItemStackPredicate predicate : this.predicates) {
+                array.add(predicate.toString());
+            }
+            json.add(ITEM, array);
+        }
         // 当前物品要丢弃的位置
         JsonArray thisVecJson = new JsonArray();
         thisVecJson.add(this.thisVec.x);
@@ -171,11 +197,11 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
             return false;
         }
         ItemCategorizeAction that = (ItemCategorizeAction) o;
-        return Objects.equals(predicate, that.predicate) && Objects.equals(thisVec, that.thisVec) && Objects.equals(otherVec, that.otherVec);
+        return Objects.equals(predicates, that.predicates) && Objects.equals(thisVec, that.thisVec) && Objects.equals(otherVec, that.otherVec);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(predicate, thisVec, otherVec);
+        return Objects.hash(predicates, thisVec, otherVec);
     }
 }

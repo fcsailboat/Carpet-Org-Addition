@@ -3,6 +3,7 @@ package boat.carpetorgaddition.command;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.*;
@@ -46,9 +47,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 public class PlayerActionCommand extends AbstractServerCommand {
@@ -64,11 +63,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         this.dispatcher.register(Commands.literal(name)
                 .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION))
                 .then(Commands.argument("player", EntityArgument.player())
-                        .then(Commands.literal("sorting")
-                                .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
-                                        .then(Commands.argument("this", Vec3Argument.vec3())
-                                                .then(Commands.argument("other", Vec3Argument.vec3())
-                                                        .executes(this::setCategorize)))))
+                        .then(thenSorting())
                         .then(Commands.literal("empty")
                                 .executes(context -> setEmptyTheContainer(context, true))
                                 .then(Commands.argument("filter", ItemPredicateArgument.itemPredicate(this.access))
@@ -139,6 +134,27 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                         .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))));
     }
 
+    private LiteralArgumentBuilder<CommandSourceStack> thenSorting() {
+        LiteralArgumentBuilder<CommandSourceStack> sorting = Commands.literal("sorting");
+        RequiredArgumentBuilder<CommandSourceStack, Result> result = null;
+        int max = GlobalConfigs.getInstance().getPlayerActionMaxSortingItemCount();
+        for (int i = max; i >= 0; i--) {
+            final int count = i + 1;
+            var argument = Commands.argument("item" + count, ItemPredicateArgument.itemPredicate(this.access));
+            if (result != null) {
+                if (i < max - 1) {
+                    argument = argument.then(Commands.literal("or").then(result));
+                }
+                argument.then(Commands.literal("at")
+                        .then(Commands.argument("this", Vec3Argument.vec3())
+                                .then(Commands.argument("other", Vec3Argument.vec3())
+                                        .executes(context -> setCategorize(context, count)))));
+            }
+            result = argument;
+        }
+        return sorting.then(result);
+    }
+
     private LiteralArgumentBuilder<CommandSourceStack> register(LiteralArgumentBuilder<CommandSourceStack> node) {
         for (BedrockAction.BedrockRegionType value : BedrockAction.BedrockRegionType.values()) {
             node.then(Commands.literal(value.name().toLowerCase(Locale.ROOT))
@@ -205,17 +221,20 @@ public class PlayerActionCommand extends AbstractServerCommand {
     }
 
     // 设置物品分拣
-    private int setCategorize(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private int setCategorize(CommandContext<CommandSourceStack> context, int count) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        // 获取要分拣的物品对象
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        List<ItemStackPredicate> predicates = new ArrayList<>();
+        // 获取要分拣的物品
+        for (int i = 1; i <= count; i++) {
+            predicates.add(new ItemStackPredicate(context, "item" + i));
+        }
         // 获取分拣物品要丢出的方向
         Vec3 thisVec = Vec3Argument.getVec3(context, "this");
         // 获取非分拣物品要丢出的方向
         Vec3 otherVec = Vec3Argument.getVec3(context, "other");
-        actionManager.setAction(new ItemCategorizeAction(fakePlayer, predicate, thisVec, otherVec));
+        actionManager.setAction(new ItemCategorizeAction(fakePlayer, predicates, thisVec, otherVec));
         return 1;
     }
 
