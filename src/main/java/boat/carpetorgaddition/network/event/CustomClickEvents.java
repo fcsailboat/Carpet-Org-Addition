@@ -1,10 +1,8 @@
 package boat.carpetorgaddition.network.event;
 
-import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.PlayerCommandExtension;
 import boat.carpetorgaddition.dialog.DialogProvider;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.rule.RuleAccessor;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
@@ -100,14 +98,6 @@ public class CustomClickEvents {
         } else {
             throw CommandUtils.createException(LocalizationKeys.Operation.Page.NON_EXISTENT.translate());
         }
-    });
-    /**
-     * 启用潜影盒堆叠
-     */
-    public static final Identifier ENABLE_SHULKER_BOX_STACKABLE = register("enable_shulker_box_stackable", context -> {
-        RuleAccessor<Boolean> accessor = CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE;
-        CommandSourceStack source = context.getSource();
-        ScopedValue.where(CarpetOrgAdditionSettings.CONFIRM_ENABLE, true).run(() -> accessor.setRuleValue(source, true));
     });
 
     /**

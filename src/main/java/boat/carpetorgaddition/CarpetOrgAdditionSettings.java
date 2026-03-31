@@ -4,14 +4,10 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.navigator.AbstractNavigator;
 import boat.carpetorgaddition.periodic.navigator.NavigatorManager;
 import boat.carpetorgaddition.rule.*;
-import boat.carpetorgaddition.rule.helper.CompatibilityDialogProvider;
 import boat.carpetorgaddition.rule.value.*;
-import boat.carpetorgaddition.util.PlayerUtils;
 import carpet.api.settings.CarpetRule;
 import carpet.api.settings.RuleCategory;
 import carpet.api.settings.SettingsManager;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -41,10 +37,6 @@ public class CarpetOrgAdditionSettings {
      * 是否正在使用引雷三叉戟
      */
     public static final ScopedValue<Boolean> USE_CHANNELING_TRIDENT = ScopedValue.newInstance();
-    /**
-     * 是否确认启用规则，用于潜影盒可堆叠的兼容性警告对话框
-     */
-    public static final ScopedValue<Boolean> CONFIRM_ENABLE = ScopedValue.newInstance();
     private static final Set<RuleContext<?>> RULES = new LinkedHashSet<>();
     public static final String OPS = "ops";
     public static final String TRUE = "true";
@@ -793,22 +785,6 @@ public class CarpetOrgAdditionSettings {
     public static final RuleAccessor<Boolean> SHULKER_BOX_STACKABLE = register(
             RuleFactory.create(Boolean.class, "shulkerBoxStackable", false)
                     .addCategories(RuleCategory.EXPERIMENTAL)
-                    .addSilenceValidator((source, value) -> {
-                        if (CONFIRM_ENABLE.orElse(false)) {
-                            return true;
-                        }
-                        if (!CarpetOrgAdditionConstants.LITHIUM || !value || source == null) {
-                            return true;
-                        }
-                        ServerPlayer player = source.getPlayer();
-                        if (player == null) {
-                            return true;
-                        }
-                        MinecraftServer server = source.getServer();
-                        Dialog dialog = CompatibilityDialogProvider.getShulkerBoxStackableDialog(server);
-                        PlayerUtils.openDialog(player, dialog);
-                        return false;
-                    })
                     .build()
     );
 

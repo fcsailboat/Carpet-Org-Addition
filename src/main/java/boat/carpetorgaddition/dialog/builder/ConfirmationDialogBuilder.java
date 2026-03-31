@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.dialog.ActionButton;
 import net.minecraft.server.dialog.ConfirmationDialog;
 
+@SuppressWarnings("unused")
 public class ConfirmationDialogBuilder extends DialogBuilder<ConfirmationDialogBuilder, ConfirmationDialog> {
     private ActionButton yesButton = ActionButtonBuilder.of(LocalizationKey.literal("gui.yes").translate()).build();
     private ActionButton noButton = ActionButtonBuilder.of(LocalizationKey.literal("gui.cancel").translate()).build();
