@@ -37,10 +37,7 @@ dependencies {
 }
 
 processResources {
-    def depend_version = minecraft_version
-            .replace("snapshot-", "alpha.")
-            .replace("pre-", "pre.")
-            .replace("rc-", "rc.")
+    def depend_version = minecraftDependVersion(minecraft_version)
     inputs.property "version", mod_version
     inputs.property "minecraft_version", minecraft_version
     inputs.property "loader_version", loader_version
@@ -54,6 +51,15 @@ processResources {
                 "loader_version": loader_version,
                 "depend_version": depend_version,
                 "build_timestamp": buildTimestamp
+    }
+}
+
+private static String minecraftDependVersion(String version) {
+    if (version.matches("(\\d){2,}\\.\\d+") || version.matches("(\\d){2,}\\.\\d+\\.\\d+")) {
+        String[] split = version.split("\\.")
+        return "%d.%d.*".formatted(Integer.parseInt(split[0]), Integer.parseInt(split[1]))
+    } else {
+        return version.replace("snapshot-", "alpha.").replace("pre-", "pre.").replace("rc-", "rc.")
     }
 }
 
