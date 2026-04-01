@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -51,7 +52,7 @@ public class RuleDocumentGenerator {
             String time = DateTimeFormatter.ofPattern("yyMMddHHmmss").format(LocalDateTime.now());
             FileInputStream input = new FileInputStream(ROOT.resolve("docs/rules.md").toFile());
             Files.copy(input, ROOT.resolve(Path.of("docs/backups/rules/" + time + ".md")));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(ROOT.resolve("docs/rules.md").toFile()));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(ROOT.resolve("docs/rules.md").toFile(), StandardCharsets.UTF_8));
             try (writer) {
                 this.head(writer);
                 this.body(writer);

@@ -24,30 +24,31 @@ public class RuleInformation {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         // 规则名称
-        sb.append("### ").append(this.translatedName).append("(").append(this.context.getName()).append(")\n");
-        sb.append("\n");
+        String lineSeparator = System.lineSeparator();
+        sb.append("### ").append(this.translatedName).append("(").append(this.context.getName()).append(")").append(lineSeparator);
+        sb.append(lineSeparator);
         // 规则描述
-        sb.append(this.docs).append(this.hasExtra() ? "<br>\n" : "\n");
+        sb.append(this.docs).append(this.hasExtra() ? "<br>" + lineSeparator : lineSeparator);
         // 规则扩展描述
         if (this.hasExtra()) {
             for (String extra : this.extra) {
-                sb.append("_").append(extra).append("_<br>\n");
+                sb.append("_").append(extra).append("_<br>").append(lineSeparator);
             }
-            sb.append("\n");
+            sb.append(lineSeparator);
         } else {
-            sb.append("\n");
+            sb.append(lineSeparator);
         }
         // 参数类型
-        sb.append("- 类型：`").append(this.getArgumentType()).append("`\n");
+        sb.append("- 类型：`").append(this.getArgumentType()).append("`").append(lineSeparator);
         // 参数默认值
-        sb.append("- 默认值：`").append(this.getDefaultValue()).append("`\n");
+        sb.append("- 默认值：`").append(this.getDefaultValue()).append("`").append(lineSeparator);
         // 参考选项
         if (this.context.getSuggestions().isEmpty()) {
             if (isBoolean()) {
-                sb.append("- 参考选项：`true`，`false`\n");
+                sb.append("- 参考选项：`true`，`false`").append(lineSeparator);
             }
         } else {
-            StringJoiner sj = new StringJoiner("，", "- 参考选项：", "\n");
+            StringJoiner sj = new StringJoiner("，", "- 参考选项：", lineSeparator);
             for (String option : this.context.getSuggestions()) {
                 sj.add("`" + option + "`");
             }
@@ -104,7 +105,7 @@ public class RuleInformation {
 
     // 获取规则分类
     private String getCategory() {
-        StringJoiner stringJoiner = new StringJoiner("，", "- 分类：", "\n");
+        StringJoiner stringJoiner = new StringJoiner("，", "- 分类：", System.lineSeparator());
         for (String category : this.context.getCategories()) {
             stringJoiner.add("`" + switch (category) {
                 case CarpetOrgAdditionSettings.ORG -> "Org";
