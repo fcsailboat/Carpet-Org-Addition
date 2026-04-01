@@ -55,12 +55,25 @@ processResources {
 }
 
 private static String minecraftDependVersion(String version) {
-    if (version.matches("(\\d){2,}\\.\\d+") || version.matches("(\\d){2,}\\.\\d+\\.\\d+")) {
+    if (isOfficialVersion(version)) {
         String[] split = version.split("\\.")
         return "%d.%d.*".formatted(Integer.parseInt(split[0]), Integer.parseInt(split[1]))
     } else {
         return version.replace("snapshot-", "alpha.").replace("pre-", "pre.").replace("rc-", "rc.")
     }
+}
+
+private static String minecraftJarVersion(String version) {
+    if (isOfficialVersion(version)) {
+        String[] split = version.split("\\.")
+        return "%d.%d.x".formatted(Integer.parseInt(split[0]), Integer.parseInt(split[1]))
+    } else {
+        return version
+    }
+}
+
+private static boolean isOfficialVersion(String version) {
+    return version.matches("(\\d){2,}\\.\\d+") || version.matches("(\\d){2,}\\.\\d+\\.\\d+")
 }
 
 test {
@@ -91,7 +104,7 @@ jar {
     exclude "boat/util/**"
     // 构建模组前自动单元测试
     dependsOn test
-    archiveBaseName = "${archives_base_name}-mc${minecraft_version}"
+    archiveBaseName = "${archives_base_name}-mc${minecraftJarVersion(minecraft_version)}"
 }
 
 loom {
