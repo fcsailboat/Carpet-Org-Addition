@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.mixin.rule;
 
-import boat.carpetorgaddition.wheel.BlockHardnessModifiers;
+import boat.carpetorgaddition.wheel.misc.BlockHardnessModifiers;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
@@ -22,7 +22,7 @@ public abstract class AbstractBlockStateMixin {
      * {@link PistonBlockMixin}
      */
     @ModifyReturnValue(method = "getDestroySpeed", at = @At("RETURN"))
-    public float getBlockHardness(float hardness, @Local(argsOnly = true) BlockGetter world, @Local(argsOnly = true) BlockPos pos) {
-        return BlockHardnessModifiers.getHardness(this.getBlock(), world, pos, hardness);
+    public float getBlockHardness(float hardness, @Local(argsOnly = true, name = "level") BlockGetter level, @Local(argsOnly = true, name = "pos") BlockPos pos) {
+        return BlockHardnessModifiers.getHardness(this.getBlock(), level, pos, hardness);
     }
 }

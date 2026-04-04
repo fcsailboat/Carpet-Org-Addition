@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-public class RuleContext<T> {
+public final class RuleContext<T> {
     private final Class<T> type;
     private final Collection<String> categories;
     private final Collection<String> suggestions;

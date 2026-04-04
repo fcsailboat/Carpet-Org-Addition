@@ -17,12 +17,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class RuleFactory {
+public final class RuleFactory {
     public static <T> Builder<T> create(Class<T> type, String rule, T value) {
         return new Builder<>(type, rule, value);
     }
 
-    public static class Builder<T> {
+    public static final class Builder<T> {
         private final Class<T> type;
         private final String name;
         private final Collection<String> categories = new ArrayList<>();
@@ -154,17 +154,18 @@ public class RuleFactory {
             return this.addValidator(ValueValidator.of(predicate, supplier));
         }
 
-        public final Builder<T> addValidator(ValueValidator<T> valueValidators) {
+        public Builder<T> addValidator(ValueValidator<T> valueValidators) {
             this.validators.add(valueValidators);
             return this;
         }
 
-        public final Builder<T> addSilenceValidator(SilenceValueValidator<T> observers) {
+        @SuppressWarnings("unused")
+        public Builder<T> addSilenceValidator(SilenceValueValidator<T> observers) {
             this.silenceValidators.add(observers);
             return this;
         }
 
-        public final Builder<T> addListener(RuleListener<T> listener) {
+        public Builder<T> addListener(RuleListener<T> listener) {
             this.listeners.add(listener);
             return this;
         }

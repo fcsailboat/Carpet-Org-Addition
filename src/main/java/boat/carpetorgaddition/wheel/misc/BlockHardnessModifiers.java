@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.wheel;
+package boat.carpetorgaddition.wheel.misc;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import net.minecraft.core.BlockPos;

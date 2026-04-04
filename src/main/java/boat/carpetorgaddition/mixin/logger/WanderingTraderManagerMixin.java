@@ -1,20 +1,17 @@
 package boat.carpetorgaddition.mixin.logger;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
-import boat.carpetorgaddition.logger.LoggerRegister;
+import boat.carpetorgaddition.logger.LoggerAccessor;
 import boat.carpetorgaddition.logger.Loggers;
-import boat.carpetorgaddition.logger.WanderingTraderSpawnLogger;
-import boat.carpetorgaddition.logger.WanderingTraderSpawnLogger.SpawnCountdown;
-import boat.carpetorgaddition.mixin.accessor.carpet.LoggerAccessor;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.misc.WanderingTraderSpawnData;
+import boat.carpetorgaddition.wheel.misc.WanderingTraderSpawnData.SpawnCountdown;
 import boat.carpetorgaddition.wheel.provider.CommandProvider;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
-import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import carpet.logging.HUDLogger;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.ChatFormatting;
@@ -45,28 +42,28 @@ public abstract class WanderingTraderManagerMixin {
     private int tickDelay;
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void updataLogger(ServerLevel world, boolean spawnMonsters, CallbackInfo ci) {
-        if (world.getGameRules().get(GameRules.SPAWN_WANDERING_TRADERS)) {
+    private void updataLogger(ServerLevel level, boolean spawnEnemies, CallbackInfo ci) {
+        if (level.getGameRules().get(GameRules.SPAWN_WANDERING_TRADERS)) {
             WanderingTraderData data = this.getTraderData();
             // 获取流浪商人生成的倒计时，并换算成秒
             int countdown = ((data.spawnDelay() == 0 ? 1200 : data.spawnDelay()) - (1200 - this.tickDelay)) / 20;
-            WanderingTraderSpawnLogger.setSpawnCountdown(new SpawnCountdown(countdown, data.spawnChance()));
+            WanderingTraderSpawnData.setSpawnCountdown(new SpawnCountdown(countdown, data.spawnChance()));
             return;
         }
-        WanderingTraderSpawnLogger.setSpawnCountdown(null);
+        WanderingTraderSpawnData.setSpawnCountdown(null);
     }
 
     @WrapOperation(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/npc/wanderingtrader/WanderingTrader;setHomeTo(Lnet/minecraft/core/BlockPos;I)V"))
     private void broadcastSpawnSuccess(WanderingTrader trader, BlockPos pos, int i, Operation<Void> original) {
         original.call(trader, pos, i);
-        if (LoggerRegister.wanderingTrader && WanderingTraderSpawnLogger.spawnCountdownNonNull()) {
+        LoggerAccessor accessor = Loggers.WANDERING_TRADER;
+        if (accessor.isEnable() && WanderingTraderSpawnData.spawnCountdownNonNull()) {
             // 获取流浪商人所在的服务器
             MinecraftServer server = ServerUtils.getServer(trader);
             if (server == null) {
                 return;
             }
-            HUDLogger logger = Loggers.getWanderingTraderLogger();
-            Set<Map.Entry<String, String>> entries = ((LoggerAccessor) logger).getSubscribedOnlinePlayers().entrySet();
+            Set<Map.Entry<String, String>> entries = accessor.getSubscribedOnlinePlayers().entrySet();
             // 普通消息
             Component blockPos = TextProvider.blockPos(trader.blockPosition(), ChatFormatting.GREEN);
             for (Map.Entry<String, String> entry : entries) {
@@ -75,7 +72,6 @@ public abstract class WanderingTraderManagerMixin {
                     continue;
                 }
                 // 广播流浪商人生成成功
-                LocalizationKey key = WanderingTraderSpawnLogger.KEY;
                 if (CommandUtils.canUseCommand(player.createCommandSourceStack(), CarpetOrgAdditionSettings.COMMAND_NAVIGATE)) {
                     // 带点击导航的消息
                     Component button = TextBuilder.of(LocalizationKeys.Button.NAVIGATE.translate())
@@ -83,9 +79,9 @@ public abstract class WanderingTraderManagerMixin {
                             .setHover(LocalizationKeys.Button.NAVIGATE_HOVER.translate(trader.getName()))
                             .setColor(ChatFormatting.AQUA)
                             .build();
-                    MessageUtils.sendMessage(player, key.then("message_with_navigate").translate(blockPos, button));
+                    MessageUtils.sendMessage(player, accessor.getLocalizationKey().then("message_with_navigate").translate(blockPos, button));
                 } else {
-                    Component message = key.then("message").translate(blockPos);
+                    Component message = accessor.getLocalizationKey().then("message").translate(blockPos);
                     MessageUtils.sendMessage(player, message);
                 }
                 // 播放音效通知流浪商人生成

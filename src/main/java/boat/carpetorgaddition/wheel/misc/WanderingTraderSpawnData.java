@@ -1,5 +1,7 @@
-package boat.carpetorgaddition.logger;
+package boat.carpetorgaddition.wheel.misc;
 
+import boat.carpetorgaddition.logger.LoggerAccessor;
+import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import net.minecraft.network.chat.Component;
@@ -9,19 +11,19 @@ import net.minecraft.world.level.gamerules.GameRules;
 /**
  * 流浪商人生成记录器
  */
-public class WanderingTraderSpawnLogger {
+public class WanderingTraderSpawnData {
     private static SpawnCountdown spawnCountdown;
-    public static final LocalizationKey KEY = LocalizationKeys.LOGGER.then(LoggerNames.WANDERING_TRADER_SPAWN_COUNTDOWN);
 
     // 更新HUD
     public static void updateHud(MinecraftServer server) {
+        LoggerAccessor accessor = Loggers.WANDERING_TRADER;
         if (server.overworld().getGameRules().get(GameRules.SPAWN_WANDERING_TRADERS)) {
-            if (LoggerRegister.wanderingTrader && spawnCountdown != null) {
+            if (accessor.isEnable() && spawnCountdown != null) {
                 // 计算流浪商人生成概率的百分比
                 double chance = spawnCountdown.spawnChance / 10.0;
                 Component time;
                 // 流浪商人生成倒计时（单位：秒）
-                int spawnCountdown = WanderingTraderSpawnLogger.spawnCountdown.countdown + 1;
+                int spawnCountdown = WanderingTraderSpawnData.spawnCountdown.countdown + 1;
                 if (spawnCountdown <= 60) {
                     // 小于60秒
                     time = LocalizationKeys.Time.SECOND.translate(spawnCountdown);
@@ -32,15 +34,15 @@ public class WanderingTraderSpawnLogger {
                     // %s分%s秒
                     time = LocalizationKeys.Time.MINUTE_SECOND.translate(spawnCountdown / 60, spawnCountdown % 60);
                 }
-                Loggers.getWanderingTraderLogger().log((_, _) -> {
-                    Component message = KEY.then("hud").translate(time, (String.format("%.1f", chance) + "%"));
+                accessor.getLogger().log((_, _) -> {
+                    Component message = accessor.getLocalizationKey().then("hud").translate(time, (String.format("%.1f", chance) + "%"));
                     return new Component[]{message};
                 });
             }
         } else {
-            Loggers.getWanderingTraderLogger().log((_, _) -> {
+            accessor.getLogger().log((_, _) -> {
                 Component gamerule = LocalizationKey.literal(GameRules.SPAWN_WANDERING_TRADERS.getDescriptionId()).translate();
-                return new Component[]{KEY.then("gamerule_not_enabled").translate(gamerule)};
+                return new Component[]{accessor.getLocalizationKey().then("gamerule_not_enabled").translate(gamerule)};
             });
         }
     }
@@ -51,7 +53,7 @@ public class WanderingTraderSpawnLogger {
     }
 
     public static void setSpawnCountdown(SpawnCountdown spawnCountdown) {
-        WanderingTraderSpawnLogger.spawnCountdown = spawnCountdown;
+        WanderingTraderSpawnData.spawnCountdown = spawnCountdown;
     }
 
     public static class SpawnCountdown {

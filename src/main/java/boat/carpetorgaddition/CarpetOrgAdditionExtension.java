@@ -4,7 +4,7 @@ import boat.carpetorgaddition.command.CommandRegister;
 import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.command.SpectatorCommand;
 import boat.carpetorgaddition.config.GlobalConfigs;
-import boat.carpetorgaddition.logger.LoggerRegister;
+import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.network.s2c.PlayerTypeSyncS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
@@ -167,7 +167,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     // 注册记录器
     @Override
     public void registerLoggers() {
-        LoggerRegister.register();
+        Loggers.register();
     }
 
     // 注册命令

@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.mixin.util.carpet;
 
-import boat.carpetorgaddition.logger.LoggerRegister;
+import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.logging.LoggerRegistry;
 import net.minecraft.server.MinecraftServer;
@@ -23,7 +23,7 @@ public class LoggerRegistryMixin {
         }
         ServerPlayer player = server.get().getPlayerList().getPlayerByName(playerName);
         if (player != null) {
-            LoggerRegister.onUnsubscribe(player, logName);
+            Loggers.getLogger(logName).ifPresent(accessor -> accessor.onUnsubscribe(player));
         }
     }
 }

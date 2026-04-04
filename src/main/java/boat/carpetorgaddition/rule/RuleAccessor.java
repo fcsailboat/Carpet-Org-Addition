@@ -12,7 +12,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Locale;
 import java.util.function.Supplier;
 
-public class RuleAccessor<T> {
+public final class RuleAccessor<T> {
     private final Supplier<T> value;
     private final CarpetRule<T> rule;
     private final String key;
@@ -50,6 +50,7 @@ public class RuleAccessor<T> {
         return this.key;
     }
 
+    @SuppressWarnings("unused")
     public void setRuleValue(CommandSourceStack source, T value) {
         SettingsManagerAccessor accessor = (SettingsManagerAccessor) this.rule.settingsManager();
         accessor.changeRuleValue(source, this.rule, this.valueAsString(value));

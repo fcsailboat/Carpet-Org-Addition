@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
-import boat.carpetorgaddition.logger.LoggerNames;
+import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
@@ -274,7 +274,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             EntityPlayerMPFake fakePlayer = this.getFakePlayer();
             MinecraftServer server = ServerUtils.getServer(fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (PlayerUtils.isSubscribeLogger(player, LoggerNames.FAKE_PLAYER_PATHFINDING)) {
+                if (Loggers.PATHFINDING.isSubscribed(player)) {
                     PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), this.nodes));
                 }
             }
@@ -287,7 +287,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             MinecraftServer server = ServerUtils.getServer(fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (PlayerUtils.isSubscribeLogger(player, LoggerNames.FAKE_PLAYER_PATHFINDING)) {
+                if (Loggers.PATHFINDING.isSubscribed(player)) {
                     PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), List.of()));
                 }
             }

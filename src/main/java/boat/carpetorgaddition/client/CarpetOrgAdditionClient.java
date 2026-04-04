@@ -1,5 +1,7 @@
 package boat.carpetorgaddition.client;
 
+import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
@@ -17,5 +19,15 @@ public class CarpetOrgAdditionClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         CarpetOrgAdditionClientRegister.register();
+        String name = ClientUtils.getSession().getName();
+        String massage = switch (name) {
+            case "qscfthmko099" -> "How did we get here?";
+            case "half_kite" -> "Happy Birthday!";
+            case "MR_LAGANXIANG" -> "You're back!!!";
+            default -> null;
+        };
+        if (massage != null) {
+            CarpetOrgAddition.LOGGER.info(massage);
+        }
     }
 }

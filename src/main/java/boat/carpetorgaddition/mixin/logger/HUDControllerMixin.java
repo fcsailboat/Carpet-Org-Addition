@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.mixin.logger;
 
-import boat.carpetorgaddition.logger.WanderingTraderSpawnLogger;
+import boat.carpetorgaddition.wheel.misc.WanderingTraderSpawnData;
 import carpet.logging.HUDController;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,6 +15,6 @@ import java.util.List;
 public class HUDControllerMixin {
     @Inject(method = "update_hud", at = @At(value = "INVOKE", target = "Ljava/util/Map;keySet()Ljava/util/Set;"), remap = false)
     private static void updateHud(MinecraftServer server, List<ServerPlayer> force, CallbackInfo ci) {
-        WanderingTraderSpawnLogger.updateHud(server);
+        WanderingTraderSpawnData.updateHud(server);
     }
 }

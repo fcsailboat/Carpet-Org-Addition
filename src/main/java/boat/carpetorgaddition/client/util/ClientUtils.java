@@ -163,4 +163,8 @@ public class ClientUtils {
     public static boolean isFakePlayer(Player player) {
         return FAKE_PLAYERS.contains(player.getUUID());
     }
+
+    public static User getSession() {
+        return getClient().getUser();
+    }
 }
