@@ -79,9 +79,13 @@ public class CarpetOrgAddition implements ModInitializer {
         }
         CarpetOrgAddition.LOGGER.debug("Build timestamp: {}", CarpetOrgAdditionConstants.BUILD_TIMESTAMP);
         if (AUTO_GENERATE_RULE_DOCUMENT) {
-            RuleDocumentGenerator generator = RuleDocumentGenerator.of();
-            generator.generate();
-            CarpetOrgAddition.LOGGER.debug("Rule document has been generated");
+            try {
+                RuleDocumentGenerator generator = RuleDocumentGenerator.of();
+                generator.generate();
+                CarpetOrgAddition.LOGGER.debug("Rule document has been generated");
+            } catch (RuntimeException e) {
+                CarpetOrgAddition.LOGGER.warn("Unable to generate rule document: ", e);
+            }
         }
     }
 

@@ -101,7 +101,7 @@ public class CarpetOrgAdditionConstants {
     }
 
     /**
-     * @apiNote 用于推迟字段初始化
+     * @apiNote 用于推迟字段初始化，避免比{@link GlobalConfigs}先初始化
      */
     private static class HiddenFunctionHolder {
         private static final boolean ENABLE_HIDDEN_FUNCTION = GlobalConfigs.getInstance().isEnableHiddenFunction();

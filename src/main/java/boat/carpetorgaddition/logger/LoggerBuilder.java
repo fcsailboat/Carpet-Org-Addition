@@ -87,8 +87,8 @@ public class LoggerBuilder {
     private Field buildDummyBooleanField() {
         String className = CarpetOrgAdditionConstants.COMPACT_MOD_NAME + "Dummy" + this.toUpperCamelCase(this.name);
         ClassDesc dummy = ClassDesc.of(className);
-        byte[] bytes = ClassFile.of().build(dummy,
-                classBuilder -> classBuilder.withField(
+        byte[] bytes = ClassFile.of().build(dummy, classBuilder -> classBuilder
+                .withField(
                         this.name,
                         ConstantDescs.CD_boolean,
                         fieldBuilder -> fieldBuilder.withFlags(AccessFlag.PUBLIC, AccessFlag.STATIC)

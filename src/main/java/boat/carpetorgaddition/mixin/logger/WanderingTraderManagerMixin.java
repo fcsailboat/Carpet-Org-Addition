@@ -42,7 +42,7 @@ public abstract class WanderingTraderManagerMixin {
     private int tickDelay;
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void updataLogger(ServerLevel level, boolean spawnEnemies, CallbackInfo ci) {
+    private void updateLogger(ServerLevel level, boolean spawnEnemies, CallbackInfo ci) {
         if (level.getGameRules().get(GameRules.SPAWN_WANDERING_TRADERS)) {
             WanderingTraderData data = this.getTraderData();
             // 获取流浪商人生成的倒计时，并换算成秒

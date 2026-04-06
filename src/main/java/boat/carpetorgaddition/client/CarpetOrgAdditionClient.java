@@ -19,11 +19,17 @@ public class CarpetOrgAdditionClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         CarpetOrgAdditionClientRegister.register();
+        this.logWittyComment();
+    }
+
+    private void logWittyComment() {
         String name = ClientUtils.getSession().getName();
         String massage = switch (name) {
             case "qscfthmko099" -> "How did we get here?";
-            case "half_kite" -> "Happy Birthday!";
+            case "half_kite" -> "Happy birthday!";
             case "MR_LAGANXIANG" -> "You're back!!!";
+            case "qweryyuoskv" -> "The bomb been planted!";
+            case "zhaixianyu" -> "Why don't you ever take advice?";
             default -> null;
         };
         if (massage != null) {
