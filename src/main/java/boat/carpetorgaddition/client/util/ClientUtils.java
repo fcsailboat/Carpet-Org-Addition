@@ -126,7 +126,7 @@ public class ClientUtils {
      */
     @Nullable
     public static Screen getCurrentScreen() {
-        return getClient().screen;
+        return getClient().gui.screen();
     }
 
     /**

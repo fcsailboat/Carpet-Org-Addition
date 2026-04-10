@@ -27,8 +27,8 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
     // Carpet: https://github.com/gnembon/fabric-carpet
-    implementation(files("lib/fabric-carpet-26.1+v260402.jar"))
-    // implementation("curse.maven:carpet-349239:${project.carpet_version}")
+    // implementation(files("lib/fabric-carpet-26.1+v260402.jar"))
+    implementation("curse.maven:carpet-349239:${project.carpet_version}")
     // MixinExtras: https://github.com/LlamaLad7/MixinExtras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")))
     // Lithium: https://modrinth.com/mod/lithium/versions

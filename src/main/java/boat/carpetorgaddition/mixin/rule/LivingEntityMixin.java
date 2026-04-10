@@ -20,9 +20,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DeathProtection;
-import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -35,17 +36,14 @@ import java.util.Map;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+    @Shadow
+    protected abstract @Nullable Map<EquipmentSlot, ItemStack> collectEquipmentChanges(Map<EquipmentSlot, ItemStack> lastEquipmentItems);
+
+    @Shadow
+    @Final
+    private Map<EquipmentSlot, ItemStack> lastEquipmentItems;
     @Unique
     private final LivingEntity self = (LivingEntity) (Object) this;
-
-    /**
-     * 在 {@link PlayerEntityMixin#getBlockBreakingSpeed(BlockState, CallbackInfoReturnable)}中被使用
-     */
-    @Shadow
-    @SuppressWarnings("JavadocReference")
-    private Map<EquipmentSlot, ItemStack> collectEquipmentChanges() {
-        return Map.of();
-    }
 
     // 禁用伤害免疫
     @WrapOperation(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;invulnerableTime:I", opcode = Opcodes.GETFIELD))
@@ -58,7 +56,7 @@ public abstract class LivingEntityMixin {
 
     // 不死图腾无敌时间
     @Inject(method = "checkTotemDeathProtection", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"))
-    private void setInvincibleTime(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+    private void setInvincibleTime(DamageSource killingDamage, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.TOTEM_OF_UNDYING_INVINCIBLE_TIME.value()) {
             this.self.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4));
         }
@@ -136,6 +134,6 @@ public abstract class LivingEntityMixin {
     @Unique
     @SuppressWarnings("UnusedReturnValue")
     protected Map<EquipmentSlot, ItemStack> applyToolEffects() {
-        return this.collectEquipmentChanges();
+        return this.collectEquipmentChanges(this.lastEquipmentItems);
     }
 }
