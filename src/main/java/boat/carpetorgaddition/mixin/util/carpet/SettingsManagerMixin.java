@@ -3,7 +3,7 @@ package boat.carpetorgaddition.mixin.util.carpet;
 import boat.carpetorgaddition.CarpetOrgAdditionExtension;
 import boat.carpetorgaddition.dataupdate.json.CarpetConfDataUpdater;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.rule.OrgRule;
+import boat.carpetorgaddition.rule.BuiltRule;
 import boat.carpetorgaddition.rule.RuleConfig;
 import boat.carpetorgaddition.rule.RuleUtils;
 import boat.carpetorgaddition.util.IOUtils;
@@ -53,7 +53,7 @@ public abstract class SettingsManagerMixin {
 
     @Inject(method = "setDefault", at = @At(value = "HEAD"), cancellable = true)
     private void setDefault(CommandSourceStack source, CarpetRule<?> rule, String stringValue, CallbackInfoReturnable<Integer> cir) {
-        if (rule instanceof OrgRule<?> && thisManager == CarpetOrgAdditionExtension.getSettingManager()) {
+        if (rule instanceof BuiltRule<?> && thisManager == CarpetOrgAdditionExtension.getSettingManager()) {
             if (locked() || !this.rules.containsKey(rule.name())) {
                 cir.setReturnValue(0);
                 return;
@@ -80,7 +80,7 @@ public abstract class SettingsManagerMixin {
 
     @Inject(method = "removeDefault", at = @At("HEAD"), cancellable = true)
     private void removeDefault(CommandSourceStack source, CarpetRule<?> rule, CallbackInfoReturnable<Integer> cir) {
-        if (rule instanceof OrgRule<?> && thisManager == CarpetOrgAdditionExtension.getSettingManager()) {
+        if (rule instanceof BuiltRule<?> && thisManager == CarpetOrgAdditionExtension.getSettingManager()) {
             if (locked() || !this.rules.containsKey(rule.name())) {
                 cir.setReturnValue(0);
                 return;
@@ -173,12 +173,12 @@ public abstract class SettingsManagerMixin {
 
     @Inject(method = "setRule", at = @At("HEAD"))
     private void setRule(CommandSourceStack source, CarpetRule<?> rule, String newValue, CallbackInfoReturnable<Integer> cir) {
-        OrgRule.RULE_UNCHANGED.set(false);
+        BuiltRule.RULE_UNCHANGED.set(false);
     }
 
     @Inject(method = "setRule", at = @At(value = "INVOKE", target = "Lcarpet/api/settings/CarpetRule;set(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;)V", shift = At.Shift.AFTER), cancellable = true)
     private void hideCommandFeedback(CommandSourceStack source, CarpetRule<?> rule, String newValue, CallbackInfoReturnable<Integer> cir) {
-        if (OrgRule.RULE_UNCHANGED.get()) {
+        if (BuiltRule.RULE_UNCHANGED.get()) {
             cir.setReturnValue(0);
         }
     }

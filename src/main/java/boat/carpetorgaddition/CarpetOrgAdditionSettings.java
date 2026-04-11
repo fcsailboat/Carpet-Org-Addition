@@ -38,9 +38,9 @@ public class CarpetOrgAdditionSettings {
      */
     public static final ScopedValue<Boolean> USE_CHANNELING_TRIDENT = ScopedValue.newInstance();
     private static final Set<RuleContext<?>> RULES = new LinkedHashSet<>();
-    public static final String OPS = "ops";
-    public static final String TRUE = "true";
-    public static final String FALSE = "false";
+    private static final String OPS = "ops";
+    private static final String TRUE = "true";
+    private static final String FALSE = "false";
     private static final List<String> COMMAND_OPTIONS = List.of(TRUE, FALSE, OPS, "0", "1", "2", "3", "4");
     public static final String ORG = "Org";
     public static final String HIDDEN = "Hidden";
@@ -53,7 +53,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_ITEM_SHADOWING = register(
             RuleFactory.create(String.class, "commandItemShadowing", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -291,7 +291,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> OPEN_SEED_PERMISSION = register(
             RuleFactory.create(Boolean.class, "openSeedPermission", false)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .build()
     );
 
@@ -300,7 +300,8 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> OPEN_CARPET_PERMISSION = register(
             RuleFactory.create(Boolean.class, "openCarpetPermission", false)
-                    .addCategories(RuleCategory.COMMAND, RuleCategory.CLIENT)
+                    .setCommand()
+                    .setClient()
                     .build()
     );
 
@@ -309,7 +310,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> OPEN_GAME_RULE_PERMISSION = register(
             RuleFactory.create(Boolean.class, "openGameRulePermission", false)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .build()
     );
 
@@ -336,7 +337,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_XP_TRANSFER = register(
             RuleFactory.create(String.class, "commandXpTransfer", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -346,7 +347,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_SPECTATOR = register(
             RuleFactory.create(String.class, "commandSpectator", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -356,7 +357,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_FINDER = register(
             RuleFactory.create(String.class, "commandFinder", TRUE)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -366,7 +367,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_KILL_ME = register(
             RuleFactory.create(String.class, "commandKillMe", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -376,7 +377,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_LOCATIONS = register(
             RuleFactory.create(String.class, "commandLocations", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -440,7 +441,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_PARTICLE_LINE = register(
             RuleFactory.create(String.class, "commandParticleLine", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .setRemoved()
                     .build()
@@ -478,7 +479,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> OPEN_TP_PERMISSION = register(
             RuleFactory.create(Boolean.class, "openTpPermission", false)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .build()
     );
 
@@ -523,7 +524,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_PLAYER_ACTION = register(
             RuleFactory.create(String.class, "commandPlayerAction", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -582,7 +583,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_CREEPER = register(
             RuleFactory.create(String.class, "commandCreeper", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -592,7 +593,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_RULE_SEARCH = register(
             RuleFactory.create(String.class, "commandRuleSearch", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -642,7 +643,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<CanHighlightBlockPos> CAN_HIGHLIGHT_BLOCK_POS = register(
             RuleFactory.create(CanHighlightBlockPos.class, "canHighlightBlockPos", CanHighlightBlockPos.DEFAULT)
-                    .addCategories(RuleCategory.SURVIVAL, RuleCategory.CLIENT)
+                    .addCategories(RuleCategory.SURVIVAL)
                     .setClient()
                     .build()
     );
@@ -652,7 +653,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_PLAYER_MANAGER = register(
             RuleFactory.create(String.class, "commandPlayerManager", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -693,7 +694,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_NAVIGATE = register(
             RuleFactory.create(String.class, "commandNavigate", TRUE)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -736,7 +737,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> COMMAND_MAIL = register(
             RuleFactory.create(String.class, "commandMail", OPS)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -755,7 +756,6 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> SYNC_NAVIGATE_WAYPOINT = register(
             RuleFactory.create(Boolean.class, "syncNavigateWaypoint", true)
-                    .addCategories(RuleCategory.CLIENT)
                     .addListener((source, value) -> {
                         if (source == null) {
                             return;
@@ -793,7 +793,6 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> MAX_BLOCK_PLACE_DISTANCE_SYNC_CLIENT = register(
             RuleFactory.create(Boolean.class, "maxBlockPlaceDistanceSyncClient", true)
-                    .addCategories(RuleCategory.CLIENT)
                     .setClient()
                     .build()
     );
@@ -840,7 +839,8 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> RECORD_PLAYER_COMMAND = register(
             RuleFactory.create(Boolean.class, "recordPlayerCommand", false)
-                    .addCategories(RuleCategory.COMMAND)
+                    // TODO 是否需要命令类别
+                    .setCommand()
                     .build()
     );
 
@@ -867,7 +867,8 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Integer> MAX_LINES_PER_PAGE = register(
             RuleFactory.create(Integer.class, "maxLinesPerPage", 10)
-                    .addCategories(RuleCategory.COMMAND)
+                    // TODO 是否需要设置为命令选项
+                    .setCommand()
                     .addOptions(10, 15, 20, 25)
                     .addValidator(newValue -> newValue > 0, () -> ValidatorFeedbacks.greaterThan(0))
                     .setLenient()
@@ -889,7 +890,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY = register(
             RuleFactory.create(String.class, "playerCommandOpenPlayerInventory", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -899,7 +900,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> PLAYER_COMMAND_TELEPORT_FAKE_PLAYER = register(
             RuleFactory.create(String.class, "playerCommandTeleportFakePlayer", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -981,7 +982,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<OpenPlayerInventoryCommandOption> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY_OPTION = register(
             RuleFactory.create(OpenPlayerInventoryCommandOption.class, "playerCommandOpenPlayerInventoryOption", OpenPlayerInventoryCommandOption.FAKE_PLAYER)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .build()
     );
 
@@ -990,7 +991,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> PLAYER_MANAGER_FORCE_COMMENT = register(
             RuleFactory.create(Boolean.class, "playerManagerForceComment", false)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .build()
     );
 
@@ -1029,7 +1030,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY_GCA_STYLE = register(
             RuleFactory.create(Boolean.class, "playerCommandOpenPlayerInventoryGcaStyle", true)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .build()
     );
 
@@ -1056,7 +1057,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<String> PLAYER_COMMAND_SUMMON_MANNEQUIN = register(
             RuleFactory.create(String.class, "playerCommandSummonMannequin", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .addOptions(COMMAND_OPTIONS)
                     .build()
     );
@@ -1075,7 +1076,7 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> PLAYER_COMMAND_CLOSE_SCREEN = register(
             RuleFactory.create(Boolean.class, "playerCommandCloseScreen", false)
-                    .addCategories(RuleCategory.COMMAND)
+                    .setCommand()
                     .build()
     );
 

@@ -6,6 +6,8 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.rule.validator.ValueValidator;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.api.settings.CarpetRule;
+import carpet.api.settings.RuleCategory;
+import carpet.utils.CommandHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -97,8 +99,28 @@ public final class RuleFactory {
             return this;
         }
 
+        /**
+         * 设置此规则为命令的开关，当规则值切换时，会将命令更改同步到客户端
+         */
+        public Builder<T> setCommand() {
+            this.categories.add(RuleCategory.COMMAND);
+            // 更改规则时将命令同步到客户端
+            this.listeners.add((source, _) -> {
+                if (source != null) {
+                    CommandHelper.notifyPlayersCommandsChanged(source.getServer());
+                }
+            });
+            return this;
+        }
+
+        /**
+         * 设置为{@code Client}的规则，可以在未安装{@code Carpet}的服务器中通过{@code /carpet}或对应规则管理器的命令启用（尽管客户端无法解析命令）
+         *
+         * @see CarpetRule#canBeToggledClientSide()
+         */
         public Builder<T> setClient() {
             this.canBeToggledClientSide = true;
+            this.categories.add(RuleCategory.CLIENT);
             return this;
         }
 
@@ -137,6 +159,9 @@ public final class RuleFactory {
             return this;
         }
 
+        /**
+         * 将规则标记为隐藏，除非启用隐藏功能，否则隐藏的规则不会在游戏中显示
+         */
         public Builder<T> setHidden() {
             this.conditions.add(CarpetOrgAdditionConstants::isEnableHiddenFunction);
             this.addCategories(CarpetOrgAdditionSettings.HIDDEN);
@@ -144,18 +169,27 @@ public final class RuleFactory {
             return this;
         }
 
+        /**
+         * 将规则标记为已删除，已删除的规则不会在游戏中显示
+         */
         public Builder<T> setRemoved() {
             this.conditions.addFirst(() -> false);
             this.isRemove = true;
             return this;
         }
 
-        public Builder<T> addValidator(Predicate<T> predicate, Supplier<Component> supplier) {
-            return this.addValidator(ValueValidator.of(predicate, supplier));
+        /**
+         * 添加规则验证器
+         *
+         * @param condition    用于验证规则值是否有效的条件
+         * @param errorMessage 规则值无效时，发送的命令反馈消息
+         */
+        public Builder<T> addValidator(Predicate<T> condition, Supplier<Component> errorMessage) {
+            return this.addValidator(ValueValidator.of(condition, errorMessage));
         }
 
-        public Builder<T> addValidator(ValueValidator<T> valueValidators) {
-            this.validators.add(valueValidators);
+        public Builder<T> addValidator(ValueValidator<T> validator) {
+            this.validators.add(validator);
             return this;
         }
 
@@ -171,7 +205,7 @@ public final class RuleFactory {
         }
 
         public RuleContext<T> build() {
-            Supplier<CarpetRule<T>> supplier = () -> new OrgRule<>(
+            Supplier<CarpetRule<T>> supplier = () -> new BuiltRule<>(
                     this.type,
                     this.name,
                     this.categories,
