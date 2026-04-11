@@ -1,25 +1,61 @@
-name: Build
+name: Build (Matrix)
 
 on:
+  # push:
+  # pull_request:
   workflow_dispatch:
 
 jobs:
-  build:
+  prepare:
     runs-on: ubuntu-latest
-
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v6
-      - name: Set up JDK 25
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate branch matrix (only 26.x)
+        id: set-matrix
+        run: |
+          # 只获取 26.x 版本的分支
+          branches=$(git branch -r | grep -v HEAD | grep -v gh-pages | grep -E '26\.' | sed 's/origin\///')
+          
+          # 固定 Java 版本为 25
+          matrix_json=$(echo "$branches" | jq -R -s 'split("\n")[:-1] | map(select(. != "")) | map({branch: ., java_version: "25"}) | {include: .}')
+          
+          echo "matrix=$(echo "$matrix_json" | jq -c .)" >> $GITHUB_OUTPUT
+          echo "Generated matrix: $(echo "$matrix_json" | jq -c .)"
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - name: Checkout ${{ matrix.branch }}
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 1
+
+      - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v5
         with:
-          distribution: "temurin"
-          java-version: 25
+          distribution: 'temurin'
+          java-version: ${{ matrix.java_version }}
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Build with gradle
-        run: |
-          chmod +x gradlew
-          ./gradlew build -x test
-  
+      - name: Build with Gradle
+        run: ./gradlew build --stacktrace
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: artifact-mc${{ matrix.branch }}
+          path: build/libs/
+          if-no-files-found: warn

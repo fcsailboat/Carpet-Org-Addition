@@ -12,6 +12,9 @@ version = "v${project.mod_version}-${buildTimestamp}"
 
 repositories {
     maven {
+        url "https://masa.dy.fi/maven"
+    }
+    maven {
         url "https://www.cursemaven.com"
     }
     maven {
@@ -27,7 +30,8 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
     // Carpet: https://github.com/gnembon/fabric-carpet
-    implementation(files("lib/fabric-carpet-26.1+v260402.jar"))
+    // Use Masa Maven: https://masa.dy.fi/maven
+    implementation("carpet:fabric-carpet:26.1+v260401")
     // implementation("curse.maven:carpet-349239:${project.carpet_version}")
     // MixinExtras: https://github.com/LlamaLad7/MixinExtras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")))
