@@ -56,6 +56,6 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: artifact-mc${{ matrix.branch }}
+          name: ${{ matrix.branch }}-artifact
           path: build/libs/
           if-no-files-found: warn
