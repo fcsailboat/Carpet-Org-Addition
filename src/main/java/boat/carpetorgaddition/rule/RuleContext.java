@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.rule;
 
 import carpet.api.settings.CarpetRule;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,7 @@ public final class RuleContext<T> {
     private final Collection<String> suggestions;
     private final boolean isRemove;
     private final boolean isHidden;
+    @Nullable
     private final CustomRuleControl<T> control;
     private final T value;
     private final String name;
@@ -30,7 +32,7 @@ public final class RuleContext<T> {
             Collection<String> suggestions,
             boolean isRemove,
             boolean isHidden,
-            CustomRuleControl<T> control
+            @Nullable CustomRuleControl<T> control
     ) {
         this.name = name;
         this.ruleSupplier = ruleSupplier;
@@ -70,6 +72,7 @@ public final class RuleContext<T> {
         return this.isRemove;
     }
 
+    @Nullable
     public CustomRuleControl<T> getCustomRuleControl() {
         return this.control;
     }

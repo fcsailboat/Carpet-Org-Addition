@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
@@ -20,8 +21,38 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class RuleFactory {
+    @Deprecated(forRemoval = true)
     public static <T> Builder<T> create(Class<T> type, String rule, T value) {
         return new Builder<>(type, rule, value);
+    }
+
+    public static Builder<Integer> create(String rule, int value) {
+        return new Builder<>(Integer.class, rule, value);
+    }
+
+    public static Builder<Long> create(String rule, long value) {
+        return new Builder<>(Long.class, rule, value);
+    }
+
+    public static Builder<Boolean> create(String rule, boolean value) {
+        return new Builder<>(Boolean.class, rule, value);
+    }
+
+    public static Builder<Float> create(String rule, float value) {
+        return new Builder<>(Float.class, rule, value);
+    }
+
+    public static Builder<Double> create(String rule, double value) {
+        return new Builder<>(Double.class, rule, value);
+    }
+
+    public static Builder<String> create(String rule, String value) {
+        return new Builder<>(String.class, rule, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<T>> Builder<T> create(String rule, Enum<T> value) {
+        return new Builder<>(value.getDeclaringClass(), rule, (T) value);
     }
 
     public static final class Builder<T> {
@@ -35,10 +66,11 @@ public final class RuleFactory {
         private final List<SilenceValueValidator<T>> silenceValidators = new ArrayList<>();
         private final List<RuleListener<T>> listeners = new ArrayList<>();
         private final List<BooleanSupplier> conditions = new ArrayList<>();
-        private boolean canBeToggledClientSide = false;
+        private boolean client = false;
         private boolean strict = true;
-        private boolean isHidden;
-        private boolean isRemove;
+        private boolean hidden;
+        private boolean removed;
+        @Nullable
         private CustomRuleControl<T> control;
         private String displayName = "";
         private String displayDesc = "";
@@ -49,12 +81,12 @@ public final class RuleFactory {
                 throw new IllegalArgumentException("Rule %s: type mismatch - expected %s, actual %s"
                         .formatted(rule, type.getSimpleName(), value.getClass().getSimpleName()));
             }
-            this.type = type;
-            this.value = value;
-            this.name = rule;
             if (rule.isBlank()) {
                 throw new IllegalArgumentException("Carpet rule name is empty");
             }
+            this.type = type;
+            this.value = value;
+            this.name = rule;
             if (this.type == Boolean.class) {
                 // 不可变集合
                 this.suggestions = List.of("true", "false");
@@ -72,14 +104,7 @@ public final class RuleFactory {
         }
 
         public Builder<T> addCategories(String... categories) {
-            return this.addCategories(List.of(categories));
-        }
-
-        public Builder<T> addCategories(List<String> list) {
-            if (list.isEmpty()) {
-                throw new IllegalArgumentException("At least one category must be provided");
-            }
-            this.categories.addAll(list);
+            this.categories.addAll(Arrays.asList(categories));
             return this;
         }
 
@@ -105,12 +130,11 @@ public final class RuleFactory {
         public Builder<T> setCommand() {
             this.categories.add(RuleCategory.COMMAND);
             // 更改规则时将命令同步到客户端
-            this.listeners.add((source, _) -> {
+            return this.addListener((source, _) -> {
                 if (source != null) {
                     CommandHelper.notifyPlayersCommandsChanged(source.getServer());
                 }
             });
-            return this;
         }
 
         /**
@@ -119,7 +143,7 @@ public final class RuleFactory {
          * @see CarpetRule#canBeToggledClientSide()
          */
         public Builder<T> setClient() {
-            this.canBeToggledClientSide = true;
+            this.client = true;
             this.categories.add(RuleCategory.CLIENT);
             return this;
         }
@@ -165,7 +189,7 @@ public final class RuleFactory {
         public Builder<T> setHidden() {
             this.conditions.add(CarpetOrgAdditionConstants::isEnableHiddenFunction);
             this.addCategories(CarpetOrgAdditionSettings.HIDDEN);
-            this.isHidden = true;
+            this.hidden = true;
             return this;
         }
 
@@ -174,7 +198,7 @@ public final class RuleFactory {
          */
         public Builder<T> setRemoved() {
             this.conditions.addFirst(() -> false);
-            this.isRemove = true;
+            this.removed = true;
             return this;
         }
 
@@ -211,7 +235,7 @@ public final class RuleFactory {
                     this.categories,
                     this.suggestions,
                     this.value,
-                    this.canBeToggledClientSide,
+                    this.client,
                     this.validators,
                     this.silenceValidators,
                     this.listeners,
@@ -227,8 +251,8 @@ public final class RuleFactory {
                     this.conditions,
                     this.categories,
                     this.suggestions,
-                    this.isRemove,
-                    this.isHidden,
+                    this.removed,
+                    this.hidden,
                     this.control
             );
         }
