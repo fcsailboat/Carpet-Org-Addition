@@ -9,10 +9,6 @@ import java.nio.file.Path;
 
 public class CarpetOrgAdditionConstants {
     /**
-     * 是否同时加载了{@code Carpet TIS Addition}模组
-     */
-    public static final boolean CARPET_TIS_ADDITION = FabricLoader.getInstance().isModLoaded("carpet-tis-addition");
-    /**
      * 模组{@code gugle-carpet-addition}是否已加载
      */
     public static final boolean GCA = FabricLoader.getInstance().isModLoaded("gca");
