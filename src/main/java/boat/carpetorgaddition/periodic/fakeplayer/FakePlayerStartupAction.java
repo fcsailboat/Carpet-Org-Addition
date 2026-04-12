@@ -36,7 +36,6 @@ public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
     }
 
     class CommandAction implements FakePlayerStartupAction {
-        public static final FakePlayerStartupAction EMPTY = of("");
         private final String command;
 
         private CommandAction(String command) {

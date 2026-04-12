@@ -49,7 +49,7 @@ public class ServerTaskManager {
         return this.tasks.stream();
     }
 
-    public <T> Stream<T> stream(Class<T> clazz) {
-        return this.tasks.stream().filter(clazz::isInstance).map(clazz::cast);
+    public <T> Stream<T> stream(Class<T> classFilter) {
+        return this.tasks.stream().filter(classFilter::isInstance).map(classFilter::cast);
     }
 }

@@ -20,7 +20,9 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.*;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -246,40 +248,6 @@ public class CommandUtils {
         MessageUtils.sendVanillaErrorMessage(source, e);
     }
 
-    /**
-     * @return 玩家是否有执行某一命令的权限
-     * @see CommandHelper#canUseCommand(CommandSourceStack, Object)
-     */
-    public static boolean canUseCommand(int level, Object value) {
-        return switch (value) {
-            case Boolean bool -> bool;
-            case String str -> switch (str.toLowerCase(Locale.ROOT)) {
-                case "ops", "2" -> level >= 2;
-                case "1", "3", "4" -> level >= Integer.parseInt(str);
-                case "0", "true" -> true;
-                default -> false;
-            };
-            case null -> false;
-            default -> canUseCommand(level, value.toString());
-        };
-    }
-
-    /**
-     * @return 玩家是否有执行某一命令的权限
-     */
-    public static boolean canUseCommand(PermissionCheck permissionCheck, Object value) {
-        return switch (value) {
-            case Boolean bool -> bool;
-            case String str -> switch (str.toLowerCase(Locale.ROOT)) {
-                case "ops", "2" -> permissionCheck.check(parsePermissionPredicate(2));
-                case "1", "3", "4" -> permissionCheck.check(parsePermissionPredicate(Integer.parseInt(str)));
-                case "0", "true" -> true;
-                default -> false;
-            };
-            case null, default -> false;
-        };
-    }
-
     public static boolean canUseCommand(PermissionSet predicate, Object value) {
         return switch (value) {
             case Boolean bool -> bool;
@@ -291,10 +259,6 @@ public class CommandUtils {
             };
             case null, default -> false;
         };
-    }
-
-    private static LevelBasedPermissionSet parsePermissionPredicate(int level) {
-        return LevelBasedPermissionSet.forLevel(PermissionLevel.byId(level));
     }
 
     public static Permission parsePermission(int level) {
@@ -337,21 +301,8 @@ public class CommandUtils {
         return Optional.empty();
     }
 
-    public static <T> T call(ThrowingIOSupplier<T> supplier) throws CommandSyntaxException {
-        try {
-            return supplier.get();
-        } catch (IOException e) {
-            throw createIOErrorException(e);
-        }
-    }
-
     @FunctionalInterface
     public interface ThrowingRunnable {
         void run() throws CommandSyntaxException;
-    }
-
-    @FunctionalInterface
-    public interface ThrowingIOSupplier<T> {
-        T get() throws IOException;
     }
 }

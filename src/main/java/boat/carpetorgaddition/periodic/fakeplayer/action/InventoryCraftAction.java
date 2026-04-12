@@ -27,11 +27,6 @@ public class InventoryCraftAction extends CraftAction {
     }
 
     @Override
-    protected int getCraftGridStart() {
-        return 1;
-    }
-
-    @Override
     protected int getCraftGridEnd() {
         return 4;
     }

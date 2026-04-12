@@ -30,6 +30,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;
@@ -522,6 +523,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         return this.comment.toLowerCase(Locale.ROOT).contains(lowerCase);
     }
 
+    @NullUnmarked
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.CommandBuildContext;
 
+@SuppressWarnings("unused")
 public abstract class AbstractClientCommand extends AbstractCommand {
     protected final CommandDispatcher<FabricClientCommandSource> dispatcher;
     protected final CommandBuildContext access;

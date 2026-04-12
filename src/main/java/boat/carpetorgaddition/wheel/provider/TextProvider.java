@@ -12,13 +12,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 public class TextProvider {
     /**
@@ -117,23 +114,6 @@ public class TextProvider {
             builder.setHover(LocalizationKeys.Item.COUNT.translate(group, remainder));
         }
         return builder.build();
-    }
-
-    /**
-     * @param base 原始的文本对象
-     * @return 获取物品栏中物品的名称和堆叠数量并用“*”连接，每个物品独占一行
-     */
-    public static Component inventory(Component base, Container inventory) {
-        TextBuilder builder = TextBuilder.of(base);
-        ArrayList<Component> list = new ArrayList<>();
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            ItemStack itemStack = inventory.getItem(i);
-            if (itemStack.isEmpty()) {
-                continue;
-            }
-            list.add(TextBuilder.combineAll(itemStack.getHoverName(), "*", String.valueOf(itemStack.getCount())));
-        }
-        return builder.setHover(TextBuilder.joinList(list)).build();
     }
 
     /**

@@ -6,6 +6,7 @@ import net.minecraft.server.dialog.ActionButton;
 import net.minecraft.server.dialog.CommonDialogData;
 import net.minecraft.server.dialog.NoticeDialog;
 
+@SuppressWarnings("unused")
 public final class NoticeDialogBuilder extends DialogBuilder<NoticeDialogBuilder, NoticeDialog> {
     /**
      * 确认对话框的按钮

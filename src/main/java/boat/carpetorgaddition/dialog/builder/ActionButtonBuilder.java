@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
+@SuppressWarnings("unused")
 public class ActionButtonBuilder {
     /**
      * 按钮的渲染文本
@@ -42,13 +43,11 @@ public class ActionButtonBuilder {
         return new ActionButtonBuilder(label);
     }
 
-    @SuppressWarnings("unused")
     public ActionButtonBuilder setTooltip(@Nullable Component tooltip) {
         this.tooltip = tooltip;
         return this;
     }
 
-    @SuppressWarnings("unused")
     public ActionButtonBuilder setWidth(int width) {
         this.width = width;
         return this;

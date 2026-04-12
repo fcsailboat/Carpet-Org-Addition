@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAdditionExtension;
-import boat.carpetorgaddition.mixin.accessor.carpet.LoggerAccessor;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
@@ -10,8 +9,6 @@ import carpet.api.settings.RuleHelper;
 import carpet.api.settings.SettingsManager;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
-import carpet.logging.Logger;
-import carpet.logging.LoggerRegistry;
 import carpet.patches.EntityPlayerMPFake;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Holder;
@@ -167,18 +164,6 @@ public class PlayerUtils {
             return;
         }
         ServerPlayNetworking.send(player, payload);
-    }
-
-    public static boolean isSubscribeLogger(ServerPlayer player, String name) {
-        Logger logger = LoggerRegistry.getLogger(name);
-        if (logger == null) {
-            return false;
-        }
-        if (logger.hasOnlineSubscribers()) {
-            LoggerAccessor accessor = (LoggerAccessor) logger;
-            return accessor.getSubscribedOnlinePlayers().containsKey(getName(player));
-        }
-        return false;
     }
 
     public static void closeScreen(ServerPlayer player) {

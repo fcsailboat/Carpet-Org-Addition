@@ -5,11 +5,12 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 背景精灵同步数据包
  */
+@NullMarked
 public record BackgroundSpriteSyncS2CPacket(int syncId, int slotIndex, Identifier identifier) implements CustomPacketPayload {
     public static final Type<BackgroundSpriteSyncS2CPacket> ID = NetworkPacketRegister.ofType("background_sprite_sync");
 
@@ -31,7 +32,7 @@ public record BackgroundSpriteSyncS2CPacket(int syncId, int slotIndex, Identifie
     };
 
     @Override
-    public @NonNull Type<? extends CustomPacketPayload> type() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

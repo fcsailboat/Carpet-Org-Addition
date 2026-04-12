@@ -1,13 +1,11 @@
 package boat.carpetorgaddition.rule;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
-import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.mixin.accessor.DamageTrackerAccessor;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import carpet.CarpetServer;
 import carpet.api.settings.CarpetRule;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.TranslationKeys;
@@ -32,7 +30,6 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public class RuleUtils {
     /**
@@ -44,8 +41,6 @@ public class RuleUtils {
      * 最小合成次数
      */
     public static final int MIN_CRAFT_COUNT = 1;
-    public static final Supplier<Boolean> hopperCountersUnlimitedSpeed = getCarpetRule("hopperCountersUnlimitedSpeed");
-    public static final Supplier<Boolean> hopperNoItemCost = getCarpetRule("hopperNoItemCost");
     /**
      * 是否正在打开箱子
      */
@@ -93,21 +88,6 @@ public class RuleUtils {
             return 6.0;
         }
         return Math.min(distance, MAX_DISTANCE);
-    }
-
-    public static <T> T shulkerBoxStackableWrap(Supplier<T> supplier) {
-        return ScopedValue.where(CarpetOrgAdditionSettings.SHULKER_BOX_STACK_COUNT_CHANGED, false).call(supplier::get);
-    }
-
-    private static Supplier<Boolean> getCarpetRule(String rule) {
-        if (CarpetOrgAdditionConstants.CARPET_TIS_ADDITION) {
-            CarpetRule<?> carpetRule = CarpetServer.settingsManager.getCarpetRule(rule);
-            if (carpetRule == null) {
-                return () -> false;
-            }
-            return () -> carpetRule.value() instanceof Boolean value ? value : false;
-        }
-        return () -> false;
     }
 
     /**

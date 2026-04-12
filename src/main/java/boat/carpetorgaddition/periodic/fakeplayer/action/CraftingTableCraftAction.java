@@ -31,11 +31,6 @@ public class CraftingTableCraftAction extends CraftAction {
     }
 
     @Override
-    protected int getCraftGridStart() {
-        return 1;
-    }
-
-    @Override
     protected int getCraftGridEnd() {
         return 9;
     }

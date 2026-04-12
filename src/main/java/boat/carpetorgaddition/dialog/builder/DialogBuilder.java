@@ -19,6 +19,7 @@ import java.util.Optional;
 /**
  * @see <a href="https://zh.minecraft.wiki/w/%E5%AF%B9%E8%AF%9D%E6%A1%86%E5%AE%9A%E4%B9%89%E6%A0%BC%E5%BC%8F">对话框定义格式</a>
  */
+@SuppressWarnings("unused")
 public abstract class DialogBuilder<C extends DialogBuilder<C, D>, D extends Dialog> {
     /**
      * 对话框的标题
@@ -54,19 +55,16 @@ public abstract class DialogBuilder<C extends DialogBuilder<C, D>, D extends Dia
         this.title = title;
     }
 
-    @SuppressWarnings("unused")
     public C setExternalTitle(Component externalTitle) {
         this.externalTitle = externalTitle;
         return this.self();
     }
 
-    @SuppressWarnings("unused")
     public C setCanCloseWithEscape(boolean canCloseWithEscape) {
         this.canCloseWithEscape = canCloseWithEscape;
         return this.self();
     }
 
-    @SuppressWarnings("unused")
     public C setPause(boolean pause) {
         this.pause = pause;
         return this.self();

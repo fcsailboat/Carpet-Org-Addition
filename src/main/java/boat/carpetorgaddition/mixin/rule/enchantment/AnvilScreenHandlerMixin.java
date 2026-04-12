@@ -18,7 +18,7 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
     }
 
     @WrapOperation(method = "createResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/Enchantment;canEnchant(Lnet/minecraft/world/item/ItemStack;)Z"))
-    private boolean isAcceptableItem(Enchantment instance, ItemStack stack, Operation<Boolean> original) {
-        return ScopedValue.where(CarpetOrgAdditionSettings.ENCHANTER, this.player).call(() -> original.call(instance, stack));
+    private boolean isAcceptableItem(Enchantment instance, ItemStack itemStack, Operation<Boolean> original) {
+        return ScopedValue.where(CarpetOrgAdditionSettings.ENCHANTER, this.player).call(() -> original.call(instance, itemStack));
     }
 }

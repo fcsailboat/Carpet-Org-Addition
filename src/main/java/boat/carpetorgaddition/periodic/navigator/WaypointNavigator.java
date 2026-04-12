@@ -1,7 +1,9 @@
 package boat.carpetorgaddition.periodic.navigator;
 
 import boat.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
-import boat.carpetorgaddition.util.*;
+import boat.carpetorgaddition.util.MathUtils;
+import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.Waypoint;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.TextBuilder;

@@ -86,6 +86,7 @@ public final class LocalizationKeys {
             public static final LocalizationKey VALID_OPTIONS = VALIDATE.then("valid_options");
         }
 
+        @SuppressWarnings("unused")
         public static class Compatibility {
             public static final LocalizationKey WARNING = COMPATIBILITY.then("warning");
             public static final LocalizationKey STILL_OPEN = COMPATIBILITY.then("still_open");

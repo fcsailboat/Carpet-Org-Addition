@@ -5,6 +5,7 @@ import boat.carpetorgaddition.util.CommandUtils;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.util.Objects;
 
@@ -42,6 +43,7 @@ public final class LocalizationKey {
         return CommandUtils.createException(this.translate((Object[]) args));
     }
 
+    @NullUnmarked
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

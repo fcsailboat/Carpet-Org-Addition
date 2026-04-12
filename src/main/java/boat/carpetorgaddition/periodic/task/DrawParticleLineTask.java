@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
+@SuppressWarnings("unused")
 public class DrawParticleLineTask extends ServerTask {
     private static final double MAX_DRAW_DISTANCE = Math.pow(128, 2);
     private final ServerLevel world;

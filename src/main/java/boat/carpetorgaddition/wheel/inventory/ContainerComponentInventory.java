@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -88,6 +89,7 @@ public class ContainerComponentInventory extends SimpleContainer implements Comp
         return count;
     }
 
+    @NullUnmarked
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

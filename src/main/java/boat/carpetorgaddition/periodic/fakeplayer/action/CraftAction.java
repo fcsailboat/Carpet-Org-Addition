@@ -186,7 +186,9 @@ public abstract class CraftAction extends AbstractPlayerAction {
     /**
      * @return 合成方格的起始索引
      */
-    protected abstract int getCraftGridStart();
+    protected int getCraftGridStart() {
+        return 1;
+    }
 
     /**
      * @return 合成方格的结束索引
