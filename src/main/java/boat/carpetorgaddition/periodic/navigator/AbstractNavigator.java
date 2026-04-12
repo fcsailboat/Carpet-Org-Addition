@@ -7,7 +7,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.SubtitleOverlay;
@@ -59,6 +59,7 @@ public abstract class AbstractNavigator {
 
     @NotNull
     protected Component getHUDText(Vec3 vec3d, Component displayName, int distance) {
+        // TODO 改为格式化文本
         // 添加左右箭头
         Map.Entry<String, String> entry = switch (forwardAngle(this.player, vec3d)) {
             case -3 -> Map.entry("    ", " >>>");
@@ -69,18 +70,18 @@ public abstract class AbstractNavigator {
             case 3 -> Map.entry("<<< ", "    ");
             default -> Map.entry("    ", "    ");
         };
-        TextBuilder builder = TextBuilder.of();
-        builder.append(entry.getKey());
-        builder.append(displayName);
+        TextJoiner joiner = new TextJoiner();
+        joiner.append(entry.getKey());
+        joiner.append(displayName);
         // 添加上下箭头
-        builder.append(switch (verticalAngle(this.player, vec3d)) {
+        joiner.append(switch (verticalAngle(this.player, vec3d)) {
             case 1 -> " ↑ ";
             case -1 -> " ↓ ";
             default -> "   ";
         });
-        builder.append(NavigatorCommand.HUD.then("distance").translate(distance));
-        builder.append(entry.getValue());
-        return builder.build();
+        joiner.append(NavigatorCommand.HUD.then("distance").translate(distance));
+        joiner.append(entry.getValue());
+        return joiner.join();
     }
 
     /**

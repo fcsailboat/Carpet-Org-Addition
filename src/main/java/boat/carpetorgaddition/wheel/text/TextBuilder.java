@@ -29,7 +29,7 @@ import java.util.UUID;
 @NullMarked
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class TextBuilder {
-    private MutableComponent text;
+    private final MutableComponent text;
 
     private TextBuilder(MutableComponent text) {
         this.text = text;
@@ -258,22 +258,6 @@ public class TextBuilder {
      */
     public TextBuilder setGrayItalic() {
         return this.setColor(ChatFormatting.GRAY).setItalic();
-    }
-
-    public TextBuilder append(String str) {
-        return this.append(create(str));
-    }
-
-    public TextBuilder append(@Nullable Component text) {
-        if (text == null) {
-            return this;
-        }
-        this.text = empty().copy().append(this.text).append(text);
-        return this;
-    }
-
-    public TextBuilder append(TextBuilder builder) {
-        return this.append(builder.text);
     }
 
     public Component build() {

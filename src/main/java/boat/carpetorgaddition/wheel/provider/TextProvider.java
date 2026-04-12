@@ -7,6 +7,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys.Dimension;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -49,20 +50,29 @@ public class TextProvider {
      * @param color 文本的颜色，如果为null，不修改颜色
      */
     public static Component blockPos(BlockPos blockPos, @Nullable ChatFormatting color) {
-        TextBuilder builder = TextBuilder.of(simpleBlockPos(blockPos));
-        // 添加单击事件，复制方块坐标
-        builder.setCopyToClipboard(ServerUtils.toPosString(blockPos));
+        TextJoiner joiner = new TextJoiner();
+        joiner.append(
+                TextBuilder.of(simpleBlockPos(blockPos))
+                        .setCopyToClipboard(ServerUtils.toPosString(blockPos))
+                        .build()
+        );
         switch (CarpetOrgAdditionSettings.CAN_HIGHLIGHT_BLOCK_POS.value()) {
-            case OMMC -> builder.append(TextBuilder.of(" [H]")
-                    .setCommand(CommandProvider.highlightWaypointByOmmc(blockPos))
-                    .setHover(LocalizationKey.literal("ommc.highlight_waypoint.tooltip").translate()));
-            case DEFAULT -> builder.append(TextBuilder.of(" [H]")
-                    .setCommand(CommandProvider.highlightWaypoint(blockPos))
-                    .setHover(LocalizationKeys.Button.HIGHLIGHT.translate()));
+            case OMMC -> joiner.append(
+                    TextBuilder.of(" [H]")
+                            .setCommand(CommandProvider.highlightWaypointByOmmc(blockPos))
+                            .setHover(LocalizationKey.literal("ommc.highlight_waypoint.tooltip").translate())
+                            .build()
+            );
+            case DEFAULT -> joiner.append(
+                    TextBuilder.of(" [H]")
+                            .setCommand(CommandProvider.highlightWaypoint(blockPos))
+                            .setHover(LocalizationKeys.Button.HIGHLIGHT.translate())
+                            .build()
+            );
             default -> {
             }
         }
-        // 修改文本颜色
+        TextBuilder builder = TextBuilder.of(joiner.join());
         builder.setColor(color);
         return builder.build();
     }

@@ -25,6 +25,7 @@ import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.CarpetSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -628,20 +629,25 @@ public class OfflinePlayerSearchTask extends ServerTask {
         // 获取玩家显示名称
         private TextBuilder getDisplayPlayerName(String name, String uuid, Component hover, Component count, PlayerInventoryType type) {
             boolean unknown = isUnknown();
-            TextBuilder builder = TextBuilder.of(unknown ? name : "[" + name + "]");
+            TextJoiner joiner = new TextJoiner();
             if (unknown) {
-                builder.setStrikethrough()
+                Component displayName = TextBuilder.of(name)
+                        .setStrikethrough()
                         .setCopyToClipboard(uuid, false)
-                        .append(createSearchButton());
+                        .build();
+                joiner.append(displayName).append(createSearchButton());
             } else {
-                builder.append(createLoginButton())
-                        .setCopyToClipboard(name, false);
+                Component displayName = TextBuilder.of("[" + name + "]")
+                        .setCopyToClipboard(name, false)
+                        .build();
+                joiner.append(displayName).append(createLoginButton());
             }
             Component button = switch (type) {
                 case INVENTORY -> openInventoryButton(this.playerConfigEntry());
                 case ENDER_CHEST -> openEnderChestButton(this.playerConfigEntry());
             };
-            builder.append(button)
+            joiner.append(button);
+            TextBuilder builder = TextBuilder.of(joiner.join())
                     .setHover(hover)
                     .setColor(ChatFormatting.GRAY);
             Component container = getContainerName(type);
@@ -665,7 +671,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
         }
 
         // 创建查询玩家名称按钮
-        private TextBuilder createSearchButton() {
+        private Component createSearchButton() {
             // 按钮的悬停提示
             ArrayList<Component> list = new ArrayList<>();
             list.add(LocalizationKeys.Operation.QueryPlayerName.Hover.FIRST.translate());
@@ -677,7 +683,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
             button.setCustomEvent(CustomClickEvents.QUERY_PLAYER_NAME, writer);
             // 设置按钮悬停提示
             button.setHover(TextBuilder.joinList(list));
-            return button;
+            return button.build();
         }
 
         public ItemStackStatistics statistics() {
