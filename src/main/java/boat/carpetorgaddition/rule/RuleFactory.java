@@ -50,9 +50,8 @@ public final class RuleFactory {
         return new Builder<>(String.class, rule, value);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends Enum<T>> Builder<T> create(String rule, Enum<T> value) {
-        return new Builder<>(value.getDeclaringClass(), rule, (T) value);
+    public static <T extends Enum<T>> Builder<T> create(String rule, T value) {
+        return new Builder<>(value.getDeclaringClass(), rule, value);
     }
 
     public static final class Builder<T> {
