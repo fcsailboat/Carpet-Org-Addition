@@ -161,7 +161,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     // 设置模组翻译
     @Override
     public Map<String, String> canHasTranslations(String lang) {
-        return Translation.getInstance().getTranslation();
+        return Translation.getInstance().getTranslation(lang);
     }
 
     // 注册记录器

@@ -31,9 +31,13 @@ public class Translation {
      * @apiNote 在单人游戏中，方法可能会被{@code Render thread}和{@code Server thread}同时访问
      */
     public Map<String, String> getTranslation() {
-        // 每种语言只从文件读取一次
         // CarpetOrgAdditionConstants.getCarpetLanguage()不是线程安全的，可能存在可见性问题，但不考虑这种情况
         String lang = CarpetOrgAdditionConstants.getCarpetLanguage();
+        return getTranslation(lang);
+    }
+
+    public Map<String, String> getTranslation(String lang) {
+        // 每种语言只从文件读取一次
         return this.translations.computeIfAbsent(lang, this::loadTranslation);
     }
 
