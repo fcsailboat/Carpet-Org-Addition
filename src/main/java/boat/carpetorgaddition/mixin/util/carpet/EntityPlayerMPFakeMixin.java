@@ -52,16 +52,16 @@ public class EntityPlayerMPFakeMixin {
     }
 
     @Inject(method = "lambda$createFake$0", at = @At(value = "INVOKE", target = "Lcarpet/patches/EntityPlayerMPFake;getAbilities()Lnet/minecraft/world/entity/player/Abilities;"))
-    private static void spawn(CallbackInfo ci, @Local(name = "instance") EntityPlayerMPFake fakePlayer) {
+    private static void spawn(CallbackInfo ci, @Local(name = "instance") EntityPlayerMPFake instance) {
         if (FakePlayerSpawner.CALLBACK.isBound()) {
-            FakePlayerSpawner.CALLBACK.get().accept(fakePlayer);
+            FakePlayerSpawner.CALLBACK.get().accept(instance);
         }
     }
 
     @WrapOperation(method = "lambda$createFake$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;placeNewPlayer(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/server/network/CommonListenerCookie;)V"))
-    private static void onPlayerConnect(PlayerList instance, Connection connection, ServerPlayer player, CommonListenerCookie clientData, Operation<Void> original) {
+    private static void onPlayerConnect(PlayerList instance, Connection connection, ServerPlayer player, CommonListenerCookie cookie, Operation<Void> original) {
         try {
-            original.call(instance, connection, player, clientData);
+            original.call(instance, connection, player, cookie);
         } catch (NullPointerException e) {
             if (FakePlayerSpawner.SILENCE.orElse(false)) {
                 // 玩家在服务器关闭后登录游戏可能导致服务器崩溃（一般发生在服务器关闭时，有玩家的周期性上下线未停止）

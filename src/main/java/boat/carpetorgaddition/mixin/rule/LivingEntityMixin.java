@@ -58,7 +58,7 @@ public abstract class LivingEntityMixin {
 
     // 不死图腾无敌时间
     @Inject(method = "checkTotemDeathProtection", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"))
-    private void setInvincibleTime(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+    private void setInvincibleTime(DamageSource killingDamage, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.TOTEM_OF_UNDYING_INVINCIBLE_TIME.value()) {
             this.self.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4));
         }

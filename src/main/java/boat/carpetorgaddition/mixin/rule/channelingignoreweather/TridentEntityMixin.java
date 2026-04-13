@@ -25,21 +25,22 @@ import java.util.function.Consumer;
 // 强化引雷
 @Mixin(ThrownTrident.class)
 public abstract class TridentEntityMixin extends AbstractArrow {
+    @SuppressWarnings("unused")
     private TridentEntityMixin(EntityType<? extends AbstractArrow> entityType, Level world) {
         super(entityType, world);
     }
 
     // 击中实体
     @WrapOperation(method = "onHitEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;doPostAttackEffectsWithItemSourceOnBreak(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/item/ItemStack;Ljava/util/function/Consumer;)V"))
-    private void onHitEntity(ServerLevel world, Entity target, DamageSource damageSource, ItemStack weapon, Consumer<Item> breakCallback, Operation<Void> original) {
+    private void onHitEntity(ServerLevel serverLevel, Entity victim, DamageSource damageSource, ItemStack source, Consumer<Item> attackerlessOnBreak, Operation<Void> original) {
         ScopedValue.where(CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT, true)
-                .call(() -> original.call(world, target, damageSource, weapon, breakCallback));
+                .call(() -> original.call(serverLevel, victim, damageSource, source, attackerlessOnBreak));
     }
 
     // 击中避雷针
     @WrapOperation(method = "hitBlockEnchantmentEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;onHitBlock(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/level/block/state/BlockState;Ljava/util/function/Consumer;)V"))
-    private void onHitBlock(ServerLevel world, ItemStack weapon, @Nullable LivingEntity owner, Entity entity, @Nullable EquipmentSlot slot, Vec3 hitLocation, BlockState hitBlock, Consumer<Item> onBreak, Operation<Void> original) {
+    private void onHitBlock(ServerLevel serverLevel, ItemStack weapon, @Nullable LivingEntity owner, Entity entity, @Nullable EquipmentSlot slot, Vec3 hitLocation, BlockState hitBlock, Consumer<Item> onBreak, Operation<Void> original) {
         ScopedValue.where(CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT, true)
-                .call(() -> original.call(world, weapon, owner, entity, slot, hitLocation, hitBlock, onBreak));
+                .call(() -> original.call(serverLevel, weapon, owner, entity, slot, hitLocation, hitBlock, onBreak));
     }
 }

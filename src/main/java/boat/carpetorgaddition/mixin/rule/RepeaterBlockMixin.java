@@ -16,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(RepeaterBlock.class)
 public class RepeaterBlockMixin {
     @Inject(method = "updateShape", at = @At("HEAD"), cancellable = true)
-    private void preventDrop(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random, CallbackInfoReturnable<BlockState> cir) {
+    private void preventDrop(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction directionToNeighbour, BlockPos neighbourPos, BlockState neighbourState, RandomSource random, CallbackInfoReturnable<BlockState> cir) {
         // 防止中继器掉落
-        if (CarpetOrgAdditionSettings.SIMPLE_UPDATE_SKIPPER.value() && direction == Direction.DOWN) {
+        if (CarpetOrgAdditionSettings.SIMPLE_UPDATE_SKIPPER.value() && directionToNeighbour == Direction.DOWN) {
             cir.setReturnValue(state);
         }
     }

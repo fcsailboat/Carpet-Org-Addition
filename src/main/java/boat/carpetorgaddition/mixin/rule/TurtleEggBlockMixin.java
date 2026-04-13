@@ -26,13 +26,14 @@ public abstract class TurtleEggBlockMixin extends Block {
     @Final
     public static IntegerProperty EGGS;
 
-    public TurtleEggBlockMixin(Properties settings) {
+    @SuppressWarnings("unused")
+    private TurtleEggBlockMixin(Properties settings) {
         super(settings);
     }
 
     //海龟蛋快速孵化
     @Inject(method = "shouldUpdateHatchLevel", at = @At("HEAD"), cancellable = true)
-    private void progress(Level world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void progress(Level level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.TURTLE_EGG_FAST_HATCH.value()) {
             cir.setReturnValue(true);
         }
@@ -40,13 +41,13 @@ public abstract class TurtleEggBlockMixin extends Block {
 
     // 海龟蛋快速采集
     @Inject(method = "playerDestroy", at = @At("HEAD"), cancellable = true)
-    private void afterBreak(Level world, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack tool, CallbackInfo ci) {
+    private void afterBreak(Level level, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack destroyedWith, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.TURTLE_EGG_FAST_MINE.value()) {
             for (int i = 0; i < state.getValue(EGGS); i++) {
-                super.playerDestroy(world, player, pos, state, blockEntity, tool);
+                super.playerDestroy(level, player, pos, state, blockEntity, destroyedWith);
             }
             // 播放海龟蛋破坏音效
-            world.playSound(null, pos, SoundEvents.TURTLE_EGG_BREAK, SoundSource.BLOCKS, 0.7F, 0.9F + world.getRandom().nextFloat() * 0.2F);
+            level.playSound(null, pos, SoundEvents.TURTLE_EGG_BREAK, SoundSource.BLOCKS, 0.7F, 0.9F + level.getRandom().nextFloat() * 0.2F);
             ci.cancel();
         }
     }

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(CachedUserNameToIdResolver.class)
 public class UserCacheMixin {
     @Inject(method = "add(Lnet/minecraft/server/players/NameAndId;)V", at = @At("HEAD"))
-    private void add(NameAndId entry, CallbackInfo ci) {
-        GameProfileCache.getInstance().put(entry);
+    private void add(NameAndId nameAndId, CallbackInfo ci) {
+        GameProfileCache.getInstance().put(nameAndId);
     }
 }

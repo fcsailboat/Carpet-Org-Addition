@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Level.class)
 public class WorldMixin {
     @WrapOperation(method = "isRaining", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getRainLevel(F)F"))
-    private float raining(Level instance, float value, Operation<Float> original) {
+    private float raining(Level instance, @SuppressWarnings("NameDoesntMatchTargetClass") float value, Operation<Float> original) {
         if (CarpetOrgAdditionSettings.CHANNELING_IGNORE_CONDITIONS.value().isIgnoreWeather() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
             return 1F;
         }
@@ -20,7 +20,7 @@ public class WorldMixin {
     }
 
     @WrapOperation(method = "isThundering", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getThunderLevel(F)F"))
-    private float thundering(Level instance, float value, Operation<Float> original) {
+    private float thundering(Level instance, @SuppressWarnings("NameDoesntMatchTargetClass") float value, Operation<Float> original) {
         if (CarpetOrgAdditionSettings.CHANNELING_IGNORE_CONDITIONS.value().isIgnoreWeather() && CarpetOrgAdditionSettings.USE_CHANNELING_TRIDENT.orElse(false)) {
             return 1F;
         }

@@ -21,11 +21,11 @@ public class MinecraftServerMixin {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject(method = "handleCustomClickAction", at = @At("HEAD"))
-    private void handleCustomClickAction(Identifier identifier, Optional<Tag> optional, CallbackInfo ci) {
+    private void handleCustomClickAction(Identifier id, Optional<Tag> payload, CallbackInfo ci) {
         if (CustomClickActionContext.CURRENT_PLAYER.isBound()) {
             ServerPlayer player = CustomClickActionContext.CURRENT_PLAYER.get();
-            CustomClickActionContext context = new CustomClickActionContext(self, player, optional.orElse(null));
-            CustomClickAction.accept(identifier, context);
+            CustomClickActionContext context = new CustomClickActionContext(self, player, payload.orElse(null));
+            CustomClickAction.accept(id, context);
         }
     }
 }

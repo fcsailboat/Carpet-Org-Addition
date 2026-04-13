@@ -27,7 +27,7 @@ public class MinecraftServerMixin implements PeriodicTaskManagerInterface {
     }
 
     @Inject(method = "tickServer", at = @At("HEAD"))
-    private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+    private void tick(BooleanSupplier haveTime, CallbackInfo ci) {
         this.manager.tick();
     }
 

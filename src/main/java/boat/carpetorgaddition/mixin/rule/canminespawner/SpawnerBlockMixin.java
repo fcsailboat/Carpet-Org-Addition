@@ -30,15 +30,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 // 可采集刷怪笼
 @Mixin(SpawnerBlock.class)
 public abstract class SpawnerBlockMixin extends BaseEntityBlock {
-    protected SpawnerBlockMixin(Properties settings) {
+    @SuppressWarnings("unused")
+    private SpawnerBlockMixin(Properties settings) {
         super(settings);
     }
 
     @Inject(method = "spawnAfterBreak", at = @At("HEAD"), cancellable = true)
     // 使用精准采集工具挖掘时不会掉落经验
-    private void onStacksDropped(BlockState state, ServerLevel world, BlockPos pos, ItemStack tool, boolean dropExperience, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && EnchantmentUtils.hasEnchantment(world, Enchantments.SILK_TOUCH, tool)) {
-            super.spawnAfterBreak(state, world, pos, tool, dropExperience);
+    private void onStacksDropped(BlockState state, ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience, CallbackInfo ci) {
+        if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && EnchantmentUtils.hasEnchantment(level, Enchantments.SILK_TOUCH, tool)) {
+            super.spawnAfterBreak(state, level, pos, tool, dropExperience);
             ci.cancel();
         }
     }

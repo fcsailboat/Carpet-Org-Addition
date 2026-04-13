@@ -20,11 +20,11 @@ public class ServerPlayerEntityMixin {
 
     @SuppressWarnings("unchecked")
     @WrapOperation(method = "restoreFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;"))
-    private <T> T keepItem(GameRules instance, GameRule<T> rule, Operation<T> original) {
-        if (this.shouldKeepInventory() && rule.gameRuleType() == GameRuleType.BOOL) {
+    private <T> T keepItem(GameRules instance, GameRule<T> gameRule, Operation<T> original) {
+        if (this.shouldKeepInventory() && gameRule.gameRuleType() == GameRuleType.BOOL) {
             return (T) Boolean.TRUE;
         }
-        return original.call(instance, rule);
+        return original.call(instance, gameRule);
     }
 
     @Unique

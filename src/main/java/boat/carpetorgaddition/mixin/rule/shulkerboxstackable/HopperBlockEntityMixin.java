@@ -25,7 +25,8 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(value = HopperBlockEntity.class, priority = 949)
 public abstract class HopperBlockEntityMixin extends BlockEntity {
-    public HopperBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    @SuppressWarnings("unused")
+    private HopperBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 

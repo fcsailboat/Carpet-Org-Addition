@@ -51,7 +51,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
 
     // 血量不满时也可以进食
     @Inject(method = "canEat", at = @At("HEAD"), cancellable = true)
-    private void canEat(boolean ignoreHunger, CallbackInfoReturnable<Boolean> cir) {
+    private void canEat(boolean canAlwaysEat, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.HEALTH_NOT_FULL_CAN_EAT.value() && thisPlayer.getHealth() < thisPlayer.getMaxHealth() - 0.3 // -0.3：可能生命值不满但是显示的心满了
             && this.getFoodData().getSaturationLevel() <= 5) {
             cir.setReturnValue(true);
@@ -170,25 +170,25 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
     }
 
     @Inject(method = "getDestroySpeed", at = @At(value = "HEAD"))
-    private void getBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
+    private void getBlockBreakingSpeed(BlockState state, CallbackInfoReturnable<Float> cir) {
         if (CarpetOrgAdditionSettings.APPLY_TOOL_EFFECTS_IMMEDIATELY.value()) {
             this.applyToolEffects();
         }
     }
 
     @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Ljava/util/List;isEmpty()Z"))
-    private void pickupItem(CallbackInfo ci, @Local(name = "pickupArea") AABB box) {
+    private void pickupItem(CallbackInfo ci, @Local(name = "pickupArea") AABB pickupArea) {
         if (this.thisPlayer instanceof ServerPlayer player) {
             int range = CarpetOrgAdditionSettings.ITEM_PICKUP_RANGE_EXPAND.value(player);
             if (range == 0) {
                 return;
             }
-            double minX = box.minX - range;
-            double minY = box.minY - range;
-            double minZ = box.minZ - range;
-            double maxX = box.maxX + range;
-            double maxY = box.maxY + range;
-            double maxZ = box.maxZ + range;
+            double minX = pickupArea.minX - range;
+            double minY = pickupArea.minY - range;
+            double minZ = pickupArea.minZ - range;
+            double maxX = pickupArea.maxX + range;
+            double maxY = pickupArea.maxY + range;
+            double maxZ = pickupArea.maxZ + range;
             AABB expand = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
             List<Entity> list = ServerUtils.getWorld(this.thisPlayer)
                     .getEntities(this.thisPlayer, expand)

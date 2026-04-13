@@ -15,8 +15,8 @@ public class CommandRegistryAccessMixin implements CommandRegistryAccessor {
     private CommandBuildContext commandRegistryAccess;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(Commands.CommandSelection environment, CommandBuildContext commandRegistryAccess, CallbackInfo ci) {
-        this.commandRegistryAccess = commandRegistryAccess;
+    private void init(Commands.CommandSelection commandSelection, CommandBuildContext context, CallbackInfo ci) {
+        this.commandRegistryAccess = context;
     }
 
 

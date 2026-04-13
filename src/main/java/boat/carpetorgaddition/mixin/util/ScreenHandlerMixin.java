@@ -17,10 +17,10 @@ public class ScreenHandlerMixin {
      * @see AbstractPlayerInventoryScreenHandler#quickMoveStack(Player, int)
      */
     @WrapOperation(method = "moveItemStackTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isSameItemSameComponents(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"))
-    private boolean isEqual(ItemStack stack, ItemStack otherStack, Operation<Boolean> original) {
-        if (AbstractPlayerInventoryScreenHandler.QUICK_MOVING_ITEM.orElse(false) && stack == otherStack) {
+    private boolean isEqual(ItemStack a, ItemStack b, Operation<Boolean> original) {
+        if (AbstractPlayerInventoryScreenHandler.QUICK_MOVING_ITEM.orElse(false) && a == b) {
             return false;
         }
-        return original.call(stack, otherStack);
+        return original.call(a, b);
     }
 }

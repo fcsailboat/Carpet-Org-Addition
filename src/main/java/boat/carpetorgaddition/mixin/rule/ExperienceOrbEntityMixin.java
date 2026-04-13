@@ -29,28 +29,28 @@ public abstract class ExperienceOrbEntityMixin {
     private final ExperienceOrb thisEntity = (ExperienceOrb) (Object) this;
 
     @Inject(method = "canMerge(Lnet/minecraft/world/entity/ExperienceOrb;II)Z", at = @At("HEAD"), cancellable = true)
-    private static void isMergeable(ExperienceOrb orb, int seed, int amount, CallbackInfoReturnable<Boolean> cir) {
+    private static void isMergeable(ExperienceOrb orb, int id, int value, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.EXPERIENCE_ORB_MERGE.value()) {
             boolean combine = ((ExperienceOrbEntityMixin) (Object) orb).combine();
             if (combine) {
-                cir.setReturnValue(!orb.isRemoved() && orb.getValue() + amount <= Short.MAX_VALUE);
+                cir.setReturnValue(!orb.isRemoved() && orb.getValue() + value <= Short.MAX_VALUE);
             }
         }
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Inject(method = "merge", at = @At("HEAD"), cancellable = true)
-    private void merge(ExperienceOrb other, CallbackInfo ci) {
+    private void merge(ExperienceOrb orb, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.EXPERIENCE_ORB_MERGE.value() && this.combine()) {
-            int sum = this.getValue() * this.count + other.getValue() * ((ExperienceOrbEntityMixin) (Object) other).count;
+            int sum = this.getValue() * this.count + orb.getValue() * ((ExperienceOrbEntityMixin) (Object) orb).count;
             if (sum > Short.MAX_VALUE) {
                 ci.cancel();
                 return;
             }
             this.setValue(sum);
-            this.age = Math.min(this.age, ((ExperienceOrbEntityMixin) (Object) other).age);
+            this.age = Math.min(this.age, ((ExperienceOrbEntityMixin) (Object) orb).age);
             this.count = 1;
-            other.discard();
+            orb.discard();
             ci.cancel();
         }
     }

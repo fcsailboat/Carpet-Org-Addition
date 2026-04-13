@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Containers.class)
 public class ItemScattererMixin {
     @Inject(method = "dropItemStack(Lnet/minecraft/world/level/Level;DDDLnet/minecraft/world/item/ItemStack;)V", at = @At(value = "HEAD"), cancellable = true)
-    private static void onStateReplaced(Level world, double x, double y, double z, ItemStack stack, CallbackInfo ci) {
+    private static void onStateReplaced(Level level, double x, double y, double z, ItemStack itemStack, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.DISABLE_CREATIVE_CONTAINER_DROPS.value()) {
             ServerPlayer player = CarpetOrgAdditionSettings.BLOCK_BREAKER.get();
             if (player != null && player.isCreative()) {

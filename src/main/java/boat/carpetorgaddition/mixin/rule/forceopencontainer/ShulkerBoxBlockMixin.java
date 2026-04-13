@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ShulkerBoxBlockMixin {
     // 强制开启潜影盒
     @Inject(method = "canOpen", at = @At(value = "HEAD"), cancellable = true)
-    private static void canOpen(BlockState state, Level world, BlockPos pos, ShulkerBoxBlockEntity entity, CallbackInfoReturnable<Boolean> cir) {
+    private static void canOpen(BlockState state, Level level, BlockPos pos, ShulkerBoxBlockEntity blockEntity, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.FORCE_OPEN_CONTAINER.value().canOpenShulkerBox()) {
             cir.setReturnValue(true);
         }

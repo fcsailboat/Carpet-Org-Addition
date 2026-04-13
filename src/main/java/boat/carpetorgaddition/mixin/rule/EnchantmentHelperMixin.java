@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class EnchantmentHelperMixin {
     // 绑定诅咒无效化
     @Inject(method = "has", at = @At("HEAD"), cancellable = true)
-    private static void hasAnyEnchantmentsWith(ItemStack stack, DataComponentType<?> componentType, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.BINDING_CURSE_INVALIDATION.value() && EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE.equals(componentType)) {
+    private static void hasAnyEnchantmentsWith(ItemStack item, DataComponentType<?> effectType, CallbackInfoReturnable<Boolean> cir) {
+        if (CarpetOrgAdditionSettings.BINDING_CURSE_INVALIDATION.value() && EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE.equals(effectType)) {
             cir.setReturnValue(false);
         }
     }

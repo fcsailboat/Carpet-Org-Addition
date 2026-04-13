@@ -14,15 +14,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FarmlandBlock.class)
 public class FarmlandBlockMixin extends Block {
-    public FarmlandBlockMixin(Properties settings) {
+    @SuppressWarnings("unused")
+    private FarmlandBlockMixin(Properties settings) {
         super(settings);
     }
 
     // 耕地防踩踏
     @Inject(method = "fallOn", at = @At("HEAD"), cancellable = true)
-    private void onLandedUpon(Level world, BlockState state, BlockPos pos, Entity entity, double fallDistance, CallbackInfo ci) {
+    private void onLandedUpon(Level level, BlockState state, BlockPos pos, Entity entity, double fallDistance, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.FARMLAND_PREVENT_STEPPING.value()) {
-            super.fallOn(world, state, pos, entity, fallDistance);
+            super.fallOn(level, state, pos, entity, fallDistance);
             ci.cancel();
         }
     }

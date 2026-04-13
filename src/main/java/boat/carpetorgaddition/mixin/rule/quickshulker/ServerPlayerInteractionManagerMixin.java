@@ -17,12 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ServerPlayerGameMode.class)
 public class ServerPlayerInteractionManagerMixin {
     @Inject(method = "useItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;use(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
-    private void interactItem(ServerPlayer player, Level world, ItemStack stack, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (stack.isEmpty()) {
+    private void interactItem(ServerPlayer player, Level level, ItemStack itemStack, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        if (itemStack.isEmpty()) {
             return;
         }
-        if (CarpetOrgAdditionSettings.QUICK_SHULKER.value() && InventoryUtils.isShulkerBoxItem(stack) && stack.getCount() == 1) {
-            PlayerUtils.openShulkerScreenHandler(player, stack);
+        if (CarpetOrgAdditionSettings.QUICK_SHULKER.value() && InventoryUtils.isShulkerBoxItem(itemStack) && itemStack.getCount() == 1) {
+            PlayerUtils.openShulkerScreenHandler(player, itemStack);
             cir.setReturnValue(InteractionResult.SUCCESS);
         }
     }

@@ -30,8 +30,8 @@ public class RedstoneWireBlockMixin {
 
     // 防止红石线掉落
     @Inject(method = "updateShape", at = @At("HEAD"), cancellable = true)
-    private void preventDrop(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random, CallbackInfoReturnable<BlockState> cir) {
-        if (CarpetOrgAdditionSettings.SIMPLE_UPDATE_SKIPPER.value() && direction == Direction.DOWN) {
+    private void preventDrop(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction directionToNeighbour, BlockPos neighbourPos, BlockState neighbourState, RandomSource random, CallbackInfoReturnable<BlockState> cir) {
+        if (CarpetOrgAdditionSettings.SIMPLE_UPDATE_SKIPPER.value() && directionToNeighbour == Direction.DOWN) {
             cir.setReturnValue(state);
         }
     }

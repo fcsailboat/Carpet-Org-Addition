@@ -26,8 +26,8 @@ public class EnchantmentMixin {
 
     // 击退棒
     @Inject(method = "canEnchant", at = @At("HEAD"), cancellable = true)
-    public void isAcceptableItem(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.KNOCKBACK_STICK.value() && stack.is(Items.STICK) && CarpetOrgAdditionSettings.ENCHANTER.isBound()) {
+    public void isAcceptableItem(ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
+        if (CarpetOrgAdditionSettings.KNOCKBACK_STICK.value() && itemStack.is(Items.STICK) && CarpetOrgAdditionSettings.ENCHANTER.isBound()) {
             Player player = CarpetOrgAdditionSettings.ENCHANTER.get();
             if (EnchantmentUtils.isSpecified(ServerUtils.getWorld(player), Enchantments.KNOCKBACK, thisEnchantment)) {
                 cir.setReturnValue(true);
@@ -37,10 +37,10 @@ public class EnchantmentMixin {
 
     // 保护类魔咒兼容
     @Inject(method = "areCompatible", at = @At("HEAD"), cancellable = true)
-    private static void protectionEnchantmentCompatible(Holder<Enchantment> first, Holder<Enchantment> second, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.PROTECTION_ENCHANTMENT_COMPATIBLE.value() && !first.equals(second)) {
-            Optional<ResourceKey<Enchantment>> firstKey = first.unwrapKey();
-            Optional<ResourceKey<Enchantment>> secondKey = second.unwrapKey();
+    private static void protectionEnchantmentCompatible(Holder<Enchantment> enchantment, Holder<Enchantment> other, CallbackInfoReturnable<Boolean> cir) {
+        if (CarpetOrgAdditionSettings.PROTECTION_ENCHANTMENT_COMPATIBLE.value() && !enchantment.equals(other)) {
+            Optional<ResourceKey<Enchantment>> firstKey = enchantment.unwrapKey();
+            Optional<ResourceKey<Enchantment>> secondKey = other.unwrapKey();
             if (firstKey.isEmpty() || secondKey.isEmpty()) {
                 return;
             }
@@ -52,10 +52,10 @@ public class EnchantmentMixin {
 
     // 伤害类魔咒兼容
     @Inject(method = "areCompatible", at = @At("HEAD"), cancellable = true)
-    private static void damageEnchantmentCompatible(Holder<Enchantment> first, Holder<Enchantment> second, CallbackInfoReturnable<Boolean> cir) {
-        if (CarpetOrgAdditionSettings.DAMAGE_ENCHANTMENT_COMPATIBLE.value() && !first.equals(second)) {
-            Optional<ResourceKey<Enchantment>> firstKey = first.unwrapKey();
-            Optional<ResourceKey<Enchantment>> secondKey = second.unwrapKey();
+    private static void damageEnchantmentCompatible(Holder<Enchantment> enchantment, Holder<Enchantment> other, CallbackInfoReturnable<Boolean> cir) {
+        if (CarpetOrgAdditionSettings.DAMAGE_ENCHANTMENT_COMPATIBLE.value() && !enchantment.equals(other)) {
+            Optional<ResourceKey<Enchantment>> firstKey = enchantment.unwrapKey();
+            Optional<ResourceKey<Enchantment>> secondKey = other.unwrapKey();
             if (firstKey.isEmpty() || secondKey.isEmpty()) {
                 return;
             }

@@ -18,15 +18,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class PhantomSpawnerMixin {
     // 限制幻翼生成
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/NaturalSpawner;isValidEmptySpawnBlock(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/material/FluidState;Lnet/minecraft/world/entity/EntityType;)Z"), cancellable = true)
-    private void spawn(ServerLevel world, boolean spawnMonsters, CallbackInfo ci, @Local(name = "spawnPos") BlockPos blockPos) {
+    private void spawn(ServerLevel level, boolean spawnEnemies, CallbackInfo ci, @Local(name = "spawnPos") BlockPos spawnPos) {
         if (CarpetOrgAdditionSettings.LIMIT_PHANTOM_SPAWN.value()) {
-            NaturalSpawner.SpawnState spawnInfo = world.getChunkSource().getLastSpawnState();
+            NaturalSpawner.SpawnState spawnInfo = level.getChunkSource().getLastSpawnState();
             if (spawnInfo == null) {
                 return;
             }
             SpawnHelperInfoAccessor accessor = (SpawnHelperInfoAccessor) spawnInfo;
             boolean isBelowCap = accessor.invokerIsBelowCap(EntityType.PHANTOM.getCategory());
-            boolean canSpawn = accessor.invokerCanSpawn(EntityType.PHANTOM.getCategory(), ChunkPos.containing(blockPos));
+            boolean canSpawn = accessor.invokerCanSpawn(EntityType.PHANTOM.getCategory(), ChunkPos.containing(spawnPos));
             if (isBelowCap && canSpawn) {
                 return;
             }

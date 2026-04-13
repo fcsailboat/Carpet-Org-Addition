@@ -25,13 +25,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ShulkerBoxBlockMixin {
     // CCE更新抑制器
     @Inject(method = "getAnalogOutputSignal", at = @At("HEAD"))
-    private void getComparatorOutput(BlockState state, Level world, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
+    private void getComparatorOutput(BlockState state, Level level, BlockPos pos, Direction direction, CallbackInfoReturnable<Integer> cir) {
         // 不要在客户端抛出异常，这可能导致客户端游戏崩溃
-        if (world.isClientSide()) {
+        if (level.isClientSide()) {
             return;
         }
-        if (RuleUtils.canUpdateSuppression(getBlockName(world, pos))) {
-            throw new CCEUpdateSuppressException(pos, "CCE Update Suppress triggered on " + ServerUtils.toWorldPosString(world, pos));
+        if (RuleUtils.canUpdateSuppression(getBlockName(level, pos))) {
+            throw new CCEUpdateSuppressException(pos, "CCE Update Suppress triggered on " + ServerUtils.toWorldPosString(level, pos));
         }
     }
 
@@ -45,9 +45,9 @@ public class ShulkerBoxBlockMixin {
     }
 
     @Inject(method = "useWithoutItem", at = @At("HEAD"), cancellable = true)
-    private void onUse(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
+    private void onUse(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
         // 提示玩家不能打开用于更新抑制的潜影盒
-        if (RuleUtils.canUpdateSuppression(getBlockName(world, pos))) {
+        if (RuleUtils.canUpdateSuppression(getBlockName(level, pos))) {
             MessageUtils.sendMessageToHud(player, LocalizationKeys.Rule.Message.CCE_UPDATE_SUPPRESSION.translate());
             cir.setReturnValue(InteractionResult.SUCCESS);
         }

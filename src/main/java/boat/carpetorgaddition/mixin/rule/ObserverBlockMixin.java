@@ -26,6 +26,7 @@ public abstract class ObserverBlockMixin extends DirectionalBlock {
     @Shadow
     protected abstract void startSignal(LevelReader level, ScheduledTickAccess ticks, BlockPos pos);
 
+    @SuppressWarnings("unused")
     private ObserverBlockMixin(Properties settings) {
         super(settings);
     }

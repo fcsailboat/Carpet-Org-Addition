@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class GameRuleCommandMixin {
     //开放/gamerule命令权限
     @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;hasPermission(Lnet/minecraft/server/permissions/PermissionCheck;)Lnet/minecraft/server/permissions/PermissionProviderCheck;"))
-    private static <T extends PermissionSetSupplier> PermissionProviderCheck<T> privilege(PermissionCheck permissionCheck, Operation<PermissionProviderCheck<T>> original) {
-        return RuleUtils.requireOrOpenPermissionLevel(CarpetOrgAdditionSettings.OPEN_GAME_RULE_PERMISSION, original.call(permissionCheck));
+    private static <T extends PermissionSetSupplier> PermissionProviderCheck<T> privilege(PermissionCheck permission, Operation<PermissionProviderCheck<T>> original) {
+        return RuleUtils.requireOrOpenPermissionLevel(CarpetOrgAdditionSettings.OPEN_GAME_RULE_PERMISSION, original.call(permission));
     }
 }

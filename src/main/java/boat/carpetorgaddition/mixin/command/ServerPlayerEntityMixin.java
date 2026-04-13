@@ -40,9 +40,9 @@ public abstract class ServerPlayerEntityMixin implements FakePlayerSafeAfkInterf
     private float safeAfkThreshold = -1F;
 
     @Inject(method = "hurtServer", at = @At(value = "RETURN"))
-    private void damage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void damage(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Boolean> cir) {
         if (this.safeAfkThreshold > 0 && thisPlayer instanceof EntityPlayerMPFake) {
-            safeAfk(source, amount);
+            safeAfk(source, damage);
         }
     }
 
