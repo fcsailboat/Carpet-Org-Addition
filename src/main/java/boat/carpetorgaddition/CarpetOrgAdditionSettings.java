@@ -835,8 +835,6 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> RECORD_PLAYER_COMMAND = register(
             RuleFactory.create("recordPlayerCommand", false)
-                    // TODO 是否需要命令类别
-                    .setCommand()
                     .build()
     );
 
@@ -863,8 +861,6 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Integer> MAX_LINES_PER_PAGE = register(
             RuleFactory.create("maxLinesPerPage", 10)
-                    // TODO 是否需要设置为命令选项
-                    .setCommand()
                     .addOptions(10, 15, 20, 25)
                     .addValidator(newValue -> newValue > 0, () -> ValidatorFeedbacks.greaterThan(0))
                     .setLenient()

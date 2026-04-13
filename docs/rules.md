@@ -675,7 +675,7 @@ _同时安装锂（Lithium）时，此规则与漏斗计数器等功能不兼容
 - 类型：`布尔值`
 - 默认值：`false`
 - 参考选项：`true`，`false`
-- 分类：`Org`，`命令`
+- 分类：`Org`
 
 ### 保护类魔咒兼容(protectionEnchantmentCompatible)
 
@@ -702,7 +702,7 @@ _同时安装锂（Lithium）时，此规则与漏斗计数器等功能不兼容
 - 类型：`整数`
 - 默认值：`10`
 - 参考选项：`10`，`15`，`20`，`25`
-- 分类：`Org`，`命令`
+- 分类：`Org`
 
 ### 打开玩家物品栏(playerCommandOpenPlayerInventory)
 

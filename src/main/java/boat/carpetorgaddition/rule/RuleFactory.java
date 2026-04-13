@@ -57,7 +57,7 @@ public final class RuleFactory {
     public static final class Builder<T> {
         private final Class<T> type;
         private final String name;
-        private final Collection<String> categories = new ArrayList<>();
+        private final Collection<String> categories = new LinkedHashSet<>();
         private final Collection<String> suggestions;
         @NonNull
         private final T value;
@@ -97,7 +97,7 @@ public final class RuleFactory {
                         .map(s -> s.toLowerCase(Locale.ROOT))
                         .toList();
             } else {
-                this.suggestions = new ArrayList<>();
+                this.suggestions = new LinkedHashSet<>();
             }
             this.categories.add(CarpetOrgAdditionSettings.ORG);
         }
