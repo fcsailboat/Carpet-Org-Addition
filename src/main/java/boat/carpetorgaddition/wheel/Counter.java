@@ -29,19 +29,7 @@ public interface Counter<E> extends Iterable<E> {
      */
     int getCount(E element);
 
-    /**
-     * 获取元素的种类数量
-     */
-    int size();
-
-    /**
-     * 计数器是否未记录任何元素
-     */
-    boolean isEmpty();
-
     Stream<Object2IntMap.Entry<E>> stream();
-
-    Set<E> keySet();
 
     Set<Object2IntMap.Entry<E>> entrySet();
 

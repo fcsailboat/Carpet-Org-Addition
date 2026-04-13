@@ -66,30 +66,11 @@ public class SimpleCounter<E> implements Counter<E> {
         return this.counter.getInt(element);
     }
 
-    /**
-     * 获取集合内总共有多少种元素
-     *
-     * @return 集合的大小
-     */
-    @Override
-    public int size() {
-        return counter.size();
-    }
-
-    /**
-     * @return 当前集合是否为空
-     */
-    @Override
-    public boolean isEmpty() {
-        return this.counter.isEmpty();
-    }
-
     @Override
     public Stream<Object2IntMap.Entry<E>> stream() {
         return this.counter.object2IntEntrySet().stream();
     }
 
-    @Override
     public Set<E> keySet() {
         return this.counter.keySet();
     }

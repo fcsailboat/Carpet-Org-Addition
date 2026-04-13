@@ -50,6 +50,6 @@ public class ServerTaskManager {
     }
 
     public <T> Stream<T> stream(Class<T> classFilter) {
-        return this.tasks.stream().filter(classFilter::isInstance).map(classFilter::cast);
+        return this.stream().filter(classFilter::isInstance).map(classFilter::cast);
     }
 }

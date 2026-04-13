@@ -20,9 +20,7 @@ import org.jspecify.annotations.NullMarked;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @NullMarked
 public class DialogProvider {
@@ -116,12 +114,6 @@ public class DialogProvider {
                 )
                 .addDialogBody(exception)
                 .build();
-    }
-
-    public Set<Map.Entry<Identifier, Dialog>> entrySet() {
-        return this.dialogs.entrySet().stream()
-                .map(entry -> Map.entry(entry.getKey(), entry.getValue().get()))
-                .collect(Collectors.toSet());
     }
 
     private static Identifier getDialogIdentifier(String id) {

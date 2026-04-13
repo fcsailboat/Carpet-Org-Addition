@@ -31,11 +31,6 @@ public class HiddenFunctionConfigEntry implements ConfigEntry<JsonPrimitive> {
     }
 
     @Override
-    public Class<JsonPrimitive> getType() {
-        return JsonPrimitive.class;
-    }
-
-    @Override
     public JsonPrimitive getValue() {
         return new JsonPrimitive(this.enable);
     }

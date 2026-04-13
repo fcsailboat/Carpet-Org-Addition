@@ -238,10 +238,6 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
         return !(this.input.startsWith("#") || this.input.startsWith("*") || this.input.matches(".*\\[.*]"));
     }
 
-    public String getInput() {
-        return this.input;
-    }
-
     @Override
     public String toString() {
         return this.input;

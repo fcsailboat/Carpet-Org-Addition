@@ -51,11 +51,6 @@ public class CustomCommandConfigEntry implements ConfigEntry<JsonObject> {
         return json;
     }
 
-    @Override
-    public Class<JsonObject> getType() {
-        return JsonObject.class;
-    }
-
     /**
      * 初始化命令配置文件
      */

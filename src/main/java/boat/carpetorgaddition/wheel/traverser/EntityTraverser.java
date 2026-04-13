@@ -19,10 +19,6 @@ public class EntityTraverser<T extends Entity> extends WorldTraverser<Optional<T
         this.type = type;
     }
 
-    public boolean contains(Class<T> type) {
-        return !entities(type).isEmpty();
-    }
-
     private List<T> entities(Class<T> type) {
         return this.world.getEntitiesOfClass(type, this.toBox());
     }

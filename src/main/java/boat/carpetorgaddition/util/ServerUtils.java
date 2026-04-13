@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 public class ServerUtils {
     /**
      * 当前{@code Minecraft}的NBT数据版本
