@@ -12,7 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class DelayedLogoutTask extends PlayerScheduleTask {
     private final MinecraftServer server;
@@ -64,7 +64,7 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
         MessageUtils.sendMessage(context, KEY.then("cancel").translate(this.fakePlayer.getDisplayName(), this.getDisplayTime()));
     }
 
-    private @NotNull Component getDisplayTime() {
+    private @NonNull Component getDisplayTime() {
         TextBuilder builder = TextBuilder.of(TextProvider.tickToTime(this.delayed));
         builder.setHover(TextProvider.tickToRealTime(this.delayed));
         return builder.build();

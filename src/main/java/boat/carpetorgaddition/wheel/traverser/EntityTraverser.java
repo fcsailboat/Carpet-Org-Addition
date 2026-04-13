@@ -3,7 +3,7 @@ package boat.carpetorgaddition.wheel.traverser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +32,7 @@ public class EntityTraverser<T extends Entity> extends WorldTraverser<Optional<T
     }
 
     @Override
-    public @NotNull Iterator<Optional<T>> iterator() {
+    public @NonNull Iterator<Optional<T>> iterator() {
         return new Itr<>(this.entities(this.type));
     }
 

@@ -12,7 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -176,7 +176,7 @@ public class CustomRuleValueManager {
     }
 
     @SuppressWarnings("unused")
-    public static Optional<CustomRuleEntry> get(@NotNull CarpetRule<?> rule) {
+    public static Optional<CustomRuleEntry> get(@NonNull CarpetRule<?> rule) {
         CustomRuleControl<?> control = RULE_TO_CONTROL.get(rule);
         String name = rule.name();
         return CustomRuleEntry.of(name, rule, control);

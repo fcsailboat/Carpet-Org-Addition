@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.wheel;
 
-import com.google.gson.JsonObject;
 import boat.carpetorgaddition.util.IOUtils;
+import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -11,7 +11,7 @@ import carpet.utils.CommandHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -59,7 +59,7 @@ public final class RuleFactory {
         private final String name;
         private final Collection<String> categories = new ArrayList<>();
         private final Collection<String> suggestions;
-        @NotNull
+        @NonNull
         private final T value;
         private final List<ValueValidator<T>> validators = new ArrayList<>();
         private final List<SilenceValueValidator<T>> silenceValidators = new ArrayList<>();
@@ -74,7 +74,7 @@ public final class RuleFactory {
         private String displayName = "";
         private String displayDesc = "";
 
-        private Builder(Class<T> type, String rule, @NotNull T value) {
+        private Builder(Class<T> type, String rule, @NonNull T value) {
             if (type != value.getClass()) {
                 // 基本数据类型和它们对应的包装类是不同的数据类型
                 throw new IllegalArgumentException("Rule %s: type mismatch - expected %s, actual %s"

@@ -18,8 +18,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class Waypoint {
     @Nullable
     private BlockPos anotherBlockPos;
     private final Level world;
-    @NotNull
+    @NonNull
     private MetaComment comment = new MetaComment();
     private final String creator;
     private final MinecraftServer server;

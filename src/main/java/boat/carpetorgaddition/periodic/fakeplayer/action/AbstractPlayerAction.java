@@ -10,8 +10,8 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -104,7 +104,7 @@ public abstract class AbstractPlayerAction {
         actionManager.setAction(new StopAction(this.fakePlayer));
     }
 
-    @NotNull
+    @NonNull
     @Contract(pure = true)
     protected EntityPlayerMPFake getFakePlayer() {
         return Objects.requireNonNull(this.fakePlayer);

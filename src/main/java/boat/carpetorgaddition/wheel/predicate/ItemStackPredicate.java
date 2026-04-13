@@ -23,9 +23,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -67,7 +66,7 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
         throw new IllegalArgumentException("Argument '%s' not found in command context".formatted(arguments));
     }
 
-    public ItemStackPredicate(@NotNull Item item) {
+    public ItemStackPredicate(@NonNull Item item) {
         this.predicate = itemStack -> itemStack.is(item);
         this.input = ServerUtils.getIdAsString(item);
         this.isWildcard = false;

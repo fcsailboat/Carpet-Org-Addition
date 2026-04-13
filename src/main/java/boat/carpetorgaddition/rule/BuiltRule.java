@@ -12,8 +12,8 @@ import carpet.api.settings.RuleHelper;
 import carpet.api.settings.SettingsManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -24,7 +24,7 @@ public class BuiltRule<T> implements CarpetRule<T> {
     private final String displayDesc;
     private final Collection<String> categories;
     private final Collection<String> suggestions;
-    @NotNull
+    @NonNull
     private T value;
     private final T defaultValue;
     private final boolean canBeToggledClientSide;
@@ -53,7 +53,7 @@ public class BuiltRule<T> implements CarpetRule<T> {
             String name,
             Collection<String> categories,
             Collection<String> suggestions,
-            @NotNull T value,
+            @NonNull T value,
             boolean canBeToggledClientSide,
             List<ValueValidator<T>> valueValidators,
             List<SilenceValueValidator<T>> silenceValidators,

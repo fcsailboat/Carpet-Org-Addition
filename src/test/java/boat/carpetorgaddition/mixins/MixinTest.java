@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.mixins;
 
+import boat.carpetorgaddition.util.IOUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import boat.carpetorgaddition.util.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

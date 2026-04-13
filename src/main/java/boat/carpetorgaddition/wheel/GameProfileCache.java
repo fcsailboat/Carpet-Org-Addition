@@ -12,8 +12,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.players.NameAndId;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -177,7 +177,7 @@ public class GameProfileCache {
      *
      * @param name 玩家的名称
      */
-    public Optional<GameProfile> getGameProfile(@NotNull String name) {
+    public Optional<GameProfile> getGameProfile(@NonNull String name) {
         try {
             this.lock.readLock().lock();
             Optional<Map.Entry<UUID, String>> optional = this.table.get(name);

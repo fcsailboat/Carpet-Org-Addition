@@ -10,13 +10,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class BlockPosNavigator extends AbstractNavigator {
     protected final BlockPos blockPos;
     protected final Level world;
 
-    public BlockPosNavigator(@NotNull ServerPlayer player, BlockPos blockPos, Level world) {
+    public BlockPosNavigator(@NonNull ServerPlayer player, BlockPos blockPos, Level world) {
         super(player);
         this.blockPos = blockPos;
         this.world = world;

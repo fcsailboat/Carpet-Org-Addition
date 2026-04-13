@@ -15,7 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class GotoAction extends AbstractPlayerAction {
     private final Supplier<Optional<BlockPos>> target;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("goto");
 
-    public GotoAction(@NotNull EntityPlayerMPFake fakePlayer, BlockPos blockPos) {
+    public GotoAction(@NonNull EntityPlayerMPFake fakePlayer, BlockPos blockPos) {
         super(fakePlayer);
         this.target = () -> Optional.of(blockPos);
         this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this.target);
@@ -38,7 +38,7 @@ public class GotoAction extends AbstractPlayerAction {
         this.displayName = TextProvider.blockPos(blockPos);
     }
 
-    public GotoAction(@NotNull EntityPlayerMPFake fakePlayer, Entity entity) {
+    public GotoAction(@NonNull EntityPlayerMPFake fakePlayer, Entity entity) {
         super(fakePlayer);
         this.target = new EntityTracker(this::getFakePlayer, ServerUtils.getWorld(entity), entity);
         this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this.target);
@@ -138,12 +138,12 @@ public class GotoAction extends AbstractPlayerAction {
         /**
          * 玩家当前跟随的实体
          */
-        @NotNull
+        @NonNull
         private Entity entity;
         /**
          * 玩家当前的目标
          */
-        @NotNull
+        @NonNull
         private BlockPos target;
         /**
          * 当前跟随实体的UUID

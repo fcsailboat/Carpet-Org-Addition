@@ -16,7 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 
@@ -57,7 +57,7 @@ public abstract class AbstractNavigator {
      */
     public abstract AbstractNavigator copy(ServerPlayer player);
 
-    @NotNull
+    @NonNull
     protected Component getHUDText(Vec3 vec3d, Component displayName, int distance) {
         // TODO 改为格式化文本
         // 添加左右箭头

@@ -4,7 +4,7 @@ import boat.carpetorgaddition.rule.ValidatorFeedbacks;
 import carpet.api.settings.CarpetRule;
 import carpet.api.settings.RuleHelper;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class StrictValueValidator<T> implements ValueValidator<T> {
     private final CarpetRule<T> rule;
@@ -19,7 +19,7 @@ public class StrictValueValidator<T> implements ValueValidator<T> {
     }
 
     @Override
-    public @NotNull Component errorMessage() {
+    public @NonNull Component errorMessage() {
         return ValidatorFeedbacks.validOptions(this.rule);
     }
 }

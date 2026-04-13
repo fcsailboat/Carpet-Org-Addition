@@ -12,8 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class WaypointNavigator extends AbstractNavigator {
     private final Waypoint waypoint;
@@ -24,18 +24,18 @@ public class WaypointNavigator extends AbstractNavigator {
     /**
      * 玩家所在的世界
      */
-    @NotNull
+    @NonNull
     private Level playerWorld;
     /**
      * 玩家所在的上一个维度
      */
-    @NotNull
+    @NonNull
     private Level prevPlayerWorld;
     private final BlockPos target;
     @Nullable
     private final BlockPos secondTarget;
 
-    public WaypointNavigator(@NotNull ServerPlayer player, Waypoint waypoint) {
+    public WaypointNavigator(@NonNull ServerPlayer player, Waypoint waypoint) {
         super(player);
         this.waypoint = waypoint;
         BlockPos blockPos = this.waypoint.getBlockPos();

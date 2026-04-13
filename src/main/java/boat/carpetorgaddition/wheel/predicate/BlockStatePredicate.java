@@ -26,8 +26,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.PushReaction;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -41,7 +41,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
     private final Block block;
     public static final BlockStatePredicate EMPTY = new BlockStatePredicate();
 
-    public BlockStatePredicate(@NotNull Block block) {
+    public BlockStatePredicate(@NonNull Block block) {
         this.content = ServerUtils.getIdAsString(block);
         this.biPredicate = (world, blockPos) -> world.getBlockState(blockPos).is(block);
         this.block = block;

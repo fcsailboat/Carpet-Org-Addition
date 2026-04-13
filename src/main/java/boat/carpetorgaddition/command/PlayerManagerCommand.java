@@ -53,8 +53,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -264,7 +264,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     // cancel子命令自动补全
-    @NotNull
+    @NonNull
     private SuggestionProvider<CommandSourceStack> cancelSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
@@ -322,7 +322,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     // relogin子命令自动补全
-    @NotNull
+    @NonNull
     private SuggestionProvider<CommandSourceStack> reLoginTaskSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();

@@ -3,7 +3,7 @@ package boat.carpetorgaddition.wheel;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -80,7 +80,7 @@ public class SimpleCounter<E> implements Counter<E> {
         return this.counter.object2IntEntrySet();
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<E> iterator() {
         return new Iterator<>() {

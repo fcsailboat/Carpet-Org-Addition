@@ -7,8 +7,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +29,7 @@ public class WaypointRenderer {
     private WaypointRenderer() {
     }
 
-    @NotNull
+    @NonNull
     public static WaypointRenderer getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new WaypointRenderer();

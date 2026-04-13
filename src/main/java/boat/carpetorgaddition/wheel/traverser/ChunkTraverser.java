@@ -6,8 +6,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -22,14 +22,14 @@ public class ChunkTraverser extends WorldTraverser<Optional<ChunkAccess>> {
     }
 
     @Override
-    public @NotNull Iterator<Optional<ChunkAccess>> iterator() {
+    public @NonNull Iterator<Optional<ChunkAccess>> iterator() {
         return new Itr(this.world, this.from, this.to);
     }
 
     public static class Itr implements Iterator<Optional<ChunkAccess>> {
         private final ChunkPos start;
         private final ChunkPos end;
-        @NotNull
+        @NonNull
         private final Level world;
         private int currentX;
         private int currentZ;

@@ -6,7 +6,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -43,7 +43,7 @@ public class FakePlayerActionSerializer {
     /**
      * 让假玩家开始执行动作
      */
-    public void startAction(@NotNull EntityPlayerMPFake fakePlayer) {
+    public void startAction(@NonNull EntityPlayerMPFake fakePlayer) {
         if (this == NO_ACTION || this.action.isStop()) {
             return;
         }

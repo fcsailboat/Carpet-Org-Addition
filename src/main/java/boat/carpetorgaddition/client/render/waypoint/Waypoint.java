@@ -23,9 +23,9 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -43,12 +43,12 @@ public abstract class Waypoint implements WorldRenderComponent {
      */
     private long remaining;
     private Vec3 target;
-    @NotNull
+    @NonNull
     protected Vec3 lastTarget;
     /**
      * 路径点所在时间的注册表项
      */
-    @NotNull
+    @NonNull
     protected ResourceKey<Level> registryKey;
     /**
      * 该路径点是否永久显示
@@ -70,7 +70,7 @@ public abstract class Waypoint implements WorldRenderComponent {
     );
     private final RenderType renderType;
 
-    public Waypoint(@NotNull ResourceKey<Level> registryKey, @NotNull Vec3 target, Identifier icon, long duration, boolean persistent) {
+    public Waypoint(@NonNull ResourceKey<Level> registryKey, @NonNull Vec3 target, Identifier icon, long duration, boolean persistent) {
         this.registryKey = registryKey;
         this.target = target;
         this.lastTarget = target;

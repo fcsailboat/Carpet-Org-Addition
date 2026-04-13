@@ -47,8 +47,8 @@ import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -394,7 +394,7 @@ public class OfflinePlayerSearchTask extends ServerTask {
     }
 
     // 查找物品
-    private void searchItem(UUID uuid, @NotNull CompoundTag nbt) {
+    private void searchItem(UUID uuid, @NonNull CompoundTag nbt) {
         // 获取玩家配置文件
         GameProfileCache cache = GameProfileCache.getInstance();
         Optional<NameAndId> optional = cache.getPlayerConfigEntry(uuid);

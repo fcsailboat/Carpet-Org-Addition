@@ -35,8 +35,8 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -307,14 +307,14 @@ public class Parcel implements Comparable<Parcel> {
     /**
      * 播放物品拾取音效
      */
-    public static void playItemPickupSound(@NotNull ServerPlayer player) {
+    public static void playItemPickupSound(@NonNull ServerPlayer player) {
         ServerUtils.playSound(player, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS);
     }
 
     /**
      * 播放经验球拾取音效
      */
-    public static void playXpOrbPickupSound(@NotNull ServerPlayer player) {
+    public static void playXpOrbPickupSound(@NonNull ServerPlayer player) {
         ServerUtils.playSound(player, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS);
     }
 
@@ -577,7 +577,7 @@ public class Parcel implements Comparable<Parcel> {
     }
 
     @Override
-    public int compareTo(@NotNull Parcel o) {
+    public int compareTo(@NonNull Parcel o) {
         return this.id - o.id;
     }
 

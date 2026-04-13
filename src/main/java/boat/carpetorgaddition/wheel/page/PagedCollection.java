@@ -16,7 +16,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -142,7 +142,7 @@ public class PagedCollection implements Iterable<Page> {
     }
 
     @Override
-    public @NotNull Iterator<Page> iterator() {
+    public @NonNull Iterator<Page> iterator() {
         return this.pages.iterator();
     }
 }

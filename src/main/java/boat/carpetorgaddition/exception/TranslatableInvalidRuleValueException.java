@@ -4,8 +4,8 @@ import boat.carpetorgaddition.util.MessageUtils;
 import carpet.api.settings.InvalidRuleValueException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class TranslatableInvalidRuleValueException extends InvalidRuleValueException {
     @Nullable
@@ -15,7 +15,7 @@ public class TranslatableInvalidRuleValueException extends InvalidRuleValueExcep
         this.message = null;
     }
 
-    public TranslatableInvalidRuleValueException(@NotNull Component message) {
+    public TranslatableInvalidRuleValueException(@NonNull Component message) {
         this.message = message;
     }
 

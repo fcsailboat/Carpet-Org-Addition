@@ -5,7 +5,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -25,7 +25,7 @@ public class BlockEntityTraverser extends WorldTraverser<BlockEntity> {
     }
 
     @Override
-    public @NotNull Iterator<BlockEntity> iterator() {
+    public @NonNull Iterator<BlockEntity> iterator() {
         return new Itr();
     }
 

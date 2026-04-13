@@ -9,11 +9,11 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.patches.EntityPlayerMPFake;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class FakePlayerActionManager {
     private final EntityPlayerMPFake fakePlayer;
-    @NotNull
+    @NonNull
     private AbstractPlayerAction action;
     /**
      * 调试用途，用于手动抛出异常
@@ -62,7 +62,7 @@ public class FakePlayerActionManager {
         this.action.setFakePlayer(this.fakePlayer);
     }
 
-    @NotNull
+    @NonNull
     public AbstractPlayerAction getAction() {
         return this.action;
     }
@@ -71,7 +71,7 @@ public class FakePlayerActionManager {
         this.debugExceptionMessage = message;
     }
 
-    public void setAction(@NotNull AbstractPlayerAction action) {
+    public void setAction(@NonNull AbstractPlayerAction action) {
         this.action.onStop();
         this.action = action;
     }

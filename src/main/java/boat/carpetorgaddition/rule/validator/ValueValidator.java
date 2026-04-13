@@ -6,7 +6,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import carpet.api.settings.CarpetRule;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -24,7 +24,7 @@ public interface ValueValidator<T> {
     /**
      * @return 规则校验失败时的错误反馈
      */
-    @NotNull
+    @NonNull
     Component errorMessage();
 
 
@@ -43,7 +43,7 @@ public interface ValueValidator<T> {
             }
 
             @Override
-            public @NotNull Component errorMessage() {
+            public @NonNull Component errorMessage() {
                 return supplier.get();
             }
         };

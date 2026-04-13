@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.config;
 
 import com.google.gson.JsonPrimitive;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class HiddenFunctionConfigEntry implements ConfigEntry<JsonPrimitive> {
     private boolean enable;

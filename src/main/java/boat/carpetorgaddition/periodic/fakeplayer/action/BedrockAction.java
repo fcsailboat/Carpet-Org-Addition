@@ -49,8 +49,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -63,7 +63,7 @@ public class BedrockAction extends AbstractPlayerAction {
     private final BedrockRegionType regionType;
     private PlayerStorageInventory inventory;
     private BlockExcavator excavator;
-    @NotNull
+    @NonNull
     private FakePlayerPathfinder pathfinder = FakePlayerPathfinder.EMPTY;
     /**
      * 玩家是否有AI，是否可以自动寻路，自动进食
@@ -75,12 +75,12 @@ public class BedrockAction extends AbstractPlayerAction {
     private int recycleTimer;
     @Nullable
     private BedrockBreakingContext currentContext;
-    @NotNull
+    @NonNull
     private PlayerWorkPhase phase = PlayerWorkPhase.WORK;
     /**
      * 玩家上一个任务阶段
      */
-    @NotNull
+    @NonNull
     private PlayerWorkPhase prevPhase = getPhase();
     /**
      * 玩家当前的移动目标
@@ -1224,12 +1224,12 @@ public class BedrockAction extends AbstractPlayerAction {
     /**
      * 玩家当前任务的阶段
      */
-    @NotNull
+    @NonNull
     private PlayerWorkPhase getPhase() {
         return phase;
     }
 
-    private void setPhase(@NotNull PlayerWorkPhase phase) {
+    private void setPhase(@NonNull PlayerWorkPhase phase) {
         this.phase = phase;
         if (this.recycleTimer != -1 && phase == PlayerWorkPhase.WORK) {
             this.recycleTimer = MATERIAL_RECYCLING_TIME;

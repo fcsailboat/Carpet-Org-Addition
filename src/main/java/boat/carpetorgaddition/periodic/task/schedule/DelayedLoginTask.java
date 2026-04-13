@@ -10,7 +10,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class DelayedLoginTask extends PlayerScheduleTask {
     private final MinecraftServer server;
@@ -47,7 +47,7 @@ public class DelayedLoginTask extends PlayerScheduleTask {
     }
 
     // 获取带有悬停提示的时间
-    private @NotNull Component getDisplayTime() {
+    private @NonNull Component getDisplayTime() {
         TextBuilder builder = TextBuilder.of(TextProvider.tickToTime(this.delayed));
         builder.setHover(TextProvider.tickToRealTime(this.delayed));
         return builder.build();

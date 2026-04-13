@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -23,7 +23,7 @@ public class EntityNavigator extends AbstractNavigator {
     /**
      * 此导航器追踪的实体
      */
-    @NotNull
+    @NonNull
     private Entity entity;
     /**
      * 该导航器是否在玩家到达目的地后仍继续导航
@@ -32,12 +32,12 @@ public class EntityNavigator extends AbstractNavigator {
     /**
      * 上一个坐标
      */
-    @NotNull
+    @NonNull
     private Vec3 prevPos;
     /**
      * 上一个维度
      */
-    @NotNull
+    @NonNull
     private Level prevWorld;
 
     public EntityNavigator(ServerPlayer player, Entity entity, boolean isContinue) {
