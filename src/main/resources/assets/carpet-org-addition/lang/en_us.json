@@ -146,6 +146,7 @@
   "carpet.rule.openPlayerInventory.extra.3": "any_player: Allows opening any player's inventory",
   "carpet.rule.openPlayerInventory.extra.4": "This rule addresses an issue in Gugle Carpet Addition where the 'openFakePlayerInventory' rule causes the item in hand to take effect when right-clicking to open a fake player's inventory",
   "carpet.rule.openPlayerInventory.extra.5": "If this issue is fixed in GCA in the future, this rule may be removed",
+  "carpet.rule.truePeacefulMode.desc": "Mobs are not hostile to players",
   "carpet-org-addition.rule.message.disableRespawnBlocksExplode": "Respawn blocks explosion is disabled",
   "carpet-org-addition.rule.message.CCEUpdateSuppression": "You cannot open the shulkerbox for update surpression",
   "carpet-org-addition.rule.message.displayPlayerSummoner": "↑ Summoned by %s",

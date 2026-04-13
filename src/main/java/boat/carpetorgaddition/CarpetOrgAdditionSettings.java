@@ -1076,6 +1076,16 @@ public class CarpetOrgAdditionSettings {
                     .build()
     );
 
+    /**
+     * 真正的和平模式
+     */
+    public static final RuleAccessor<Boolean> TRUE_PEACEFUL_MODE = register(
+            RuleFactory.create("truePeacefulMode", false)
+                    .addCategories(RuleCategory.SURVIVAL)
+                    .setHidden()
+                    .build()
+    );
+
     private static <T> RuleAccessor<T> register(RuleContext<T> context) {
         RULES.add(context);
         return new RuleAccessor<>(context);

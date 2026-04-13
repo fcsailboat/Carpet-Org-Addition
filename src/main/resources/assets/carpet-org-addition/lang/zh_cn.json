@@ -249,6 +249,8 @@
   "carpet.rule.openPlayerInventory.extra.3": "any_player：允许打开任意玩家物品栏",
   "carpet.rule.openPlayerInventory.extra.4": "此规则是为了解决Gugle Carpet Addition中“假人背包”规则的一个问题，即右键打开假玩家物品栏时，会应用手上的物品效果",
   "carpet.rule.openPlayerInventory.extra.5": "如果未来GCA修复了此问题，则该规则可能会被移除",
+  "carpet.rule.truePeacefulMode.name": "真正的和平模式",
+  "carpet.rule.truePeacefulMode.desc": "生物不会与玩家敌对",
   "carpet-org-addition.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",
   "carpet-org-addition.rule.message.CCEUpdateSuppression": "你不能打开用于更新抑制的潜影盒",
   "carpet-org-addition.rule.message.displayPlayerSummoner": "↑由%s召唤",
