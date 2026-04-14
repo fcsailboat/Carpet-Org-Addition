@@ -22,35 +22,35 @@ import java.util.function.Supplier;
 
 public final class RuleFactory {
     @Deprecated(forRemoval = true)
-    public static <T> Builder<T> create(Class<T> type, String rule, T value) {
+    public static <T> Builder<T> of(Class<T> type, String rule, T value) {
         return new Builder<>(type, rule, value);
     }
 
-    public static Builder<Integer> create(String rule, int value) {
+    public static Builder<Integer> of(String rule, int value) {
         return new Builder<>(Integer.class, rule, value);
     }
 
-    public static Builder<Long> create(String rule, long value) {
+    public static Builder<Long> of(String rule, long value) {
         return new Builder<>(Long.class, rule, value);
     }
 
-    public static Builder<Boolean> create(String rule, boolean value) {
+    public static Builder<Boolean> of(String rule, boolean value) {
         return new Builder<>(Boolean.class, rule, value);
     }
 
-    public static Builder<Float> create(String rule, float value) {
+    public static Builder<Float> of(String rule, float value) {
         return new Builder<>(Float.class, rule, value);
     }
 
-    public static Builder<Double> create(String rule, double value) {
+    public static Builder<Double> of(String rule, double value) {
         return new Builder<>(Double.class, rule, value);
     }
 
-    public static Builder<String> create(String rule, String value) {
+    public static Builder<String> of(String rule, String value) {
         return new Builder<>(String.class, rule, value);
     }
 
-    public static <T extends Enum<T>> Builder<T> create(String rule, T value) {
+    public static <T extends Enum<T>> Builder<T> of(String rule, T value) {
         return new Builder<>(value.getDeclaringClass(), rule, value);
     }
 
