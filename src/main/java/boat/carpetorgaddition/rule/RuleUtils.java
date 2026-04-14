@@ -29,7 +29,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class RuleUtils {
     /**
@@ -60,22 +59,18 @@ public class RuleUtils {
      * 潜影盒是否可以触发更新抑制器
      */
     public static boolean canUpdateSuppression(@Nullable String blockName) {
+        if (blockName == null || CarpetOrgAdditionSettings.CCE_UPDATE_SUPPRESSION.isDisabled()) {
+            return false;
+        }
         String value = CarpetOrgAdditionSettings.CCE_UPDATE_SUPPRESSION.value();
-        if ("false".equalsIgnoreCase(value)) {
+        if ("false".equals(value)) {
             return false;
         }
-        if (blockName == null) {
-            return false;
-        }
-        if ("true".equalsIgnoreCase(value)) {
+        if ("true".equals(value)) {
             return "更新抑制器".equals(blockName) || "updateSuppression".equalsIgnoreCase(blockName);
         }
         // 比较字符串并忽略大小写
-        return Objects.equals(value.toLowerCase(), blockName.toLowerCase());
-    }
-
-    public static boolean isDefaultDistance() {
-        return CarpetOrgAdditionSettings.MAX_BLOCK_PLACE_DISTANCE.value() == -1;
+        return value.equalsIgnoreCase(blockName);
     }
 
     /**
@@ -85,7 +80,7 @@ public class RuleUtils {
      */
     public static double getPlayerMaxInteractionDistance() {
         double distance = CarpetOrgAdditionSettings.MAX_BLOCK_PLACE_DISTANCE.value();
-        if (distance < 0) {
+        if (distance < 0.0) {
             return 6.0;
         }
         return Math.min(distance, MAX_DISTANCE);

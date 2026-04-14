@@ -152,10 +152,10 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
     // 最大方块交互距离
     @Inject(method = "blockInteractionRange", at = @At("HEAD"), cancellable = true)
     private void getBlockInteractionRange(CallbackInfoReturnable<Double> cir) {
-        if (ServerUtils.getWorld(thisPlayer).isClientSide() && !CarpetOrgAdditionSettings.MAX_BLOCK_PLACE_DISTANCE_SYNC_CLIENT.value()) {
+        if (CarpetOrgAdditionSettings.MAX_BLOCK_PLACE_DISTANCE.isDisabled()) {
             return;
         }
-        if (RuleUtils.isDefaultDistance()) {
+        if (ServerUtils.getWorld(thisPlayer).isClientSide() && !CarpetOrgAdditionSettings.MAX_BLOCK_PLACE_DISTANCE_SYNC_CLIENT.value()) {
             return;
         }
         cir.setReturnValue(RuleUtils.getPlayerMaxInteractionDistance());

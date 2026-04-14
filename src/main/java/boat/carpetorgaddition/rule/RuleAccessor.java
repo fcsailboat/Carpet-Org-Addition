@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 public final class RuleAccessor<T> {
     private final Supplier<T> value;
-    private final CarpetRule<T> rule;
+    private final BuiltRule<T> rule;
     private final String key;
     @Nullable
     private final CustomRuleControl<T> control;
@@ -48,6 +48,15 @@ public final class RuleAccessor<T> {
 
     public String getKey() {
         return this.key;
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isEnabled() {
+        return this.rule.isEnable();
+    }
+
+    public boolean isDisabled() {
+        return !this.rule.isEnable();
     }
 
     @SuppressWarnings("unused")

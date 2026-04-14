@@ -228,7 +228,7 @@ public final class RuleFactory {
         }
 
         public RuleContext<T> build() {
-            Supplier<CarpetRule<T>> supplier = () -> new BuiltRule<>(
+            Supplier<BuiltRule<T>> supplier = () -> new BuiltRule<>(
                     this.type,
                     this.name,
                     this.categories,

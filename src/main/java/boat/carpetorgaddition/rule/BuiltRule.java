@@ -19,6 +19,10 @@ import java.util.*;
 import java.util.function.Function;
 
 public class BuiltRule<T> implements CarpetRule<T> {
+    /**
+     * 规则值是否改变了，用于隐藏规则更改后的命令反馈
+     */
+    public static final ThreadLocal<Boolean> RULE_UNCHANGED = ThreadLocal.withInitial(() -> false);
     private final String name;
     private final String displayName;
     private final String displayDesc;
@@ -44,9 +48,9 @@ public class BuiltRule<T> implements CarpetRule<T> {
     private final List<RuleListener<T>> listeners = new ArrayList<>();
     private final boolean strict;
     /**
-     * 规则值是否改变了，用于隐藏规则更改后的命令反馈
+     * 规则是否被启用了
      */
-    public static final ThreadLocal<Boolean> RULE_UNCHANGED = ThreadLocal.withInitial(() -> false);
+    private boolean enable = false;
 
     public BuiltRule(
             Class<T> type,
@@ -88,7 +92,7 @@ public class BuiltRule<T> implements CarpetRule<T> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private RuleValueParser<T> createParser() {
         Map.Entry<Component, Function<String, T>> entry = switch (this.defaultValue) {
-            case String _ -> Map.entry(Type.STRING.translate(), this.type::cast);
+            case String _ -> Map.entry(Type.STRING.translate(), s -> this.type.cast(s.toLowerCase(Locale.ROOT)));
             case Boolean _ -> Map.entry(Type.BOOLEAN.translate(), s -> this.type.cast(parseBoolean(s)));
             case Integer _ -> Map.entry(Type.INTEGER.translate(), s -> this.type.cast(Integer.parseInt(s)));
             case Long _ -> Map.entry(Type.LONG.translate(), s -> this.type.cast(Long.parseLong(s)));
@@ -205,6 +209,7 @@ public class BuiltRule<T> implements CarpetRule<T> {
         boolean canChanged = this.silenceValidators.stream().allMatch(observer -> observer.validate(source, value));
         if (canChanged) {
             this.value = value;
+            this.enable = value instanceof Boolean ? (Boolean) value : !this.value.equals(this.defaultValue);
             if (source != null) {
                 this.settingsManager().notifyRuleChanged(source, this, userInput);
             }
@@ -239,6 +244,10 @@ public class BuiltRule<T> implements CarpetRule<T> {
     @Override
     public String toString() {
         return this.name + ": " + RuleHelper.toRuleString(value());
+    }
+
+    public boolean isEnable() {
+        return this.enable;
     }
 
     @FunctionalInterface
