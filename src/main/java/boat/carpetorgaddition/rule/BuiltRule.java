@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionExtension;
 import boat.carpetorgaddition.exception.TranslatableInvalidRuleValueException;
 import boat.carpetorgaddition.rule.validator.StrictValueValidator;
 import boat.carpetorgaddition.rule.validator.ValueValidator;
+import boat.carpetorgaddition.rule.value.CommandPermissionLevel;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys.Data.Type;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -103,6 +104,8 @@ public class BuiltRule<T> implements CarpetRule<T> {
                 // 只有枚举名称全部为大写时才能匹配
                 return (T) Enum.valueOf(clazz, s.toUpperCase(Locale.ROOT));
             });
+            case CommandPermissionLevel _ ->
+                    Map.entry(Type.STRING.translate(), s -> this.type.cast(CommandPermissionLevel.of(s)));
             default -> {
                 String message = "Unsupported type for %s %s".formatted(this.getClass().getSimpleName(), this.type);
                 throw new UnsupportedOperationException(message);

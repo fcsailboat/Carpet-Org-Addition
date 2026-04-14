@@ -127,7 +127,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                         .then(Commands.literal("clear")
                                 .executes(context -> this.addStartupRunCommandFunction(context, -1)))));
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PLAYER_MANAGER))
+                .requires(source -> CarpetOrgAdditionSettings.COMMAND_PLAYER_MANAGER.value().hasPermission(source))
                 .then(Commands.literal("save")
                         .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                 .executes(context -> savePlayerData(context, false))

@@ -11,7 +11,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -145,8 +144,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
 
     @Unique
     private boolean hasOpenCraftGuiPermission() {
-        PermissionSet predicate = thisPlayer.permissions();
-        return CommandUtils.canUseCommand(predicate, CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION.value());
+        return CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION.value().hasPermission(thisPlayer);
     }
 
     // 最大方块交互距离

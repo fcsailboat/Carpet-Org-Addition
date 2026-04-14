@@ -38,10 +38,6 @@ public class CarpetOrgAdditionSettings {
      */
     public static final ScopedValue<Boolean> USE_CHANNELING_TRIDENT = ScopedValue.newInstance();
     private static final Set<RuleContext<?>> RULES = new LinkedHashSet<>();
-    private static final String OPS = "ops";
-    private static final String TRUE = "true";
-    private static final String FALSE = "false";
-    private static final List<String> COMMAND_OPTIONS = List.of(TRUE, FALSE, OPS, "0", "1", "2", "3", "4");
     public static final String ORG = "Org";
     public static final String HIDDEN = "Hidden";
 
@@ -51,10 +47,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 制作物品分身
      */
-    public static final RuleAccessor<String> COMMAND_ITEM_SHADOWING = register(
-            RuleFactory.of("commandItemShadowing", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_ITEM_SHADOWING = register(
+            RuleFactory.of("commandItemShadowing", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -279,9 +273,9 @@ public class CarpetOrgAdditionSettings {
      * CCE更新抑制器
      */
     public static final RuleAccessor<String> CCE_UPDATE_SUPPRESSION = register(
-            RuleFactory.of("CCEUpdateSuppression", FALSE)
+            RuleFactory.of("CCEUpdateSuppression", "false")
                     .addCategories(RuleCategory.FEATURE)
-                    .addOptions(TRUE, FALSE)
+                    .addOptions("true", "false")
                     .setLenient()
                     .build()
     );
@@ -335,50 +329,40 @@ public class CarpetOrgAdditionSettings {
     /**
      * 经验转移
      */
-    public static final RuleAccessor<String> COMMAND_XP_TRANSFER = register(
-            RuleFactory.of("commandXpTransfer", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_XP_TRANSFER = register(
+            RuleFactory.of("commandXpTransfer", CommandPermissionLevel.OPS)
                     .build()
     );
 
     /**
      * 生存旁观切换命令
      */
-    public static final RuleAccessor<String> COMMAND_SPECTATOR = register(
-            RuleFactory.of("commandSpectator", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_SPECTATOR = register(
+            RuleFactory.of("commandSpectator", CommandPermissionLevel.OPS)
                     .build()
     );
 
     /**
      * 查找器命令
      */
-    public static final RuleAccessor<String> COMMAND_FINDER = register(
-            RuleFactory.of("commandFinder", TRUE)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_FINDER = register(
+            RuleFactory.of("commandFinder", CommandPermissionLevel.TRUE)
                     .build()
     );
 
     /**
      * 自杀
      */
-    public static final RuleAccessor<String> COMMAND_KILL_ME = register(
-            RuleFactory.of("commandKillMe", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_KILL_ME = register(
+            RuleFactory.of("commandKillMe", CommandPermissionLevel.OPS)
                     .build()
     );
 
     /**
      * 路径点管理器
      */
-    public static final RuleAccessor<String> COMMAND_LOCATIONS = register(
-            RuleFactory.of("commandLocations", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_LOCATIONS = register(
+            RuleFactory.of("commandLocations", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -439,10 +423,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 绘制粒子线命令
      */
-    public static final RuleAccessor<String> COMMAND_PARTICLE_LINE = register(
-            RuleFactory.of("commandParticleLine", FALSE)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_PARTICLE_LINE = register(
+            RuleFactory.of("commandParticleLine", CommandPermissionLevel.FALSE)
                     .setRemoved()
                     .build()
     );
@@ -522,10 +504,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 假玩家动作命令
      */
-    public static final RuleAccessor<String> COMMAND_PLAYER_ACTION = register(
-            RuleFactory.of("commandPlayerAction", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_PLAYER_ACTION = register(
+            RuleFactory.of("commandPlayerAction", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -581,20 +561,16 @@ public class CarpetOrgAdditionSettings {
     /**
      * 苦力怕命令
      */
-    public static final RuleAccessor<String> COMMAND_CREEPER = register(
-            RuleFactory.of("commandCreeper", FALSE)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_CREEPER = register(
+            RuleFactory.of("commandCreeper", CommandPermissionLevel.FALSE)
                     .build()
     );
 
     /**
      * 规则搜索命令
      */
-    public static final RuleAccessor<String> COMMAND_RULE_SEARCH = register(
-            RuleFactory.of("commandRuleSearch", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_RULE_SEARCH = register(
+            RuleFactory.of("commandRuleSearch", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -651,10 +627,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 玩家管理器命令
      */
-    public static final RuleAccessor<String> COMMAND_PLAYER_MANAGER = register(
-            RuleFactory.of("commandPlayerManager", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_PLAYER_MANAGER = register(
+            RuleFactory.of("commandPlayerManager", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -688,10 +662,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 导航器
      */
-    public static final RuleAccessor<String> COMMAND_NAVIGATE = register(
-            RuleFactory.of("commandNavigate", TRUE)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_NAVIGATE = register(
+            RuleFactory.of("commandNavigate", CommandPermissionLevel.TRUE)
                     .build()
     );
 
@@ -731,10 +703,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 快递命令
      */
-    public static final RuleAccessor<String> COMMAND_MAIL = register(
-            RuleFactory.of("commandMail", OPS)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_MAIL = register(
+            RuleFactory.of("commandMail", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -880,20 +850,16 @@ public class CarpetOrgAdditionSettings {
     /**
      * /player命令打开玩家物品栏
      */
-    public static final RuleAccessor<String> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY = register(
-            RuleFactory.of("playerCommandOpenPlayerInventory", FALSE)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY = register(
+            RuleFactory.of("playerCommandOpenPlayerInventory", CommandPermissionLevel.FALSE)
                     .build()
     );
 
     /**
      * /player命令假玩家传送
      */
-    public static final RuleAccessor<String> PLAYER_COMMAND_TELEPORT_FAKE_PLAYER = register(
-            RuleFactory.of("playerCommandTeleportFakePlayer", FALSE)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> PLAYER_COMMAND_TELEPORT_FAKE_PLAYER = register(
+            RuleFactory.of("playerCommandTeleportFakePlayer", CommandPermissionLevel.FALSE)
                     .build()
     );
 
@@ -1047,10 +1013,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * {@code /player}命令召唤玩家模型
      */
-    public static final RuleAccessor<String> PLAYER_COMMAND_SUMMON_MANNEQUIN = register(
-            RuleFactory.of("playerCommandSummonMannequin", FALSE)
-                    .setCommand()
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> PLAYER_COMMAND_SUMMON_MANNEQUIN = register(
+            RuleFactory.of("playerCommandSummonMannequin", CommandPermissionLevel.FALSE)
                     .build()
     );
 

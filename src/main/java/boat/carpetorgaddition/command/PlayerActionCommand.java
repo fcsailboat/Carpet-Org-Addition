@@ -61,7 +61,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION))
+                .requires(source -> CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION.value().hasPermission(source))
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(thenSorting())
                         .then(Commands.literal("empty")

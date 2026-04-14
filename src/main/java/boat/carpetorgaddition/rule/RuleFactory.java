@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.rule.validator.ValueValidator;
+import boat.carpetorgaddition.rule.value.CommandPermissionLevel;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.api.settings.CarpetRule;
 import carpet.api.settings.RuleCategory;
@@ -50,6 +51,10 @@ public final class RuleFactory {
         return new Builder<>(String.class, rule, value);
     }
 
+    public static Builder<CommandPermissionLevel> of(String rule, CommandPermissionLevel value) {
+        return new Builder<>(CommandPermissionLevel.class, rule, value);
+    }
+
     public static <T extends Enum<T>> Builder<T> of(String rule, T value) {
         return new Builder<>(value.getDeclaringClass(), rule, value);
     }
@@ -75,6 +80,7 @@ public final class RuleFactory {
         private String displayDesc = "";
 
         private Builder(Class<T> type, String rule, @NonNull T value) {
+            this.categories.add(CarpetOrgAdditionSettings.ORG);
             if (type != value.getClass()) {
                 // 基本数据类型和它们对应的包装类是不同的数据类型
                 throw new IllegalArgumentException("Rule %s: type mismatch - expected %s, actual %s"
@@ -96,10 +102,12 @@ public final class RuleFactory {
                         .map(Enum::name)
                         .map(s -> s.toLowerCase(Locale.ROOT))
                         .toList();
+            } else if (this.type == CommandPermissionLevel.class) {
+                this.suggestions = List.of("true", "false", "ops", "0", "1", "2", "3", "4");
+                this.setCommand();
             } else {
                 this.suggestions = new LinkedHashSet<>();
             }
-            this.categories.add(CarpetOrgAdditionSettings.ORG);
         }
 
         public Builder<T> addCategories(String... categories) {

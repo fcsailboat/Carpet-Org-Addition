@@ -85,6 +85,6 @@ public enum OpenPlayerInventoryCommandOption {
     }
 
     public static boolean isEnable(CommandSourceStack source) {
-        return CommandUtils.canUseCommand(source, CarpetOrgAdditionSettings.PLAYER_COMMAND_OPEN_PLAYER_INVENTORY);
+        return CarpetOrgAdditionSettings.PLAYER_COMMAND_OPEN_PLAYER_INVENTORY.value().hasPermission(source);
     }
 }

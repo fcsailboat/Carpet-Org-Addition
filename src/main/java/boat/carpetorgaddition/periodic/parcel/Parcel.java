@@ -360,7 +360,7 @@ public class Parcel implements Comparable<Parcel> {
 
     public static void checkRecipientPermission(@Nullable ServerPlayer senderPlayer, ServerPlayer recipientPlayer) {
         // 检查接收者是否有接收物品的权限
-        if (CommandUtils.canUseCommand(recipientPlayer.createCommandSourceStack(), CarpetOrgAdditionSettings.COMMAND_MAIL)) {
+        if (CarpetOrgAdditionSettings.COMMAND_MAIL.value().hasPermission(recipientPlayer)) {
             return;
         }
         if (senderPlayer == null) {

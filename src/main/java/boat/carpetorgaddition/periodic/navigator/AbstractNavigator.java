@@ -4,7 +4,6 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.NavigatorCommand;
 import boat.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
-import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -135,7 +134,7 @@ public abstract class AbstractNavigator {
         // 更新上一个坐标
         if (force || this.updateRequired()) {
             // 要求玩家有执行/navigate命令的权限
-            boolean hasPermission = CommandUtils.canUseCommand(this.player.createCommandSourceStack(), CarpetOrgAdditionSettings.COMMAND_NAVIGATE);
+            boolean hasPermission = CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(this.player);
             if (CarpetOrgAdditionSettings.SYNC_NAVIGATE_WAYPOINT.value() && hasPermission) {
                 WaypointUpdateS2CPacket packet = this.createPacket();
                 ServerPlayNetworking.send(this.player, packet);

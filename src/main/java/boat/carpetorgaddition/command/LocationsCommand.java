@@ -46,7 +46,7 @@ public class LocationsCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_LOCATIONS))
+                .requires(source -> CarpetOrgAdditionSettings.COMMAND_LOCATIONS.value().hasPermission(source))
                 .then(Commands.literal("add")
                         .then(Commands.argument("name", StringArgumentType.string())
                                 .executes(context -> addWayPoint(context, null))

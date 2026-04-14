@@ -3,7 +3,6 @@ package boat.carpetorgaddition.mixin.logger;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.logger.LoggerAccessor;
 import boat.carpetorgaddition.logger.Loggers;
-import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.misc.WanderingTraderSpawnData;
@@ -72,7 +71,7 @@ public abstract class WanderingTraderManagerMixin {
                     continue;
                 }
                 // 广播流浪商人生成成功
-                if (CommandUtils.canUseCommand(player.createCommandSourceStack(), CarpetOrgAdditionSettings.COMMAND_NAVIGATE)) {
+                if (CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(player)) {
                     // 带点击导航的消息
                     Component button = TextBuilder.of(LocalizationKeys.Button.NAVIGATE.translate())
                             .setCommand(CommandProvider.navigateToUuidEntity(trader.getUUID()))
