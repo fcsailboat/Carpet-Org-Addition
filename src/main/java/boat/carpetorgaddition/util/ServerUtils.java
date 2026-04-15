@@ -277,6 +277,10 @@ public class ServerUtils {
         return server.getLevel(ResourceKey.create(Registries.DIMENSION, identifier));
     }
 
+    public static ServerLevel getWorld(MinecraftServer server, ResourceKey<Level> key) {
+        return server.getLevel(key);
+    }
+
     @Contract("_ -> !null")
     public static MinecraftServer getServer(ServerPlayer player) {
         return getWorld(player).getServer();

@@ -33,7 +33,7 @@ public final class CommandPermissionLevel {
             case "ops", "2" -> new CommandPermissionLevel(lowerCase, 2);
             case "3" -> new CommandPermissionLevel(lowerCase, 3);
             case "4" -> new CommandPermissionLevel(lowerCase, 4);
-            default -> throw new IllegalArgumentException();
+            default -> throw new IllegalArgumentException("Invalid command permission level: " + option);
         });
     }
 

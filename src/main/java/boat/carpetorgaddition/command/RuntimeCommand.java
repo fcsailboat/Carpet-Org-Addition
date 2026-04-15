@@ -3,6 +3,7 @@ package boat.carpetorgaddition.command;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.util.IOUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -16,7 +17,10 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
@@ -24,10 +28,12 @@ import oshi.hardware.GlobalMemory;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Optional;
 
 public class RuntimeCommand extends AbstractServerCommand {
     public static final LocalizationKey KEY = LocalizationKeys.COMMAND.then("runtime");
     public static final LocalizationKey MEMORY = KEY.then("memory");
+    public static final ScopedValue<Boolean> SPAWN_WANDERING_TRADERS = ScopedValue.newInstance();
 
     public RuntimeCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext access) {
         super(dispatcher, access);
@@ -45,7 +51,10 @@ public class RuntimeCommand extends AbstractServerCommand {
                                 .executes(this::triggerGc)))
                 .then(Commands.literal("server")
                         .then(Commands.literal("openfolder")
-                                .executes(this::openFolder)))
+                                .executes(this::openFolder))
+                        .then(Commands.literal("event")
+                                .then(Commands.literal("spawn_wandering_traders")
+                                        .executes(this::spawnWanderingTraders))))
                 .then(Commands.literal("test")
                         .then(Commands.literal("io")
                                 .then(Commands.argument("content", StringArgumentType.greedyString())
@@ -136,6 +145,18 @@ public class RuntimeCommand extends AbstractServerCommand {
             IOUtils.loggerError(e);
         }
         return content.length();
+    }
+
+    private int spawnWanderingTraders(CommandContext<CommandSourceStack> context) {
+        MinecraftServer server = context.getSource().getServer();
+        ServerLevel world = ServerUtils.getWorld(server, Level.OVERWORLD);
+        Optional<WanderingTraderSpawner> optional = world.customSpawners.stream()
+                .filter(customSpawner -> customSpawner instanceof WanderingTraderSpawner)
+                .map(customSpawner -> (WanderingTraderSpawner) customSpawner)
+                .findFirst();
+        return optional.filter(spawner -> ScopedValue.where(SPAWN_WANDERING_TRADERS, true).call(() -> spawner.spawn(world)))
+                .map(_ -> 1)
+                .orElse(0);
     }
 
     @Override
