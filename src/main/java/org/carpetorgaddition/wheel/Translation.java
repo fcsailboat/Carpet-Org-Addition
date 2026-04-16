@@ -31,6 +31,10 @@ public class Translation {
     public Map<String, String> getTranslation() {
         // 每种语言只从文件读取一次
         String lang = CarpetSettings.language;
+        return getTranslation(lang);
+    }
+
+    public Map<String, String> getTranslation(String lang) {
         return this.translations.computeIfAbsent(lang, this::loadTranslation);
     }
 
