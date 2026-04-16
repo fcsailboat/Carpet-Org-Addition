@@ -83,8 +83,12 @@ public abstract class ServerTask implements Thread.UncaughtExceptionHandler {
         }
         if (this.getExecutionTime() > time) {
             // 任务超时
-            throw new TaskExecutionException(this::timeoutHandler);
+            timeout();
         }
+    }
+
+    protected void timeout() {
+        throw new TaskExecutionException(this::timeoutHandler);
     }
 
     /**
