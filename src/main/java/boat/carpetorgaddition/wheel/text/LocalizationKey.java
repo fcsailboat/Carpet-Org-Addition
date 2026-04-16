@@ -39,7 +39,7 @@ public final class LocalizationKey {
         return TextBuilder.of(this.translate(args));
     }
 
-    public CommandSyntaxException raise(Objects... args) {
+    public CommandSyntaxException toSyntaxException(Objects... args) {
         return CommandUtils.createException(this.translate((Object[]) args));
     }
 

@@ -70,8 +70,12 @@ public abstract class ServerTask {
         }
         if (this.getElapsedTime() > time) {
             // 任务超时
-            throw new TaskExecutionException(this::timeoutHandler);
+            this.throwTimeoutException();
         }
+    }
+
+    protected void throwTimeoutException() {
+        throw new TaskExecutionException(this::timeoutHandler);
     }
 
     /**

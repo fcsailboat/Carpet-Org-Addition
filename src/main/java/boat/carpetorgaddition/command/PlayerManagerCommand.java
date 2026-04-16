@@ -905,7 +905,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             if (Commands.LEVEL_OWNERS.check(source.permissions())) {
                 return;
             }
-            throw key.then("permission").raise();
+            throw key.then("permission").toSyntaxException();
         }
         String name = StringArgumentType.getString(context, "name");
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
