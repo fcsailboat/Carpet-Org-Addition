@@ -14,9 +14,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
@@ -35,6 +35,13 @@ import java.util.stream.Stream;
 
 public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T>> {
     private static final List<String> PATTERNS = Arrays.stream(MatchPattern.values()).map(MatchPattern::toString).toList();
+    /**
+     * 是否允许通过id补全名称<br>
+     * 启用后，可以通过输入部分或全部对象id来补全对象名称<br>
+     * 例如：输入apple，则补全候选中会出现苹果、金苹果和附魔金苹果。<br>
+     * 但是，该命令参数本身就是为了通过对象名称查询对象id，允许反向补全可能没有实际意义。
+     */
+    private static final boolean ID_COMPLETION_NAME = false;
     /**
      * 字符串是否使用匹配模式
      */
@@ -60,7 +67,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         // 由于可以使用资源包更改对象名称，因此一个名称可能对应多个对象
         ArrayList<T> list = new ArrayList<>();
         if (!name.isEmpty()) {
-            for (T t : getRegistry().toList()) {
+            for (T t : stream().toList()) {
                 // 获取所有与字符串对应的对象
                 if (pattern.match(name.toLowerCase(Locale.ROOT), objectToString(t).toLowerCase(Locale.ROOT))) {
                     list.add(t);
@@ -101,16 +108,14 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
      */
     protected abstract String objectToString(T t);
 
+    protected abstract Map.Entry<String, String> entry(T t);
+
     /**
      * 列出命令建议
      */
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof SharedSuggestionProvider) {
-            String[] array = getRegistry()
-                    .map(this::objectToString)
-                    .map(s -> s.contains(" ") ? "\"" + s + "\"" : s)
-                    .toArray(String[]::new);
             String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
             String[] split = this.splitArguments(remaining);
             if (this.patternMatching && (split.length > 1 || remaining.endsWith(" "))) {
@@ -129,16 +134,25 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
                 }
                 return offset.buildFuture();
             } else {
-                for (String candidate : array) {
-                    // 列出所有名称中包含输入字符串的对象
-                    if (candidate.toLowerCase(Locale.ROOT).contains(remaining)) {
-                        builder.suggest(candidate);
-                    }
-                }
+                // 列出所有名称中包含输入字符串的对象
+                this.stream()
+                        .map(this::entry)
+                        .distinct()
+                        .map(entry -> Map.entry(quoteIfContainsSpace(entry.getKey()), entry.getValue()))
+                        .forEach(entry -> {
+                            String key = entry.getKey();
+                            if (key.toLowerCase(Locale.ROOT).contains(remaining) || (ID_COMPLETION_NAME && entry.getValue().contains(remaining))) {
+                                builder.suggest(key);
+                            }
+                        });
                 return builder.buildFuture();
             }
         }
         return Suggestions.empty();
+    }
+
+    private static String quoteIfContainsSpace(String str) {
+        return str.contains(" ") ? "\"" + str + "\"" : str;
     }
 
     /**
@@ -163,7 +177,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 获取对象对应的注册表
      */
-    protected abstract Stream<T> getRegistry();
+    protected abstract Stream<T> stream();
 
     /**
      * 物品参数
@@ -179,7 +193,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected Stream<Item> getRegistry() {
+        protected Map.Entry<String, String> entry(Item item) {
+            return Map.entry(ServerUtils.getNameAsString(item), ServerUtils.getIdAsString(item));
+        }
+
+        @Override
+        protected Stream<Item> stream() {
             return BuiltInRegistries.ITEM.stream();
         }
     }
@@ -198,7 +217,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected Stream<Block> getRegistry() {
+        protected Map.Entry<String, String> entry(Block block) {
+            return Map.entry(ServerUtils.getNameAsString(block), ServerUtils.getIdAsString(block));
+        }
+
+        @Override
+        protected Stream<Block> stream() {
             return BuiltInRegistries.BLOCK.stream();
         }
     }
@@ -213,14 +237,18 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected Stream<EntityType<?>> getRegistry() {
-            LocalPlayer player = ClientUtils.getPlayer();
-            return player.connection.registryAccess().lookupOrThrow(Registries.ENTITY_TYPE).stream();
+        protected Map.Entry<String, String> entry(EntityType<?> entityType) {
+            return Map.entry(ServerUtils.getNameAsString(entityType), ServerUtils.getIdAsString(entityType));
+        }
+
+        @Override
+        protected Stream<EntityType<?>> stream() {
+            return ClientUtils.getRegistryAccess().lookupOrThrow(Registries.ENTITY_TYPE).stream();
         }
     }
 
     /**
-     * 附魔参数
+     * 魔咒参数
      */
     public static class ClientEnchantmentArgumentType extends ClientObjectArgumentType<Enchantment> {
         @Override
@@ -229,8 +257,14 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected Stream<Enchantment> getRegistry() {
-            Registry<Enchantment> registry = ClientUtils.getPlayer().connection.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        protected Map.Entry<String, String> entry(Enchantment enchantment) {
+            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
+            return Map.entry(ServerUtils.getNameAsString(enchantment), ServerUtils.getIdAsString(registryAccess, enchantment));
+        }
+
+        @Override
+        protected Stream<Enchantment> stream() {
+            Registry<Enchantment> registry = ClientUtils.getRegistryAccess().lookupOrThrow(Registries.ENCHANTMENT);
             return registry.stream();
         }
     }
@@ -245,25 +279,35 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected Stream<MobEffect> getRegistry() {
-            LocalPlayer player = ClientUtils.getPlayer();
-            return player.connection.registryAccess().lookupOrThrow(Registries.MOB_EFFECT).stream();
+        protected Map.Entry<String, String> entry(MobEffect statusEffect) {
+            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
+            return Map.entry(ServerUtils.getNameAsString(statusEffect), ServerUtils.getIdAsString(registryAccess, statusEffect));
+        }
+
+        @Override
+        protected Stream<MobEffect> stream() {
+            return ClientUtils.getRegistryAccess().lookupOrThrow(Registries.MOB_EFFECT).stream();
         }
     }
 
     public static class ClientBiomeArgumentType extends ClientObjectArgumentType<Biome> {
         @Override
         protected String objectToString(Biome biome) {
-            Registry<Biome> biomes = ClientUtils.getPlayer().connection.registryAccess().lookupOrThrow(Registries.BIOME);
+            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
+            Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
             String key = Objects.requireNonNull(biomes.getKey(biome)).toLanguageKey("biome");
             return LocalizationKey.literal(key).translate().getString();
-
         }
 
         @Override
-        protected Stream<Biome> getRegistry() {
-            LocalPlayer player = ClientUtils.getPlayer();
-            return player.connection.registryAccess().lookupOrThrow(Registries.BIOME).stream();
+        protected Map.Entry<String, String> entry(Biome biome) {
+            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
+            return Map.entry(ServerUtils.getNameAsString(registryAccess, biome), ServerUtils.getIdAsString(registryAccess, biome));
+        }
+
+        @Override
+        protected Stream<Biome> stream() {
+            return ClientUtils.getRegistryAccess().lookupOrThrow(Registries.BIOME).stream();
         }
     }
 
@@ -277,7 +321,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected Stream<GameType> getRegistry() {
+        protected Map.Entry<String, String> entry(GameType gameType) {
+            return Map.entry(ServerUtils.getNameAsString(gameType), ServerUtils.getIdAsString(gameType));
+        }
+
+        @Override
+        protected Stream<GameType> stream() {
             return Stream.of(GameType.values());
         }
     }
@@ -293,9 +342,14 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected Stream<GameRule<?>> getRegistry() {
-            LocalPlayer player = ClientUtils.getPlayer();
-            Optional<Registry<GameRule<?>>> optional = player.connection.registryAccess().lookup(Registries.GAME_RULE);
+        protected Map.Entry<String, String> entry(GameRule<?> gameRule) {
+            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
+            return Map.entry(ServerUtils.getNameAsString(gameRule), ServerUtils.getIdAsString(registryAccess, gameRule));
+        }
+
+        @Override
+        protected Stream<GameRule<?>> stream() {
+            Optional<Registry<GameRule<?>>> optional = ClientUtils.getRegistryAccess().lookup(Registries.GAME_RULE);
             if (optional.isEmpty()) {
                 return Stream.empty();
             }

@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -166,5 +167,9 @@ public class ClientUtils {
 
     public static User getSession() {
         return getClient().getUser();
+    }
+
+    public static RegistryAccess getRegistryAccess() {
+        return getPlayer().connection.registryAccess();
     }
 }

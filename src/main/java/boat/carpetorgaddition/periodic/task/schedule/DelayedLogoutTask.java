@@ -79,5 +79,4 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
     public boolean stopped() {
         return this.delayed < 0L;
     }
-
 }

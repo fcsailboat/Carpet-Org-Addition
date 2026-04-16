@@ -2,6 +2,7 @@ package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
+import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.CarpetServer;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
@@ -24,24 +25,32 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
+@NullMarked
 public class ServerUtils {
     /**
      * 当前{@code Minecraft}的NBT数据版本
@@ -53,6 +62,7 @@ public class ServerUtils {
     public static final String SIMPLE_OVERWORLD = "overworld";
     public static final String SIMPLE_THE_NETHER = "the_nether";
     public static final String SIMPLE_THE_END = "the_end";
+    private static final String UNREGISTERED = "[<unregistered>]";
 
     private ServerUtils() {
     }
@@ -274,11 +284,11 @@ public class ServerUtils {
      */
     public static ServerLevel getWorld(MinecraftServer server, String id) {
         Identifier identifier = Identifier.parse(id);
-        return server.getLevel(ResourceKey.create(Registries.DIMENSION, identifier));
+        return Objects.requireNonNull(server.getLevel(ResourceKey.create(Registries.DIMENSION, identifier)));
     }
 
     public static ServerLevel getWorld(MinecraftServer server, ResourceKey<Level> key) {
-        return server.getLevel(key);
+        return Objects.requireNonNull(server.getLevel(key));
     }
 
     @Contract("_ -> !null")
@@ -315,7 +325,7 @@ public class ServerUtils {
     }
 
     public static Level getWorld(BlockEntity blockEntity) {
-        return blockEntity.getLevel();
+        return Objects.requireNonNull(blockEntity.getLevel());
     }
 
     public static Vec3 getFootPos(Entity entity) {
@@ -334,12 +344,67 @@ public class ServerUtils {
         return item.components().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
     }
 
+    public static Component getName(Block block) {
+        return block.getName();
+    }
+
+    public static Component getName(EntityType<?> entityType) {
+        return entityType.getDescription();
+    }
+
+    public static Component getName(Enchantment enchantment) {
+        return enchantment.description();
+    }
+
+    public static Component getName(MobEffect statusEffect) {
+        return statusEffect.getDisplayName();
+    }
+
+    public static Component getName(RegistryAccess registryAccess, Biome biome) {
+        Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
+        String key = Objects.requireNonNull(biomes.getKey(biome)).toLanguageKey("biome");
+        return LocalizationKey.literal(key).translate();
+    }
+
+    public static Component getName(GameRule<?> gameRule) {
+        String key = gameRule.getDescriptionId();
+        return LocalizationKey.literal(key).translate();
+    }
+
     public static Component getDefaultName(ItemStack itemStack) {
         return getName(itemStack.getItem());
     }
 
-    public static String currentTimeFormat() {
-        return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
+    public static String getNameAsString(Item item) {
+        return getName(item).getString();
+    }
+
+    public static String getNameAsString(Block block) {
+        return getName(block).getString();
+    }
+
+    public static String getNameAsString(EntityType<?> entityType) {
+        return getName(entityType).getString();
+    }
+
+    public static String getNameAsString(Enchantment enchantment) {
+        return getName(enchantment).getString();
+    }
+
+    public static String getNameAsString(MobEffect statusEffect) {
+        return getName(statusEffect).getString();
+    }
+
+    public static String getNameAsString(GameType gameType) {
+        return gameType.getLongDisplayName().getString();
+    }
+
+    public static String getNameAsString(GameRule<?> gameRule) {
+        return getName(gameRule).getString();
+    }
+
+    public static String getNameAsString(RegistryAccess registryAccess, Biome biome) {
+        return getName(registryAccess, biome).getString();
     }
 
     public static Identifier getId(Item item) {
@@ -348,6 +413,14 @@ public class ServerUtils {
 
     public static Identifier getId(Block block) {
         return BuiltInRegistries.BLOCK.getKey(block);
+    }
+
+    public static Identifier getId(Level world) {
+        return world.dimension().identifier();
+    }
+
+    public static Identifier getId(EntityType<?> entityType) {
+        return BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
     }
 
     @SuppressWarnings("unused")
@@ -361,17 +434,20 @@ public class ServerUtils {
         return getId(server.registryAccess(), enchantment);
     }
 
-    public static Optional<Identifier> getId(RegistryAccess registryManager, Enchantment enchantment) {
-        Optional<Registry<Enchantment>> optional = registryManager.lookup(Registries.ENCHANTMENT);
-        if (optional.isEmpty()) {
-            return Optional.empty();
-        }
-        Registry<Enchantment> enchantments = optional.get();
-        return Optional.ofNullable(enchantments.getKey(enchantment));
+    public static Optional<Identifier> getId(RegistryAccess registryAccess, Enchantment enchantment) {
+        return registryAccess.lookup(Registries.ENCHANTMENT).map(registry -> registry.getKey(enchantment));
     }
 
-    public static Identifier getId(Level world) {
-        return world.dimension().identifier();
+    public static Optional<Identifier> getId(RegistryAccess registryAccess, MobEffect statusEffect) {
+        return registryAccess.lookup(Registries.MOB_EFFECT).map(registry -> registry.getKey(statusEffect));
+    }
+
+    public static Optional<Identifier> getId(RegistryAccess registryAccess, Biome biome) {
+        return registryAccess.lookup(Registries.BIOME).map(registry -> registry.getKey(biome));
+    }
+
+    public static Optional<Identifier> getId(RegistryAccess registryAccess, GameRule<?> gameRule) {
+        return registryAccess.lookup(Registries.GAME_RULE).map(registry -> registry.getKey(gameRule));
     }
 
     public static String getIdAsString(Item item) {
@@ -390,6 +466,30 @@ public class ServerUtils {
      */
     public static String getIdAsString(Level world) {
         return getId(world).toString();
+    }
+
+    public static String getIdAsString(EntityType<?> entityType) {
+        return getId(entityType).toString();
+    }
+
+    public static String getIdAsString(GameType gameType) {
+        return gameType.getSerializedName();
+    }
+
+    public static String getIdAsString(RegistryAccess registryAccess, Enchantment enchantment) {
+        return getId(registryAccess, enchantment).map(Identifier::toString).orElse(UNREGISTERED);
+    }
+
+    public static String getIdAsString(RegistryAccess registryAccess, MobEffect statusEffect) {
+        return getId(registryAccess, statusEffect).map(Identifier::toString).orElse(UNREGISTERED);
+    }
+
+    public static String getIdAsString(RegistryAccess registryAccess, Biome biome) {
+        return getId(registryAccess, biome).map(Identifier::toString).orElse(UNREGISTERED);
+    }
+
+    public static String getIdAsString(RegistryAccess registryAccess, GameRule<?> gameRule) {
+        return getId(registryAccess, gameRule).map(Identifier::toString).orElse(UNREGISTERED);
     }
 
     /**
@@ -416,6 +516,10 @@ public class ServerUtils {
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
+    }
+
+    public static String currentTimeFormat() {
+        return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
     }
 
     public static Identifier ofIdentifier(String id) {
