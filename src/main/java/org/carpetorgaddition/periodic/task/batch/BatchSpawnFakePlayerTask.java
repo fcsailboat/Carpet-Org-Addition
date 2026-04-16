@@ -65,6 +65,7 @@ public class BatchSpawnFakePlayerTask extends ServerTask {
      * 玩家档案预加载使用的时间
      */
     private long setupTime = -1L;
+    private final long startSystemTime = System.currentTimeMillis();
 
     public BatchSpawnFakePlayerTask(MinecraftServer server, ServerCommandSource source, NameToIdCache userCache, FakePlayerCreateContext context, String prefix, int start, int end) {
         super(source);
@@ -99,6 +100,9 @@ public class BatchSpawnFakePlayerTask extends ServerTask {
         int size = this.players.size();
         long time = FetcherUtils.getWorld(this.source).getTime();
         if (this.isPreload) {
+            if (System.currentTimeMillis() - this.startSystemTime > 60 * 1000L) {
+                this.timeout();
+            }
             // 任务开始前几个游戏刻不显示进度
             boolean progress = time - this.startTime > 10;
             if (size < this.count) {
