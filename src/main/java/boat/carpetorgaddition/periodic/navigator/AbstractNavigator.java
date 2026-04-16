@@ -134,6 +134,7 @@ public abstract class AbstractNavigator {
         // 更新上一个坐标
         if (force || this.updateRequired()) {
             // 要求玩家有执行/navigate命令的权限
+            // TODO 如果没有权限，应该停止显示路径点
             boolean hasPermission = CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(this.player);
             if (CarpetOrgAdditionSettings.SYNC_NAVIGATE_WAYPOINT.value() && hasPermission) {
                 WaypointUpdateS2CPacket packet = this.createPacket();
