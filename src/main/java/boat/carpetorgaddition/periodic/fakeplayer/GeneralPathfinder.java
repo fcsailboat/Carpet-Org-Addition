@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
@@ -331,7 +331,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
      */
     public static class DummyEntity extends Mob {
         protected DummyEntity(Level world, Vec3 pos) {
-            super(EntityType.VILLAGER, world);
+            super(EntityTypes.VILLAGER, world);
             this.setPos(pos);
         }
     }

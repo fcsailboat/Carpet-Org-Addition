@@ -24,7 +24,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.Mannequin;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.jspecify.annotations.NullMarked;
@@ -106,7 +106,7 @@ public class PlayerCommandExtension {
      */
     private static int summonMannequin(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerLevel world = ServerUtils.getWorld(context.getSource());
-        Mannequin mannequin = new Mannequin(EntityType.MANNEQUIN, world);
+        Mannequin mannequin = new Mannequin(EntityTypes.MANNEQUIN, world);
         String name = getPlayerName(context);
         mannequin.setProfile(ResolvableProfile.createUnresolved(name));
         ServerPlayer player = CommandUtils.getSourcePlayer(context);

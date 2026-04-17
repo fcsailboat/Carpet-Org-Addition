@@ -5,7 +5,7 @@ import boat.carpetorgaddition.mixin.accessor.SpawnHelperInfoAccessor;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
@@ -25,8 +25,8 @@ public abstract class PhantomSpawnerMixin {
                 return;
             }
             SpawnHelperInfoAccessor accessor = (SpawnHelperInfoAccessor) spawnInfo;
-            boolean isBelowCap = accessor.invokerIsBelowCap(EntityType.PHANTOM.getCategory());
-            boolean canSpawn = accessor.invokerCanSpawn(EntityType.PHANTOM.getCategory(), ChunkPos.containing(blockPos));
+            boolean isBelowCap = accessor.invokerIsBelowCap(EntityTypes.PHANTOM.getCategory());
+            boolean canSpawn = accessor.invokerCanSpawn(EntityTypes.PHANTOM.getCategory(), ChunkPos.containing(blockPos));
             if (isBelowCap && canSpawn) {
                 return;
             }

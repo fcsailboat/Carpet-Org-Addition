@@ -15,7 +15,7 @@ import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
@@ -194,7 +194,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
                     .getEntities(this.thisPlayer, expand)
                     .stream()
                     .filter(entity -> !entity.isRemoved())
-                    .filter(entity -> entity.getType() == EntityType.ITEM)
+                    .filter(entity -> entity.getType() == EntityTypes.ITEM)
                     .toList();
             for (Entity entity : list) {
                 this.touch(entity);

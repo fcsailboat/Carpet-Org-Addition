@@ -113,7 +113,7 @@ public class ClientUtils {
      */
     @Contract(pure = true)
     public static Camera getCamera() {
-        return getGameRenderer().getMainCamera();
+        return getGameRenderer().mainCamera();
     }
 
     @Contract(pure = true)

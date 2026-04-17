@@ -7,7 +7,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -32,7 +32,7 @@ public class CreeperExplosionTask extends ServerTask {
 
     // 将苦力怕传送到合适位置
     private static Creeper teleport(ServerPlayer player) {
-        Creeper creeper = new Creeper(EntityType.CREEPER, ServerUtils.getWorld(player));
+        Creeper creeper = new Creeper(EntityTypes.CREEPER, ServerUtils.getWorld(player));
         BlockPos playerPos = player.blockPosition();
         Vec3 fromPos = new Vec3(playerPos.getX() - 3, playerPos.getY() - 1, playerPos.getZ() - 3);
         Vec3 toPos = new Vec3(playerPos.getX() + 3, playerPos.getY() + 1, playerPos.getZ() + 3);

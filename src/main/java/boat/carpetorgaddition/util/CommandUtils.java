@@ -22,7 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.*;
 import net.minecraft.server.players.NameAndId;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
@@ -97,7 +97,7 @@ public class CommandUtils {
                 for (GameProfile gameProfile : collection) {
                     TextJoiner joiner = new TextJoiner();
                     Component component = joiner
-                            .append(EntityType.PLAYER.getDescription())
+                            .append(EntityTypes.PLAYER.getDescription())
                             .append(": ")
                             .append(gameProfile.name()).join();
                     list.add(component);
