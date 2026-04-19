@@ -58,7 +58,6 @@ public abstract class AbstractNavigator {
 
     @NonNull
     protected Component getHUDText(Vec3 vec3d, Component displayName, int distance) {
-        // TODO 改为格式化文本
         // 添加左右箭头
         Map.Entry<String, String> entry = switch (forwardAngle(this.player, vec3d)) {
             case -3 -> Map.entry("    ", " >>>");
@@ -132,14 +131,9 @@ public abstract class AbstractNavigator {
      */
     public void syncWaypoint(boolean force) {
         // 更新上一个坐标
-        if (force || this.updateRequired()) {
-            // 要求玩家有执行/navigate命令的权限
-            // TODO 如果没有权限，应该停止显示路径点
-            boolean hasPermission = CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(this.player);
-            if (CarpetOrgAdditionSettings.SYNC_NAVIGATE_WAYPOINT.value() && hasPermission) {
-                WaypointUpdateS2CPacket packet = this.createPacket();
-                ServerPlayNetworking.send(this.player, packet);
-            }
+        if ((force || this.updateRequired()) && CarpetOrgAdditionSettings.SYNC_NAVIGATE_WAYPOINT.value()) {
+            WaypointUpdateS2CPacket packet = this.createPacket();
+            ServerPlayNetworking.send(this.player, packet);
         }
     }
 

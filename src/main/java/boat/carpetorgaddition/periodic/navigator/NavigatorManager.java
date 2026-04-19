@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.periodic.navigator;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.NavigatorCommand;
 import boat.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
@@ -17,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 public class NavigatorManager {
     @Nullable
     private AbstractNavigator navigator;
-    private boolean isUpdated = false;
+    private boolean updated = false;
     private final ServerPlayer player;
 
     public NavigatorManager(ServerPlayer player) {
@@ -29,17 +30,17 @@ public class NavigatorManager {
             return;
         }
         try {
-            if (this.navigator.isArrive()) {
+            if (this.navigator.isArrive() || !CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(this.player)) {
                 this.clearNavigator();
-            } else {
-                if (this.isUpdated) {
-                    this.isUpdated = false;
-                    this.navigator.onStart();
-                }
-                this.navigator.tick();
+                return;
             }
+            if (this.updated) {
+                this.updated = false;
+                this.navigator.onStart();
+            }
+            this.navigator.tick();
         } catch (RuntimeException e) {
-            MessageUtils.sendErrorMessage(this.player.createCommandSourceStack(), NavigatorCommand.KEY.then("error").translate(), e);
+            MessageUtils.sendErrorMessage(this.player, NavigatorCommand.KEY.then("error").translate(), e);
             CarpetOrgAddition.LOGGER.error("The navigator did not work as expected", e);
             // 清除导航器
             this.clearNavigator();
@@ -70,7 +71,7 @@ public class NavigatorManager {
     private void setNavigator(@Nullable AbstractNavigator navigator) {
         ServerPlayNetworking.send(this.player, WaypointClearS2CPacket.INSTANCE);
         this.navigator = navigator;
-        this.isUpdated = true;
+        this.updated = true;
     }
 
     public void clearNavigator() {
