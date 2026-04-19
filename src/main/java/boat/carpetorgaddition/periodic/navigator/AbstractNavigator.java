@@ -33,16 +33,16 @@ public abstract class AbstractNavigator {
     }
 
     /**
-     * 开始导航时调用
-     */
-    public void onStart() {
-        this.syncWaypoint(true);
-    }
-
-    /**
      * 每个游戏刻都调用
      */
     public abstract void tick();
+
+    /**
+     * 导航器更新时调用
+     */
+    public void onUpdate() {
+        this.syncWaypoint(true);
+    }
 
     /**
      * 此导航器的结束条件

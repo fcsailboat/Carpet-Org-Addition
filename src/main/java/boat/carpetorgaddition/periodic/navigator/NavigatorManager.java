@@ -36,7 +36,7 @@ public class NavigatorManager {
             }
             if (this.updated) {
                 this.updated = false;
-                this.navigator.onStart();
+                this.navigator.onUpdate();
             }
             this.navigator.tick();
         } catch (RuntimeException e) {
