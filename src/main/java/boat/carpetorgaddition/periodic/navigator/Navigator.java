@@ -19,14 +19,14 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 
-public abstract class AbstractNavigator {
+public abstract class Navigator {
     protected static final LocalizationKey IN = NavigatorCommand.HUD.then("in");
     protected static final LocalizationKey REACH = NavigatorCommand.HUD.then("reach");
     protected final ServerPlayer player;
     protected final MinecraftServer server;
     protected final NavigatorManager manager;
 
-    public AbstractNavigator(ServerPlayer player) {
+    public Navigator(ServerPlayer player) {
         this.player = player;
         this.server = ServerUtils.getServer(player);
         this.manager = PlayerComponentCoordinator.getCoordinator(this.player).getNavigatorManager();
@@ -54,7 +54,7 @@ public abstract class AbstractNavigator {
     /**
      * @return 此导航器的浅拷贝副本
      */
-    public abstract AbstractNavigator copy(ServerPlayer player);
+    public abstract Navigator copy(ServerPlayer player);
 
     @NonNull
     protected Component getHUDText(Vec3 vec3d, Component displayName, int distance) {

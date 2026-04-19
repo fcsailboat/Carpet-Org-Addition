@@ -1,7 +1,7 @@
 package boat.carpetorgaddition;
 
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
-import boat.carpetorgaddition.periodic.navigator.AbstractNavigator;
+import boat.carpetorgaddition.periodic.navigator.Navigator;
 import boat.carpetorgaddition.periodic.navigator.NavigatorManager;
 import boat.carpetorgaddition.rule.*;
 import boat.carpetorgaddition.rule.value.*;
@@ -726,7 +726,7 @@ public class CarpetOrgAdditionSettings {
                         if (source == null) {
                             return;
                         }
-                        List<AbstractNavigator> list = source.getServer().getPlayerList().getPlayers()
+                        List<Navigator> list = source.getServer().getPlayerList().getPlayers()
                                 .stream()
                                 .map(PlayerComponentCoordinator::getCoordinator)
                                 .map(PlayerComponentCoordinator::getNavigatorManager)
@@ -737,7 +737,7 @@ public class CarpetOrgAdditionSettings {
                         if (value) {
                             list.forEach(navigator -> navigator.syncWaypoint(true));
                         } else {
-                            list.forEach(AbstractNavigator::clear);
+                            list.forEach(Navigator::clear);
                         }
                     })
                     .setClient()

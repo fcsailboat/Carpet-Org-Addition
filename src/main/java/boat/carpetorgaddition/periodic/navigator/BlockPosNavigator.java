@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.NonNull;
 
-public class BlockPosNavigator extends AbstractNavigator {
+public class BlockPosNavigator extends Navigator {
     protected final BlockPos blockPos;
     protected final Level world;
 

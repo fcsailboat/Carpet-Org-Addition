@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-public class WaypointNavigator extends AbstractNavigator {
+public class WaypointNavigator extends Navigator {
     private final Waypoint waypoint;
     /**
      * 路径点所在维度的ID

@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class EntityNavigator extends AbstractNavigator {
+public class EntityNavigator extends Navigator {
     /**
      * 此导航器追踪的实体
      */

@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 
 public class NavigatorManager {
     @Nullable
-    private AbstractNavigator navigator;
+    private Navigator navigator;
     private boolean updated = false;
     private final ServerPlayer player;
 
@@ -48,7 +48,7 @@ public class NavigatorManager {
     }
 
     @Nullable
-    public AbstractNavigator getNavigator() {
+    public Navigator getNavigator() {
         return this.navigator;
     }
 
@@ -68,20 +68,20 @@ public class NavigatorManager {
         this.setNavigator(new HasNamePosNavigator(this.player, blockPos, world, name));
     }
 
-    private void setNavigator(@Nullable AbstractNavigator navigator) {
+    private void setNavigator(@Nullable Navigator navigator) {
         ServerPlayNetworking.send(this.player, WaypointClearS2CPacket.INSTANCE);
         this.navigator = navigator;
         this.updated = true;
     }
 
     public void clearNavigator() {
-        this.setNavigator((AbstractNavigator) null);
+        this.setNavigator((Navigator) null);
         ServerPlayNetworking.send(this.player, WaypointClearS2CPacket.INSTANCE);
     }
 
     public void setNavigatorFromOldPlayer(ServerPlayer oldPlayer) {
         NavigatorManager manager = PlayerComponentCoordinator.getCoordinator(oldPlayer).getNavigatorManager();
-        AbstractNavigator navigator = manager.getNavigator();
+        Navigator navigator = manager.getNavigator();
         this.navigator = navigator == null ? null : navigator.copy(this.player);
     }
 }
