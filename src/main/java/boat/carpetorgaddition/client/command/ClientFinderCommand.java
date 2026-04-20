@@ -1,7 +1,8 @@
 package boat.carpetorgaddition.client.command;
 
-import boat.carpetorgaddition.client.command.argument.ClientObjectArgument;
-import boat.carpetorgaddition.client.command.argument.ClientObjectArgument.ClientBlockArgument;
+import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType;
+import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientBlockArgumentType;
+import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientItemArgumentType;
 import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket.Type;
@@ -34,7 +35,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
     public void register(String name) {
         this.dispatcher.register(ClientCommands.literal(name)
                 .then(ClientCommands.literal("item")
-                        .then(ClientCommands.argument("item", new ClientObjectArgument.ClientItemArgument(true))
+                        .then(ClientCommands.argument("item", new ClientItemArgumentType(true))
                                 .executes(context -> searchItem(context, 64))
                                 .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RANGE))
                                         .suggests(suggestionDefaultDistance())
@@ -43,7 +44,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
                                         .then(ClientCommands.literal("offline_player")
                                                 .executes(this::searchItem)))))
                 .then(ClientCommands.literal("block")
-                        .then(ClientCommands.argument("block", new ClientBlockArgument(true))
+                        .then(ClientCommands.argument("block", new ClientBlockArgumentType(true))
                                 .executes(context -> searchBlock(context, 64))
                                 .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RANGE))
                                         .suggests(suggestionDefaultDistance())
@@ -75,7 +76,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
     }
 
     private int searchBlock(CommandContext<FabricClientCommandSource> context, int range) {
-        List<Block> list = ClientObjectArgument.getType(context, "block").stream()
+        List<Block> list = ClientObjectArgumentType.getType(context, "block").stream()
                 .filter(t -> t instanceof Block)
                 .map(t -> (Block) t)
                 .toList();
@@ -88,7 +89,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
     }
 
     private List<Item> getItemList(CommandContext<FabricClientCommandSource> context) {
-        return ClientObjectArgument.getType(context, "item").stream()
+        return ClientObjectArgumentType.getType(context, "item").stream()
                 .filter(t -> t instanceof Item)
                 .map(t -> (Item) t)
                 .toList();

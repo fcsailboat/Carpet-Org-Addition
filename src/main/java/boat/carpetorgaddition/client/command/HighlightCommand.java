@@ -2,7 +2,7 @@ package boat.carpetorgaddition.client.command;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.client.CarpetOrgAdditionClient;
-import boat.carpetorgaddition.client.command.argument.ClientVec3dArgument;
+import boat.carpetorgaddition.client.command.argument.ClientBlockPosArgumentType;
 import boat.carpetorgaddition.client.render.waypoint.HighlightWaypoint;
 import boat.carpetorgaddition.client.render.waypoint.Waypoint;
 import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
@@ -44,7 +44,7 @@ public class HighlightCommand extends AbstractClientCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(ClientCommands.literal(name)
-                .then(ClientCommands.argument("position", ClientVec3dArgument.blockPos())
+                .then(ClientCommands.argument("blockPos", ClientBlockPosArgumentType.blockPos())
                         .executes(context -> highlight(context, 60 * 20L, !CarpetOrgAdditionClient.CLEAR_WAYPOINT.isUnbound()))
                         .then(ClientCommands.argument("second", IntegerArgumentType.integer(1))
                                 .suggests((_, builder) -> SharedSuggestionProvider.suggest(new String[]{"30", "60", "120"}, builder))
@@ -57,7 +57,7 @@ public class HighlightCommand extends AbstractClientCommand {
 
     // 高亮路径点
     private int highlight(CommandContext<FabricClientCommandSource> context, long duration, boolean persistent) {
-        Vec3 vec3d = ClientVec3dArgument.getVec3d(context, "position");
+        Vec3 vec3d = ClientBlockPosArgumentType.getBlockPos(context, "blockPos").getCenter();
         ClientLevel world = ClientUtils.getWorld();
         WaypointRenderer instance = WaypointRenderer.getInstance();
         List<Waypoint> list = instance.listRenderers(Waypoint.HIGHLIGHT);
