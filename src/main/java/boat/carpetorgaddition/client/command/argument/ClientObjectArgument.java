@@ -33,7 +33,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T>> {
+public abstract class ClientObjectArgument<T> implements ArgumentType<List<T>> {
     private static final List<String> PATTERNS = Arrays.stream(MatchPattern.values()).map(MatchPattern::toString).toList();
     /**
      * 是否允许通过id补全名称<br>
@@ -47,11 +47,11 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
      */
     private final boolean patternMatching;
 
-    private ClientObjectArgumentType() {
+    private ClientObjectArgument() {
         this(false);
     }
 
-    private ClientObjectArgumentType(boolean patternMatching) {
+    private ClientObjectArgument(boolean patternMatching) {
         this.patternMatching = patternMatching;
     }
 
@@ -182,8 +182,8 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 物品参数
      */
-    public static class ClientItemArgumentType extends ClientObjectArgumentType<Item> {
-        public ClientItemArgumentType(boolean patternMatching) {
+    public static class ClientItemArgument extends ClientObjectArgument<Item> {
+        public ClientItemArgument(boolean patternMatching) {
             super(patternMatching);
         }
 
@@ -206,8 +206,8 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 方块参数
      */
-    public static class ClientBlockArgumentType extends ClientObjectArgumentType<Block> {
-        public ClientBlockArgumentType(boolean patternMatching) {
+    public static class ClientBlockArgument extends ClientObjectArgument<Block> {
+        public ClientBlockArgument(boolean patternMatching) {
             super(patternMatching);
         }
 
@@ -230,7 +230,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 实体参数
      */
-    public static class ClientEntityArgumentType extends ClientObjectArgumentType<EntityType<?>> {
+    public static class ClientEntityArgument extends ClientObjectArgument<EntityType<?>> {
         @Override
         protected String objectToString(EntityType<?> entityType) {
             return entityType.getDescription().getString();
@@ -250,7 +250,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 魔咒参数
      */
-    public static class ClientEnchantmentArgumentType extends ClientObjectArgumentType<Enchantment> {
+    public static class ClientEnchantmentArgument extends ClientObjectArgument<Enchantment> {
         @Override
         protected String objectToString(Enchantment enchantment) {
             return EnchantmentUtils.getName(enchantment).getString();
@@ -272,7 +272,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 状态效果参数
      */
-    public static class ClientStatusEffectArgumentType extends ClientObjectArgumentType<MobEffect> {
+    public static class ClientStatusEffectArgument extends ClientObjectArgument<MobEffect> {
         @Override
         protected String objectToString(MobEffect statusEffect) {
             return statusEffect.getDisplayName().getString();
@@ -290,7 +290,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
     }
 
-    public static class ClientBiomeArgumentType extends ClientObjectArgumentType<Biome> {
+    public static class ClientBiomeArgument extends ClientObjectArgument<Biome> {
         @Override
         protected String objectToString(Biome biome) {
             RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
@@ -314,7 +314,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 游戏模式参数
      */
-    public static class ClientGameModeArgumentType extends ClientObjectArgumentType<GameType> {
+    public static class ClientGameModeArgument extends ClientObjectArgument<GameType> {
         @Override
         protected String objectToString(GameType gameMode) {
             return gameMode.getLongDisplayName().getString();
@@ -334,7 +334,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 游戏规则参数
      */
-    public static class ClientGameRuleArgumentType extends ClientObjectArgumentType<GameRule<?>> {
+    public static class ClientGameRuleArgument extends ClientObjectArgument<GameRule<?>> {
         @Override
         protected String objectToString(GameRule<?> gameRule) {
             String key = gameRule.getDescriptionId();

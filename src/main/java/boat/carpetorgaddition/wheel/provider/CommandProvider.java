@@ -151,7 +151,7 @@ public class CommandProvider {
      */
     public static String highlightWaypoint(BlockPos blockPos) {
         String name = getClientCommandName(HighlightCommand.class, HighlightCommand.DEFAULT_COMMAND_NAME);
-        return "/%s %s %s %s".formatted(name, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        return "/%s %s %s %s".formatted(name, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
     }
 
     /**

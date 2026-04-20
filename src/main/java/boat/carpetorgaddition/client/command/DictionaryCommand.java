@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.client.command;
 
-import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType;
+import boat.carpetorgaddition.client.command.argument.ClientObjectArgument;
 import boat.carpetorgaddition.client.util.ClientMessageUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.EnchantmentUtils;
@@ -59,7 +59,7 @@ public class DictionaryCommand extends AbstractClientCommand {
 
     // 获取对象id
     private int getId(CommandContext<FabricClientCommandSource> context, DictionaryType type) {
-        List<?> list = ClientObjectArgumentType.getType(context, type.name);
+        List<?> list = ClientObjectArgument.getType(context, type.name);
         // list集合至少有一个元素，不与任何对象匹配的字符串在解析命令时不会成功
         if (list.size() == 1) {
             // 字符串只对应一个对象
@@ -198,14 +198,14 @@ public class DictionaryCommand extends AbstractClientCommand {
         // 获取参数类型
         private ArgumentType<?> getArgumentType() {
             return switch (this) {
-                case ITEM -> new ClientObjectArgumentType.ClientItemArgumentType(false);
-                case BLOCK -> new ClientObjectArgumentType.ClientBlockArgumentType(false);
-                case ENTITY -> new ClientObjectArgumentType.ClientEntityArgumentType();
-                case ENCHANTMENT -> new ClientObjectArgumentType.ClientEnchantmentArgumentType();
-                case STATUS_EFFECT -> new ClientObjectArgumentType.ClientStatusEffectArgumentType();
-                case BIOME -> new ClientObjectArgumentType.ClientBiomeArgumentType();
-                case GAME_MODE -> new ClientObjectArgumentType.ClientGameModeArgumentType();
-                case GAME_RULE -> new ClientObjectArgumentType.ClientGameRuleArgumentType();
+                case ITEM -> new ClientObjectArgument.ClientItemArgument(false);
+                case BLOCK -> new ClientObjectArgument.ClientBlockArgument(false);
+                case ENTITY -> new ClientObjectArgument.ClientEntityArgument();
+                case ENCHANTMENT -> new ClientObjectArgument.ClientEnchantmentArgument();
+                case STATUS_EFFECT -> new ClientObjectArgument.ClientStatusEffectArgument();
+                case BIOME -> new ClientObjectArgument.ClientBiomeArgument();
+                case GAME_MODE -> new ClientObjectArgument.ClientGameModeArgument();
+                case GAME_RULE -> new ClientObjectArgument.ClientGameRuleArgument();
             };
         }
     }
