@@ -137,7 +137,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     private LiteralArgumentBuilder<CommandSourceStack> thenSorting() {
         LiteralArgumentBuilder<CommandSourceStack> sorting = Commands.literal("sorting");
         RequiredArgumentBuilder<CommandSourceStack, Result> result = null;
-        int max = GlobalConfigs.getInstance().getPlayerActionMaxSortingItemCount();
+        int max = GlobalConfigs.getPlayerActionMaxSortingItemCount();
         for (int i = max; i >= 0; i--) {
             final int count = i + 1;
             var argument = Commands.argument("item" + count, ItemPredicateArgument.itemPredicate(this.access));

@@ -37,8 +37,7 @@ public abstract class AbstractCommand {
      * 命令的名称，可以有多个，表示使用不同的名称多次注册，如果为0个，则在注册时会自动使用默认名称
      */
     public String[] getCustomNames() {
-        GlobalConfigs configs = GlobalConfigs.getInstance();
-        return configs.getCommand(this.getDefaultName());
+        return GlobalConfigs.getCommand(this.getDefaultName());
     }
 
     public String getAvailableName() {

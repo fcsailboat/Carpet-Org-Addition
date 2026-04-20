@@ -901,7 +901,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     private void validateMultiPlayerUsability(CommandContext<CommandSourceStack> context, CommandSourceStack source) throws CommandSyntaxException {
         LocalizationKey key = STARTUP.then("run");
-        if (GlobalConfigs.getInstance().isAllowMpPlayerStartupCmd()) {
+        if (GlobalConfigs.isAllowMpPlayerStartupCmd()) {
             if (Commands.LEVEL_OWNERS.check(source.permissions())) {
                 return;
             }

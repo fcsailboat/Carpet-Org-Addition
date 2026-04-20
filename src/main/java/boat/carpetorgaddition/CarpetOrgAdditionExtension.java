@@ -154,7 +154,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     public void onServerClosed(MinecraftServer server) {
         GameProfileCache.getInstance().save();
         PermissionManager.reset();
-        GlobalConfigs.getInstance().save();
+        GlobalConfigs.save();
         OfflinePlayerSearchTask.clear();
     }
 
