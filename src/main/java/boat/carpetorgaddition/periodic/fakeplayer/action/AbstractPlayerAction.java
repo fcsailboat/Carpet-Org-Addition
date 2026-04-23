@@ -15,6 +15,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class AbstractPlayerAction {
     @Nullable
@@ -110,6 +111,10 @@ public abstract class AbstractPlayerAction {
         return Objects.requireNonNull(this.fakePlayer);
     }
 
+    protected Optional<EntityPlayerMPFake> getFakePlayerNullable() {
+        return Optional.ofNullable(this.fakePlayer);
+    }
+
     public boolean equalFakePlayer(@Nullable EntityPlayerMPFake fakePlayer) {
         return Objects.equals(this.fakePlayer, fakePlayer);
     }
@@ -142,6 +147,13 @@ public abstract class AbstractPlayerAction {
      * 当玩家被赋值为{@code null}时调用
      */
     protected void onClearPlayer() {
+    }
+
+    /**
+     * 当玩家退出游戏时调用，用于提前关闭GUI
+     */
+    public void onFakePlayerLogout() {
+        // 假玩家退出游戏时，会先将玩家实体标记为已删除再关闭GUI，这会导致GUI中存放的物品无法回到玩家物品栏
     }
 
     @Override

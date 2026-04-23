@@ -3,6 +3,7 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
@@ -117,6 +118,11 @@ public class RenameAction extends AbstractPlayerAction {
             return screenHandler.getCost() > 0;
         }
         return false;
+    }
+
+    @Override
+    public void onFakePlayerLogout() {
+        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
     }
 
     @Override

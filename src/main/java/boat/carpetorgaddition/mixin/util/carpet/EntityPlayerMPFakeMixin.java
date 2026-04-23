@@ -1,6 +1,8 @@
 package boat.carpetorgaddition.mixin.util.carpet;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
+import boat.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import carpet.patches.EntityPlayerMPFake;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
@@ -9,6 +11,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,6 +19,7 @@ import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Relative;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -29,6 +33,9 @@ import java.util.function.Consumer;
 
 @Mixin(value = EntityPlayerMPFake.class)
 public class EntityPlayerMPFakeMixin {
+    @Unique
+    private final EntityPlayerMPFake self = (EntityPlayerMPFake) (Object) this;
+
     @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;whenCompleteAsync(Ljava/util/function/BiConsumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
     private static <T> CompletableFuture<T> whenCompleteAsync(CompletableFuture<Optional<GameProfile>> instance, BiConsumer<? super T, ? super Throwable> action, Executor executor, Operation<CompletableFuture<T>> original) {
         if (FakePlayerSpawner.CALLBACK.isBound()) {
@@ -106,5 +113,13 @@ public class EntityPlayerMPFakeMixin {
     @WrapWithCondition(method = "lambda$createFake$0", at = @At(value = "INVOKE", target = "Lcarpet/patches/EntityPlayerMPFake;stopRiding()V"))
     private static boolean stopRiding(EntityPlayerMPFake instance) {
         return !FakePlayerSpawner.ORIGINAL_POSITION.orElse(false);
+    }
+
+    @Inject(method = "kill(Lnet/minecraft/network/chat/Component;)V", at = @At("HEAD"))
+    private void kill(Component reason, CallbackInfo ci) {
+        FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.getCoordinator(this.self);
+        FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
+        actionManager.getAction().onFakePlayerLogout();
+        actionManager.stop();
     }
 }

@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +42,8 @@ public class InventoryCraftAction extends AbstractCraftAction {
     }
 
     @Override
-    protected @Nullable AbstractContainerMenu getScreenHandler() {
+    @NonNull
+    protected AbstractContainerMenu getScreenHandler() {
         return this.getFakePlayer().inventoryMenu;
     }
 
@@ -106,5 +107,12 @@ public class InventoryCraftAction extends AbstractCraftAction {
     @Override
     public ActionSerializeType getActionSerializeType() {
         return ActionSerializeType.INVENTORY_CRAFT;
+    }
+
+    @Override
+    public void onFakePlayerLogout() {
+        this.getFakePlayerNullable().ifPresent(fakePlayer -> this.getScreenHandler().removed(fakePlayer));
+        // 如果假玩家是从其他动作切换到物品栏合成的，则上一次动作可能有物品残留
+        super.onFakePlayerLogout();
     }
 }

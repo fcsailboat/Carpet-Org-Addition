@@ -7,6 +7,7 @@ import boat.carpetorgaddition.mixin.accessor.MerchantScreenHandlerAccessor;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -284,6 +285,11 @@ public class TradeAction extends AbstractPlayerAction {
     // 检查槽位上的物品是否可以交易
     private boolean slotItemCanTrade(ItemStack slotItem, ItemStack tradeItem) {
         return (slotItem.getCount() >= tradeItem.getCount()) || slotItem.getCount() >= slotItem.getMaxStackSize();
+    }
+
+    @Override
+    public void onFakePlayerLogout() {
+        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
     }
 
     @Override

@@ -5,6 +5,7 @@ import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
@@ -246,6 +247,12 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         Level world = ServerUtils.getWorld(fakePlayer);
         Optional<RecipeHolder<CraftingRecipe>> optional = ServerUtils.getServer(fakePlayer).getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, world);
         return optional.map(recipe -> recipe.value().assemble(input)).orElse(ItemStack.EMPTY);
+    }
+
+    @Override
+    public void onFakePlayerLogout() {
+        // 在假玩家退出游戏前关闭工作台，使合成方格中的物品回到玩家物品栏，
+        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
     }
 
     @Override
