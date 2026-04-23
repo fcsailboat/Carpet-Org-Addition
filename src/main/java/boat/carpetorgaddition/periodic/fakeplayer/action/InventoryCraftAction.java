@@ -8,13 +8,11 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
-import java.util.Objects;
 
 public class InventoryCraftAction extends AbstractCraftAction {
     public InventoryCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
@@ -38,12 +36,12 @@ public class InventoryCraftAction extends AbstractCraftAction {
 
     @Override
     protected int getInventoryEnd() {
-        return Objects.requireNonNull(this.getScreenHandler()).slots.size();
+        return this.getScreenHandler().slots.size();
     }
 
     @Override
     @NonNull
-    protected AbstractContainerMenu getScreenHandler() {
+    protected InventoryMenu getScreenHandler() {
         return this.getFakePlayer().inventoryMenu;
     }
 
@@ -61,8 +59,7 @@ public class InventoryCraftAction extends AbstractCraftAction {
         joiner.enter(() -> this.addCraftRecipe(joiner, craftOutput));
         // 合成方格状态
         joiner.newline(key.then("state").translate(name));
-        InventoryMenu playerScreenHandler = this.getFakePlayer().inventoryMenu;
-        joiner.enter(() -> this.addCraftGridState(joiner, playerScreenHandler));
+        joiner.enter(() -> this.addCraftGridState(joiner, this.getScreenHandler()));
         return joiner.collect();
     }
 

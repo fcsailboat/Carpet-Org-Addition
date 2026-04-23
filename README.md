@@ -26,7 +26,7 @@
     <tr>
       <td>1.19.4</td>
       <td rowspan="8">停止支持</td>
-      <td><a href="https://github.com/fcsailboat/Carpet-Org-Addition/releases/tag/v1.26.2">v1.26.2</a></td>
+      <td><a href="https://github.com/fcsailboat/Carpet-Org-Addition/releases/tag/v1.26.3">v1.26.3</a></td>
     </tr>
     <tr>
       <td>1.20.1</td>
