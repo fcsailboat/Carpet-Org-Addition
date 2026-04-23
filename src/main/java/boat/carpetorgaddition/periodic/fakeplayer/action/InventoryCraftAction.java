@@ -16,7 +16,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class InventoryCraftAction extends CraftAction {
+public class InventoryCraftAction extends AbstractCraftAction {
     public InventoryCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
         super(fakePlayer, predicates);
     }

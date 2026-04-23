@@ -94,8 +94,8 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
             }
             // 一轮循环结束后，再重新将当前物品设置为物品栏中的潜影盒
             itemStack = inventory.getItem(index);
-            //判断潜影盒是否为空
-            if (InventoryUtils.isEmptyShulkerBox(itemStack)) {
+            // 判断潜影盒是否为空
+            if (InventoryUtils.isNonOrEmptyContainer(itemStack)) {
                 // 如果为空，将朝向设置为丢出非指定物品的方向，然后结束循环
                 // 设置当前朝向为丢出非指定物品朝向
                 this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, this.otherVec);

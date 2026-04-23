@@ -29,13 +29,13 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class CraftAction extends AbstractPlayerAction {
+public abstract class AbstractCraftAction extends AbstractPlayerAction {
     /**
      * 物品合成所使用的物品栏
      */
     protected final ItemStackPredicate[] predicates;
 
-    public CraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
+    public AbstractCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
         super(fakePlayer);
         int size = this.getCraftGridSize();
         if (predicates.length != size) {
@@ -56,7 +56,7 @@ public abstract class CraftAction extends AbstractPlayerAction {
         }
     }
 
-    protected void craft(AutoGrowInventory inventory) {
+    private void craft(AutoGrowInventory inventory) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         AbstractContainerMenu screenHandler = this.getScreenHandler();
         if (screenHandler == null) {
@@ -267,7 +267,7 @@ public abstract class CraftAction extends AbstractPlayerAction {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        CraftAction that = (CraftAction) o;
+        AbstractCraftAction that = (AbstractCraftAction) o;
         return Objects.deepEquals(predicates, that.predicates);
     }
 

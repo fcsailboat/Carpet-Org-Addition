@@ -173,6 +173,6 @@ public class RuleUtils {
         return instance instanceof ItemStack itemStack
                && CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value()
                && InventoryUtils.isShulkerBoxItem(itemStack)
-               && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isEmptyShulkerBox(itemStack));
+               && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isNonOrEmptyContainer(itemStack));
     }
 }

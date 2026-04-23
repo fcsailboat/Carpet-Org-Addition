@@ -246,6 +246,6 @@ public class FakePlayerUtils {
      */
     public static void mergeEmptyShulkerBox(ServerPlayer player) {
         PlayerStorageInventory inventory = new PlayerStorageInventory(player);
-        inventory.merge(InventoryUtils::isEmptyShulkerBox);
+        inventory.merge(shulkerBox -> InventoryUtils.isShulkerBoxItem(shulkerBox) && InventoryUtils.isNonOrEmptyContainer(shulkerBox));
     }
 }

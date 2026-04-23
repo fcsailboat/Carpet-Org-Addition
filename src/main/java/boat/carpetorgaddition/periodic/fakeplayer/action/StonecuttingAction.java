@@ -141,7 +141,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                     return true;
                 }
             } else if (InventoryUtils.isShulkerBoxItem(itemStack)) {
-                if (itemStack.getCount() == 1 && InventoryUtils.isEmptyShulkerBox(itemStack)) {
+                if (itemStack.getCount() == 1 && InventoryUtils.isNonOrEmptyContainer(itemStack)) {
                     continue;
                 }
                 shulkerSlotIndex.add(index);

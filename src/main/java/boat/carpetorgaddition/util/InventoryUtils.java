@@ -163,18 +163,16 @@ public class InventoryUtils {
     }
 
     /**
-     * 判断当前潜影盒是否是空潜影盒
+     * 判断当前物品是否是非容器或空容器
      *
-     * @param shulkerBox 当前要检查是否为空的潜影盒物品
-     * @return 潜影盒内没有物品返回true，有物品返回false
-     * @apiNote 此方法可以保证返回值为false时，shulkerBox.get(DataComponentTypes.CONTAINER)永远不会返回null
+     * @return 物品是非容器或空容器返回{@code true}，否则返回{@code false}
      */
-    public static boolean isEmptyShulkerBox(ItemStack shulkerBox) {
-        // 正常情况下有物品的潜影盒无法堆叠
-        if (shulkerBox.getCount() != 1) {
+    public static boolean isNonOrEmptyContainer(ItemStack itemStack) {
+        // 正常情况下有物品的容器无法堆叠
+        if (itemStack.getCount() != 1) {
             return true;
         }
-        ItemContainerContents component = shulkerBox.get(DataComponents.CONTAINER);
+        ItemContainerContents component = itemStack.get(DataComponents.CONTAINER);
         if (component == null || component == ItemContainerContents.EMPTY) {
             return true;
         }
@@ -209,7 +207,7 @@ public class InventoryUtils {
      * @return 潜影盒内的物品栏
      */
     public static ImmutableInventory getInventory(ItemStack shulkerBox) {
-        if (isEmptyShulkerBox(shulkerBox)) {
+        if (isNonOrEmptyContainer(shulkerBox)) {
             return ImmutableInventory.EMPTY;
         }
         ItemContainerContents component = shulkerBox.get(DataComponents.CONTAINER);
@@ -222,14 +220,17 @@ public class InventoryUtils {
     /**
      * 判断指定物品是否为潜影盒
      *
-     * @param shulkerBox 要判断是否为潜影盒的物品
+     * @param itemStack 要判断是否为潜影盒的物品
      * @return 指定物品是否是潜影盒
      */
-    public static boolean isShulkerBoxItem(ItemStack shulkerBox) {
-        if (shulkerBox.is(Items.SHULKER_BOX)) {
+    public static boolean isShulkerBoxItem(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        if (itemStack.is(Items.SHULKER_BOX)) {
             return true;
         }
-        if (shulkerBox.getItem() instanceof BlockItem blockItem) {
+        if (itemStack.getItem() instanceof BlockItem blockItem) {
             return blockItem.getBlock() instanceof ShulkerBoxBlock;
         }
         return false;
