@@ -12,12 +12,16 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.font.TextRenderable;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CommonColors;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
@@ -25,7 +29,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -272,10 +278,19 @@ public abstract class Waypoint implements WorldRenderComponent {
         poseStack.pushPose();
         // 缩小文字
         poseStack.scale(0.15F, 0.15F, 0.15F);
+        Component component = builder.build();
+        FormattedCharSequence sequence = FormattedCharSequence.forward(component.getString(), component.getStyle());
         // 渲染文字
-        textRenderer.drawInBatch(builder.build(), x, y, CommonColors.WHITE, false,
-                poseStack.last().pose(), context.bufferSource(),
-                Font.DisplayMode.SEE_THROUGH, opacity, 1);
+        Font.PreparedText prepared = textRenderer.prepareText(sequence, x, y, CommonColors.WHITE, false, false, opacity);
+        MultiBufferSource.BufferSource bufferSource = context.bufferSource();
+        Matrix4f pose = poseStack.last().pose();
+        prepared.visit(new Font.GlyphVisitor() {
+            @Override
+            public void acceptRenderable(@NonNull TextRenderable renderable) {
+                VertexConsumer buffer = bufferSource.getBuffer(renderable.renderType(Font.DisplayMode.SEE_THROUGH));
+                renderable.render(pose, buffer, 1, false);
+            }
+        });
         poseStack.popPose();
     }
 
