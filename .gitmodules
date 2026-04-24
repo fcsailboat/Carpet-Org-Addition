@@ -1,3 +1,6 @@
 [submodule "python"]
 	path = python
 	url = ./python
+[submodule "publisher"]
+	path = publisher
+	url = ./publisher
