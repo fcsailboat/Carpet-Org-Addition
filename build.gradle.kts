@@ -10,6 +10,8 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r")
+    @Suppress("all")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
 }
 
 kotlin {

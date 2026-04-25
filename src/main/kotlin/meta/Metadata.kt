@@ -8,14 +8,10 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class Metadata {
-    private val file: File
-    private val version: String
-    private val mcVersion: String
-    private val id: String
-
-    companion object {
-        private val GSON: Gson = GsonBuilder().create()
-    }
+    val file: File
+    val version: String
+    val mcVersion: String
+    val id: String
 
     constructor(file: File) {
         this.file = file
@@ -33,4 +29,31 @@ class Metadata {
     fun getFileName(): String {
         return this.file.name
     }
+
+    fun getVersionType(): VersionType {
+        if (this.mcVersion.contains("snapshot")) {
+            return VersionType.SNAPSHOT
+        }
+        if (this.mcVersion.contains("pre")) {
+            return VersionType.PRE_RELEASE
+        }
+        if (this.mcVersion.contains("rc")) {
+            return VersionType.RELEASE_CANDIDATE
+        }
+        if (this.mcVersion.matches(Regex("(\\d+\\.\\d+)|(\\d+\\.\\d+\\.\\d+)"))) {
+            return VersionType.OFFICIAL
+        }
+        throw IllegalStateException("Unknown version type")
+    }
+
+    companion object {
+        private val GSON: Gson = GsonBuilder().create()
+    }
+}
+
+enum class VersionType {
+    OFFICIAL,
+    SNAPSHOT,
+    PRE_RELEASE,
+    RELEASE_CANDIDATE
 }

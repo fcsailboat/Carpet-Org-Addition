@@ -1,4 +1,4 @@
 config/
 dist/
 out/
-build/
+/build/
