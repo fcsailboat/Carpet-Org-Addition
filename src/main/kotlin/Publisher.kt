@@ -11,7 +11,9 @@ class Publisher {
 fun main() {
     Publisher.LOGGER.info("Root: ${GlobalConfigs.getRoot().absoluteFile}")
     check()
-    for (version in GlobalConfigs.getVersions()) {
+    val versions: List<String> = GlobalConfigs.getVersions()
+    for (version in versions) {
+        Publisher.LOGGER.info(version)
         val builder = JarBuilder(version)
         builder.run()
     }

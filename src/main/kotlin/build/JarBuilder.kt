@@ -2,17 +2,21 @@ package build
 
 import GlobalConfigs
 import Publisher
+import meta.VersionFormats
 import org.eclipse.jgit.api.Git
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
 
 class JarBuilder {
     private val branch: String
+    private val format: VersionFormats
 
     constructor(branch: String) {
         this.branch = branch
+        this.format = VersionFormats.parse(branch)
     }
 
     fun run() {
@@ -24,8 +28,12 @@ class JarBuilder {
     private fun moveFile() {
         val files = GlobalConfigs.getBuildOutput().listFiles() ?: throw IllegalArgumentException()
         val file = files.asList().stream()
-            .filter { it.name.contains("mc${this.branch}") }
-            .sorted()
+            .filter { this.format.test(it, this.branch) }
+            .sorted(Comparator.comparingLong {
+                val path = it.toPath()
+                val attributes = Files.readAttributes(path, BasicFileAttributes::class.java)
+                return@comparingLong attributes.creationTime().toMillis()
+            })
             .toList()
             .last()
         val from = file.toPath()
@@ -61,7 +69,7 @@ class JarBuilder {
     }
 
     private fun tryBuild() {
-        val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "jar")
+        val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "build")
         processBuilder.directory(GlobalConfigs.getRoot()).inheritIO()
         Publisher.LOGGER.info("Working directory: ${GlobalConfigs.getRoot()}")
         val process = processBuilder.start()

@@ -12,6 +12,7 @@ class Metadata {
     val version: String
     val mcVersion: String
     val id: String
+    val versionFormats: VersionFormats
 
     constructor(file: File) {
         this.file = file
@@ -24,36 +25,14 @@ class Metadata {
             this.id = json.get("id").asString
             this.mcVersion = json.getAsJsonObject("depends").get("minecraft").asString
         }
+        this.versionFormats = VersionFormats.parse(this.mcVersion)
     }
 
     fun getFileName(): String {
         return this.file.name
     }
 
-    fun getVersionType(): VersionType {
-        if (this.mcVersion.contains("snapshot")) {
-            return VersionType.SNAPSHOT
-        }
-        if (this.mcVersion.contains("pre")) {
-            return VersionType.PRE_RELEASE
-        }
-        if (this.mcVersion.contains("rc")) {
-            return VersionType.RELEASE_CANDIDATE
-        }
-        if (this.mcVersion.matches(Regex("(\\d+\\.\\d+)|(\\d+\\.\\d+\\.\\d+)"))) {
-            return VersionType.OFFICIAL
-        }
-        throw IllegalStateException("Unknown version type")
-    }
-
     companion object {
         private val GSON: Gson = GsonBuilder().create()
     }
-}
-
-enum class VersionType {
-    OFFICIAL,
-    SNAPSHOT,
-    PRE_RELEASE,
-    RELEASE_CANDIDATE
 }
