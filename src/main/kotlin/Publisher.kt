@@ -1,6 +1,6 @@
-import build.JarBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import publish.JarUploader
 
 class Publisher {
     companion object {
@@ -10,23 +10,6 @@ class Publisher {
 
 fun main() {
     Publisher.LOGGER.info("Root: ${GlobalConfigs.getRoot().absoluteFile}")
-    check()
-    val versions: List<String> = GlobalConfigs.getVersions()
-    for (version in versions) {
-        Publisher.LOGGER.info(version)
-        val builder = JarBuilder(version)
-        builder.run()
-    }
-}
-
-private fun check() {
-    val file = GlobalConfigs.getStaging()
-    if (!file.isDirectory()) {
-        file.mkdirs()
-    }
-    val files = file.listFiles()
-    if (files?.isEmpty() ?: false) {
-        return
-    }
-    throw IllegalStateException("'$file' directory is not empty")
+//    JarBuilder.start()
+    JarUploader.start(GlobalConfigs.getStaging().listFiles()?.toList() ?: listOf())
 }

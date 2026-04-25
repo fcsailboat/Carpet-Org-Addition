@@ -6,7 +6,7 @@ import java.io.File
 
 class GlobalConfigs {
     companion object {
-        val GSON: Gson = GsonBuilder().create()
+        private val GSON: Gson = GsonBuilder().create()
 
         fun getToken(): String {
             return getJsonObject().get("token").asString
@@ -22,11 +22,15 @@ class GlobalConfigs {
         }
 
         fun getBuildOutput(): File {
-            return File(this.getRoot(), "build/libs")
+            return File(this.getRoot(), "publish/libs")
         }
 
         fun getStaging(): File {
             return File(this.getPublisher(), "dist/staging")
+        }
+
+        fun getArchive(): File {
+            return File(this.getPublisher(), "dist/archive")
         }
 
         fun getPublisher(): File {

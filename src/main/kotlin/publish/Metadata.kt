@@ -1,4 +1,4 @@
-package meta
+package publish
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -12,7 +12,7 @@ class Metadata {
     val version: String
     val mcVersion: String
     val id: String
-    val versionFormats: VersionFormats
+    val subtitle: String
 
     constructor(file: File) {
         this.file = file
@@ -25,11 +25,7 @@ class Metadata {
             this.id = json.get("id").asString
             this.mcVersion = json.getAsJsonObject("depends").get("minecraft").asString
         }
-        this.versionFormats = VersionFormats.parse(this.mcVersion)
-    }
-
-    fun getFileName(): String {
-        return this.file.name
+        this.subtitle = "${this.id}-mc${this.mcVersion}-${this.version}"
     }
 
     companion object {

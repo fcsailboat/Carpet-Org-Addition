@@ -19,7 +19,7 @@ enum class VersionFormats {
                 return true
             }
             if (name.matches(Regex("carpet-org-addition-mc${version}-rc\\d+-v.*-\\d+\\.jar"))) {
-                return true;
+                return true
             }
         } else if (this == NEW_VERSION) {
             if (name.matches(Regex("carpet-org-addition-mc${version}\\.x-v.*-\\d+\\.jar"))) {
@@ -40,7 +40,7 @@ enum class VersionFormats {
 
     companion object {
         fun parse(version: String): VersionFormats {
-            if (version.matches(Regex("(\\d+\\.\\d+)")) || version.matches(Regex("(\\d+\\.\\d+\\.\\d+)"))) {
+            if (version.matches(Regex("\\d+\\.\\d+")) || version.matches(Regex("\\d+\\.\\d+\\.\\d+"))) {
                 return if (version.startsWith("1.")) OLD_VERSION else NEW_VERSION
             }
             throw IllegalArgumentException("Unknown version number: $version")

@@ -1,4 +1,4 @@
-package build
+package publish
 
 import GlobalConfigs
 import Publisher
@@ -19,7 +19,7 @@ class JarBuilder {
         this.format = VersionFormats.parse(branch)
     }
 
-    fun run() {
+    private fun run() {
         this.switch()
         this.build()
         this.moveFile()
@@ -69,7 +69,7 @@ class JarBuilder {
     }
 
     private fun tryBuild() {
-        val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "build")
+        val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "publish")
         processBuilder.directory(GlobalConfigs.getRoot()).inheritIO()
         Publisher.LOGGER.info("Working directory: ${GlobalConfigs.getRoot()}")
         val process = processBuilder.start()
@@ -89,5 +89,28 @@ class JarBuilder {
 
     companion object {
         val GIT: Git = Git.open(GlobalConfigs.getRoot())
+
+        fun start() {
+            check()
+            val versions: List<String> = GlobalConfigs.getVersions()
+            for (version in versions) {
+                Publisher.LOGGER.info(version)
+                val builder = JarBuilder(version)
+                builder.run()
+            }
+        }
+
+        private fun check() {
+            val file = GlobalConfigs.getStaging()
+            if (!file.isDirectory()) {
+                file.mkdirs()
+            }
+            val files = file.listFiles()
+            if (files?.isEmpty() ?: false) {
+                return
+            }
+            throw IllegalStateException("'$file' directory is not empty")
+        }
+
     }
 }
