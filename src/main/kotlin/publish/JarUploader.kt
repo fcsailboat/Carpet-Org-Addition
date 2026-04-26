@@ -14,8 +14,8 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.util.*
-
 
 class JarUploader {
     private val file: File
@@ -26,7 +26,10 @@ class JarUploader {
         this.metadata = Metadata(file)
     }
 
-    fun upload(): Int {
+    private fun upload(): Int {
+        if (this.metadata.gameVersions.isEmpty()) {
+            throw ModPublishException("${this.metadata.subtitle} is not applicable to any Minecraft version")
+        }
         return this.request()
     }
 
@@ -36,7 +39,7 @@ class JarUploader {
         body["version_number"] = this.metadata.version
         body["version_type"] = "release"
         body["dependencies"] = this.depend()
-        body["game_versions"] = this.metadata.mcVersion
+        body["game_versions"] = this.metadata.gameVersions
         body["loaders"] = Collections.singletonList("fabric")
         body["project_id"] = PROJECT
         body["file_parts"] = Collections.singletonList(this.file.name)
@@ -46,7 +49,7 @@ class JarUploader {
         val httpClient = HttpClients.createDefault()
         httpClient.use { httpClient ->
             val post = HttpPost(URL)
-            post.setHeader("Authorization", GlobalConfigs.getToken());
+            post.setHeader("Authorization", GlobalConfigs.getToken())
             post.setHeader("User-Agent", "https://github.com/fcsailboat/Carpet-Org-Addition")
             val builder = MultipartEntityBuilder.create()
             builder.addBinaryBody(
@@ -65,16 +68,12 @@ class JarUploader {
             post.entity = entity
             return httpClient.execute(post) {
                 val entity = it.entity
-                if (entity != null) {
-                    Publisher.LOGGER.error("${EntityUtils.toString(entity)}")
+                if (it.code != EFFECTIVE_RESPONSE && entity != null) {
+                    Publisher.LOGGER.error(EntityUtils.toString(entity))
                 }
                 return@execute it.code
             }
         }
-    }
-
-    private fun allDependGameVersions() {
-
     }
 
     private fun depend(): List<Map<String, Any>> {
@@ -88,13 +87,19 @@ class JarUploader {
         private const val CARPET = "TQTTVgYE"
         private const val FABRIC_API = "P7dR8mSH"
         private const val PROJECT = "L0bOPIqR"
-        private const val URL = "https://staging-api.modrinth.com/v2/version"
+        private const val URL = "https://api.modrinth.com/v2/version"
+        private const val EFFECTIVE_RESPONSE = 200
         private val GSON: Gson = Gson()
-        private val versions: List<String> = this.listMinecraftVersions()
+        val versions: List<String> = this.listMinecraftVersions()
 
         fun start(files: List<File>) {
             Publisher.LOGGER.info("Check the files to be published: ")
-            files.stream().map { Metadata(it) }.map { it.subtitle }.forEach { Publisher.LOGGER.info(it) }
+            Publisher.LOGGER.info("-".repeat(70))
+            files.stream()
+                .map { Metadata(it) }
+                .map { "${it.subtitle} ${it.gameVersions}" }
+                .forEach { Publisher.LOGGER.info(it) }
+            Publisher.LOGGER.info("-".repeat(70))
             Publisher.LOGGER.info("Confirm to publish these ${files.size} mod(s) to Modrinth? Y/N")
             val input: String = readln()
             if (input == "y" || input == "Y") {
@@ -102,8 +107,9 @@ class JarUploader {
                     Publisher.LOGGER.info("[${index}/${files.size}] Publishing ${file.name} to Modrinth...")
                     val uploader = JarUploader(file)
                     val code = uploader.upload()
-                    if (code == 200) {
+                    if (code == EFFECTIVE_RESPONSE) {
                         Publisher.LOGGER.info("Published, status code: $code")
+                        Files.move(file.toPath(), File(GlobalConfigs.getArchive(), file.name).toPath())
                     } else {
                         Publisher.LOGGER.error("Publish failed, status code: $code")
                         throw IllegalStateException("${file.name} failed to publish to Modrinth, status code: $code")
