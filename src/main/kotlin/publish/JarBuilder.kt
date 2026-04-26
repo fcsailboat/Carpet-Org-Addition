@@ -13,16 +13,20 @@ import kotlin.io.path.absolutePathString
 class JarBuilder {
     private val branch: String
     private val format: VersionFormats
+    private val logger: (String) -> Unit
 
-    constructor(branch: String) {
+    constructor(branch: String, logger: (String) -> Unit) {
         this.branch = branch
         this.format = VersionFormats.parse(branch)
+        this.logger = logger
     }
 
     fun run() {
+        this.logger("开始")
         this.switch()
         this.build()
         this.moveFile()
+        this.logger("完成")
     }
 
     private fun moveFile() {
@@ -38,6 +42,7 @@ class JarBuilder {
             .last()
         val from = file.toPath()
         val to = File(GlobalConfigs.getStaging(), file.name).toPath()
+        this.logger("正在移动文件：${file.name}")
         Files.copy(from, to)
         Publisher.LOGGER.info("File ${from.absolutePathString()} has been moved to ${to.absolutePathString()}")
     }
@@ -46,16 +51,19 @@ class JarBuilder {
      * 切换至当前分支
      */
     private fun switch() {
+        this.logger("切换到${this.branch}分支")
         GIT.checkout().setName(this.branch).call()
     }
 
     private fun build() {
+        this.logger("开始构建：${this.branch}")
         var i = 0
         while (true) {
             if (i >= 3) {
                 throw IllegalStateException("Attempted an unreasonable number of times")
             }
             i++
+            this.logger("正在进行第${i}次尝试")
             Publisher.LOGGER.info("[${this.branch}] The $i attempt is currently underway")
             try {
                 this.tryBuild()
@@ -78,8 +86,10 @@ class JarBuilder {
         if (finished) {
             val code = process.exitValue()
             if (code == 0) {
+                this.logger("构建成功！")
                 return
             } else {
+                this.logger("构建失败，退出码：$code")
                 throw IllegalStateException("[${this.branch}] Build jar failed, exit code: $code")
             }
         }
@@ -95,7 +105,7 @@ class JarBuilder {
             val versions: List<String> = GlobalConfigs.getVersions()
             for (version in versions) {
                 Publisher.LOGGER.info(version)
-                val builder = JarBuilder(version)
+                val builder = JarBuilder(version) {}
                 builder.run()
             }
         }
