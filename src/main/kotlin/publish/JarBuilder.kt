@@ -19,7 +19,7 @@ class JarBuilder {
         this.format = VersionFormats.parse(branch)
     }
 
-    private fun run() {
+    fun run() {
         this.switch()
         this.build()
         this.moveFile()
@@ -69,7 +69,7 @@ class JarBuilder {
     }
 
     private fun tryBuild() {
-        val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "publish")
+        val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "build")
         processBuilder.directory(GlobalConfigs.getRoot()).inheritIO()
         Publisher.LOGGER.info("Working directory: ${GlobalConfigs.getRoot()}")
         val process = processBuilder.start()

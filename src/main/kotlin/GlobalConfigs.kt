@@ -22,7 +22,7 @@ class GlobalConfigs {
         }
 
         fun getBuildOutput(): File {
-            return File(this.getRoot(), "publish/libs")
+            return File(this.getRoot(), "build/libs")
         }
 
         fun getStaging(): File {

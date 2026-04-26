@@ -4,9 +4,13 @@ import java.io.File
 
 enum class VersionFormats {
     OLD_VERSION,
-    NEW_VERSION;
+    NEW_VERSION,
+    INVALID;
 
     fun test(file: File, version: String): Boolean {
+        if (this == INVALID) {
+            return false
+        }
         val name = file.name
         if (this == OLD_VERSION) {
             if (name.matches(Regex("carpet-org-addition-mc${version}-v.*-\\d+\\.jar"))) {
@@ -43,7 +47,7 @@ enum class VersionFormats {
             if (version.matches(Regex("\\d+\\.\\d+")) || version.matches(Regex("\\d+\\.\\d+\\.\\d+"))) {
                 return if (version.startsWith("1.")) OLD_VERSION else NEW_VERSION
             }
-            throw IllegalArgumentException("Unknown version number: $version")
+            return INVALID
         }
     }
 }
