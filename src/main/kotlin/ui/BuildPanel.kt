@@ -4,13 +4,16 @@ import GlobalConfigs
 import Publisher
 import publish.JarBuilder
 import util.listVersion
-import java.awt.*
+import util.versionCompare
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Dimension
+import java.awt.Insets
 import java.nio.file.Path
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
-import javax.swing.border.EtchedBorder
 
 class BuildPanel : JPanel {
     private val folderPathField: JTextField = JTextField()
@@ -21,8 +24,8 @@ class BuildPanel : JPanel {
     private val button = JButton()
     private val logs: ArrayList<String> = ArrayList()
     private val rightTextArea = JTextArea()
-
-    private var buttonState: AtomicReference<ButtonState> = AtomicReference(ButtonState.READY)
+    private val currentVersion = JLabel()
+    private val buttonState: AtomicReference<ButtonState> = AtomicReference(ButtonState.READY)
 
     constructor() {
         this.layout = BorderLayout()
@@ -40,19 +43,45 @@ class BuildPanel : JPanel {
         leftPanel.add(this.createStartButton())
         leftPanel.add(Box.createVerticalGlue())
         leftPanel.add(this.initProgressBar())
-        val rightPanel = JPanel(GridLayout(1, 0))
-        val scroll = JScrollPane()
-        scroll.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
-        scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-        scroll.verticalScrollBar.unitIncrement = 16
-        this.rightTextArea.border = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
-        scroll.setViewportView(this.rightTextArea)
-        rightPanel.add(scroll)
+        val rightPanel = JPanel(BorderLayout())
+        rightPanel.add(this.createScrollTextArea(), BorderLayout.CENTER)
+        rightPanel.add(this.initCurrentVersion(), BorderLayout.SOUTH)
         val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel)
         splitPane.resizeWeight = 0.3
         splitPane.isContinuousLayout = true
         splitPane.border = BorderFactory.createLineBorder(Color.GRAY)
         this.add(splitPane, BorderLayout.CENTER)
+    }
+
+    private fun initCurrentVersion(): JLabel {
+        this.currentVersion.horizontalAlignment = SwingConstants.LEFT
+        this.setCurrentVersion("无")
+        return this.currentVersion
+    }
+
+    private fun setCurrentVersion(version: String) {
+        val text = "当前版本：$version"
+        this.invokeLaterIfAsync {
+            this.currentVersion.text = text
+        }
+    }
+
+    private fun invokeLaterIfAsync(run: () -> Unit) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            run()
+        } else {
+            SwingUtilities.invokeLater { run() }
+        }
+    }
+
+    private fun createScrollTextArea(): JScrollPane {
+        val scroll = JScrollPane()
+        scroll.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        scroll.verticalScrollBar.unitIncrement = 16
+        this.rightTextArea.border = BorderFactory.createTitledBorder("日志")
+        scroll.setViewportView(this.rightTextArea)
+        return scroll
     }
 
     private fun initProgressBar(): JPanel {
@@ -68,10 +97,10 @@ class BuildPanel : JPanel {
 
     private fun setProgress(value: Int, size: Int) {
         val text = DecimalFormat("#.##").format(100 * (value / size.toDouble()))
-        SwingUtilities.invokeLater {
-            progressBar.maximum = size
-            progressBar.value = value
-            progressBar.string = if (value == size && value == 0) "0%" else "$text% [$value/$size]"
+        this.invokeLaterIfAsync {
+            this.progressBar.maximum = size
+            this.progressBar.value = value
+            this.progressBar.string = if (size == 0) "0%" else "$text% [$value/$size]"
         }
     }
 
@@ -140,27 +169,43 @@ class BuildPanel : JPanel {
         this.button.alignmentX = 0.5F
         this.button.addActionListener {
             if (this.buttonState.get() == ButtonState.READY) {
+                val list = this.versions.entries.stream()
+                    .filter { it.value.isSelected }
+                    .map { it.key }
+                    .sorted { s1, s2 -> -versionCompare(s1, s2) }
+                    .toList()
+                if (list.isEmpty()) {
+                    this.log("未选择任何版本！")
+                    return@addActionListener
+                }
+                this.setButtonState(ButtonState.RUNNING)
                 Publisher.EXECUTOR.execute {
                     try {
-                        this.setButtonState(ButtonState.RUNNING)
-                        val list = this.versions.entries.stream()
-                            .filter { it.value.isSelected }
-                            .map { it.key }
-                            .toList()
                         for ((index, version) in list.withIndex()) {
                             if (this.buttonState.get() == ButtonState.WAIT_TO_STOP) {
                                 return@execute
                             }
+                            this.setCurrentVersion(version)
                             val builder = JarBuilder(version) {
                                 this.log(it)
                             }
                             this.log("-".repeat(80))
-                            builder.run()
+                            try {
+                                builder.run()
+                            } catch (e: Exception) {
+                                this.log("\n构建失败！")
+                                Publisher.LOGGER.error("Build failed: ", e)
+                                return@execute
+                            }
                             this.log("-".repeat(80))
                             this.setProgress(index + 1, list.size)
                         }
                     } finally {
                         this.setButtonState(ButtonState.READY)
+                        this.setCurrentVersion("无")
+                        this.invokeLaterIfAsync {
+                            this.logs.clear()
+                        }
                     }
                 }
             } else {
@@ -171,15 +216,19 @@ class BuildPanel : JPanel {
     }
 
     private fun log(message: String) {
-        this.logs.add(message)
-        val joiner = StringJoiner("\n")
-        this.logs.forEach { joiner.add(it) }
-        this.rightTextArea.text = joiner.toString()
+        this.invokeLaterIfAsync {
+            this.logs.add(message)
+            val joiner = StringJoiner("\n")
+            this.logs.forEach { joiner.add(it) }
+            this.rightTextArea.text = joiner.toString()
+        }
     }
 
     private fun setButtonState(state: ButtonState) {
         this.buttonState.set(state)
-        this.button.isEnabled = state != ButtonState.WAIT_TO_STOP
+        this.invokeLaterIfAsync {
+            this.button.isEnabled = state != ButtonState.WAIT_TO_STOP
+        }
         when (state) {
             ButtonState.READY -> {
                 this.button.text = "开始"

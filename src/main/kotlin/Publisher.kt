@@ -1,3 +1,4 @@
+import com.formdev.flatlaf.FlatLightLaf
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ui.Screen
@@ -15,6 +16,7 @@ fun main() {
     Publisher.LOGGER.info("Root: ${GlobalConfigs.getRoot().absoluteFile}")
 //    JarBuilder.start()
 //    JarUploader.start(GlobalConfigs.getStaging().listFiles()?.toList() ?: listOf())
+    FlatLightLaf.setup()
     val screen = Screen()
     screen.display()
 }

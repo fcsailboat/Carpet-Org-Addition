@@ -4,9 +4,9 @@ import GlobalConfigs
 import Publisher
 import meta.VersionFormats
 import org.eclipse.jgit.api.Git
+import util.copyOrReplaceFile
+import util.moveOrReplaceFile
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.attribute.BasicFileAttributes
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
 
@@ -24,6 +24,7 @@ class JarBuilder {
     fun run() {
         this.logger("开始")
         this.switch()
+        this.archive()
         this.build()
         this.moveFile()
         this.logger("完成")
@@ -31,20 +32,34 @@ class JarBuilder {
 
     private fun moveFile() {
         val files = GlobalConfigs.getBuildOutput().listFiles() ?: throw IllegalArgumentException()
-        val file = files.asList().stream()
-            .filter { this.format.test(it, this.branch) }
-            .sorted(Comparator.comparingLong {
-                val path = it.toPath()
-                val attributes = Files.readAttributes(path, BasicFileAttributes::class.java)
-                return@comparingLong attributes.creationTime().toMillis()
-            })
+        val list = files.asList().stream()
+            .filter { it.isFile }
+            .filter { "sources" !in it.name }
+            .filter { it.name.endsWith(".jar") }
             .toList()
-            .last()
+        if (list.size != 1) {
+            throw IllegalStateException("The build product contains multiple files")
+        }
+        val file = list.last()
         val from = file.toPath()
         val to = File(GlobalConfigs.getStaging(), file.name).toPath()
         this.logger("正在移动文件：${file.name}")
-        Files.copy(from, to)
+        copyOrReplaceFile(from, to)
         Publisher.LOGGER.info("File ${from.absolutePathString()} has been moved to ${to.absolutePathString()}")
+    }
+
+    private fun archive() {
+        val output = GlobalConfigs.getBuildOutput()
+        val archive = File(output, "archive")
+        if (!archive.exists()) {
+            archive.mkdirs()
+        }
+        val files = output.listFiles()?.toList() ?: listOf()
+        for (file in files) {
+            if (file.isFile) {
+                moveOrReplaceFile(file.toPath(), archive.resolve(file.name).toPath())
+            }
+        }
     }
 
     /**
@@ -121,6 +136,5 @@ class JarBuilder {
             }
             throw IllegalStateException("'$file' directory is not empty")
         }
-
     }
 }

@@ -10,11 +10,11 @@ import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import util.moveOrReplaceFile
 import java.io.BufferedInputStream
 import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 import java.util.*
 
 class JarUploader {
@@ -109,7 +109,7 @@ class JarUploader {
                     val code = uploader.upload()
                     if (code == EFFECTIVE_RESPONSE) {
                         Publisher.LOGGER.info("Published, status code: $code")
-                        Files.move(file.toPath(), File(GlobalConfigs.getArchive(), file.name).toPath())
+                        moveOrReplaceFile(file.toPath(), File(GlobalConfigs.getArchive(), file.name).toPath())
                     } else {
                         Publisher.LOGGER.error("Publish failed, status code: $code")
                         throw IllegalStateException("${file.name} failed to publish to Modrinth, status code: $code")
