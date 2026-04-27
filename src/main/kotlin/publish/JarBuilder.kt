@@ -114,27 +114,5 @@ class JarBuilder {
 
     companion object {
         val GIT: Git = Git.open(GlobalConfigs.getRoot())
-
-        fun start() {
-            check()
-            val versions: List<String> = GlobalConfigs.getVersions()
-            for (version in versions) {
-                Publisher.LOGGER.info(version)
-                val builder = JarBuilder(version) {}
-                builder.run()
-            }
-        }
-
-        private fun check() {
-            val file = GlobalConfigs.getStaging()
-            if (!file.isDirectory()) {
-                file.mkdirs()
-            }
-            val files = file.listFiles()
-            if (files?.isEmpty() ?: false) {
-                return
-            }
-            throw IllegalStateException("'$file' directory is not empty")
-        }
     }
 }
