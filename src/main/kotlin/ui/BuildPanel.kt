@@ -9,6 +9,7 @@ import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Insets
+import java.awt.event.*
 import java.nio.file.Path
 import java.text.DecimalFormat
 import java.util.*
@@ -26,9 +27,11 @@ class BuildPanel : JPanel {
     private val rightTextArea = JTextArea()
     private val currentVersion = JLabel()
     private val buttonState: AtomicReference<ButtonState> = AtomicReference(ButtonState.READY)
+    private val registryPanelsToHighlight: (JComponent) -> Unit
 
-    constructor() {
+    constructor(registry: (JComponent) -> Unit) {
         this.layout = BorderLayout()
+        this.registryPanelsToHighlight = registry
         this.init()
     }
 
@@ -80,7 +83,9 @@ class BuildPanel : JPanel {
         scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         scroll.verticalScrollBar.unitIncrement = 16
         this.rightTextArea.border = BorderFactory.createTitledBorder("日志")
+        this.rightTextArea.isEditable = false
         scroll.setViewportView(this.rightTextArea)
+        this.registryPanelsToHighlight(scroll)
         return scroll
     }
 
@@ -92,6 +97,9 @@ class BuildPanel : JPanel {
         this.progressBar.isStringPainted = true
         this.setProgress(0, 0)
         panel.add(this.progressBar, BorderLayout.CENTER)
+        panel.isFocusable = true
+        this.registryPanelsToHighlight(panel)
+        panel.addMouseListener(this.clickToFocusInWindow(panel))
         return panel
     }
 
@@ -127,10 +135,11 @@ class BuildPanel : JPanel {
         folderPanel.add(this.folderPathField)
         folderPanel.add(Box.createHorizontalStrut(5))
         folderPanel.add(browseButton)
+        this.registryPanelsToHighlight(this.folderPathField)
         return folderPanel
     }
 
-    private fun createVersionCheckBox(): JScrollPane {
+    private fun createVersionCheckBox(): JPanel {
         val panel = this.versionPanel
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
         this.refreshVersions()
@@ -139,7 +148,44 @@ class BuildPanel : JPanel {
         scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         scroll.verticalScrollBar.unitIncrement = 16
         scroll.border = BorderFactory.createTitledBorder("选择版本")
-        return scroll
+        val wrapper = JPanel()
+        wrapper.layout = BoxLayout(wrapper, BoxLayout.Y_AXIS)
+        wrapper.add(scroll)
+        wrapper.isFocusable = true
+        this.registryPanelsToHighlight(wrapper)
+        val inputMap = wrapper.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK), "select_all")
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "deselect_all")
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK), "invert_selection")
+        wrapper.actionMap.put("select_all", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent) {
+                for (box in versions.values) {
+                    box.isSelected = true
+                }
+            }
+        })
+        wrapper.actionMap.put("deselect_all", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent) {
+                for (box in versions.values) {
+                    box.isSelected = false
+                }
+            }
+        })
+        wrapper.actionMap.put("invert_selection", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent) {
+                for (box in versions.values) {
+                    box.isSelected = !box.isSelected
+                }
+            }
+        })
+        scroll.addMouseListener(this.clickToFocusInWindow(panel))
+        return wrapper
+    }
+
+    private fun clickToFocusInWindow(panel: JPanel): MouseAdapter = object : MouseAdapter() {
+        override fun mousePressed(e: MouseEvent) {
+            panel.requestFocusInWindow()
+        }
     }
 
     private fun refreshVersions() {
@@ -169,6 +215,9 @@ class BuildPanel : JPanel {
         this.button.alignmentX = 0.5F
         this.button.addActionListener {
             if (this.buttonState.get() == ButtonState.READY) {
+                if ((GlobalConfigs.getStaging().listFiles()?.size ?: 0) > 0) {
+
+                }
                 val list = this.versions.entries.stream()
                     .filter { it.value.isSelected }
                     .map { it.key }
@@ -180,32 +229,8 @@ class BuildPanel : JPanel {
                 }
                 this.setButtonState(ButtonState.RUNNING)
                 Publisher.EXECUTOR.execute {
-                    try {
-                        for ((index, version) in list.withIndex()) {
-                            if (this.buttonState.get() == ButtonState.WAIT_TO_STOP) {
-                                return@execute
-                            }
-                            this.setCurrentVersion(version)
-                            val builder = JarBuilder(version) {
-                                this.log(it)
-                            }
-                            this.log("-".repeat(80))
-                            try {
-                                builder.run()
-                            } catch (e: Exception) {
-                                this.log("\n构建失败！")
-                                Publisher.LOGGER.error("Build failed: ", e)
-                                return@execute
-                            }
-                            this.log("-".repeat(80))
-                            this.setProgress(index + 1, list.size)
-                        }
-                    } finally {
-                        this.setButtonState(ButtonState.READY)
-                        this.setCurrentVersion("无")
-                        this.invokeLaterIfAsync {
-                            this.logs.clear()
-                        }
+                    if (start(list)) {
+                        return@execute
                     }
                 }
             } else {
@@ -213,6 +238,37 @@ class BuildPanel : JPanel {
             }
         }
         return this.button
+    }
+
+    private fun start(list: List<String>): Boolean {
+        try {
+            for ((index, version) in list.withIndex()) {
+                if (this.buttonState.get() == ButtonState.WAIT_TO_STOP) {
+                    return true
+                }
+                this.setCurrentVersion(version)
+                val builder = JarBuilder(version) {
+                    this.log(it)
+                }
+                this.log("-".repeat(80))
+                try {
+                    builder.run()
+                } catch (e: Exception) {
+                    this.log("\n构建失败！")
+                    Publisher.LOGGER.error("Build failed: ", e)
+                    return true
+                }
+                this.log("-".repeat(80))
+                this.setProgress(index + 1, list.size)
+            }
+        } finally {
+            this.setButtonState(ButtonState.READY)
+            this.setCurrentVersion("无")
+            this.invokeLaterIfAsync {
+                this.logs.clear()
+            }
+        }
+        return false
     }
 
     private fun log(message: String) {
