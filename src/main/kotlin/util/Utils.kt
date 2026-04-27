@@ -1,7 +1,9 @@
 package util
 
+import GlobalConfigs
 import meta.VersionFormats
 import org.eclipse.jgit.api.Git
+import java.io.File
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -72,11 +74,16 @@ fun copyOrReplaceFile(from: Path, to: Path) {
     }
 }
 
+fun archiveStagingFile(file: File) {
+    moveOrReplaceFile(file.toPath(), GlobalConfigs.getArchive().toPath().resolve(file.name))
+}
+
 private fun fileEquivalent(path1: Path, path2: Path): Boolean {
     if (Files.mismatch(path1, path2) == -1L) {
         return true
     }
     return try {
+        // 比较两个压缩包内的内容是否相同，字节不完全相同可能是因为压缩包内文件的属性不相同
         zipContentAsByteArrays(path1) == zipContentAsByteArrays(path2)
     } catch (_: Exception) {
         false

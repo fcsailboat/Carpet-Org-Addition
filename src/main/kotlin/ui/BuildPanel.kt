@@ -3,6 +3,7 @@ package ui
 import GlobalConfigs
 import Publisher
 import publish.JarBuilder
+import util.archiveStagingFile
 import util.listVersion
 import util.versionCompare
 import java.awt.BorderLayout
@@ -13,16 +14,18 @@ import java.awt.event.*
 import java.nio.file.Path
 import java.text.DecimalFormat
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
 
 class BuildPanel : JPanel {
+    private val fileBrowseButton = JButton("浏览...")
     private val folderPathField: JTextField = JTextField()
     private val progressBar: JProgressBar = JProgressBar()
-    private val versions: HashMap<String, JCheckBox> = HashMap()
+    private val versions: ConcurrentHashMap<String, JCheckBox> = ConcurrentHashMap()
     private val versionPanel: JPanel = JPanel()
     private val versionScrollPane: JScrollPane = JScrollPane(this.versionPanel)
-    private val button = JButton()
+    private val startBuildButton = JButton()
     private val logs: ArrayList<String> = ArrayList()
     private val rightTextArea = JTextArea()
     private val currentVersion = JLabel()
@@ -122,8 +125,7 @@ class BuildPanel : JPanel {
         this.folderPathField.preferredSize = Dimension(0, 0)
         this.folderPathField.maximumSize = Dimension(Integer.MAX_VALUE, 30)
         this.folderPathField.text = GlobalConfigs.getRoot().absolutePath
-        val browseButton = JButton("浏览...")
-        browseButton.addActionListener {
+        this.fileBrowseButton.addActionListener {
             val chooser = JFileChooser()
             chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
             chooser.selectedFile = GlobalConfigs.getRoot()
@@ -134,7 +136,7 @@ class BuildPanel : JPanel {
         }
         folderPanel.add(this.folderPathField)
         folderPanel.add(Box.createHorizontalStrut(5))
-        folderPanel.add(browseButton)
+        folderPanel.add(this.fileBrowseButton)
         this.registryPanelsToHighlight(this.folderPathField)
         return folderPanel
     }
@@ -155,7 +157,8 @@ class BuildPanel : JPanel {
         this.registryPanelsToHighlight(wrapper)
         val inputMap = wrapper.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK), "select_all")
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "deselect_all")
+        val ctrlAndShift = InputEvent.CTRL_DOWN_MASK or InputEvent.SHIFT_DOWN_MASK
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, ctrlAndShift), "deselect_all")
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK), "invert_selection")
         wrapper.actionMap.put("select_all", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
@@ -211,13 +214,10 @@ class BuildPanel : JPanel {
 
     private fun createStartButton(): JButton {
         this.setButtonState(ButtonState.READY)
-        this.button.maximumSize = Dimension(Int.MAX_VALUE, button.preferredSize.height)
-        this.button.alignmentX = 0.5F
-        this.button.addActionListener {
+        this.startBuildButton.maximumSize = Dimension(Int.MAX_VALUE, startBuildButton.preferredSize.height)
+        this.startBuildButton.alignmentX = 0.5F
+        this.startBuildButton.addActionListener {
             if (this.buttonState.get() == ButtonState.READY) {
-                if ((GlobalConfigs.getStaging().listFiles()?.size ?: 0) > 0) {
-
-                }
                 val list = this.versions.entries.stream()
                     .filter { it.value.isSelected }
                     .map { it.key }
@@ -225,6 +225,9 @@ class BuildPanel : JPanel {
                     .toList()
                 if (list.isEmpty()) {
                     this.log("未选择任何版本！")
+                    return@addActionListener
+                }
+                if (this.handleStaging()) {
                     return@addActionListener
                 }
                 this.setButtonState(ButtonState.RUNNING)
@@ -237,7 +240,37 @@ class BuildPanel : JPanel {
                 this.setButtonState(ButtonState.WAIT_TO_STOP)
             }
         }
-        return this.button
+        return this.startBuildButton
+    }
+
+    private fun handleStaging(): Boolean {
+        val stagingFiles = GlobalConfigs.getStaging().listFiles()
+        if (stagingFiles != null && !stagingFiles.isEmpty()) {
+            val options = arrayOf("取消", "忽略", "归档")
+            val choice = JOptionPane.showOptionDialog(
+                this@BuildPanel,
+                "暂存区存在${stagingFiles.size}个文件。",
+                "暂存区非空",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null,
+                options,
+                options[2]
+            )
+            when (choice) {
+                0 -> {
+                    return true
+                }
+
+                2 -> {
+                    stagingFiles.forEach {
+                        archiveStagingFile(it)
+                    }
+                }
+
+            }
+        }
+        return false
     }
 
     private fun start(list: List<String>): Boolean {
@@ -283,19 +316,20 @@ class BuildPanel : JPanel {
     private fun setButtonState(state: ButtonState) {
         this.buttonState.set(state)
         this.invokeLaterIfAsync {
-            this.button.isEnabled = state != ButtonState.WAIT_TO_STOP
+            this.startBuildButton.isEnabled = state != ButtonState.WAIT_TO_STOP
+            this.fileBrowseButton.isEnabled = state == ButtonState.READY
         }
         when (state) {
             ButtonState.READY -> {
-                this.button.text = "开始"
+                this.startBuildButton.text = "开始"
             }
 
             ButtonState.RUNNING -> {
-                this.button.text = "停止"
+                this.startBuildButton.text = "停止"
             }
 
             ButtonState.WAIT_TO_STOP -> {
-                this.button.text = "正在停止..."
+                this.startBuildButton.text = "正在停止..."
             }
         }
     }
