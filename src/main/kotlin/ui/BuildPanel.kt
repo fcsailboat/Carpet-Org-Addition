@@ -7,18 +7,16 @@ import util.archiveStagingFile
 import util.listVersion
 import util.versionCompare
 import java.awt.BorderLayout
-import java.awt.Color
 import java.awt.Dimension
 import java.awt.Insets
 import java.awt.event.*
 import java.nio.file.Path
 import java.text.DecimalFormat
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
 
-class BuildPanel : JPanel {
+class BuildPanel : SimplePanel {
     private val fileBrowseButton = JButton("浏览...")
     private val folderPathField: JTextField = JTextField()
     private val progressBar: JProgressBar = JProgressBar()
@@ -26,37 +24,22 @@ class BuildPanel : JPanel {
     private val versionPanel: JPanel = JPanel()
     private val versionScrollPane: JScrollPane = JScrollPane(this.versionPanel)
     private val startBuildButton = JButton()
-    private val logs: ArrayList<String> = ArrayList()
-    private val rightTextArea = JTextArea()
     private val currentVersion = JLabel()
     private val buttonState: AtomicReference<ButtonState> = AtomicReference(ButtonState.READY)
-    private val registryPanelsToHighlight: (JComponent) -> Unit
 
-    constructor(registry: (JComponent) -> Unit) {
-        this.layout = BorderLayout()
-        this.registryPanelsToHighlight = registry
+    constructor(registry: (JComponent) -> Unit) : super(registry) {
         this.init()
     }
 
     private fun init() {
-        val leftPanel = JPanel()
-        leftPanel.layout = BoxLayout(leftPanel, BoxLayout.Y_AXIS)
-        leftPanel.border = BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        leftPanel.add(this.createFileChooser())
-        leftPanel.add(Box.createVerticalStrut(10))
-        leftPanel.add(this.createVersionCheckBox())
-        leftPanel.add(Box.createVerticalStrut(10))
-        leftPanel.add(this.createStartButton())
-        leftPanel.add(Box.createVerticalGlue())
-        leftPanel.add(this.initProgressBar())
-        val rightPanel = JPanel(BorderLayout())
-        rightPanel.add(this.createScrollTextArea(), BorderLayout.CENTER)
-        rightPanel.add(this.initCurrentVersion(), BorderLayout.SOUTH)
-        val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel)
-        splitPane.resizeWeight = 0.3
-        splitPane.isContinuousLayout = true
-        splitPane.border = BorderFactory.createLineBorder(Color.GRAY)
-        this.add(splitPane, BorderLayout.CENTER)
+        this.leftPanel.add(this.createFileChooser())
+        this.leftPanel.add(Box.createVerticalStrut(10))
+        this.leftPanel.add(this.createVersionCheckBox())
+        this.leftPanel.add(Box.createVerticalStrut(10))
+        this.leftPanel.add(this.createStartButton())
+        this.leftPanel.add(Box.createVerticalGlue())
+        this.leftPanel.add(this.initProgressBar())
+        this.rightPanel.add(this.initCurrentVersion(), BorderLayout.SOUTH)
     }
 
     private fun initCurrentVersion(): JLabel {
@@ -70,26 +53,6 @@ class BuildPanel : JPanel {
         this.invokeLaterIfAsync {
             this.currentVersion.text = text
         }
-    }
-
-    private fun invokeLaterIfAsync(run: () -> Unit) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            run()
-        } else {
-            SwingUtilities.invokeLater { run() }
-        }
-    }
-
-    private fun createScrollTextArea(): JScrollPane {
-        val scroll = JScrollPane()
-        scroll.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
-        scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-        scroll.verticalScrollBar.unitIncrement = 16
-        this.rightTextArea.border = BorderFactory.createTitledBorder("日志")
-        this.rightTextArea.isEditable = false
-        scroll.setViewportView(this.rightTextArea)
-        this.registryPanelsToHighlight(scroll)
-        return scroll
     }
 
     private fun initProgressBar(): JPanel {
@@ -259,15 +222,20 @@ class BuildPanel : JPanel {
             )
             when (choice) {
                 0 -> {
+                    this.log("取消操作")
                     return true
+                }
+
+                1 -> {
+                    this.log("已忽略暂存区文件")
                 }
 
                 2 -> {
                     stagingFiles.forEach {
                         archiveStagingFile(it)
                     }
+                    this.log("已归档暂存区文件")
                 }
-
             }
         }
         return false
@@ -297,20 +265,9 @@ class BuildPanel : JPanel {
         } finally {
             this.setButtonState(ButtonState.READY)
             this.setCurrentVersion("无")
-            this.invokeLaterIfAsync {
-                this.logs.clear()
-            }
+            this.clearLog()
         }
         return false
-    }
-
-    private fun log(message: String) {
-        this.invokeLaterIfAsync {
-            this.logs.add(message)
-            val joiner = StringJoiner("\n")
-            this.logs.forEach { joiner.add(it) }
-            this.rightTextArea.text = joiner.toString()
-        }
     }
 
     private fun setButtonState(state: ButtonState) {

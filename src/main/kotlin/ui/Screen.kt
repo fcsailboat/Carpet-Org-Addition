@@ -1,6 +1,5 @@
 package ui
 
-import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Component
 import java.awt.KeyboardFocusManager
@@ -26,7 +25,7 @@ class Screen : JFrame {
         val registry: (JComponent) -> Unit = { this.panelsToHighlight.add(it) }
         val tabbedPane = JTabbedPane()
         val build = BuildPanel(registry)
-        val publish = JPanel(BorderLayout())
+        val publish = PublishPanel(registry)
         tabbedPane.addTab("构建", build)
         tabbedPane.addTab("发布", publish)
         this.add(tabbedPane)
@@ -39,7 +38,7 @@ class Screen : JFrame {
             val newFocusOwner = evt.newValue as? Component
             for (panel in this.panelsToHighlight) {
                 if (newFocusOwner != null && SwingUtilities.isDescendingFrom(newFocusOwner, panel)) {
-                    panel.border = BorderFactory.createLineBorder(Color(0, 0, 0), 1)
+                    panel.border = BorderFactory.createLineBorder(Color.BLACK, 1)
                 } else {
                     panel.border = originalBorders[panel]
                 }
