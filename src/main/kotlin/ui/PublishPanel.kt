@@ -4,7 +4,9 @@ import GlobalConfigs
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
+import java.awt.datatransfer.DataFlavor
 import java.io.File
+import java.util.*
 import javax.swing.*
 import javax.swing.filechooser.FileSystemView
 
@@ -36,8 +38,7 @@ class PublishPanel : SimplePanel {
         val panel = JPanel()
         val clear = JButton("清空")
         clear.addActionListener {
-            this.listModel.clear()
-            this.updateFileListVisibleRows()
+            this.clearFiles()
         }
         val selection = JButton("选择...")
         selection.addActionListener {
@@ -47,9 +48,8 @@ class PublishPanel : SimplePanel {
             chooser.isMultiSelectionEnabled = true
             if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
                 val files = chooser.selectedFiles.toList()
-                this.listModel.clear()
-                this.listModel.addAll(files)
-                this.updateFileListVisibleRows()
+                this.clearFiles()
+                this.addFiles(files)
             }
         }
         panel.add(clear)
@@ -60,8 +60,7 @@ class PublishPanel : SimplePanel {
 
     private fun createFileSelectionList(): JPanel {
         val files: Array<File> = GlobalConfigs.getStaging().listFiles() ?: arrayOf()
-        files.forEach { this.listModel.addElement(it) }
-        this.updateFileListVisibleRows()
+        this.addFiles(files.toList())
         this.selectFiles.cellRenderer = object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
                 list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean
@@ -78,16 +77,64 @@ class PublishPanel : SimplePanel {
                 return renderer
             }
         }
+        this.setupFileDrop()
         val scroll = JScrollPane(this.selectFiles)
         this.fileSelectionPanel.add(scroll, BorderLayout.CENTER)
         return this.fileSelectionPanel
     }
 
+    private fun setupFileDrop() {
+        this.selectFiles.transferHandler = object : TransferHandler() {
+            override fun canImport(support: TransferSupport): Boolean {
+                return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+            }
+
+            override fun importData(support: TransferSupport): Boolean {
+                if (this.canImport(support)) {
+                    val transferable = support.transferable
+                    val fileList = try {
+                        val data = transferable.getTransferData(DataFlavor.javaFileListFlavor)
+                        data as? List<*> ?: return false
+                    } catch (_: Exception) {
+                        return false
+                    }
+                    val files = fileList.filterIsInstance<File>()
+                        .filter { it.isFile }
+                        .filter { !listModel.contains(it) }
+                    if (files.isEmpty()) return false
+                    addFiles(files)
+                    return true
+                }
+                return false
+            }
+        }
+        this.selectFiles.dropMode = DropMode.USE_SELECTION
+        this.selectFiles.dragEnabled = false
+    }
+
     private fun updateFileListVisibleRows() {
+        this.selectFiles.visibleRowCount = Math.clamp(this.listModel.size.toLong() + 1, 6, 15)
+        this.fileSelectionPanel.revalidate()
+        this.fileSelectionPanel.repaint()
+    }
+
+    private fun addFiles(files: List<File>) {
+        val tree = TreeSet<File>()
+        tree.addAll(files)
         this.invokeLaterIfAsync {
-            this.selectFiles.visibleRowCount = Math.clamp(this.listModel.size.toLong(), 6, 15)
-            this.fileSelectionPanel.revalidate()
-            this.fileSelectionPanel.repaint()
+            for (i in 0 until this.listModel.size) {
+                tree.add(this.listModel[i])
+            }
+            this.listModel.clear()
+            this.listModel.addAll(tree)
+            this.updateFileListVisibleRows()
+        }
+    }
+
+    private fun clearFiles() {
+        this.invokeLaterIfAsync {
+            this.listModel.clear()
+            this.updateFileListVisibleRows()
         }
     }
 }
