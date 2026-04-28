@@ -122,6 +122,7 @@ class BuildPanel : SimplePanel {
             }
         })
         scroll.addMouseListener(this.clickToFocusInWindow(panel))
+        wrapper.maximumSize = Dimension(Int.MAX_VALUE, wrapper.preferredSize.height)
         return wrapper
     }
 

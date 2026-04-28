@@ -45,7 +45,7 @@ class PublishPanel : SimplePanel {
         panel.border = BorderFactory.createTitledBorder("选择文件")
         panel.add(this.createFileSelectionList(), BorderLayout.CENTER)
         panel.add(this.createFileSelectionButton(), BorderLayout.SOUTH)
-        panel.maximumSize = Dimension(Int.MAX_VALUE, 0)
+        panel.maximumSize = Dimension(Int.MAX_VALUE, panel.preferredSize.height)
         return panel
     }
 
