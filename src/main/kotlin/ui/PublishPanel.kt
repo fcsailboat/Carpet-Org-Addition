@@ -9,6 +9,7 @@ import java.io.File
 import java.util.*
 import javax.swing.*
 import javax.swing.filechooser.FileSystemView
+import kotlin.math.max
 
 class PublishPanel : SimplePanel {
     private val listModel = DefaultListModel<File>()
@@ -23,14 +24,28 @@ class PublishPanel : SimplePanel {
     private fun init() {
         this.leftPanel.preferredSize = Dimension(250, this.leftPanel.preferredSize.height)
         this.leftPanel.add(this.createFileSelection())
+        this.leftPanel.add(Box.createVerticalStrut(10))
+        this.leftPanel.add(this.createPublishButton())
         this.leftPanel.add(Box.createVerticalGlue())
+        this.leftPanel.add(this.initProgressBar())
+    }
+
+    private fun createPublishButton(): JPanel {
+        val panel = JPanel()
+        panel.layout = BorderLayout()
+        val button = JButton("发布")
+        panel.add(button, BorderLayout.CENTER)
+        panel.maximumSize = Dimension(Int.MAX_VALUE, button.preferredSize.height)
+        button.alignmentX = 0.5F
+        return panel
     }
 
     private fun createFileSelection(): JPanel {
         val panel = JPanel(BorderLayout())
         panel.border = BorderFactory.createTitledBorder("选择文件")
-        panel.add(this.createFileSelectionList(), BorderLayout.NORTH)
-        panel.add(this.createFileSelectionButton(), BorderLayout.CENTER)
+        panel.add(this.createFileSelectionList(), BorderLayout.CENTER)
+        panel.add(this.createFileSelectionButton(), BorderLayout.SOUTH)
+        panel.maximumSize = Dimension(Int.MAX_VALUE, 0)
         return panel
     }
 
@@ -79,7 +94,10 @@ class PublishPanel : SimplePanel {
         }
         this.setupFileDrop()
         val scroll = JScrollPane(this.selectFiles)
+        scroll.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         this.fileSelectionPanel.add(scroll, BorderLayout.CENTER)
+        this.registryPanelsToHighlight(this.fileSelectionPanel)
         return this.fileSelectionPanel
     }
 
@@ -113,7 +131,7 @@ class PublishPanel : SimplePanel {
     }
 
     private fun updateFileListVisibleRows() {
-        this.selectFiles.visibleRowCount = Math.clamp(this.listModel.size.toLong() + 1, 6, 15)
+        this.selectFiles.visibleRowCount = max(this.listModel.size + 1, 6)
         this.fileSelectionPanel.revalidate()
         this.fileSelectionPanel.repaint()
     }

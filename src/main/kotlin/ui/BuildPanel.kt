@@ -9,9 +9,10 @@ import util.versionCompare
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Insets
-import java.awt.event.*
+import java.awt.event.ActionEvent
+import java.awt.event.InputEvent
+import java.awt.event.KeyEvent
 import java.nio.file.Path
-import java.text.DecimalFormat
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
@@ -19,7 +20,6 @@ import javax.swing.*
 class BuildPanel : SimplePanel {
     private val fileBrowseButton = JButton("浏览...")
     private val folderPathField: JTextField = JTextField()
-    private val progressBar: JProgressBar = JProgressBar()
     private val versions: ConcurrentHashMap<String, JCheckBox> = ConcurrentHashMap()
     private val versionPanel: JPanel = JPanel()
     private val versionScrollPane: JScrollPane = JScrollPane(this.versionPanel)
@@ -52,29 +52,6 @@ class BuildPanel : SimplePanel {
         val text = "当前版本：$version"
         this.invokeLaterIfAsync {
             this.currentVersion.text = text
-        }
-    }
-
-    private fun initProgressBar(): JPanel {
-        val panel = JPanel(BorderLayout())
-        panel.maximumSize = Dimension(Int.MAX_VALUE, 40)
-        this.progressBar.minimum = 0
-        this.progressBar.border = BorderFactory.createTitledBorder("进度")
-        this.progressBar.isStringPainted = true
-        this.setProgress(0, 0)
-        panel.add(this.progressBar, BorderLayout.CENTER)
-        panel.isFocusable = true
-        this.registryPanelsToHighlight(panel)
-        panel.addMouseListener(this.clickToFocusInWindow(panel))
-        return panel
-    }
-
-    private fun setProgress(value: Int, size: Int) {
-        val text = DecimalFormat("#.##").format(100 * (value / size.toDouble()))
-        this.invokeLaterIfAsync {
-            this.progressBar.maximum = size
-            this.progressBar.value = value
-            this.progressBar.string = if (size == 0) "0%" else "$text% [$value/$size]"
         }
     }
 
@@ -148,12 +125,6 @@ class BuildPanel : SimplePanel {
         return wrapper
     }
 
-    private fun clickToFocusInWindow(panel: JPanel): MouseAdapter = object : MouseAdapter() {
-        override fun mousePressed(e: MouseEvent) {
-            panel.requestFocusInWindow()
-        }
-    }
-
     private fun refreshVersions() {
         val path = Path.of(folderPathField.text)
         val versions = listVersion(path)
@@ -177,7 +148,7 @@ class BuildPanel : SimplePanel {
 
     private fun createStartButton(): JButton {
         this.setButtonState(ButtonState.READY)
-        this.startBuildButton.maximumSize = Dimension(Int.MAX_VALUE, startBuildButton.preferredSize.height)
+        this.startBuildButton.maximumSize = Dimension(Int.MAX_VALUE, this.startBuildButton.preferredSize.height)
         this.startBuildButton.alignmentX = 0.5F
         this.startBuildButton.addActionListener {
             if (this.buttonState.get() == ButtonState.READY) {

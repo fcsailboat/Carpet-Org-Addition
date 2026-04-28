@@ -2,6 +2,10 @@ package ui
 
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Dimension
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import java.text.DecimalFormat
 import java.util.*
 import javax.swing.*
 
@@ -11,6 +15,7 @@ open class SimplePanel : JPanel {
     protected val rightPanel = JPanel(BorderLayout())
     protected val rightTextArea = JTextArea()
     private val logs: ArrayList<String> = ArrayList()
+    private val progressBar: JProgressBar = JProgressBar()
 
     constructor(registry: (JComponent) -> Unit) {
         this.registryPanelsToHighlight = registry
@@ -65,6 +70,35 @@ open class SimplePanel : JPanel {
     protected fun clearLog() {
         this.invokeLaterIfAsync {
             this.logs.clear()
+        }
+    }
+
+    protected fun initProgressBar(): JPanel {
+        val panel = JPanel(BorderLayout())
+        panel.maximumSize = Dimension(Int.MAX_VALUE, 40)
+        this.progressBar.minimum = 0
+        this.progressBar.border = BorderFactory.createTitledBorder("进度")
+        this.progressBar.isStringPainted = true
+        this.setProgress(0, 0)
+        panel.add(this.progressBar, BorderLayout.CENTER)
+        panel.isFocusable = true
+        this.registryPanelsToHighlight(panel)
+        panel.addMouseListener(this.clickToFocusInWindow(panel))
+        return panel
+    }
+
+    protected fun setProgress(value: Int, size: Int) {
+        val text = DecimalFormat("#.##").format(100 * (value / size.toDouble()))
+        this.invokeLaterIfAsync {
+            progressBar.maximum = size
+            progressBar.value = value
+            progressBar.string = if (size == 0) "0%" else "$text% [$value/$size]"
+        }
+    }
+
+    protected fun clickToFocusInWindow(panel: JPanel): MouseAdapter = object : MouseAdapter() {
+        override fun mousePressed(e: MouseEvent) {
+            panel.requestFocusInWindow()
         }
     }
 }
