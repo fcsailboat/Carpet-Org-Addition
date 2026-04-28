@@ -12,12 +12,14 @@ class PublishPanel : SimplePanel {
     private val listModel = DefaultListModel<File>()
     private val selectFiles = JList(this.listModel)
     private val fileIcons: MutableMap<File, Icon> = HashMap()
+    private val fileSelectionPanel = JPanel(BorderLayout())
 
     constructor(registry: (JComponent) -> Unit) : super(registry) {
         this.init()
     }
 
     private fun init() {
+        this.leftPanel.preferredSize = Dimension(250, this.leftPanel.preferredSize.height)
         this.leftPanel.add(this.createFileSelection())
         this.leftPanel.add(Box.createVerticalGlue())
     }
@@ -33,7 +35,23 @@ class PublishPanel : SimplePanel {
     private fun createFileSelectionButton(): JPanel {
         val panel = JPanel()
         val clear = JButton("清空")
+        clear.addActionListener {
+            this.listModel.clear()
+            this.updateFileListVisibleRows()
+        }
         val selection = JButton("选择...")
+        selection.addActionListener {
+            val chooser = JFileChooser()
+            chooser.fileSelectionMode = JFileChooser.FILES_ONLY
+            chooser.currentDirectory = GlobalConfigs.getStaging()
+            chooser.isMultiSelectionEnabled = true
+            if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
+                val files = chooser.selectedFiles.toList()
+                this.listModel.clear()
+                this.listModel.addAll(files)
+                this.updateFileListVisibleRows()
+            }
+        }
         panel.add(clear)
         panel.add(Box.createHorizontalStrut(5))
         panel.add(selection)
@@ -41,10 +59,9 @@ class PublishPanel : SimplePanel {
     }
 
     private fun createFileSelectionList(): JPanel {
-        val panel = JPanel(BorderLayout())
         val files: Array<File> = GlobalConfigs.getStaging().listFiles() ?: arrayOf()
         files.forEach { this.listModel.addElement(it) }
-        this.selectFiles.visibleRowCount = Math.clamp(files.size.toLong(), 6, 15)
+        this.updateFileListVisibleRows()
         this.selectFiles.cellRenderer = object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
                 list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean
@@ -62,8 +79,15 @@ class PublishPanel : SimplePanel {
             }
         }
         val scroll = JScrollPane(this.selectFiles)
-        panel.add(scroll, BorderLayout.CENTER)
-        panel.preferredSize = Dimension(0, panel.preferredSize.height)
-        return panel
+        this.fileSelectionPanel.add(scroll, BorderLayout.CENTER)
+        return this.fileSelectionPanel
+    }
+
+    private fun updateFileListVisibleRows() {
+        this.invokeLaterIfAsync {
+            this.selectFiles.visibleRowCount = Math.clamp(this.listModel.size.toLong(), 6, 15)
+            this.fileSelectionPanel.revalidate()
+            this.fileSelectionPanel.repaint()
+        }
     }
 }
