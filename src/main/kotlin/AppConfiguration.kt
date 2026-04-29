@@ -47,9 +47,9 @@ class AppConfiguration {
                 val lines: List<String> = Files.readAllLines(file.toPath())
                 val builder = StringBuilder()
                 lines.forEach { builder.append(it) }
-                val json = GSON.fromJson(lines.toString(), JsonObject::class.java)
+                val json = GSON.fromJson(builder.toString(), JsonObject::class.java)
                 val timestamp = json.get("timestamp")?.asJsonPrimitive?.asLong ?: 0L
-                if (System.currentTimeMillis() - timestamp > (3600L * 1000)) {
+                if (System.currentTimeMillis() - timestamp < (3600L * 1000)) {
                     return json.get("versions").asJsonArray.toList().map { it.asString }.toList()
                 }
             }
@@ -59,11 +59,12 @@ class AppConfiguration {
             val array = JsonArray()
             versions.forEach { array.add(it) }
             json.add("versions", array)
-            Files.writeString(file.toPath(), json.toString(), StandardCharsets.UTF_8)
+            Files.writeString(file.toPath(), GSON.toJson(json), StandardCharsets.UTF_8)
             return versions
         }
 
         private fun listMinecraftVersions(): List<String> {
+            Publisher.LOGGER.info("Getting game version online")
             val url = URI.create("https://api.modrinth.com/v3/loader_field?loader_field=game_versions").toURL()
             val connection = url.openConnection()
             val input = BufferedInputStream(connection.getInputStream())

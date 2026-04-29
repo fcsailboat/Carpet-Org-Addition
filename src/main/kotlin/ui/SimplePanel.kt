@@ -58,7 +58,7 @@ open class SimplePanel : JPanel {
         }
     }
 
-    protected fun log(message: String) {
+    protected fun log(message: String = "") {
         this.invokeLaterIfAsync {
             this.logs.add(message)
             val joiner = StringJoiner("\n")
