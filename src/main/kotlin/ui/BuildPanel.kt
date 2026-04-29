@@ -14,7 +14,6 @@ import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
 import javax.swing.*
 
 class BuildPanel : SimplePanel {
@@ -25,7 +24,7 @@ class BuildPanel : SimplePanel {
     private val versionScrollPane: JScrollPane = JScrollPane(this.versionPanel)
     private val startBuildButton = JButton()
     private val currentVersion = JLabel()
-    private val buttonState: AtomicReference<ButtonState> = AtomicReference(ButtonState.READY)
+    private var buttonState: ButtonState = ButtonState.READY
 
     constructor(registry: (JComponent) -> Unit) : super(registry) {
         this.init()
@@ -152,7 +151,7 @@ class BuildPanel : SimplePanel {
         this.startBuildButton.maximumSize = Dimension(Int.MAX_VALUE, this.startBuildButton.preferredSize.height)
         this.startBuildButton.alignmentX = 0.5F
         this.startBuildButton.addActionListener {
-            if (this.buttonState.get() == ButtonState.READY) {
+            if (this.buttonState == ButtonState.READY) {
                 val list = this.versions.entries.stream()
                     .filter { it.value.isSelected }
                     .map { it.key }
@@ -216,7 +215,7 @@ class BuildPanel : SimplePanel {
     private fun start(list: List<String>): Boolean {
         try {
             for ((index, version) in list.withIndex()) {
-                if (this.buttonState.get() == ButtonState.WAIT_TO_STOP) {
+                if (this.buttonState == ButtonState.WAIT_TO_STOP) {
                     return true
                 }
                 this.setCurrentVersion(version)
@@ -243,22 +242,23 @@ class BuildPanel : SimplePanel {
     }
 
     private fun setButtonState(state: ButtonState) {
-        this.buttonState.set(state)
         this.invokeLaterIfAsync {
+            this.buttonState = state
             this.startBuildButton.isEnabled = state != ButtonState.WAIT_TO_STOP
             this.fileBrowseButton.isEnabled = state == ButtonState.READY
-        }
-        when (state) {
-            ButtonState.READY -> {
-                this.startBuildButton.text = "开始"
-            }
 
-            ButtonState.RUNNING -> {
-                this.startBuildButton.text = "停止"
-            }
+            when (state) {
+                ButtonState.READY -> {
+                    this.startBuildButton.text = "开始"
+                }
 
-            ButtonState.WAIT_TO_STOP -> {
-                this.startBuildButton.text = "正在停止..."
+                ButtonState.RUNNING -> {
+                    this.startBuildButton.text = "停止"
+                }
+
+                ButtonState.WAIT_TO_STOP -> {
+                    this.startBuildButton.text = "正在停止..."
+                }
             }
         }
     }

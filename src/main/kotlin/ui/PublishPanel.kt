@@ -1,6 +1,8 @@
 package ui
 
 import AppConfiguration
+import Publisher
+import publish.Metadata
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -18,6 +20,10 @@ class PublishPanel : SimplePanel {
     private val selectFiles = JList(this.listModel)
     private val fileIcons: MutableMap<File, Icon> = HashMap()
     private val fileSelectionPanel = JPanel(BorderLayout())
+    private val publishButton = JButton()
+    private val cancelButton = JButton("取消")
+    private var buttonState: ButtonState = ButtonState.READY
+    private var lastClickReadyTime: Long = 0L
 
     constructor(registry: (JComponent) -> Unit) : super(registry) {
         this.init()
@@ -35,10 +41,46 @@ class PublishPanel : SimplePanel {
     private fun createPublishButton(): JPanel {
         val panel = JPanel()
         panel.layout = BorderLayout()
-        val button = JButton("发布")
-        panel.add(button, BorderLayout.CENTER)
-        panel.maximumSize = Dimension(Int.MAX_VALUE, button.preferredSize.height)
-        button.alignmentX = 0.5F
+        this.setButtonState(ButtonState.READY)
+        this.publishButton.addActionListener {
+            if (this.buttonState == ButtonState.READY) {
+                this.setButtonState(ButtonState.PENDING_CONFIRM)
+                this.lastClickReadyTime = System.currentTimeMillis()
+                this.clearLog()
+                val size = this.listModel.size
+                for (i in 0 until size) {
+                    val file = this.listModel[i]
+                    val metadata = Metadata(file)
+                    this.log("[${metadata.subtitle}]  /  ${metadata.gameVersions}")
+                }
+                this.log()
+                this.log("确认将以上${size}个模组发布到Modrinth？")
+                return@addActionListener
+            }
+            if (this.buttonState == ButtonState.RUNNING) {
+                this.setButtonState(ButtonState.WAIT_TO_STOP)
+                return@addActionListener
+            }
+            if (this.buttonState == ButtonState.PENDING_CONFIRM) {
+                // 阻止按下发布按钮后立即确认（防误触）
+                if (System.currentTimeMillis() - this.lastClickReadyTime < 1500) {
+                    this.log("操作过于频繁！")
+                    return@addActionListener
+                }
+                this.setButtonState(ButtonState.RUNNING)
+                Publisher.EXECUTOR.execute {
+                    this.setButtonState(ButtonState.READY)
+                }
+            }
+        }
+        this.cancelButton.addActionListener {
+            this.setButtonState(ButtonState.READY)
+            this.log("取消发布！")
+        }
+        panel.add(this.publishButton, BorderLayout.CENTER)
+        panel.add(this.cancelButton, BorderLayout.SOUTH)
+        panel.maximumSize = Dimension(Int.MAX_VALUE, this.publishButton.preferredSize.height)
+        this.publishButton.alignmentX = 0.5F
         return panel
     }
 
@@ -100,6 +142,19 @@ class PublishPanel : SimplePanel {
         scroll.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
         scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         this.fileSelectionPanel.add(scroll, BorderLayout.CENTER)
+        this.selectFiles.addListSelectionListener {
+            if (this.buttonState != ButtonState.READY) {
+                return@addListSelectionListener
+            }
+            this.clearLog()
+            for (file in this.selectFiles.selectedValuesList) {
+                val metadata = Metadata(file)
+                this.log("标题：${metadata.subtitle}")
+                this.log("模组版本：${metadata.version}")
+                this.log("游戏版本：${metadata.gameVersions}")
+                this.log()
+            }
+        }
         return this.fileSelectionPanel
     }
 
@@ -202,5 +257,37 @@ class PublishPanel : SimplePanel {
             this.listModel.clear()
             this.updateFileListVisibleRows()
         }
+    }
+
+    private fun setButtonState(state: ButtonState) {
+        this.invokeLaterIfAsync {
+            this.buttonState = state
+            this.publishButton.isEnabled = state != ButtonState.WAIT_TO_STOP
+            this.cancelButton.isVisible = state == ButtonState.PENDING_CONFIRM
+            when (state) {
+                ButtonState.READY -> {
+                    this.publishButton.text = "发布"
+                }
+
+                ButtonState.PENDING_CONFIRM -> {
+                    this.publishButton.text = "确认发布"
+                }
+
+                ButtonState.RUNNING -> {
+                    this.publishButton.text = "停止发布"
+                }
+
+                ButtonState.WAIT_TO_STOP -> {
+                    this.publishButton.text = "正在停止"
+                }
+            }
+        }
+    }
+
+    private enum class ButtonState {
+        READY,
+        PENDING_CONFIRM,
+        RUNNING,
+        WAIT_TO_STOP
     }
 }
