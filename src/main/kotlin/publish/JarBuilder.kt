@@ -1,6 +1,6 @@
 package publish
 
-import GlobalConfigs
+import AppConfiguration
 import Publisher
 import meta.VersionFormats
 import org.eclipse.jgit.api.Git
@@ -31,7 +31,7 @@ class JarBuilder {
     }
 
     private fun moveFile() {
-        val files = GlobalConfigs.getBuildOutput().listFiles() ?: throw IllegalArgumentException()
+        val files = AppConfiguration.getBuildOutput().listFiles() ?: throw IllegalArgumentException()
         val list = files.asList().stream()
             .filter { it.isFile }
             .filter { "sources" !in it.name }
@@ -42,14 +42,14 @@ class JarBuilder {
         }
         val file = list.last()
         val from = file.toPath()
-        val to = File(GlobalConfigs.getStaging(), file.name).toPath()
+        val to = File(AppConfiguration.getStaging(), file.name).toPath()
         this.logger("正在移动文件：${file.name}")
         copyOrReplaceFile(from, to)
         Publisher.LOGGER.info("File ${from.absolutePathString()} has been moved to ${to.absolutePathString()}")
     }
 
     private fun archive() {
-        val output = GlobalConfigs.getBuildOutput()
+        val output = AppConfiguration.getBuildOutput()
         val archive = File(output, "archive")
         if (!archive.exists()) {
             archive.mkdirs()
@@ -93,8 +93,8 @@ class JarBuilder {
 
     private fun tryBuild() {
         val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "build")
-        processBuilder.directory(GlobalConfigs.getRoot()).inheritIO()
-        Publisher.LOGGER.info("Working directory: ${GlobalConfigs.getRoot()}")
+        processBuilder.directory(AppConfiguration.getRoot()).inheritIO()
+        Publisher.LOGGER.info("Working directory: ${AppConfiguration.getRoot()}")
         val process = processBuilder.start()
         // 要求在10分钟内完成，下载依赖可能需要相当长的时间
         val finished = process.waitFor(600, TimeUnit.SECONDS)
@@ -113,6 +113,6 @@ class JarBuilder {
     }
 
     companion object {
-        val GIT: Git = Git.open(GlobalConfigs.getRoot())
+        val GIT: Git = Git.open(AppConfiguration.getRoot())
     }
 }

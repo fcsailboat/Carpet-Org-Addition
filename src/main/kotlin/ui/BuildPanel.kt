@@ -1,6 +1,6 @@
 package ui
 
-import GlobalConfigs
+import AppConfiguration
 import Publisher
 import publish.JarBuilder
 import util.archiveStagingFile
@@ -64,11 +64,11 @@ class BuildPanel : SimplePanel {
         this.folderPathField.border = BorderFactory.createEtchedBorder()
         this.folderPathField.preferredSize = Dimension(0, 0)
         this.folderPathField.maximumSize = Dimension(Integer.MAX_VALUE, 30)
-        this.folderPathField.text = GlobalConfigs.getRoot().absolutePath
+        this.folderPathField.text = AppConfiguration.getRoot().absolutePath
         this.fileBrowseButton.addActionListener {
             val chooser = JFileChooser()
             chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-            chooser.selectedFile = GlobalConfigs.getRoot()
+            chooser.selectedFile = AppConfiguration.getRoot()
             if (chooser.showOpenDialog(folderPanel) == JFileChooser.APPROVE_OPTION) {
                 this.folderPathField.text = chooser.selectedFile.absolutePath
                 this.refreshVersions()
@@ -131,7 +131,7 @@ class BuildPanel : SimplePanel {
         val versions = listVersion(path)
         this.versionPanel.removeAll()
         this.versions.clear()
-        val defaultVersions = GlobalConfigs.getVersions()
+        val defaultVersions = AppConfiguration.getDefaultSelectionVersions()
         for (version in versions) {
             val box = JCheckBox(version)
             box.margin = Insets(0, 0, 0, 0)
@@ -179,7 +179,7 @@ class BuildPanel : SimplePanel {
     }
 
     private fun handleStaging(): Boolean {
-        val stagingFiles = GlobalConfigs.getStaging().listFiles()
+        val stagingFiles = AppConfiguration.getStaging().listFiles()
         if (stagingFiles != null && !stagingFiles.isEmpty()) {
             val options = arrayOf("取消", "忽略", "归档")
             val choice = JOptionPane.showOptionDialog(

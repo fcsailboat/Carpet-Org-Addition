@@ -13,7 +13,7 @@ class Publisher {
 }
 
 fun main() {
-    Publisher.LOGGER.info("Root: ${GlobalConfigs.getRoot().absoluteFile}")
+    Publisher.LOGGER.info("Root: ${AppConfiguration.getRoot().absoluteFile}")
 //    JarUploader.start(GlobalConfigs.getStaging().listFiles()?.toList() ?: listOf())
     FlatLightLaf.setup()
     val screen = Screen()

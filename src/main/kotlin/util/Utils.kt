@@ -1,6 +1,6 @@
 package util
 
-import GlobalConfigs
+import AppConfiguration
 import meta.VersionFormats
 import org.eclipse.jgit.api.Git
 import java.io.File
@@ -75,7 +75,7 @@ fun copyOrReplaceFile(from: Path, to: Path) {
 }
 
 fun archiveStagingFile(file: File) {
-    moveOrReplaceFile(file.toPath(), GlobalConfigs.getArchive().toPath().resolve(file.name))
+    moveOrReplaceFile(file.toPath(), AppConfiguration.getArchive().toPath().resolve(file.name))
 }
 
 private fun fileEquivalent(path1: Path, path2: Path): Boolean {

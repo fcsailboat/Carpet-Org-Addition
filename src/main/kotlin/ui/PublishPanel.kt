@@ -1,6 +1,6 @@
 package ui
 
-import GlobalConfigs
+import AppConfiguration
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -61,7 +61,7 @@ class PublishPanel : SimplePanel {
         selection.addActionListener {
             val chooser = JFileChooser()
             chooser.fileSelectionMode = JFileChooser.FILES_ONLY
-            chooser.currentDirectory = GlobalConfigs.getStaging()
+            chooser.currentDirectory = AppConfiguration.getStaging()
             chooser.isMultiSelectionEnabled = true
             if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
                 val files = chooser.selectedFiles.toList()
@@ -76,7 +76,7 @@ class PublishPanel : SimplePanel {
     }
 
     private fun createFileSelectionList(): JPanel {
-        val files: Array<File> = GlobalConfigs.getStaging().listFiles() ?: arrayOf()
+        val files: Array<File> = AppConfiguration.getStaging().listFiles() ?: arrayOf()
         this.addFiles(files.toList())
         this.selectFiles.cellRenderer = object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
@@ -135,7 +135,7 @@ class PublishPanel : SimplePanel {
     private fun setupFilePopupMenu() {
         val popup = JPopupMenu()
         val removeItem = JMenuItem("移除")
-        val openTheFileLocation = JMenuItem("打开文件所在位置")
+        val openFile = JMenuItem("打开文件所在位置")
         removeItem.addActionListener {
             // 倒序移除，避免下标变化导致错误
             val indices = this.selectFiles.selectedIndices.sortedDescending()
@@ -144,14 +144,14 @@ class PublishPanel : SimplePanel {
             }
             this.updateFileListVisibleRows()
         }
-        openTheFileLocation.addActionListener {
+        openFile.addActionListener {
             val index = this.selectFiles.selectedIndex
             val file: File = this.listModel.get(index)
             Runtime.getRuntime().exec(arrayOf("explorer", "/select,", file.absolutePath))
         }
         popup.add(removeItem)
         if (System.getProperty("os.name").lowercase().contains("win")) {
-            popup.add(openTheFileLocation)
+            popup.add(openFile)
         }
         this.selectFiles.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {

@@ -1,9 +1,8 @@
 package publish
 
-import GlobalConfigs
+import AppConfiguration
 import Publisher
 import com.google.gson.Gson
-import com.google.gson.JsonArray
 import org.apache.hc.client5.http.classic.methods.HttpPost
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import org.apache.hc.client5.http.impl.classic.HttpClients
@@ -11,9 +10,7 @@ import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import util.moveOrReplaceFile
-import java.io.BufferedInputStream
 import java.io.File
-import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.*
 
@@ -49,7 +46,7 @@ class JarUploader {
         val httpClient = HttpClients.createDefault()
         httpClient.use { httpClient ->
             val post = HttpPost(URL)
-            post.setHeader("Authorization", GlobalConfigs.getToken())
+            post.setHeader("Authorization", AppConfiguration.getToken())
             post.setHeader("User-Agent", "https://github.com/fcsailboat/Carpet-Org-Addition")
             val builder = MultipartEntityBuilder.create()
             builder.addBinaryBody(
@@ -90,7 +87,7 @@ class JarUploader {
         private const val URL = "https://api.modrinth.com/v2/version"
         private const val EFFECTIVE_RESPONSE = 200
         private val GSON: Gson = Gson()
-        val versions: List<String> = this.listMinecraftVersions()
+        val versions: List<String> = AppConfiguration.getVersionSupport()
 
         fun start(files: List<File>) {
             Publisher.LOGGER.info("Check the files to be published: ")
@@ -109,7 +106,7 @@ class JarUploader {
                     val code = uploader.upload()
                     if (code == EFFECTIVE_RESPONSE) {
                         Publisher.LOGGER.info("Published, status code: $code")
-                        moveOrReplaceFile(file.toPath(), File(GlobalConfigs.getArchive(), file.name).toPath())
+                        moveOrReplaceFile(file.toPath(), File(AppConfiguration.getArchive(), file.name).toPath())
                     } else {
                         Publisher.LOGGER.error("Publish failed, status code: $code")
                         throw IllegalStateException("${file.name} failed to publish to Modrinth, status code: $code")
@@ -119,23 +116,6 @@ class JarUploader {
                 Publisher.LOGGER.info("Abort publishing!")
                 return
             }
-        }
-
-        private fun listMinecraftVersions(): List<String> {
-            val url = URI.create("https://api.modrinth.com/v3/loader_field?loader_field=game_versions").toURL()
-            val connection = url.openConnection()
-            val input = BufferedInputStream(connection.getInputStream())
-            val result: String
-            input.use {
-                val bytes = it.readAllBytes()
-                result = String(bytes)
-            }
-            val array = GSON.fromJson(result, JsonArray::class.java)
-            return array.asList().stream()
-                .map { it.asJsonObject }
-                .map { it.get("value") }
-                .map { it.asString }
-                .toList()
         }
     }
 }
