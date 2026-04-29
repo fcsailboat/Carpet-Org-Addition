@@ -5,6 +5,7 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.nio.file.FileSystemException
 import java.text.DecimalFormat
 import java.util.*
 import javax.swing.*
@@ -94,6 +95,27 @@ open class SimplePanel : JPanel {
             progressBar.value = value
             progressBar.string = if (size == 0) "0%" else "$text% [$value/$size]"
         }
+    }
+
+    protected fun fileOperationFailed(operation: () -> Unit): Boolean {
+        try {
+            operation()
+            return false
+        } catch (e: FileSystemException) {
+            this.invokeLaterIfAsync {
+                this.fileErrorPopUpWindow(e)
+            }
+            return true
+        }
+    }
+
+    private fun fileErrorPopUpWindow(error: FileSystemException) {
+        JOptionPane.showMessageDialog(
+            this,
+            error.message ?: error.javaClass.simpleName,
+            "文件系统异常",
+            JOptionPane.ERROR_MESSAGE
+        )
     }
 
     protected fun clickToFocusInWindow(panel: JPanel): MouseAdapter = object : MouseAdapter() {

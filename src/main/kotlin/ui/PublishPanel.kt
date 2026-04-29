@@ -18,6 +18,7 @@ import kotlin.math.max
 class PublishPanel : SimplePanel {
     private val listModel = DefaultListModel<File>()
     private val selectFiles = JList(this.listModel)
+    private val metadataCache = HashMap<File, Metadata>()
     private val fileIcons: MutableMap<File, Icon> = HashMap()
     private val fileSelectionPanel = JPanel(BorderLayout())
     private val publishButton = JButton()
@@ -44,13 +45,17 @@ class PublishPanel : SimplePanel {
         this.setButtonState(ButtonState.READY)
         this.publishButton.addActionListener {
             if (this.buttonState == ButtonState.READY) {
+                if (this.listModel.isEmpty) {
+                    this.log("请选择要发布的文件！")
+                    return@addActionListener
+                }
                 this.setButtonState(ButtonState.PENDING_CONFIRM)
                 this.lastClickReadyTime = System.currentTimeMillis()
                 this.clearLog()
                 val size = this.listModel.size
                 for (i in 0 until size) {
                     val file = this.listModel[i]
-                    val metadata = Metadata(file)
+                    val metadata = this.getMetadata(file)
                     this.log("[${metadata.subtitle}]  /  ${metadata.gameVersions}")
                 }
                 this.log()
@@ -65,6 +70,16 @@ class PublishPanel : SimplePanel {
                 // 阻止按下发布按钮后立即确认（防误触）
                 if (System.currentTimeMillis() - this.lastClickReadyTime < 1500) {
                     this.log("操作过于频繁！")
+                    return@addActionListener
+                }
+                if (this.checkModVersionInconsistent()) {
+                    JOptionPane.showMessageDialog(
+                        this@PublishPanel,
+                        "待发布模组版本不统一",
+                        "拒绝发布",
+                        JOptionPane.ERROR_MESSAGE,
+                        null
+                    )
                     return@addActionListener
                 }
                 this.setButtonState(ButtonState.RUNNING)
@@ -82,6 +97,21 @@ class PublishPanel : SimplePanel {
         panel.maximumSize = Dimension(Int.MAX_VALUE, this.publishButton.preferredSize.height)
         this.publishButton.alignmentX = 0.5F
         return panel
+    }
+
+    private fun checkModVersionInconsistent(): Boolean {
+        val version = this.getMetadata(this.listModel[0]).version
+        for (i in 1 until this.listModel.size) {
+            val file = this.listModel[i]
+            if (version != this.getMetadata(file).version) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun getMetadata(file: File): Metadata {
+        return this.metadataCache.computeIfAbsent(file) { Metadata(it) }
     }
 
     private fun createFileSelection(): JPanel {
@@ -152,6 +182,7 @@ class PublishPanel : SimplePanel {
                 this.log("标题：${metadata.subtitle}")
                 this.log("模组版本：${metadata.version}")
                 this.log("游戏版本：${metadata.gameVersions}")
+                this.log("构建时间：${metadata.getFormatTime()}")
                 this.log()
             }
         }
@@ -256,6 +287,7 @@ class PublishPanel : SimplePanel {
         this.invokeLaterIfAsync {
             this.listModel.clear()
             this.updateFileListVisibleRows()
+            this.metadataCache.clear()
         }
     }
 
@@ -289,5 +321,12 @@ class PublishPanel : SimplePanel {
         PENDING_CONFIRM,
         RUNNING,
         WAIT_TO_STOP
+    }
+
+    private enum class RefusalPublishReason {
+        VERSION_INCONSISTENT,
+        VERSION_REPEAT,
+        LARGE_TIME_SPAN,
+        NONE
     }
 }

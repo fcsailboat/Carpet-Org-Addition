@@ -203,7 +203,10 @@ class BuildPanel : SimplePanel {
 
                 2 -> {
                     stagingFiles.forEach {
-                        archiveStagingFile(it)
+                        val result = this.fileOperationFailed { archiveStagingFile(it) }
+                        if (result) {
+                            return true
+                        }
                     }
                     this.log("已归档暂存区文件")
                 }
@@ -224,7 +227,14 @@ class BuildPanel : SimplePanel {
                 }
                 this.log("-".repeat(80))
                 try {
-                    builder.run()
+                    val result = this.fileOperationFailed {
+                        builder.run()
+                    }
+                    if (result) {
+                        this.log()
+                        this.log("已中止！")
+                        return true
+                    }
                 } catch (e: Exception) {
                     this.log("\n构建失败！")
                     Publisher.LOGGER.error("Build failed: ", e)

@@ -4,6 +4,9 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import java.io.File
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -14,6 +17,7 @@ class Metadata {
     val id: String
     val subtitle: String
     val gameVersions: List<String>
+    val timestamp: Instant
 
     constructor(file: File) {
         this.file = file
@@ -27,6 +31,14 @@ class Metadata {
                 this.id = json.get("id").asString
                 val mcVersion = json.getAsJsonObject("depends").get("minecraft").asString
                 this.mcVersion = this.parseMcVersion(mcVersion)
+                val buildTimestamp = json.get("custom")
+                    ?.asJsonObject
+                    ?.get("build_timestamp")
+                    ?.asString
+                    ?: "0".repeat(10)
+                val formatter = DateTimeFormatter.ofPattern("yyMMddHHmm").withZone(ZoneOffset.UTC)
+                val accessor = formatter.parse(buildTimestamp)
+                this.timestamp = Instant.from(accessor)
             }
             this.subtitle = "${this.id}-mc${this.mcVersion}-${this.version}"
             this.gameVersions = this.allDependGameVersions()
@@ -67,7 +79,12 @@ class Metadata {
         return mcVersion
     }
 
+    fun getFormatTime(): String {
+        return this.timestamp.atZone(ZoneOffset.UTC).format(TIME_PRINT_FORMATTER)
+    }
+
     companion object {
         private val GSON: Gson = GsonBuilder().create()
+        private val TIME_PRINT_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     }
 }
