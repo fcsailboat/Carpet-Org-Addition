@@ -17,6 +17,7 @@ open class SimplePanel : JPanel {
     protected val rightTextArea = JTextArea()
     private val logs: ArrayList<String> = ArrayList()
     private val progressBar: JProgressBar = JProgressBar()
+    private val currentVersion = JLabel()
 
     constructor(registry: (JComponent) -> Unit) {
         this.registryPanelsToHighlight = registry
@@ -121,6 +122,19 @@ open class SimplePanel : JPanel {
     protected fun clickToFocusInWindow(panel: JPanel): MouseAdapter = object : MouseAdapter() {
         override fun mousePressed(e: MouseEvent) {
             panel.requestFocusInWindow()
+        }
+    }
+
+    protected fun initCurrentVersion(): JLabel {
+        this.currentVersion.horizontalAlignment = SwingConstants.LEFT
+        this.setCurrentVersion(null)
+        return this.currentVersion
+    }
+
+    protected fun setCurrentVersion(version: String?) {
+        val text = "当前版本：${version ?: "无"}"
+        this.invokeLaterIfAsync {
+            currentVersion.text = text
         }
     }
 }

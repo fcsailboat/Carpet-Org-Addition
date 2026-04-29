@@ -23,7 +23,8 @@ class BuildPanel : SimplePanel {
     private val versionPanel: JPanel = JPanel()
     private val versionScrollPane: JScrollPane = JScrollPane(this.versionPanel)
     private val startBuildButton = JButton()
-    private val currentVersion = JLabel()
+
+    @Volatile
     private var buttonState: ButtonState = ButtonState.READY
 
     constructor(registry: (JComponent) -> Unit) : super(registry) {
@@ -39,19 +40,6 @@ class BuildPanel : SimplePanel {
         this.leftPanel.add(Box.createVerticalGlue())
         this.leftPanel.add(this.initProgressBar())
         this.rightPanel.add(this.initCurrentVersion(), BorderLayout.SOUTH)
-    }
-
-    private fun initCurrentVersion(): JLabel {
-        this.currentVersion.horizontalAlignment = SwingConstants.LEFT
-        this.setCurrentVersion("无")
-        return this.currentVersion
-    }
-
-    private fun setCurrentVersion(version: String) {
-        val text = "当前版本：$version"
-        this.invokeLaterIfAsync {
-            this.currentVersion.text = text
-        }
     }
 
     private fun createFileChooser(): JPanel {
@@ -166,7 +154,7 @@ class BuildPanel : SimplePanel {
                 }
                 this.setButtonState(ButtonState.RUNNING)
                 Publisher.EXECUTOR.execute {
-                    if (start(list)) {
+                    if (this@BuildPanel.build(list)) {
                         return@execute
                     }
                 }
@@ -215,7 +203,7 @@ class BuildPanel : SimplePanel {
         return false
     }
 
-    private fun start(list: List<String>): Boolean {
+    private fun build(list: List<String>): Boolean {
         try {
             for ((index, version) in list.withIndex()) {
                 if (this.buttonState == ButtonState.WAIT_TO_STOP) {
@@ -245,7 +233,7 @@ class BuildPanel : SimplePanel {
             }
         } finally {
             this.setButtonState(ButtonState.READY)
-            this.setCurrentVersion("无")
+            this.setCurrentVersion(null)
             this.clearLog()
         }
         return false

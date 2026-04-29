@@ -24,6 +24,8 @@ class PublishPanel : SimplePanel {
     private val fileSelectionPanel = JPanel(BorderLayout())
     private val publishButton = JButton()
     private val cancelButton = JButton("取消")
+
+    @Volatile
     private var buttonState: ButtonState = ButtonState.READY
     private var lastClickReadyTime: Long = 0L
 
@@ -38,6 +40,7 @@ class PublishPanel : SimplePanel {
         this.leftPanel.add(this.createPublishButton())
         this.leftPanel.add(Box.createVerticalGlue())
         this.leftPanel.add(this.initProgressBar())
+        this.rightPanel.add(this.initCurrentVersion(), BorderLayout.SOUTH)
     }
 
     private fun createPublishButton(): JPanel {
@@ -78,8 +81,33 @@ class PublishPanel : SimplePanel {
                     return@addActionListener
                 }
                 this.setButtonState(ButtonState.RUNNING)
+                val files = ArrayList<File>(this.listModel.size)
+                for (i in 0 until this.listModel.size) {
+                    files.add(this.listModel[i])
+                }
+                this.log("开始发布，共${files.size}个文件")
                 Publisher.EXECUTOR.execute {
-                    this.setButtonState(ButtonState.READY)
+                    try {
+                        for ((index, file) in files.withIndex()) {
+                            val failed = this.fileOperationFailed {
+                                if (this.buttonState == ButtonState.WAIT_TO_STOP) {
+                                    return@fileOperationFailed
+                                }
+                                val metadata = getMetadata(file)
+                                this.setCurrentVersion(metadata.mcVersion)
+                                // TODO 替换为实际发布功能
+                                Thread.sleep(2000)
+                                this.setProgress(index + 1, files.size)
+                            }
+                            if (failed) {
+                                this.log("发布中止！")
+                                break
+                            }
+                        }
+                    } finally {
+                        this.setButtonState(ButtonState.READY)
+                        this.setCurrentVersion(null)
+                    }
                 }
             }
         }
@@ -363,6 +391,7 @@ class PublishPanel : SimplePanel {
             when (state) {
                 ButtonState.READY -> {
                     this.publishButton.text = "发布"
+                    this.setProgress(0, 0)
                 }
 
                 ButtonState.PENDING_CONFIRM -> {
