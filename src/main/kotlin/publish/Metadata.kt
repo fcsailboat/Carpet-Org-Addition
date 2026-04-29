@@ -17,7 +17,7 @@ class Metadata {
     val id: String
     val subtitle: String
     val gameVersions: List<String>
-    val timestamp: Instant
+    val timestamp: Long
 
     constructor(file: File) {
         this.file = file
@@ -31,14 +31,15 @@ class Metadata {
                 this.id = json.get("id").asString
                 val mcVersion = json.getAsJsonObject("depends").get("minecraft").asString
                 this.mcVersion = this.parseMcVersion(mcVersion)
-                val buildTimestamp = json.get("custom")
-                    ?.asJsonObject
-                    ?.get("build_timestamp")
-                    ?.asString
-                    ?: "0".repeat(10)
-                val formatter = DateTimeFormatter.ofPattern("yyMMddHHmm").withZone(ZoneOffset.UTC)
-                val accessor = formatter.parse(buildTimestamp)
-                this.timestamp = Instant.from(accessor)
+                val custom: JsonObject? = json.get("custom")?.asJsonObject
+                val buildTimestamp = (custom?.get("build_timestamp") ?: custom?.get("buildTimestamp"))?.asString
+                if (buildTimestamp == null) {
+                    this.timestamp = 0L
+                } else {
+                    val formatter = DateTimeFormatter.ofPattern("yyMMddHHmm").withZone(ZoneOffset.UTC)
+                    val accessor = formatter.parse(buildTimestamp)
+                    this.timestamp = Instant.from(accessor).toEpochMilli()
+                }
             }
             this.subtitle = "${this.id}-mc${this.mcVersion}-${this.version}"
             this.gameVersions = this.allDependGameVersions()
@@ -80,7 +81,7 @@ class Metadata {
     }
 
     fun getFormatTime(): String {
-        return this.timestamp.atZone(ZoneOffset.UTC).format(TIME_PRINT_FORMATTER)
+        return Instant.ofEpochMilli(this.timestamp).atZone(ZoneOffset.UTC).format(TIME_PRINT_FORMATTER)
     }
 
     companion object {

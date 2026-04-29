@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import javax.swing.*
 import javax.swing.filechooser.FileSystemView
 import kotlin.math.max
@@ -18,7 +19,7 @@ import kotlin.math.max
 class PublishPanel : SimplePanel {
     private val listModel = DefaultListModel<File>()
     private val selectFiles = JList(this.listModel)
-    private val metadataCache = HashMap<File, Metadata>()
+    private val metadataCache = ConcurrentHashMap<File, Metadata>()
     private val fileIcons: MutableMap<File, Icon> = HashMap()
     private val fileSelectionPanel = JPanel(BorderLayout())
     private val publishButton = JButton()
@@ -68,18 +69,12 @@ class PublishPanel : SimplePanel {
             }
             if (this.buttonState == ButtonState.PENDING_CONFIRM) {
                 // 阻止按下发布按钮后立即确认（防误触）
-                if (System.currentTimeMillis() - this.lastClickReadyTime < 1500) {
+                if (System.currentTimeMillis() - this.lastClickReadyTime < 1000) {
                     this.log("操作过于频繁！")
                     return@addActionListener
                 }
-                if (this.checkModVersionInconsistent()) {
-                    JOptionPane.showMessageDialog(
-                        this@PublishPanel,
-                        "待发布模组版本不统一",
-                        "拒绝发布",
-                        JOptionPane.ERROR_MESSAGE,
-                        null
-                    )
+                val reason = this.checkModFileError()
+                if (reason != RefusalPublishReason.NONE && reason.dialog(this@PublishPanel)) {
                     return@addActionListener
                 }
                 this.setButtonState(ButtonState.RUNNING)
@@ -99,11 +94,55 @@ class PublishPanel : SimplePanel {
         return panel
     }
 
+    private fun checkModFileError(): RefusalPublishReason {
+        if (this.checkModVersionInconsistent()) {
+            return RefusalPublishReason.VERSION_INCONSISTENT
+        }
+        if (this.checkMinecraftVersionRepeat()) {
+            return RefusalPublishReason.VERSION_REPEAT
+        }
+        if (this.checkModBuildTimespan()) {
+            return RefusalPublishReason.LARGE_TIME_SPAN
+        }
+        return RefusalPublishReason.NONE
+    }
+
     private fun checkModVersionInconsistent(): Boolean {
         val version = this.getMetadata(this.listModel[0]).version
         for (i in 1 until this.listModel.size) {
             val file = this.listModel[i]
             if (version != this.getMetadata(file).version) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun checkMinecraftVersionRepeat(): Boolean {
+        val size = this.listModel.size
+        val versions = HashSet<List<String>>(size)
+        for (i in 0 until size) {
+            if (versions.add(this.getMetadata(this.listModel[i]).gameVersions)) {
+                continue
+            }
+            return true
+        }
+        return false
+    }
+
+    private fun checkModBuildTimespan(): Boolean {
+        val maxSpan = this.listModel.size * 1000L * 60
+        var min = this.getMetadata(this.listModel[0]).timestamp
+        var max = this.getMetadata(this.listModel[0]).timestamp
+        for (i in 1 until this.listModel.size) {
+            val metadata = this.getMetadata(this.listModel[i])
+            val timestamp = metadata.timestamp
+            if (timestamp < min) {
+                min = timestamp
+            } else if (timestamp > max) {
+                max = timestamp
+            }
+            if (max - min > maxSpan) {
                 return true
             }
         }
@@ -131,6 +170,10 @@ class PublishPanel : SimplePanel {
         }
         val selection = JButton("选择...")
         selection.addActionListener {
+            if (this.buttonState != ButtonState.READY) {
+                this.fileListImmutableDialog()
+                return@addActionListener
+            }
             val chooser = JFileChooser()
             chooser.fileSelectionMode = JFileChooser.FILES_ONLY
             chooser.currentDirectory = AppConfiguration.getStaging()
@@ -220,9 +263,13 @@ class PublishPanel : SimplePanel {
 
     private fun setupFilePopupMenu() {
         val popup = JPopupMenu()
-        val removeItem = JMenuItem("移除")
+        val removeItem = JMenuItem("移除选中文件")
         val openFile = JMenuItem("打开文件所在位置")
         removeItem.addActionListener {
+            if (this.buttonState != ButtonState.READY) {
+                this.fileListImmutableDialog()
+                return@addActionListener
+            }
             // 倒序移除，避免下标变化导致错误
             val indices = this.selectFiles.selectedIndices.sortedDescending()
             for (i in indices) {
@@ -274,6 +321,10 @@ class PublishPanel : SimplePanel {
         val tree = TreeSet<File>()
         tree.addAll(files)
         this.invokeLaterIfAsync {
+            if (this.buttonState != ButtonState.READY) {
+                this.fileListImmutableDialog()
+                return@invokeLaterIfAsync
+            }
             for (i in 0 until this.listModel.size) {
                 tree.add(this.listModel[i])
             }
@@ -285,10 +336,23 @@ class PublishPanel : SimplePanel {
 
     private fun clearFiles() {
         this.invokeLaterIfAsync {
+            if (this.buttonState != ButtonState.READY) {
+                this.fileListImmutableDialog()
+                return@invokeLaterIfAsync
+            }
             this.listModel.clear()
             this.updateFileListVisibleRows()
             this.metadataCache.clear()
         }
+    }
+
+    private fun fileListImmutableDialog() {
+        JOptionPane.showMessageDialog(
+            this,
+            "发布操作未完成或取消，不可变更文件",
+            "文件列表已锁定",
+            JOptionPane.WARNING_MESSAGE
+        )
     }
 
     private fun setButtonState(state: ButtonState) {
@@ -324,9 +388,43 @@ class PublishPanel : SimplePanel {
     }
 
     private enum class RefusalPublishReason {
-        VERSION_INCONSISTENT,
-        VERSION_REPEAT,
-        LARGE_TIME_SPAN,
-        NONE
+        VERSION_INCONSISTENT {
+            override fun dialog(parentComponent: Component): Boolean {
+                JOptionPane.showMessageDialog(
+                    parentComponent,
+                    "待发布模组版本不统一",
+                    "拒绝发布",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return true
+            }
+        },
+        VERSION_REPEAT {
+            override fun dialog(parentComponent: Component): Boolean {
+                JOptionPane.showMessageDialog(
+                    parentComponent,
+                    "待发布模组Minecraft支持版本重复",
+                    "拒绝发布",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return true
+            }
+        },
+        LARGE_TIME_SPAN {
+            override fun dialog(parentComponent: Component): Boolean {
+                val choice = JOptionPane.showConfirmDialog(
+                    parentComponent,
+                    "待发布模组构建时间跨度过大，确认是否发布",
+                    "确认发布",
+                    JOptionPane.WARNING_MESSAGE
+                )
+                return choice != 0
+            }
+        },
+        NONE;
+
+        open fun dialog(parentComponent: Component): Boolean {
+            return false
+        }
     }
 }
