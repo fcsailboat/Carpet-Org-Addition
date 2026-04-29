@@ -5,6 +5,8 @@ import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.datatransfer.DataFlavor
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.io.File
 import java.util.*
 import javax.swing.*
@@ -93,11 +95,11 @@ class PublishPanel : SimplePanel {
             }
         }
         this.setupFileDrop()
+        this.setupFilePopupMenu()
         val scroll = JScrollPane(this.selectFiles)
         scroll.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
         scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         this.fileSelectionPanel.add(scroll, BorderLayout.CENTER)
-        this.registryPanelsToHighlight(this.fileSelectionPanel)
         return this.fileSelectionPanel
     }
 
@@ -128,6 +130,52 @@ class PublishPanel : SimplePanel {
         }
         this.selectFiles.dropMode = DropMode.USE_SELECTION
         this.selectFiles.dragEnabled = false
+    }
+
+    private fun setupFilePopupMenu() {
+        val popup = JPopupMenu()
+        val removeItem = JMenuItem("移除")
+        val openTheFileLocation = JMenuItem("打开文件所在位置")
+        removeItem.addActionListener {
+            // 倒序移除，避免下标变化导致错误
+            val indices = this.selectFiles.selectedIndices.sortedDescending()
+            for (i in indices) {
+                this.listModel.remove(i)
+            }
+            this.updateFileListVisibleRows()
+        }
+        openTheFileLocation.addActionListener {
+            val index = this.selectFiles.selectedIndex
+            val file: File = this.listModel.get(index)
+            Runtime.getRuntime().exec(arrayOf("explorer", "/select,", file.absolutePath))
+        }
+        popup.add(removeItem)
+        if (System.getProperty("os.name").lowercase().contains("win")) {
+            popup.add(openTheFileLocation)
+        }
+        this.selectFiles.addMouseListener(object : MouseAdapter() {
+            override fun mousePressed(e: MouseEvent) {
+                if (e.isPopupTrigger) {
+                    this.showPopup(e)
+                }
+            }
+
+            override fun mouseReleased(e: MouseEvent) {
+                if (e.isPopupTrigger) {
+                    this.showPopup(e)
+                }
+            }
+
+            private fun showPopup(e: MouseEvent) {
+                val index = selectFiles.locationToIndex(e.point)
+                if (index != -1) {
+                    if (!selectFiles.isSelectedIndex(index)) {
+                        selectFiles.selectedIndex = index
+                    }
+                    popup.show(selectFiles, e.x, e.y)
+                }
+            }
+        })
     }
 
     private fun updateFileListVisibleRows() {
