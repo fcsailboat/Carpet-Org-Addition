@@ -98,10 +98,9 @@ open class SimplePanel : JPanel {
         }
     }
 
-    protected fun fileOperationFailed(operation: () -> Unit): Boolean {
+    protected fun fileOperationFailed(operation: () -> Boolean): Boolean {
         try {
-            operation()
-            return false
+            return operation()
         } catch (e: FileSystemException) {
             this.invokeLaterIfAsync {
                 this.fileErrorPopUpWindow(e)

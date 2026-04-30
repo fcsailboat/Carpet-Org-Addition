@@ -25,3 +25,12 @@ kotlin {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<JavaExec>("run") {
+    group = "publisher"
+    description = "Run Publisher"
+    mainClass.set("PublisherKt")
+    classpath = sourceSets.main.get().runtimeClasspath
+    workingDir = rootProject.projectDir.parentFile
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+}

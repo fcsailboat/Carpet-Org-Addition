@@ -1,5 +1,5 @@
 package publish
 
-class ModPublishException : RuntimeException {
+class ModMetadataException : RuntimeException {
     constructor(message: String) : super(message)
 }

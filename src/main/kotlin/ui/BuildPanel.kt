@@ -191,7 +191,10 @@ class BuildPanel : SimplePanel {
 
                 2 -> {
                     stagingFiles.forEach {
-                        val result = this.fileOperationFailed { archiveStagingFile(it) }
+                        val result = this.fileOperationFailed {
+                            archiveStagingFile(it)
+                            return@fileOperationFailed false
+                        }
                         if (result) {
                             return true
                         }
@@ -217,6 +220,7 @@ class BuildPanel : SimplePanel {
                 try {
                     val result = this.fileOperationFailed {
                         builder.run()
+                        return@fileOperationFailed false
                     }
                     if (result) {
                         this.log()

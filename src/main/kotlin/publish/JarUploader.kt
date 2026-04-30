@@ -9,7 +9,6 @@ import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.io.entity.EntityUtils
-import util.moveOrReplaceFile
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -17,20 +16,25 @@ import java.util.*
 class JarUploader {
     private val file: File
     private val metadata: Metadata
+    private val logger: (String) -> Unit
 
-    constructor(file: File) {
-        this.file = file
-        this.metadata = Metadata(file)
+    constructor(metadata: Metadata, logger: (String) -> Unit) {
+        this.file = metadata.file
+        this.metadata = metadata
+        this.logger = logger
     }
 
-    private fun upload(): Int {
+    fun upload(listed: Boolean): Int {
         if (this.metadata.gameVersions.isEmpty()) {
-            throw ModPublishException("${this.metadata.subtitle} is not applicable to any Minecraft version")
+            throw ModMetadataException("${this.metadata.subtitle} is not applicable to any Minecraft version")
         }
-        return this.request()
+        val code = this.request(listed)
+        this.logger("完成发布")
+        return code
     }
 
-    private fun request(): Int {
+    private fun request(listed: Boolean): Int {
+        this.logger("正在创建请求")
         val body: HashMap<String, Any> = HashMap()
         body["name"] = this.metadata.subtitle
         body["version_number"] = this.metadata.version
@@ -42,6 +46,7 @@ class JarUploader {
         body["file_parts"] = Collections.singletonList(this.file.name)
         body["primary_file"] = this.file.name
         body["featured"] = true
+        body["status"] = if (listed) "listed" else "unlisted"
         val json: String = GSON.toJson(body)
         val httpClient = HttpClients.createDefault()
         httpClient.use { httpClient ->
@@ -63,13 +68,19 @@ class JarUploader {
             )
             val entity: HttpEntity = builder.build()
             post.entity = entity
-            return httpClient.execute(post) {
+            this.logger("正在发布")
+            val response = httpClient.execute(post) {
                 val entity = it.entity
+                val message = if (entity == null) null else EntityUtils.toString(entity)
                 if (it.code != EFFECTIVE_RESPONSE && entity != null) {
-                    Publisher.LOGGER.error(EntityUtils.toString(entity))
+                    Publisher.LOGGER.error(message)
                 }
-                return@execute it.code
+                return@execute Pair(it.code, message)
             }
+            if (response.first != EFFECTIVE_RESPONSE) {
+                throw ModrinthPublishException(response.first, response.second)
+            }
+            return response.first
         }
     }
 
@@ -88,34 +99,5 @@ class JarUploader {
         private const val EFFECTIVE_RESPONSE = 200
         private val GSON: Gson = Gson()
         val versions: List<String> = AppConfiguration.getVersionSupport()
-
-        fun start(files: List<File>) {
-            Publisher.LOGGER.info("Check the files to be published: ")
-            Publisher.LOGGER.info("-".repeat(70))
-            files.stream()
-                .map { Metadata(it) }
-                .map { "${it.subtitle} ${it.gameVersions}" }
-                .forEach { Publisher.LOGGER.info(it) }
-            Publisher.LOGGER.info("-".repeat(70))
-            Publisher.LOGGER.info("Confirm to publish these ${files.size} mod(s) to Modrinth? Y/N")
-            val input: String = readln()
-            if (input == "y" || input == "Y") {
-                for ((index, file) in files.withIndex()) {
-                    Publisher.LOGGER.info("[${index}/${files.size}] Publishing ${file.name} to Modrinth...")
-                    val uploader = JarUploader(file)
-                    val code = uploader.upload()
-                    if (code == EFFECTIVE_RESPONSE) {
-                        Publisher.LOGGER.info("Published, status code: $code")
-                        moveOrReplaceFile(file.toPath(), File(AppConfiguration.getArchive(), file.name).toPath())
-                    } else {
-                        Publisher.LOGGER.error("Publish failed, status code: $code")
-                        throw IllegalStateException("${file.name} failed to publish to Modrinth, status code: $code")
-                    }
-                }
-            } else {
-                Publisher.LOGGER.info("Abort publishing!")
-                return
-            }
-        }
     }
 }

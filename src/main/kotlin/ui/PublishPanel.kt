@@ -2,7 +2,9 @@ package ui
 
 import AppConfiguration
 import Publisher
+import publish.JarUploader
 import publish.Metadata
+import publish.ModrinthPublishException
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -88,22 +90,10 @@ class PublishPanel : SimplePanel {
                 this.log("开始发布，共${files.size}个文件")
                 Publisher.EXECUTOR.execute {
                     try {
-                        for ((index, file) in files.withIndex()) {
-                            val failed = this.fileOperationFailed {
-                                if (this.buttonState == ButtonState.WAIT_TO_STOP) {
-                                    return@fileOperationFailed
-                                }
-                                val metadata = getMetadata(file)
-                                this.setCurrentVersion(metadata.mcVersion)
-                                // TODO 替换为实际发布功能
-                                Thread.sleep(2000)
-                                this.setProgress(index + 1, files.size)
-                            }
-                            if (failed) {
-                                this.log("发布中止！")
-                                break
-                            }
-                        }
+                        this.publish(files)
+                    } catch (e: Exception) {
+                        this.log("发布失败")
+                        Publisher.LOGGER.error("Publish failed: ", e)
                     } finally {
                         this.setButtonState(ButtonState.READY)
                         this.setCurrentVersion(null)
@@ -120,6 +110,37 @@ class PublishPanel : SimplePanel {
         panel.maximumSize = Dimension(Int.MAX_VALUE, this.publishButton.preferredSize.height)
         this.publishButton.alignmentX = 0.5F
         return panel
+    }
+
+    private fun publish(files: ArrayList<File>) {
+        for ((index, file) in files.withIndex()) {
+            val failed = this.fileOperationFailed {
+                if (this.buttonState == ButtonState.WAIT_TO_STOP) {
+                    return@fileOperationFailed true
+                }
+                val metadata = getMetadata(file)
+                this.setCurrentVersion(metadata.mcVersion)
+                val uploader = JarUploader(metadata) { this.log(it) }
+                try {
+                    this.log("-".repeat(80))
+                    this.log("开始发布${metadata.version}版本，游戏版本：${metadata.gameVersions}")
+                    uploader.upload(true)
+                    this.log("-".repeat(80))
+                } catch (e: ModrinthPublishException) {
+                    this.log()
+                    this.log("发布失败！")
+                    this.log("返回码：${e.code}")
+                    this.log("消息：${e.message}")
+                    return@fileOperationFailed true
+                }
+                this.setProgress(index + 1, files.size)
+                return@fileOperationFailed false
+            }
+            if (failed) {
+                this.log("发布中止！")
+                break
+            }
+        }
     }
 
     private fun checkModFileError(): RefusalPublishReason {
