@@ -1,5 +1,6 @@
 package ui
 
+import AppConfiguration
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -15,6 +16,8 @@ open class SimplePanel : JPanel {
     protected val leftPanel = JPanel()
     protected val rightPanel = JPanel(BorderLayout())
     protected val rightTextArea = JTextArea()
+    protected val fileBrowseButton = JButton("浏览...")
+    protected val folderPathField: JTextField = JTextField()
     private val logs: ArrayList<String> = ArrayList()
     private val progressBar: JProgressBar = JProgressBar()
     private val currentVersion = JLabel()
@@ -87,6 +90,36 @@ open class SimplePanel : JPanel {
         this.registryPanelsToHighlight(panel)
         panel.addMouseListener(this.clickToFocusInWindow(panel))
         return panel
+    }
+
+    protected fun createFileChooser(): JPanel {
+        val folderPanel = JPanel()
+        folderPanel.layout = BoxLayout(folderPanel, BoxLayout.X_AXIS)
+        folderPanel.alignmentX = 0.5f
+        folderPanel.maximumSize = Dimension(Integer.MAX_VALUE, 30)
+        this.folderPathField.isEditable = false
+        this.folderPathField.border = BorderFactory.createEtchedBorder()
+        this.folderPathField.preferredSize = Dimension(0, 0)
+        this.folderPathField.maximumSize = Dimension(Integer.MAX_VALUE, 30)
+        this.folderPathField.text = AppConfiguration.getRoot().absolutePath
+        this.fileBrowseButton.addActionListener {
+            val chooser = JFileChooser()
+            chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+            chooser.selectedFile = AppConfiguration.getRoot()
+            if (chooser.showOpenDialog(folderPanel) == JFileChooser.APPROVE_OPTION) {
+                this.folderPathField.text = chooser.selectedFile.absolutePath
+                this.onFileChooserUpdate()
+            }
+        }
+        folderPanel.add(this.folderPathField)
+        folderPanel.add(Box.createHorizontalStrut(5))
+        folderPanel.add(this.fileBrowseButton)
+        this.registryPanelsToHighlight(this.folderPathField)
+        return folderPanel
+    }
+
+
+    protected open fun onFileChooserUpdate() {
     }
 
     protected fun setProgress(value: Int, size: Int) {

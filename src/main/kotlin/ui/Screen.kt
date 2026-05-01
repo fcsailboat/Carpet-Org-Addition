@@ -24,10 +24,9 @@ class Screen : JFrame {
     private fun initTabbedPane() {
         val registry: (JComponent) -> Unit = { this.panelsToHighlight.add(it) }
         val tabbedPane = JTabbedPane()
-        val build = BuildPanel(registry)
-        val publish = PublishPanel(registry)
-        tabbedPane.addTab("构建", build)
-        tabbedPane.addTab("发布", publish)
+        tabbedPane.addTab("构建", BuildPanel(registry))
+        tabbedPane.addTab("发布", PublishPanel(registry))
+        tabbedPane.addTab("合并分支", MergeBranchPanel(registry))
         this.add(tabbedPane)
     }
 

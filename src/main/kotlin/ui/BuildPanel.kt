@@ -17,8 +17,6 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.swing.*
 
 class BuildPanel : SimplePanel {
-    private val fileBrowseButton = JButton("浏览...")
-    private val folderPathField: JTextField = JTextField()
     private val versions: ConcurrentHashMap<String, JCheckBox> = ConcurrentHashMap()
     private val versionPanel: JPanel = JPanel()
     private val versionScrollPane: JScrollPane = JScrollPane(this.versionPanel)
@@ -42,30 +40,8 @@ class BuildPanel : SimplePanel {
         this.rightPanel.add(this.initCurrentVersion(), BorderLayout.SOUTH)
     }
 
-    private fun createFileChooser(): JPanel {
-        val folderPanel = JPanel()
-        folderPanel.layout = BoxLayout(folderPanel, BoxLayout.X_AXIS)
-        folderPanel.alignmentX = 0.5f
-        folderPanel.maximumSize = Dimension(Integer.MAX_VALUE, 30)
-        this.folderPathField.isEditable = false
-        this.folderPathField.border = BorderFactory.createEtchedBorder()
-        this.folderPathField.preferredSize = Dimension(0, 0)
-        this.folderPathField.maximumSize = Dimension(Integer.MAX_VALUE, 30)
-        this.folderPathField.text = AppConfiguration.getRoot().absolutePath
-        this.fileBrowseButton.addActionListener {
-            val chooser = JFileChooser()
-            chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-            chooser.selectedFile = AppConfiguration.getRoot()
-            if (chooser.showOpenDialog(folderPanel) == JFileChooser.APPROVE_OPTION) {
-                this.folderPathField.text = chooser.selectedFile.absolutePath
-                this.refreshVersions()
-            }
-        }
-        folderPanel.add(this.folderPathField)
-        folderPanel.add(Box.createHorizontalStrut(5))
-        folderPanel.add(this.fileBrowseButton)
-        this.registryPanelsToHighlight(this.folderPathField)
-        return folderPanel
+    override fun onFileChooserUpdate() {
+        this.refreshVersions()
     }
 
     private fun createVersionCheckBox(): JPanel {
@@ -114,7 +90,7 @@ class BuildPanel : SimplePanel {
     }
 
     private fun refreshVersions() {
-        val path = Path.of(folderPathField.text)
+        val path = Path.of(this.folderPathField.text)
         val versions = listVersion(path)
         this.versionPanel.removeAll()
         this.versions.clear()
