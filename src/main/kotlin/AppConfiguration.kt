@@ -82,7 +82,16 @@ class AppConfiguration {
         }
 
         private fun getJsonObject(): JsonObject {
-            val text = File(this.getPublisher(), "config/config.json").readText()
+            val file = File(this.getPublisher(), "config/config.json")
+            if (!file.exists()) {
+                val json = JsonObject()
+                json.add("versions", JsonArray())
+                json.addProperty("token", "")
+                Publisher.LOGGER.info("Init config/config.json")
+                file.parentFile.mkdirs()
+                file.writeText(GSON.toJson(json))
+            }
+            val text = file.readText()
             return GSON.fromJson(text, JsonObject::class.java)
         }
     }

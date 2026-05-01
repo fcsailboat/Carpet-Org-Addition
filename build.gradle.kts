@@ -1,5 +1,7 @@
 plugins {
     kotlin("jvm") version "2.3.20"
+    id("com.gradleup.shadow") version "8.3.0"
+    application
 }
 
 repositories {
@@ -26,11 +28,17 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.register<JavaExec>("run") {
-    group = "publisher"
-    description = "Run Publisher"
+application {
     mainClass.set("PublisherKt")
-    classpath = sourceSets.main.get().runtimeClasspath
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("Publisher")
+    archiveClassifier.set("")
+    archiveVersion.set("1.0.0")
+}
+
+tasks.named<JavaExec>("run") {
     workingDir = rootProject.projectDir.parentFile
     jvmArgs("--enable-native-access=ALL-UNNAMED")
 }

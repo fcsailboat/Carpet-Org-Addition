@@ -3,6 +3,7 @@ package util
 import AppConfiguration
 import meta.VersionFormats
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.errors.RepositoryNotFoundException
 import java.io.File
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
@@ -11,14 +12,21 @@ import java.nio.file.StandardCopyOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.io.path.inputStream
+import kotlin.io.path.isDirectory
 import kotlin.math.max
 
 fun listBranch(path: Path): List<String> {
-    val git = Git.open(path.toFile())
-    val call = git.branchList().call()
-    return call.stream().map { it.name.replace("refs/heads/", "") }.toList()
+    if (path.resolve(".git").isDirectory()) {
+        try {
+            val git = Git.open(path.toFile())
+            val call = git.branchList().call()
+            return call.stream().map { it.name.replace("refs/heads/", "") }.toList()
+        } catch (_: RepositoryNotFoundException) {
+            return listOf()
+        }
+    }
+    return listOf()
 }
-
 
 fun listVersion(path: Path): List<String> {
     val branches = listBranch(path)
