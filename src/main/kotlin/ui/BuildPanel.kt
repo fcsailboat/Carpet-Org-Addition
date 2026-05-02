@@ -156,7 +156,7 @@ class BuildPanel : SimplePanel {
                 options[2]
             )
             when (choice) {
-                0 -> {
+                JOptionPane.CLOSED_OPTION, 0 -> {
                     this.log("取消操作")
                     return true
                 }
