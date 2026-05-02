@@ -7,9 +7,14 @@ import javax.swing.JComponent
 import javax.swing.JList
 import javax.swing.TransferHandler
 
-class ListItemTransferHandler : TransferHandler() {
+class ListItemTransferHandler : TransferHandler {
     private val localObjectFlavor = DataFlavor(String::class.java, "Local String List Item")
+    private val limit: () -> Int
     private var sourceIndex = -1
+
+    constructor(limit: () -> Int) {
+        this.limit = limit
+    }
 
     override fun createTransferable(c: JComponent): Transferable? {
         val list = c as? JList<*> ?: return null
@@ -34,7 +39,10 @@ class ListItemTransferHandler : TransferHandler() {
     }
 
     override fun canImport(support: TransferSupport): Boolean {
-        return support.isDataFlavorSupported(this.localObjectFlavor) && support.dropLocation is JList.DropLocation
+        if (support.isDataFlavorSupported(this.localObjectFlavor) && support.dropLocation is JList.DropLocation) {
+            return (support.dropLocation as JList.DropLocation).index <= this.limit()
+        }
+        return false
     }
 
     override fun importData(support: TransferSupport): Boolean {
@@ -46,6 +54,9 @@ class ListItemTransferHandler : TransferHandler() {
             val value = support.transferable.getTransferData(this.localObjectFlavor) as String
             if (this.sourceIndex == dropIndex) {
                 return true
+            }
+            if (dropIndex > this.limit()) {
+                return false
             }
             model.removeAt(this.sourceIndex)
             val insertIndex = if (dropIndex > this.sourceIndex) dropIndex - 1 else dropIndex

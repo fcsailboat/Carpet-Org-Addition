@@ -9,7 +9,7 @@ class Screen : JFrame {
     private val panelsToHighlight: MutableList<JComponent> = mutableListOf()
 
     constructor() {
-        this.setSize(900, 600)
+        this.setSize(960, 650)
         this.defaultCloseOperation = EXIT_ON_CLOSE
         this.setLocationRelativeTo(null)
         this.title = "Publisher"
@@ -32,14 +32,16 @@ class Screen : JFrame {
 
     private fun installFocusHighlight() {
         val originalBorders = this.panelsToHighlight.associateWith { it.border }
-        val focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager()
-        focusManager.addPropertyChangeListener("focusOwner") { evt ->
-            val newFocusOwner = evt.newValue as? Component
-            for (panel in this.panelsToHighlight) {
-                if (newFocusOwner != null && SwingUtilities.isDescendingFrom(newFocusOwner, panel)) {
-                    panel.border = BorderFactory.createLineBorder(Color.BLACK, 1)
-                } else {
-                    panel.border = originalBorders[panel]
+        if (PANELS_HIGHLIGHT) {
+            val focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager()
+            focusManager.addPropertyChangeListener("focusOwner") { evt ->
+                val newFocusOwner = evt.newValue as? Component
+                for (panel in this.panelsToHighlight) {
+                    if (newFocusOwner != null && SwingUtilities.isDescendingFrom(newFocusOwner, panel)) {
+                        panel.border = BorderFactory.createLineBorder(Color.BLACK, 1)
+                    } else {
+                        panel.border = originalBorders[panel]
+                    }
                 }
             }
         }
@@ -47,5 +49,9 @@ class Screen : JFrame {
 
     fun display() {
         this.isVisible = true
+    }
+
+    companion object {
+        private const val PANELS_HIGHLIGHT = false
     }
 }
