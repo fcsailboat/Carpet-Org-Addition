@@ -91,7 +91,7 @@ class BuildPanel : SimplePanel {
 
     private fun refreshVersions() {
         val path = Path.of(this.folderPathField.text)
-        val versions = listVersion(path)
+        val versions = listVersion(path).reversed()
         this.versionPanel.removeAll()
         this.versions.clear()
         val defaultVersions = AppConfiguration.getDefaultSelectionVersions()
@@ -119,7 +119,7 @@ class BuildPanel : SimplePanel {
                 val list = this.versions.entries.stream()
                     .filter { it.value.isSelected }
                     .map { it.key }
-                    .sorted { s1, s2 -> -versionCompare(s1, s2) }
+                    .sorted { s1, s2 -> versionCompare(s1, s2) }
                     .toList()
                 if (list.isEmpty()) {
                     this.log("未选择任何版本！")

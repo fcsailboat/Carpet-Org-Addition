@@ -213,6 +213,7 @@ class PublishPanel : SimplePanel {
 
     private fun createFileSelectionButton(): JPanel {
         val panel = JPanel()
+        // TODO 发布时禁用按钮
         val clear = JButton("清空")
         clear.addActionListener {
             this.clearFiles()

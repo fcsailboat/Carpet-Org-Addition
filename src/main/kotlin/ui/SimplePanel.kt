@@ -48,7 +48,7 @@ open class SimplePanel : JPanel {
         scroll.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
         scroll.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         scroll.verticalScrollBar.unitIncrement = 16
-        this.rightTextArea.border = BorderFactory.createTitledBorder("日志")
+        this.rightTextArea.border = BorderFactory.createTitledBorder("信息")
         this.rightTextArea.isEditable = false
         scroll.setViewportView(this.rightTextArea)
         this.registryPanelsToHighlight(scroll)

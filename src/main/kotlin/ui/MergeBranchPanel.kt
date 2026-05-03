@@ -26,6 +26,8 @@ class MergeBranchPanel : SimplePanel {
         this.leftPanel.add(this.createFileChooser())
         this.leftPanel.add(Box.createVerticalStrut(10))
         this.leftPanel.add(this.createSortableList())
+        this.leftPanel.add(Box.createVerticalStrut(5))
+        this.leftPanel.add(this.createStartMergeButton())
         this.leftPanel.add(Box.createVerticalGlue())
         this.leftPanel.add(this.initProgressBar())
     }
@@ -34,9 +36,32 @@ class MergeBranchPanel : SimplePanel {
         this.refreshBranches()
     }
 
+    private fun createStartMergeButton(): JPanel {
+        val panel = JPanel(BorderLayout())
+        val button = JButton("合并")
+        button.addActionListener {
+            if (this.unordered()) {
+                val chooser = JOptionPane.showConfirmDialog(
+                    this,
+                    "已选择的分支尚未按版本排序，是否继续合并？",
+                    "分支未排序",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+                )
+                if (chooser != 0) {
+                    return@addActionListener
+                }
+            }
+            TODO()
+        }
+        panel.add(button, BorderLayout.CENTER)
+        panel.maximumSize = Dimension(Int.MAX_VALUE, panel.preferredSize.height)
+        return panel
+    }
+
     private fun refreshBranches() {
         val path = Path.of(this.folderPathField.text)
-        val versions = listVersion(path).reversed()
+        val versions = listVersion(path)
         this.versionChecks.removeIf { it !in versions }
         this.prioritizeCheckedVersions(versions)
         this.selectVersions.visibleRowCount = max(this.listModel.size, 6)
@@ -91,11 +116,15 @@ class MergeBranchPanel : SimplePanel {
         val scroll = JScrollPane(selectVersions)
         val panel = JPanel(BorderLayout())
         panel.add(scroll, BorderLayout.CENTER)
+        val buttonWrapper = JPanel(BorderLayout())
         val button = JButton("排序选择的分支")
         button.addActionListener {
-            this.listModel.sort(0, this.versionChecks.size - 1) { o1, o2 -> -versionCompare(o1, o2) }
+            this.listModel.sort(0, this.versionChecks.size - 1) { o1, o2 -> versionCompare(o1, o2) }
         }
-        panel.add(button, BorderLayout.SOUTH)
+        buttonWrapper.add(Box.createVerticalStrut(3), BorderLayout.NORTH)
+        buttonWrapper.add(button, BorderLayout.CENTER)
+        buttonWrapper.add(Box.createVerticalStrut(3), BorderLayout.SOUTH)
+        panel.add(buttonWrapper, BorderLayout.SOUTH)
         panel.border = BorderFactory.createTitledBorder("选择分支")
         panel.maximumSize = Dimension(Int.MAX_VALUE, scroll.preferredSize.height)
         return panel
@@ -103,6 +132,16 @@ class MergeBranchPanel : SimplePanel {
 
     private fun String.isChecked(): Boolean {
         return this in versionChecks
+    }
+
+    private fun unordered(): Boolean {
+        for (index in 0..this.versionChecks.size - 2) {
+            if (versionCompare(this.listModel.get(index), this.listModel.get(index + 1)) < 0) {
+                continue
+            }
+            return true
+        }
+        return false
     }
 
     private fun prioritizeCheckedVersions(branches: Iterable<String> = this.listModel) {
