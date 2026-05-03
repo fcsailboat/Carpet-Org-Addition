@@ -39,6 +39,9 @@ class ListItemTransferHandler : TransferHandler {
     }
 
     override fun canImport(support: TransferSupport): Boolean {
+        if (this.sourceIndex >= this.limit()) {
+            return false
+        }
         if (support.isDataFlavorSupported(this.localObjectFlavor) && support.dropLocation is JList.DropLocation) {
             return (support.dropLocation as JList.DropLocation).index <= this.limit()
         }
