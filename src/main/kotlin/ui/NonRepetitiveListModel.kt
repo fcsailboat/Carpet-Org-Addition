@@ -36,6 +36,20 @@ private constructor(private val trustee: DefaultListModel<E>) :
         return this.trustee.get(index)
     }
 
+    fun sort(from: Int, to: Int, comparator: Comparator<E>) {
+        if (from !in 0..to || to >= this.size) {
+            throw IllegalArgumentException("range [$from, $to] invalid for size ${this.size}")
+        }
+        if (from == to) {
+            return
+        }
+        val list = (from..to).map { this.trustee[it] }.toMutableList()
+        list.sortWith(comparator)
+        for ((index, e) in list.withIndex()) {
+            this.trustee[from + index] = e
+        }
+    }
+
     fun clear() {
         this.deduplicator.clear()
         this.trustee.clear()

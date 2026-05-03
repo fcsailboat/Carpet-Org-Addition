@@ -2,6 +2,7 @@ package ui
 
 import AppConfiguration
 import util.listVersion
+import util.versionCompare
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -36,6 +37,7 @@ class MergeBranchPanel : SimplePanel {
     private fun refreshBranches() {
         val path = Path.of(this.folderPathField.text)
         val versions = listVersion(path).reversed()
+        this.versionChecks.removeIf { it !in versions }
         this.prioritizeCheckedVersions(versions)
         this.selectVersions.visibleRowCount = max(this.listModel.size, 6)
     }
@@ -88,8 +90,13 @@ class MergeBranchPanel : SimplePanel {
         }
         val scroll = JScrollPane(selectVersions)
         val panel = JPanel(BorderLayout())
-        panel.border = BorderFactory.createTitledBorder("选择分支")
         panel.add(scroll, BorderLayout.CENTER)
+        val button = JButton("排序选择的分支")
+        button.addActionListener {
+            this.listModel.sort(0, this.versionChecks.size - 1) { o1, o2 -> -versionCompare(o1, o2) }
+        }
+        panel.add(button, BorderLayout.SOUTH)
+        panel.border = BorderFactory.createTitledBorder("选择分支")
         panel.maximumSize = Dimension(Int.MAX_VALUE, scroll.preferredSize.height)
         return panel
     }
