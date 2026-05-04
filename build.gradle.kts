@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.3.20"
     id("com.gradleup.shadow") version "8.3.0"
+    id("org.openjfx.javafxplugin") version "0.1.0"
     application
 }
 
@@ -30,6 +31,11 @@ tasks.test {
 
 application {
     mainClass.set("PublisherKt")
+}
+
+javafx {
+    version = "25"
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.swing")
 }
 
 tasks.shadowJar {
