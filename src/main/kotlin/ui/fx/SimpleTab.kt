@@ -1,6 +1,9 @@
 package ui.fx
 
 import AppConfiguration
+import javafx.application.Platform
+import javafx.concurrent.Task
+import javafx.concurrent.Worker
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -31,12 +34,17 @@ open class SimpleTab : VBox() {
 
     private fun addMessagePanel() {
         val pane = TitledPane("信息", this.messageArea)
+        this.messageArea.isEditable = false
         pane.isCollapsible = false
         pane.isAnimated = false
         pane.maxHeight = Double.MAX_VALUE
         pane.style = """-fx-border-color:lightgray;-fx-border-width:2px;-fx-border-radius:4px;"""
         this.rightBox.children.add(pane)
         setVgrow(pane, Priority.ALWAYS)
+    }
+
+    protected fun addCurrentProceed() {
+        this.rightBox.children.add(this.proceeding)
     }
 
     protected fun addFileChooser() {
@@ -73,8 +81,9 @@ open class SimpleTab : VBox() {
         stack.alignment = Pos.CENTER
         this.progressBar.maxWidth = Double.MAX_VALUE
         HBox.setHgrow(this.progressBar, Priority.ALWAYS)
+        this.progressBar.prefHeight = 22.5
         this.leftBox.children.add(stack)
-        this.setProgress(0, 0)
+        this.setProgress(0.0, 0)
     }
 
     protected fun addSpace() {
@@ -85,21 +94,38 @@ open class SimpleTab : VBox() {
     }
 
     protected fun logMessage(message: String) {
-        this.messageArea.text = this.messageArea.text + "\n" + message
+        this.messageArea.text = "${this.messageArea.text}${message}\n"
+    }
+
+    protected fun safetyLogMessage(message: String) {
+        Platform.runLater {
+            logMessage(message)
+        }
     }
 
     protected fun clearMessage() {
         this.messageArea.clear()
     }
 
-    protected fun setProgress(value: Int, max: Int) {
+    protected fun setProgress(progress: Double, max: Int) {
         if (max == 0) {
             this.progressBar.progress = 0.0
             this.progressBarLabel.text = "0%"
         } else {
-            val progress = value.toDouble() / max
             this.progressBar.progress = progress
-            this.progressBarLabel.text = "${FORMATTER.format(100 * progress)}% [$value/$max]"
+            this.progressBarLabel.text = "${FORMATTER.format(100 * progress)}% [${(progress * max).toInt()}/$max]"
+        }
+    }
+
+    protected fun Task<Unit>.addFinishedListener(listener: (Worker.State) -> Unit) {
+        this.stateProperty().addListener { _, _, newValue ->
+            when (newValue) {
+                Worker.State.SUCCEEDED, Worker.State.CANCELLED, Worker.State.FAILED -> {
+                    listener(newValue)
+                }
+
+                else -> {}
+            }
         }
     }
 
