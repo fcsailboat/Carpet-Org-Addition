@@ -1,15 +1,16 @@
 package ui.fx
 
 import AppConfiguration
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.stage.DirectoryChooser
 import java.text.DecimalFormat
 
-open class SimpleTab : VBox(3.0) {
-    protected val leftBox = VBox()
-    protected val rightBox = VBox()
+open class SimpleTab : VBox() {
+    protected val leftBox = VBox(5.0)
+    protected val rightBox = VBox(5.0)
     private val progressBar = ProgressBar()
     private val progressBarLabel = Label()
     protected val folderPathField = TextField()
@@ -18,15 +19,17 @@ open class SimpleTab : VBox(3.0) {
     private val messageArea = TextArea()
 
     init {
+        this.leftBox.padding = Insets(4.0, 3.0, 3.0, 3.0)
+        this.rightBox.padding = Insets(3.0, 3.0, 3.0, 3.0)
         val split = SplitPane()
         split.items.addAll(this.leftBox, this.rightBox)
         split.setDividerPositions(*doubleArrayOf(0.3))
         setVgrow(split, Priority.ALWAYS)
         this.children.add(split)
-        this.initMessagePanel()
+        this.addMessagePanel()
     }
 
-    private fun initMessagePanel() {
+    private fun addMessagePanel() {
         val pane = TitledPane("信息", this.messageArea)
         pane.isCollapsible = false
         pane.isAnimated = false
@@ -36,7 +39,7 @@ open class SimpleTab : VBox(3.0) {
         setVgrow(pane, Priority.ALWAYS)
     }
 
-    protected fun initFileChooser() {
+    protected fun addFileChooser() {
         val box = HBox(5.0)
         box.alignment = Pos.CENTER_LEFT
         box.maxWidth = Double.MAX_VALUE
@@ -65,7 +68,7 @@ open class SimpleTab : VBox(3.0) {
         this.leftBox.children.add(box)
     }
 
-    protected fun initProgressBar() {
+    protected fun addProgressBar() {
         val stack = StackPane(this.progressBar, this.progressBarLabel)
         stack.alignment = Pos.CENTER
         this.progressBar.maxWidth = Double.MAX_VALUE
@@ -74,8 +77,8 @@ open class SimpleTab : VBox(3.0) {
         this.setProgress(0, 0)
     }
 
-    protected fun space() {
-        this.leftBox.children.add(Region().apply { setVgrow(this, Priority.ALWAYS) })
+    protected fun addSpace() {
+        this.leftBox.children.add(Region().apply { setVgrow(this, Priority.SOMETIMES) })
     }
 
     protected open fun onFileChooserUpdate() {
@@ -108,7 +111,8 @@ open class SimpleTab : VBox(3.0) {
         this.setCurrentProceed("当前版本", right)
     }
 
-    private companion object {
+    companion object {
         private val FORMATTER = DecimalFormat("#.##")
+        const val CELL_SIZE = 20.0
     }
 }

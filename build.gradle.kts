@@ -19,6 +19,7 @@ dependencies {
     @Suppress("all")
     implementation("org.apache.httpcomponents.client5:httpclient5-fluent:5.4")
     implementation("com.formdev:flatlaf:3.7.1")
+    implementation("org.apache.commons:commons-collections4:4.5.0")
 }
 
 kotlin {
