@@ -18,17 +18,17 @@ open class SimpleTab : VBox() {
     private val progressBarLabel = Label()
     protected val folderPathField = TextField()
     protected val fileBrowseButton = Button("浏览...")
+    private val splitPane = SplitPane()
     private val proceeding = Label()
     private val messageArea = TextArea()
 
     init {
         this.leftBox.padding = Insets(4.0, 3.0, 3.0, 3.0)
         this.rightBox.padding = Insets(3.0, 3.0, 3.0, 3.0)
-        val split = SplitPane()
-        split.items.addAll(this.leftBox, this.rightBox)
-        split.setDividerPositions(*doubleArrayOf(0.3))
-        setVgrow(split, Priority.ALWAYS)
-        this.children.add(split)
+        this.splitPane.items.addAll(this.leftBox, this.rightBox)
+        this.setDividerPosition(0.35)
+        setVgrow(this.splitPane, Priority.ALWAYS)
+        this.children.add(this.splitPane)
         this.addMessagePanel()
     }
 
@@ -84,6 +84,10 @@ open class SimpleTab : VBox() {
         this.progressBar.prefHeight = 22.5
         this.leftBox.children.add(stack)
         this.setProgress(0.0, 0)
+    }
+
+    protected fun setDividerPosition(value: Double) {
+        this.splitPane.setDividerPositions(*doubleArrayOf(value))
     }
 
     protected fun addSpace() {

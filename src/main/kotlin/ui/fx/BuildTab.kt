@@ -18,11 +18,12 @@ import util.archiveStagingFile
 import util.listVersion
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.max
 
 
 class BuildTab : SimpleTab() {
-    private val observableList = FXCollections.observableList(SetUniqueList.setUniqueList(ArrayList<String>()))
-    private val listView = ListView(this.observableList)
+    private val versionList = FXCollections.observableList(SetUniqueList.setUniqueList(ArrayList<String>()))
+    private val listView = ListView(this.versionList)
     private val checkStates = HashMap<String, BooleanProperty>()
     private val startBuildButton = Button()
     private var workState = WorkStatus.READY
@@ -41,7 +42,7 @@ class BuildTab : SimpleTab() {
         val titledPane = TitledPane("选择版本", this.listView)
         this.listView.fixedCellSize = CELL_SIZE
         this.listView.cellFactory = CheckBoxListCell.forListView {
-            checkStates.getOrPut(it) {
+            this.checkStates.getOrPut(it) {
                 SimpleBooleanProperty(false)
             }
         }
@@ -59,9 +60,9 @@ class BuildTab : SimpleTab() {
         for (version in AppConfiguration.getDefaultSelectionVersions()) {
             this.checkStates[version] = SimpleBooleanProperty(true)
         }
-        this.observableList.clear()
-        this.observableList.addAll(versions)
-        this.listView.prefHeight = CELL_SIZE * versions.size
+        this.versionList.clear()
+        this.versionList.addAll(versions)
+        this.listView.prefHeight = CELL_SIZE * max(versions.size, 3)
     }
 
     private fun addStartButton() {
@@ -81,7 +82,7 @@ class BuildTab : SimpleTab() {
     }
 
     private fun startBuildTask() {
-        val list = this.observableList.stream().filter { it.isChecked() }.toList().reversed()
+        val list = this.versionList.stream().filter { it.isChecked() }.toList().reversed()
         if (list.isEmpty()) {
             this.logMessage("未选择任何版本！")
             return
