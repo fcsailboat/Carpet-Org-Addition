@@ -94,7 +94,8 @@ open class SimpleTab : VBox() {
     }
 
     protected fun logMessage(message: String) {
-        this.messageArea.text = "${this.messageArea.text}${message}\n"
+        this.messageArea.appendText("${message}\n")
+        this.messageArea.end()
     }
 
     protected fun safetyLogMessage(message: String) {
