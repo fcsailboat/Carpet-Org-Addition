@@ -2,29 +2,24 @@ package ui.fx
 
 import AppConfiguration
 import javafx.application.Platform
-import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
 import javafx.embed.swing.SwingFXUtils
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.ListCell
-import javafx.scene.control.ListView
 import javafx.scene.control.TitledPane
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.input.TransferMode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
-import org.apache.commons.collections4.list.SetUniqueList
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.swing.Icon
 import javax.swing.filechooser.FileSystemView
-import kotlin.math.max
 
 class PublishTab : SimpleTab() {
-    private val fileList = FXCollections.observableList(SetUniqueList.setUniqueList(ArrayList<File>()))
-    private val listView = ListView(this.fileList)
+    private val listView = WritableUniqueListView<File>()
     private val fileIconCaches = HashMap<File, ImageView>()
 
     init {
@@ -38,14 +33,12 @@ class PublishTab : SimpleTab() {
 
     private fun addFileListPanel() {
         val box = VBox(8.0)
-        this.fileList.addListener(ListChangeListener { change ->
+        this.listView.addListChangeListener { change ->
             while (change.next()) {
                 val removed = change.removed
                 this.fileIconCaches.entries.removeIf { entry -> entry.key in removed }
             }
-            this.listView.prefHeight = CELL_SIZE * max(this.fileList.size, 2) + 24
-        })
-        this.listView.fixedCellSize = CELL_SIZE
+        }
         this.listView.cellFactory = {
             object : ListCell<File>() {
                 override fun updateItem(file: File?, empty: Boolean) {
@@ -60,11 +53,31 @@ class PublishTab : SimpleTab() {
                 }
             }
         }
+        this.listView.setOnDragOver { event ->
+            if (event.gestureSource != this.listView && event.dragboard.hasFiles()) {
+                val files = event.dragboard.files
+                if (files != null && files.filter { it.isFile && it.name.endsWith(".jar") }.size == files.size) {
+                    event.acceptTransferModes(TransferMode.COPY)
+                }
+            }
+            event.consume()
+        }
+
+        this.listView.setOnDragDropped { event ->
+            val dragboard = event.dragboard
+            if (dragboard.hasFiles()) {
+                this.listView.addAll(dragboard.files)
+                event.setDropCompleted(true)
+            } else {
+                event.setDropCompleted(false)
+            }
+            event.consume()
+        }
         box.children.add(this.listView)
         val title = TitledPane("选择文件", box)
         this.addFileListButton(box)
         this.leftBox.children.add(title)
-        AppConfiguration.getStaging().listFiles()?.forEach { this.fileList.add(it) }
+        AppConfiguration.getStaging().listFiles()?.forEach { this.listView.add(it) }
     }
 
     private fun addFileListButton(parent: VBox) {
@@ -74,7 +87,7 @@ class PublishTab : SimpleTab() {
         val buttonWidth = 70.0
         clear.prefWidth = buttonWidth
         clear.onAction = {
-            this.fileList.clear()
+            this.listView.clear()
         }
         selection.prefWidth = buttonWidth
         selection.onAction = {
@@ -84,8 +97,8 @@ class PublishTab : SimpleTab() {
             }
             val selectedFiles = chooser.showOpenMultipleDialog(selection.scene.window)
             if (selectedFiles != null) {
-                this.fileList.clear()
-                this.fileList.addAll(selectedFiles)
+                this.listView.clear()
+                this.listView.addAll(selectedFiles)
             }
         }
         box.children.add(clear)
