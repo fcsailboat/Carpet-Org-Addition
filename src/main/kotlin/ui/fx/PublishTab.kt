@@ -11,6 +11,7 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
 import java.awt.image.BufferedImage
@@ -21,14 +22,74 @@ import javax.swing.filechooser.FileSystemView
 class PublishTab : SimpleTab() {
     private val listView = WritableUniqueListView<File>()
     private val fileIconCaches = HashMap<File, ImageView>()
+    private val stateHolder = WorkStateHolder(WorkStatus.READY)
 
     init {
         this.addFileListPanel()
+        this.addPublishButton()
         this.addSpace()
         this.addProgressBar()
         Platform.runLater {
             this.setDividerPosition(0.42)
         }
+    }
+
+    private fun addPublishButton() {
+        val box = HBox(8.0)
+        val publishButton = Button("发布")
+        val cooldownButton = CooldownButton(publishButton)
+        val cancelPublishButton = Button("取消发布")
+        HBox.setHgrow(publishButton, Priority.ALWAYS)
+        publishButton.maxWidth = Double.MAX_VALUE
+        publishButton.onAction = {
+            this.stateHolder.changeWorkState(WorkStatus.PENDING_CONFIRMATION)
+        }
+        this.stateHolder.addChangeListener {
+            publishButton.isDisable = it == WorkStatus.STOPPING
+        }
+        this.stateHolder.addChangeListener {
+            when (it) {
+                WorkStatus.READY -> {
+                    publishButton.text = "发布"
+                }
+
+                WorkStatus.PENDING_CONFIRMATION -> {
+                    publishButton.text = "确认发布"
+                }
+
+                WorkStatus.RUNNING -> {
+                    publishButton.text = "停止发布"
+                }
+
+                WorkStatus.STOPPING -> {
+                    publishButton.text = "正在停止"
+                }
+            }
+        }
+        HBox.setHgrow(cancelPublishButton, Priority.ALWAYS)
+        cancelPublishButton.onAction = {
+            this.stateHolder.changeWorkState(WorkStatus.READY)
+        }
+        cancelPublishButton.maxWidth = Double.MAX_VALUE
+        this.stateHolder.addChangeListener {
+            cancelPublishButton.isVisible = it == WorkStatus.PENDING_CONFIRMATION
+            cancelPublishButton.isManaged = it == WorkStatus.PENDING_CONFIRMATION
+        }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.PENDING_CONFIRMATION) {
+                // 防止按下发布按钮后因误触立即确认
+                cooldownButton.startCooldown()
+            } else {
+                cooldownButton.finishCooldown()
+            }
+        }
+        this.stateHolder.changeWorkState(WorkStatus.READY)
+        cooldownButton.maxWidth = Double.MAX_VALUE
+        HBox.setHgrow(cooldownButton, Priority.ALWAYS)
+        cancelPublishButton.prefWidth = 0.0
+        cooldownButton.prefWidth = 0.0
+        box.children.addAll(cancelPublishButton, cooldownButton)
+        this.leftBox.children.add(box)
     }
 
     private fun addFileListPanel() {
@@ -124,5 +185,12 @@ class PublishTab : SimpleTab() {
         icon.paintIcon(null, graphics2D, 0, 0)
         graphics2D.dispose()
         return SwingFXUtils.toFXImage(image, null)
+    }
+
+    private enum class WorkStatus {
+        READY,
+        PENDING_CONFIRMATION,
+        RUNNING,
+        STOPPING
     }
 }

@@ -1,5 +1,6 @@
 package ui.fx
 
+import Publisher
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Tab
@@ -16,7 +17,17 @@ class MainScreen : Application() {
         val scene = Scene(root, 960.0, 650.0)
         stage.title = "Publisher"
         stage.scene = scene
+        this.loadStylesheet(scene)
         stage.show()
+    }
+
+    private fun loadStylesheet(scene: Scene) {
+        val resource = MainScreen::class.java.getResource("/css/style.css")
+        if (resource == null) {
+            Publisher.LOGGER.error("Failed to load CSS: resource '/css/style.css' not found")
+        } else {
+            scene.stylesheets.add(resource.toExternalForm())
+        }
     }
 
     private fun addTabPane(box: VBox) {

@@ -1,0 +1,7 @@
+.cooldown-progress .progress-bar {
+    -fx-background-color: transparent;
+}
+
+.cooldown-progress .progress-bar > .track {
+    -fx-background-color: transparent;
+}
