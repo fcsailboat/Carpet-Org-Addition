@@ -5,3 +5,27 @@
 .cooldown-progress .progress-bar > .track {
     -fx-background-color: transparent;
 }
+
+.context-menu {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6px;
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 8, 0, 0, 2);
+    -fx-padding: 4px;
+}
+
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 6px 12px;
+}
+
+.menu-item .label {
+    -fx-text-fill: #333333;
+    -fx-font-size: 13px;
+}
+
+.menu-item:hover, .menu-item:focused {
+    -fx-background-color: #e8e8e8;
+    -fx-background-radius: 4px;
+}

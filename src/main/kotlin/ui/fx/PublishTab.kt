@@ -4,9 +4,7 @@ import AppConfiguration
 import javafx.application.Platform
 import javafx.embed.swing.SwingFXUtils
 import javafx.geometry.Pos
-import javafx.scene.control.Button
-import javafx.scene.control.ListCell
-import javafx.scene.control.TitledPane
+import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.TransferMode
@@ -14,6 +12,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
+import util.revealInFileManager
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.swing.Icon
@@ -21,7 +20,7 @@ import javax.swing.filechooser.FileSystemView
 
 class PublishTab : SimpleTab() {
     private val listView = WritableUniqueListView<File>()
-    private val fileIconCaches = HashMap<File, ImageView>()
+    private val fileIconCaches = HashMap<File, Image>()
     private val stateHolder = WorkStateHolder(WorkStatus.READY)
 
     init {
@@ -123,7 +122,6 @@ class PublishTab : SimpleTab() {
             }
             event.consume()
         }
-
         this.listView.setOnDragDropped { event ->
             val dragboard = event.dragboard
             if (dragboard.hasFiles()) {
@@ -134,6 +132,23 @@ class PublishTab : SimpleTab() {
             }
             event.consume()
         }
+        this.listView.addContextMenu(MenuItem("移除").apply {
+            this.setOnAction {
+                val files = listView.selectionModel?.selectedItems?.toList() ?: listOf()
+                for (file in files) {
+                    listView.remove(file)
+                }
+            }
+        })
+        this.listView.addContextMenu(MenuItem("打开文件所在位置").apply {
+            this.setOnAction {
+                val file = listView.selectionModel?.selectedItem
+                if (file != null) {
+                    revealInFileManager(file)
+                }
+            }
+        })
+        this.listView.selectionModel?.selectionMode = SelectionMode.MULTIPLE
         box.children.add(this.listView)
         val title = TitledPane("选择文件", box)
         this.addFileListButton(box)
@@ -169,13 +184,14 @@ class PublishTab : SimpleTab() {
     }
 
     private fun getFileIcon(file: File): ImageView {
-        return this.fileIconCaches.computeIfAbsent(file) {
+        val image = this.fileIconCaches.computeIfAbsent(file) {
             val icon = FileSystemView.getFileSystemView().getSystemIcon(it, 32, 32)
-            return@computeIfAbsent ImageView(this.swingIconToJavaFXImage(icon)).apply {
-                fitHeight = 16.0
-                isPreserveRatio = true
-                isSmooth = true
-            }
+            this.swingIconToJavaFXImage(icon)
+        }
+        return ImageView(image).apply {
+            fitHeight = 16.0
+            isPreserveRatio = true
+            isSmooth = true
         }
     }
 

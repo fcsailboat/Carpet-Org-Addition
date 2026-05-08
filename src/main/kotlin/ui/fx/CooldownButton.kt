@@ -41,7 +41,7 @@ class CooldownButton : HBox {
         this.animation = Timeline(
             KeyFrame(
                 Duration.seconds(seconds), { onCooldownFinished() },
-                KeyValue(this.progressBar.progressProperty(), 0.0, Interpolator.EASE_OUT)
+                KeyValue(this.progressBar.progressProperty(), 0.0, EASE_OUT_QUAD)
             )
         ).apply {
             this.cycleCount = 1
@@ -60,5 +60,13 @@ class CooldownButton : HBox {
         this.button.isDisable = false
         this.progressBar.isVisible = false
         this.progressBar.progress = 0.0
+    }
+
+    private companion object {
+        private val EASE_OUT_QUAD = object : Interpolator() {
+            override fun curve(t: Double): Double {
+                return 1 - (1 - t) * (1 - t)
+            }
+        }
     }
 }

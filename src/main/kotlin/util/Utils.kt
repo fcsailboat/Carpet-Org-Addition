@@ -4,6 +4,7 @@ import AppConfiguration
 import meta.VersionFormats
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.errors.RepositoryNotFoundException
+import java.awt.Desktop
 import java.io.File
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
@@ -128,5 +129,17 @@ private class EqualityByteArray(arr: ByteArray) {
 
     override fun hashCode(): Int {
         return bytes.contentHashCode()
+    }
+}
+
+fun revealInFileManager(file: File) {
+    if (System.getProperty("os.name").lowercase().contains("win")) {
+        Runtime.getRuntime().exec(arrayOf("explorer", "/select,", file.absolutePath))
+    } else {
+        try {
+            Desktop.getDesktop().browseFileDirectory(file)
+        } catch (_: Exception) {
+            Desktop.getDesktop().open(if (file.isFile) file.parentFile else file)
+        }
     }
 }
