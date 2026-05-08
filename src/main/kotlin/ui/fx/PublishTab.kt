@@ -262,6 +262,19 @@ class PublishTab : SkeletonTab() {
                 }
             }
         }
+        this.listView.selectionModel?.selectedItemProperty()?.addListener { _, _, newFile ->
+            if (this.stateHolder.workState == WorkStatus.READY) {
+                val metadata = this.getMetadata(newFile)
+                this.clearMessage()
+                this.logMessage("标题：${metadata.subtitle}")
+                this.logMessage("模组版本：${metadata.version}")
+                this.logMessage("游戏版本：${metadata.gameVersions}")
+                this.logMessage("构建时间：${metadata.getFormatTime()}")
+                this.logMessage("文件名称：${metadata.file.name}")
+                this.logMessage("文件大小：${FORMATTER.format(metadata.file.length().toDouble() / 1024 / 1024)} MB")
+                this.newlineMessage()
+            }
+        }
         this.listView.setOnDragOver { event ->
             if (event.gestureSource != this.listView && event.dragboard.hasFiles()) {
                 val files = event.dragboard.files

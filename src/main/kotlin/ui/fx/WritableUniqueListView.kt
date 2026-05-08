@@ -24,12 +24,12 @@ class WritableUniqueListView<T> : VBox() {
         set(value) {
             this.listView.selectionModel = value
         }
-    val size: Int get() = this.observableList.size
     var cellFactory: Callback<ListView<T>, ListCell<T>>
         get() = this.listView.cellFactory
         set(value) {
             this.listView.cellFactory = value
         }
+    val size: Int get() = this.observableList.size
 
     init {
         this.children.add(this.listView)

@@ -112,6 +112,10 @@ abstract class SkeletonTab : VBox() {
         this.messageArea.clear()
     }
 
+    protected fun newlineMessage() {
+        this.logMessage("")
+    }
+
     protected fun setProgress(progress: Double, max: Int) {
         if (max == 0) {
             this.progressBar.progress = 0.0
@@ -143,7 +147,7 @@ abstract class SkeletonTab : VBox() {
     }
 
     companion object {
-        private val FORMATTER = DecimalFormat("#.##")
+        val FORMATTER = DecimalFormat("#.##")
         const val CELL_SIZE = 20.0
     }
 }
