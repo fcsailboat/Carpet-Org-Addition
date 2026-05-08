@@ -20,11 +20,14 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.swing.Icon
 import javax.swing.filechooser.FileSystemView
+import kotlin.jvm.optionals.getOrNull
 
 class PublishTab : SkeletonTab() {
     private val listView = WritableUniqueListView<File>()
     private val fileIconCaches = HashMap<File, Image>()
+    private val fileMetadataCaches = HashMap<File, Metadata>()
     private val stateHolder = WorkStateHolder(WorkStatus.READY)
+    private val validators = ArrayList<() -> Boolean>()
 
     init {
         this.addFileListPanel()
@@ -58,6 +61,17 @@ class PublishTab : SkeletonTab() {
             } else {
                 true
             }
+        }
+        this.stateHolder.addChangeValidator {
+            if (it == WorkStatus.RUNNING) {
+                if (this.verify()) {
+                    return@addChangeValidator true
+                } else {
+                    this.logMessage("取消发布！")
+                    return@addChangeValidator false
+                }
+            }
+            return@addChangeValidator true
         }
         this.stateHolder.addChangeListener {
             publishButton.isDisable = it == WorkStatus.STOPPING
@@ -105,6 +119,7 @@ class PublishTab : SkeletonTab() {
             }
         }
         this.stateHolder.changeWorkState(WorkStatus.READY)
+        this.registerModFileValidator()
         cooldownButton.maxWidth = Double.MAX_VALUE
         HBox.setHgrow(cooldownButton, Priority.ALWAYS)
         cancelPublishButton.prefWidth = 0.0
@@ -113,8 +128,66 @@ class PublishTab : SkeletonTab() {
         this.leftBox.children.add(box)
     }
 
+    private fun registerModFileValidator() {
+        this.validators.add {
+            val version = this.getMetadata(this.listView[0]).version
+            for (i in 1 until this.listView.size) {
+                val file = this.listView[i]
+                if (version != this.getMetadata(file).version) {
+                    val alert = Alert(Alert.AlertType.ERROR)
+                    alert.title = "拒绝发布！"
+                    alert.headerText = "待发布模组版本不统一！"
+                    alert.showAndWait()
+                    return@add false
+                }
+            }
+            return@add true
+        }
+        this.validators.add {
+            val size = this.listView.size
+            val versions = HashSet<List<String>>(size)
+            for (i in 0 until size) {
+                if (versions.add(this.getMetadata(this.listView[i]).gameVersions)) {
+                    continue
+                }
+                val alert = Alert(Alert.AlertType.ERROR)
+                alert.title = "拒绝发布！"
+                alert.headerText = "待发布模组Minecraft支持版本重复！"
+                alert.showAndWait()
+                return@add false
+            }
+            return@add true
+        }
+        this.validators.add {
+            val maxSpan = this.listView.size * 1000L * 60
+            var min = this.getMetadata(this.listView[0]).timestamp
+            var max = this.getMetadata(this.listView[0]).timestamp
+            for (i in 1 until this.listView.size) {
+                val metadata = this.getMetadata(this.listView[i])
+                val timestamp = metadata.timestamp
+                if (timestamp < min) {
+                    min = timestamp
+                } else if (timestamp > max) {
+                    max = timestamp
+                }
+                if (max - min > maxSpan) {
+                    val alert = Alert(Alert.AlertType.CONFIRMATION)
+                    alert.title = "确认发布。"
+                    alert.headerText = "待发布模组构建时间跨度过大，确认是否发布。"
+                    val result = alert.showAndWait().getOrNull() ?: return@add false
+                    return@add result == ButtonType.OK
+                }
+            }
+            return@add true
+        }
+    }
+
+    private fun getMetadata(file: File): Metadata {
+        return this.fileMetadataCaches.computeIfAbsent(file) { Metadata(it) }
+    }
+
     private fun publish() {
-        val mods = this.listView.toList().stream().map { Metadata(it) }.toList()
+        val mods = this.listView.toList().stream().map { this.getMetadata(it) }.toList()
         val totals = mods.size
         val task = object : Task<Unit>() {
             override fun call() {
@@ -124,7 +197,7 @@ class PublishTab : SkeletonTab() {
                         break
                     }
                     updateMessage(metadata.mcVersion)
-                    Thread.sleep(1000)
+                    Thread.sleep(3000)
                     updateProgress(index.toLong() + 1L, totals.toLong())
                 }
             }
@@ -156,12 +229,23 @@ class PublishTab : SkeletonTab() {
         Thread(task, "Publish Worker").start()
     }
 
+    private fun verify(): Boolean {
+        for (validator in this.validators) {
+            if (validator()) {
+                continue
+            }
+            return false
+        }
+        return true
+    }
+
     private fun addFileListPanel() {
         val box = VBox(8.0)
         this.listView.addListChangeListener { change ->
             while (change.next()) {
                 val removed = change.removed
                 this.fileIconCaches.entries.removeIf { entry -> entry.key in removed }
+                this.fileMetadataCaches.entries.removeIf { entry -> entry.key in removed }
             }
         }
         this.listView.cellFactory = {

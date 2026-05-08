@@ -51,6 +51,10 @@ class WritableUniqueListView<T> : VBox() {
         this.observableList.addAll(list)
     }
 
+    operator fun get(index: Int): T {
+        return this.observableList[index]
+    }
+
     fun clear() {
         this.deduplicator.clear()
         this.observableList.clear()
