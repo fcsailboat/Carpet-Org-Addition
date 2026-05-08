@@ -11,7 +11,7 @@ import javafx.scene.layout.*
 import javafx.stage.DirectoryChooser
 import java.text.DecimalFormat
 
-open class SimpleTab : VBox() {
+abstract class SkeletonTab : VBox() {
     protected val leftBox = VBox(5.0)
     protected val rightBox = VBox(5.0)
     private val progressBar = ProgressBar()

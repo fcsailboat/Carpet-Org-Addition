@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 
 
-class BuildTab : SimpleTab() {
+class BuildTab : SkeletonTab() {
     private val versionList = FXCollections.observableList(SetUniqueList.setUniqueList(ArrayList<String>()))
     private val listView = ListView(this.versionList)
     private val checkStates = HashMap<String, BooleanProperty>()

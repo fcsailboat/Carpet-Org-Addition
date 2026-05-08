@@ -1,4 +1,4 @@
 package ui.fx
 
-class MergeBranchTab : SimpleTab() {
+class MergeBranchTab : SkeletonTab() {
 }

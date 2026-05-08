@@ -18,7 +18,7 @@ import java.io.File
 import javax.swing.Icon
 import javax.swing.filechooser.FileSystemView
 
-class PublishTab : SimpleTab() {
+class PublishTab : SkeletonTab() {
     private val listView = WritableUniqueListView<File>()
     private val fileIconCaches = HashMap<File, Image>()
     private val stateHolder = WorkStateHolder(WorkStatus.READY)
