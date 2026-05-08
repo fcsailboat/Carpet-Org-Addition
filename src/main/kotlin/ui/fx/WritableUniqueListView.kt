@@ -73,4 +73,12 @@ class WritableUniqueListView<T> : VBox() {
             this.deduplicator.remove(element)
         }
     }
+
+    fun toList(): List<T> {
+        return this.observableList.toList()
+    }
+
+    fun isEmpty(): Boolean {
+        return this.observableList.isEmpty()
+    }
 }

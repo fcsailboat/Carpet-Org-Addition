@@ -2,6 +2,8 @@ package ui.fx
 
 import AppConfiguration
 import javafx.application.Platform
+import javafx.concurrent.Task
+import javafx.concurrent.Worker
 import javafx.embed.swing.SwingFXUtils
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -12,6 +14,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
+import publish.Metadata
 import util.revealInFileManager
 import java.awt.image.BufferedImage
 import java.io.File
@@ -41,10 +44,24 @@ class PublishTab : SkeletonTab() {
         HBox.setHgrow(publishButton, Priority.ALWAYS)
         publishButton.maxWidth = Double.MAX_VALUE
         publishButton.onAction = {
-            this.stateHolder.changeWorkState(WorkStatus.PENDING_CONFIRMATION)
+            when (this.stateHolder.workState) {
+                WorkStatus.READY -> this.stateHolder.changeWorkState(WorkStatus.PENDING_CONFIRMATION)
+                WorkStatus.PENDING_CONFIRMATION -> this.stateHolder.changeWorkState(WorkStatus.RUNNING)
+                WorkStatus.RUNNING -> this.stateHolder.changeWorkState(WorkStatus.STOPPING)
+                else -> {}
+            }
+        }
+        this.stateHolder.addChangeValidator {
+            if (it == WorkStatus.PENDING_CONFIRMATION && this.listView.isEmpty()) {
+                this.logMessage("未选择任何文件！")
+                false
+            } else {
+                true
+            }
         }
         this.stateHolder.addChangeListener {
             publishButton.isDisable = it == WorkStatus.STOPPING
+            this.stateHolder.cancel = it == WorkStatus.STOPPING
         }
         this.stateHolder.addChangeListener {
             when (it) {
@@ -65,6 +82,11 @@ class PublishTab : SkeletonTab() {
                 }
             }
         }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.RUNNING) {
+                this.publish()
+            }
+        }
         HBox.setHgrow(cancelPublishButton, Priority.ALWAYS)
         cancelPublishButton.onAction = {
             this.stateHolder.changeWorkState(WorkStatus.READY)
@@ -76,9 +98,9 @@ class PublishTab : SkeletonTab() {
         }
         this.stateHolder.addChangeListener {
             if (it == WorkStatus.PENDING_CONFIRMATION) {
-                // 防止按下发布按钮后因误触立即确认
+                // 防止按下发布按钮后因误触而立即确认
                 cooldownButton.startCooldown()
-            } else {
+            } else if (it == WorkStatus.READY) {
                 cooldownButton.finishCooldown()
             }
         }
@@ -89,6 +111,49 @@ class PublishTab : SkeletonTab() {
         cooldownButton.prefWidth = 0.0
         box.children.addAll(cancelPublishButton, cooldownButton)
         this.leftBox.children.add(box)
+    }
+
+    private fun publish() {
+        val mods = this.listView.toList().stream().map { Metadata(it) }.toList()
+        val totals = mods.size
+        val task = object : Task<Unit>() {
+            override fun call() {
+                updateProgress(0L, totals.toLong())
+                for ((index, metadata) in mods.withIndex()) {
+                    if (stateHolder.cancel) {
+                        break
+                    }
+                    updateMessage(metadata.mcVersion)
+                    Thread.sleep(1000)
+                    updateProgress(index.toLong() + 1L, totals.toLong())
+                }
+            }
+        }
+        task.progressProperty().addListener { _, _, newValue ->
+            this.setProgress(newValue.toDouble(), totals)
+        }
+        task.messageProperty().addListener { _, _, newValue ->
+            this.setCurrentProceed(newValue)
+        }
+        task.addFinishedListener {
+            when (it) {
+                Worker.State.SUCCEEDED -> {
+                    if (this.stateHolder.cancel) {
+                        this.logMessage("发布已停止！")
+                    } else {
+                        this.logMessage("发布完成！")
+                    }
+                }
+
+                Worker.State.FAILED -> {
+                    this.logMessage("错误: ${task.exception?.message}")
+                }
+
+                else -> {}
+            }
+            this.stateHolder.changeWorkState(WorkStatus.READY)
+        }
+        Thread(task, "Publish Worker").start()
     }
 
     private fun addFileListPanel() {
@@ -116,7 +181,11 @@ class PublishTab : SkeletonTab() {
         this.listView.setOnDragOver { event ->
             if (event.gestureSource != this.listView && event.dragboard.hasFiles()) {
                 val files = event.dragboard.files
-                if (files != null && files.filter { it.isFile && it.name.endsWith(".jar") }.size == files.size) {
+                if (
+                    files != null
+                    && files.filter { it.isFile && it.name.endsWith(".jar") }.size == files.size
+                    && this.stateHolder.workState == WorkStatus.READY
+                ) {
                     event.acceptTransferModes(TransferMode.COPY)
                 }
             }
@@ -132,14 +201,18 @@ class PublishTab : SkeletonTab() {
             }
             event.consume()
         }
-        this.listView.addContextMenu(MenuItem("移除").apply {
+        val removeItem = MenuItem("移除").apply {
             this.setOnAction {
                 val files = listView.selectionModel?.selectedItems?.toList() ?: listOf()
                 for (file in files) {
                     listView.remove(file)
                 }
             }
-        })
+        }
+        this.stateHolder.addChangeListener {
+            removeItem.isDisable = it != WorkStatus.READY
+        }
+        this.listView.addContextMenu(removeItem)
         this.listView.addContextMenu(MenuItem("打开文件所在位置").apply {
             this.setOnAction {
                 val file = listView.selectionModel?.selectedItem
@@ -176,6 +249,10 @@ class PublishTab : SkeletonTab() {
                 this.listView.clear()
                 this.listView.addAll(selectedFiles)
             }
+        }
+        this.stateHolder.addChangeListener {
+            clear.isDisable = it != WorkStatus.READY
+            selection.isDisable = it != WorkStatus.READY
         }
         box.children.add(clear)
         box.children.add(selection)

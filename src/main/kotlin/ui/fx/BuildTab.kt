@@ -130,7 +130,7 @@ class BuildTab : SkeletonTab() {
                 }
                 this.setButtonState(WorkStatus.READY)
             }
-            Thread(task, "BuildWorker").start()
+            Thread(task, "Build Worker").start()
         }
     }
 
