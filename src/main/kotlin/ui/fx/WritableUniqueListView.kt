@@ -6,8 +6,9 @@ import javafx.collections.ObservableList
 import javafx.scene.control.*
 import javafx.scene.layout.VBox
 import javafx.util.Callback
+import java.util.function.Predicate
 
-class WritableUniqueListView<T> : VBox() {
+class WritableUniqueListView<T> : VBox(), Iterable<T> {
     private val observableList: ObservableList<T> = FXCollections.observableArrayList()
     private val listView: ListView<T> = ListView(this.observableList)
     private val deduplicator = HashSet<T>()
@@ -91,5 +92,14 @@ class WritableUniqueListView<T> : VBox() {
 
     fun isEmpty(): Boolean {
         return this.observableList.isEmpty()
+    }
+
+    fun removeIf(predicate: Predicate<T>) {
+        this.deduplicator.removeIf(predicate)
+        this.observableList.removeIf(predicate)
+    }
+
+    override fun iterator(): Iterator<T> {
+        return this.observableList.iterator()
     }
 }

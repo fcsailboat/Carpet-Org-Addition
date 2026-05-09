@@ -98,10 +98,10 @@ class BuildTab : SkeletonTab() {
                             break
                         }
                         updateMessage(version)
-                        val builder = JarBuilder(version) { safetyLogMessage(it) }
-                        safetyLogMessage("-".repeat(70))
+                        val builder = JarBuilder(version) { logMessageLater(it) }
+                        logDividingLineLater()
                         builder.run()
-                        safetyLogMessage("-".repeat(70))
+                        logDividingLineLater()
                         updateProgress(index.toLong() + 1, totals.toLong())
                     }
                 }
@@ -113,22 +113,25 @@ class BuildTab : SkeletonTab() {
                 this.setCurrentProceed(newValue)
             }
             task.addFinishedListener {
-                when (it) {
-                    Worker.State.SUCCEEDED -> {
-                        if (this.stopFlag.get()) {
-                            this.logMessage("构建已停止！")
-                        } else {
-                            this.logMessage("构建完成！")
+                try {
+                    when (it) {
+                        Worker.State.SUCCEEDED -> {
+                            if (this.stopFlag.get()) {
+                                this.logMessage("构建已停止！")
+                            } else {
+                                this.logMessage("构建完成！")
+                            }
                         }
-                    }
 
-                    Worker.State.FAILED -> {
-                        this.logMessage("错误: ${task.exception?.message}")
-                    }
+                        Worker.State.FAILED -> {
+                            this.logMessage("错误: ${task.exception?.asString()}")
+                        }
 
-                    else -> {}
+                        else -> {}
+                    }
+                } finally {
+                    this.setButtonState(WorkStatus.READY)
                 }
-                this.setButtonState(WorkStatus.READY)
             }
             Thread(task, "Build Worker").start()
         }

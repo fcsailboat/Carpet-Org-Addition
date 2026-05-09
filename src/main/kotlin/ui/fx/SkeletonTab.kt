@@ -98,21 +98,37 @@ abstract class SkeletonTab : VBox() {
     }
 
     protected fun logMessage(message: String) {
-        this.messageArea.appendText("${message}\n")
-        this.messageArea.end()
+        if (Platform.isFxApplicationThread()) {
+            this.messageArea.appendText("${message}\n")
+            this.messageArea.end()
+        } else {
+            Platform.runLater {
+                logMessage(message)
+            }
+        }
     }
 
-    protected fun safetyLogMessage(message: String) {
+    protected fun logMessageLater(message: String) {
         Platform.runLater {
             logMessage(message)
         }
     }
 
-    protected fun clearMessage() {
-        this.messageArea.clear()
+    protected fun logDividingLineLater() {
+        this.logMessageLater("-".repeat(70))
     }
 
-    protected fun newlineMessage() {
+    protected fun clearMessage() {
+        if (Platform.isFxApplicationThread()) {
+            this.messageArea.clear()
+        } else {
+            Platform.runLater {
+                clearMessage()
+            }
+        }
+    }
+
+    protected fun logEmptyMessage() {
         this.logMessage("")
     }
 
@@ -144,6 +160,13 @@ abstract class SkeletonTab : VBox() {
 
     protected fun setCurrentProceed(right: String) {
         this.setCurrentProceed("当前版本", right)
+    }
+
+    protected fun Throwable.asString(): String {
+        if (this.message == null) {
+            return this.javaClass.simpleName
+        }
+        return "${this.javaClass.simpleName}: ${this.message}"
     }
 
     companion object {

@@ -14,6 +14,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
+import publish.JarUploader
 import publish.Metadata
 import util.revealInFileManager
 import java.awt.image.BufferedImage
@@ -30,6 +31,7 @@ class PublishTab : SkeletonTab() {
     private val validators = ArrayList<() -> Boolean>()
 
     init {
+        this.addCurrentProceed()
         this.addFileListPanel()
         this.addPublishButton()
         this.addSpace()
@@ -57,12 +59,16 @@ class PublishTab : SkeletonTab() {
             }
         }
         this.stateHolder.addChangeValidator {
-            if (it == WorkStatus.PENDING_CONFIRMATION && this.listView.isEmpty()) {
-                this.logMessage("未选择任何文件！")
-                false
-            } else {
-                true
+            if (it == WorkStatus.PENDING_CONFIRMATION) {
+                this.listView.removeIf { file ->
+                    !file.isFile
+                }
+                if (this.listView.isEmpty()) {
+                    this.logMessage("未选择任何文件！")
+                    return@addChangeValidator false
+                }
             }
+            return@addChangeValidator true
         }
         this.stateHolder.addChangeValidator {
             if (it == WorkStatus.RUNNING) {
@@ -96,6 +102,30 @@ class PublishTab : SkeletonTab() {
                 WorkStatus.STOPPING -> {
                     publishButton.text = "正在停止"
                 }
+            }
+        }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.READY || it == WorkStatus.PENDING_CONFIRMATION) {
+                this.setCurrentProceed("无")
+            }
+        }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.PENDING_CONFIRMATION) {
+                val size = this.listView.size
+                val length = size.toString().length
+                this.clearMessage()
+                for ((index, file) in this.listView.withIndex()) {
+                    val metadata = this.getMetadata(file)
+                    val difference = length - (index + 1).toString().length
+                    val ordinal: String = if (difference == 0) {
+                        (index + 1).toString()
+                    } else {
+                        "0".repeat(difference) + index.toString()
+                    }
+                    this.logMessage("${ordinal}. [${metadata.subtitle}]  /  ${metadata.gameVersions}")
+                }
+                this.logEmptyMessage()
+                this.logMessage("确认将以上${size}个模组发布到Modrinth？")
             }
         }
         this.stateHolder.addChangeListener {
@@ -205,7 +235,13 @@ class PublishTab : SkeletonTab() {
                         break
                     }
                     updateMessage(metadata.mcVersion.toString())
-                    Thread.sleep(3000)
+                    logDividingLineLater()
+                    logMessageLater("开始发布${metadata.version}版本，游戏版本：${metadata.gameVersions}")
+                    val uploader = JarUploader(metadata) {
+                        logMessageLater(it)
+                    }
+                    uploader.upload(true)
+                    logDividingLineLater()
                     updateProgress(index.toLong() + 1L, totals.toLong())
                 }
             }
@@ -217,22 +253,27 @@ class PublishTab : SkeletonTab() {
             this.setCurrentProceed(newValue)
         }
         task.addFinishedListener {
-            when (it) {
-                Worker.State.SUCCEEDED -> {
-                    if (this.stateHolder.cancel) {
-                        this.logMessage("发布已停止！")
-                    } else {
-                        this.logMessage("发布完成！")
+            try {
+                when (it) {
+                    Worker.State.SUCCEEDED -> {
+                        if (this.stateHolder.cancel) {
+                            this.logMessage("发布已停止！")
+                        } else {
+                            this.logMessage("发布完成！")
+                        }
                     }
-                }
 
-                Worker.State.FAILED -> {
-                    this.logMessage("错误: ${task.exception?.message}")
-                }
+                    Worker.State.FAILED -> {
+                        this.logMessage("发布中止！")
+                        val e = task.exception
+                        this.logMessage("错误: ${e?.asString()}")
+                    }
 
-                else -> {}
+                    else -> {}
+                }
+            } finally {
+                this.stateHolder.changeWorkState(WorkStatus.READY)
             }
-            this.stateHolder.changeWorkState(WorkStatus.READY)
         }
         Thread(task, "Publish Worker").start()
     }
@@ -280,7 +321,7 @@ class PublishTab : SkeletonTab() {
                 this.logMessage("构建时间：${metadata.getFormatTime()}")
                 this.logMessage("文件名称：${metadata.file.name}")
                 this.logMessage("文件大小：${FORMATTER.format(metadata.file.length().toDouble() / 1024 / 1024)} MB")
-                this.newlineMessage()
+                this.logEmptyMessage()
             }
         }
         this.listView.setOnDragOver { event ->
