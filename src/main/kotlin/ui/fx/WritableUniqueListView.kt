@@ -29,6 +29,7 @@ class WritableUniqueListView<T> : VBox() {
         set(value) {
             this.listView.cellFactory = value
         }
+    var sorter: Comparator<T>? = null
     val size: Int get() = this.observableList.size
 
     init {
@@ -38,6 +39,9 @@ class WritableUniqueListView<T> : VBox() {
     fun add(element: T) {
         if (this.deduplicator.add(element)) {
             this.observableList.add(element)
+            if (this.sorter != null) {
+                FXCollections.sort(this.observableList, this.sorter)
+            }
         }
     }
 
@@ -49,6 +53,9 @@ class WritableUniqueListView<T> : VBox() {
             }
         }
         this.observableList.addAll(list)
+        if (this.sorter != null) {
+            FXCollections.sort(this.observableList, this.sorter)
+        }
     }
 
     operator fun get(index: Int): T {

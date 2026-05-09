@@ -13,7 +13,7 @@ import java.util.zip.ZipFile
 class Metadata {
     val file: File
     val version: String
-    val mcVersion: String
+    val mcVersion: MinecraftVersion
     val id: String
     val subtitle: String
     val gameVersions: List<String>
@@ -30,7 +30,7 @@ class Metadata {
                 this.version = json.get("version").asString
                 this.id = json.get("id").asString
                 val mcVersion = json.getAsJsonObject("depends").get("minecraft").asString
-                this.mcVersion = this.parseMcVersion(mcVersion)
+                this.mcVersion = MinecraftVersion(this.parseMcVersion(mcVersion))
                 val custom: JsonObject? = json.get("custom")?.asJsonObject
                 val buildTimestamp = (custom?.get("build_timestamp") ?: custom?.get("buildTimestamp"))?.asString
                 if (buildTimestamp == null) {
@@ -46,12 +46,23 @@ class Metadata {
         }
     }
 
+    @Suppress("unused")
+    constructor(file: File, unit: Unit) {
+        this.file = file
+        this.version = "0.0.0"
+        this.mcVersion = MinecraftVersion("?")
+        this.id = "???"
+        this.subtitle = "???"
+        this.gameVersions = listOf()
+        this.timestamp = 0L
+    }
+
     private fun allDependGameVersions(): List<String> {
         return JarUploader.versions.stream().filter { this.match(it) }.toList().reversed()
     }
 
     private fun match(version: String): Boolean {
-        val mcVersion = this.mcVersion
+        val mcVersion = this.mcVersion.toString()
         if (mcVersion == version) {
             return true
         }
@@ -82,6 +93,34 @@ class Metadata {
 
     fun getFormatTime(): String {
         return Instant.ofEpochMilli(this.timestamp).atZone(ZoneOffset.UTC).format(TIME_PRINT_FORMATTER)
+    }
+
+    operator fun compareTo(other: Metadata): Int {
+        if (this === other) {
+            return 0
+        }
+        val n = this.mcVersion.compareTo(other.mcVersion)
+        if (n == 0) {
+            return this.file.compareTo(other.file)
+        }
+        return n
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (this === other) {
+            return true
+        }
+        if (this.javaClass == other.javaClass) {
+            return this.file == (other as Metadata).file
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return this.file.hashCode()
     }
 
     companion object {

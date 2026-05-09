@@ -34,6 +34,8 @@ class PublishTab : SkeletonTab() {
         this.addPublishButton()
         this.addSpace()
         this.addProgressBar()
+        val files = AppConfiguration.getStaging().listFiles()?.asList() ?: listOf()
+        this.listView.addAll(files)
         Platform.runLater {
             this.setDividerPosition(0.42)
         }
@@ -183,7 +185,13 @@ class PublishTab : SkeletonTab() {
     }
 
     private fun getMetadata(file: File): Metadata {
-        return this.fileMetadataCaches.computeIfAbsent(file) { Metadata(it) }
+        return this.fileMetadataCaches.computeIfAbsent(file) {
+            try {
+                Metadata(it)
+            } catch (_: Exception) {
+                Metadata(it, Unit)
+            }
+        }
     }
 
     private fun publish() {
@@ -196,7 +204,7 @@ class PublishTab : SkeletonTab() {
                     if (stateHolder.cancel) {
                         break
                     }
-                    updateMessage(metadata.mcVersion)
+                    updateMessage(metadata.mcVersion.toString())
                     Thread.sleep(3000)
                     updateProgress(index.toLong() + 1L, totals.toLong())
                 }
@@ -263,7 +271,7 @@ class PublishTab : SkeletonTab() {
             }
         }
         this.listView.selectionModel?.selectedItemProperty()?.addListener { _, _, newFile ->
-            if (this.stateHolder.workState == WorkStatus.READY) {
+            if (newFile != null && this.stateHolder.workState == WorkStatus.READY) {
                 val metadata = this.getMetadata(newFile)
                 this.clearMessage()
                 this.logMessage("标题：${metadata.subtitle}")
@@ -291,7 +299,11 @@ class PublishTab : SkeletonTab() {
         this.listView.setOnDragDropped { event ->
             val dragboard = event.dragboard
             if (dragboard.hasFiles()) {
-                this.listView.addAll(dragboard.files)
+                this.listView.addAll(
+                    dragboard.files
+                        .filter { "sources" !in it.name }
+                        .filter { this.getMetadata(it).mcVersion.isValid() }
+                )
                 event.setDropCompleted(true)
             } else {
                 event.setDropCompleted(false)
@@ -319,11 +331,13 @@ class PublishTab : SkeletonTab() {
             }
         })
         this.listView.selectionModel?.selectionMode = SelectionMode.MULTIPLE
+        this.listView.sorter = { o1, o2 ->
+            this.getMetadata(o1).compareTo(this.getMetadata(o2))
+        }
         box.children.add(this.listView)
         val title = TitledPane("选择文件", box)
         this.addFileListButton(box)
         this.leftBox.children.add(title)
-        AppConfiguration.getStaging().listFiles()?.forEach { this.listView.add(it) }
     }
 
     private fun addFileListButton(parent: VBox) {

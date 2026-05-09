@@ -119,7 +119,7 @@ class PublishPanel : SimplePanel {
                     return@fileOperationFailed true
                 }
                 val metadata = getMetadata(file)
-                this.setCurrentVersion(metadata.mcVersion)
+                this.setCurrentVersion(metadata.mcVersion.toString())
                 val uploader = JarUploader(metadata) { this.log(it) }
                 try {
                     this.log("-".repeat(80))
