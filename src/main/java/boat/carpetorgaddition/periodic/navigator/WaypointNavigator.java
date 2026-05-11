@@ -1,7 +1,9 @@
 package boat.carpetorgaddition.periodic.navigator;
 
 import boat.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
-import boat.carpetorgaddition.util.*;
+import boat.carpetorgaddition.util.MathUtils;
+import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.Waypoint;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -57,7 +59,7 @@ public class WaypointNavigator extends AbstractNavigator {
             // 玩家和路径点在相同的维度
             Component display = IN.translate(waypoint.getName(), TextProvider.simpleBlockPos(this.target));
             int distance = MathUtils.getBlockIntegerDistance(playerPos, this.target);
-            Component text = this.getHUDText(this.target.getCenter(), display, distance);
+            Component text = this.getHUDText(ServerUtils.getBlockCenter(this.target), display, distance);
             MessageUtils.sendMessageToHud(this.player, text);
         } else {
             if (this.canMapping(this.secondTarget)) {
@@ -67,7 +69,7 @@ public class WaypointNavigator extends AbstractNavigator {
                 builder.setItalic();
                 Component in = IN.translate(waypoint.getName(), builder.build());
                 int distance = MathUtils.getBlockIntegerDistance(playerPos, this.secondTarget);
-                Component text = this.getHUDText(this.secondTarget.getCenter(), in, distance);
+                Component text = this.getHUDText(ServerUtils.getBlockCenter(this.secondTarget), in, distance);
                 MessageUtils.sendMessageToHud(this.player, text);
             } else {
                 // 玩家和路径点在不同维度

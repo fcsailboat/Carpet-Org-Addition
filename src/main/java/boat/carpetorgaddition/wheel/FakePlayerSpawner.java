@@ -81,7 +81,7 @@ public class FakePlayerSpawner {
     private FakePlayerSpawner(MinecraftServer server, String name) {
         this.server = server;
         this.name = name;
-        this.position = server.getRespawnData().pos().getBottomCenter();
+        this.position = ServerUtils.getBlockBottomCenter(server.getRespawnData().pos());
         this.dimension = server.overworld().dimension();
         this.gameMode = server.getDefaultGameType();
     }

@@ -38,7 +38,7 @@ public abstract class ServerPlayerEntityMixin {
             int range = (int) Math.min(thisPlayer.blockInteractionRange() + 1, 8);
             BlockPosTraverser traverser = new BlockPosTraverser(blockPos.offset(-range, -range, -range), blockPos.offset(range, range, range));
             for (BlockPos pos : traverser) {
-                if (blockPos.getCenter().distanceTo(pos.getCenter()) > range) {
+                if (ServerUtils.getBlockCenter(blockPos).distanceTo(ServerUtils.getBlockCenter(pos)) > range) {
                     continue;
                 }
                 thisPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, this.level().getBlockState(pos)));

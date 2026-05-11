@@ -159,7 +159,7 @@ public class AStarPathfinder implements FakePlayerPathfinder {
         SearchNode node;
         while ((node = end.parent) != null) {
             end = node;
-            this.nodes.add(node.blockPos.getBottomCenter());
+            this.nodes.add(ServerUtils.getBlockBottomCenter(node.blockPos));
         }
     }
 

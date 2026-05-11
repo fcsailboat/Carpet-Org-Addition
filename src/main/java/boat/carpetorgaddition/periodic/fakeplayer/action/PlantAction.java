@@ -224,8 +224,8 @@ public class PlantAction extends AbstractPlayerAction {
     // 种植
     private void planting(Level world, ItemStack itemStack, BlockPos blockPos, BlockPos lookPos) {
         // 让假玩家看向该位置（这不是必须的）
-        this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, lookPos.getCenter());
-        BlockHitResult hitResult = new BlockHitResult(blockPos.getCenter(), Direction.UP, lookPos, false);
+        this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, ServerUtils.getBlockCenter(lookPos));
+        BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(blockPos), Direction.UP, lookPos, false);
         this.getFakePlayer().gameMode.useItemOn(this.getFakePlayer(), world, itemStack, InteractionHand.OFF_HAND, hitResult);
         // 摆动手
         this.getFakePlayer().swing(InteractionHand.OFF_HAND, true);
@@ -241,7 +241,7 @@ public class PlantAction extends AbstractPlayerAction {
                 || this.getFakePlayer().isCreative()
                 || replenishment(this.getFakePlayer().getInventory().getSelectedSlot() + 36, predicate)) {
                 // 如果手上有多余一个的骨粉，就使用骨粉
-                Vec3 centerPos = upPos.getCenter();
+                Vec3 centerPos = ServerUtils.getBlockCenter(upPos);
                 // 让假玩家看向该位置（这不是必须的）
                 this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, centerPos);
                 // 使用骨粉

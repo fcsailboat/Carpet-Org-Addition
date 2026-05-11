@@ -19,6 +19,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -57,7 +58,8 @@ public class HighlightCommand extends AbstractClientCommand {
 
     // 高亮路径点
     private int highlight(CommandContext<FabricClientCommandSource> context, long duration, boolean persistent) {
-        Vec3 vec3d = ClientBlockPosArgumentType.getBlockPos(context, "blockPos").getCenter();
+        BlockPos blockPos = ClientBlockPosArgumentType.getBlockPos(context, "blockPos");
+        Vec3 vec3d = ServerUtils.getBlockCenter(blockPos);
         ClientLevel world = ClientUtils.getWorld();
         WaypointRenderer instance = WaypointRenderer.getInstance();
         List<Waypoint> list = instance.listRenderers(Waypoint.HIGHLIGHT);

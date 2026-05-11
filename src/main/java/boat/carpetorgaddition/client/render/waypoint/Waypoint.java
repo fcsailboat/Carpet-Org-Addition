@@ -8,12 +8,9 @@ import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.font.TextRenderable;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -29,9 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -93,6 +88,7 @@ public abstract class Waypoint implements WorldRenderComponent {
         this(world.dimension(), target, icon, duration, persistent);
     }
 
+    // TODO 路径点渲染可能会被半透明方块遮挡
     @Override
     public void render(LevelRenderContext context) {
         PoseStack poseStack = context.poseStack();
@@ -134,12 +130,13 @@ public abstract class Waypoint implements WorldRenderComponent {
 
     private void drawIcon(LevelRenderContext context) {
         float alpha = this.getRenderAlpha();
-        VertexConsumer consumer = context.bufferSource().getBuffer(this.renderType);
-        PoseStack.Pose pose = context.poseStack().last();
-        consumer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F);
-        consumer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F);
-        consumer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F);
-        consumer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F);
+        PoseStack stack = context.poseStack();
+        context.submitNodeCollector().order(-1).submitCustomGeometry(stack, this.renderType, (pose, buffer) -> {
+            buffer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F);
+            buffer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F);
+            buffer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F);
+            buffer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F);
+        });
     }
 
     protected float getRenderAlpha() {
@@ -280,18 +277,18 @@ public abstract class Waypoint implements WorldRenderComponent {
         poseStack.scale(0.15F, 0.15F, 0.15F);
         Component component = builder.build();
         FormattedCharSequence sequence = FormattedCharSequence.forward(component.getString(), component.getStyle());
-        // 渲染文字
-        Font.PreparedText prepared = textRenderer.prepareText(sequence, x, y, CommonColors.WHITE, false, false, opacity);
-        MultiBufferSource.BufferSource bufferSource = context.bufferSource();
-        Matrix4f pose = poseStack.last().pose();
-        prepared.visit(new Font.GlyphVisitor() {
-            @Override
-            public void acceptRenderable(@NonNull TextRenderable renderable) {
-                VertexConsumer buffer = bufferSource.getBuffer(renderable.renderType(Font.DisplayMode.SEE_THROUGH));
-                renderable.render(pose, buffer, 1, false);
-            }
-        });
-        poseStack.popPose();
+        context.submitNodeCollector().submitText(
+                poseStack,
+                x,
+                y,
+                sequence,
+                false,
+                Font.DisplayMode.SEE_THROUGH,
+                1,
+                CommonColors.WHITE,
+                opacity,
+                0
+        );
     }
 
     /**

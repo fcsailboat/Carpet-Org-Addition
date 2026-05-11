@@ -77,7 +77,7 @@ public class BlockExcavator {
         }
         BlockState blockState = world.getBlockState(blockPos);
         // 让假玩家看向该位置（这不是必须的）
-        this.player.lookAt(EntityAnchorArgument.Anchor.EYES, blockPos.getCenter());
+        this.player.lookAt(EntityAnchorArgument.Anchor.EYES, ServerUtils.getBlockCenter(blockPos));
         // 获取每次挖掘增加的进度
         float delta = blockState.getDestroyProgress(this.player, world, blockPos);
         // 当前方块是否被破坏

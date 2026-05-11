@@ -99,7 +99,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             this.updateTime--;
         }
         // 是否还没有接近目标
-        boolean farAway = blockPos.getBottomCenter().distanceTo(pos) > 1.5;
+        boolean farAway = ServerUtils.getBlockBottomCenter(blockPos).distanceTo(pos) > 1.5;
         if (this.updateTime == 0 && farAway) {
             // 更新路径
             this.noRoad = false;
@@ -211,7 +211,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         }
         for (int i = 0; i < path.getNodeCount(); i++) {
             Node node = path.getNode(i);
-            this.nodes.add(node.asBlockPos().getBottomCenter());
+            this.nodes.add(ServerUtils.getBlockBottomCenter(node.asBlockPos()));
         }
         this.nodes.set(0, pos);
         this.onStart();

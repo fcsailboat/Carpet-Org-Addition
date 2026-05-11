@@ -26,7 +26,7 @@ public class HasNamePosNavigator extends BlockPosNavigator {
         // 玩家与目的地是否在同一维度
         if (ServerUtils.getWorld(this.player).equals(this.world)) {
             int distance = MathUtils.getBlockIntegerDistance(this.player.blockPosition(), this.blockPos);
-            text = getHUDText(this.blockPos.getCenter(), IN.translate(this.name, pos), distance);
+            text = getHUDText(ServerUtils.getBlockCenter(this.blockPos), IN.translate(this.name, pos), distance);
         } else {
             text = IN.translate(this.name, TextBuilder.combineAll(TextProvider.dimension(this.world), pos));
         }

@@ -114,7 +114,7 @@ public class CarpetOrgAdditionClientRegister {
      */
     private static void registerRenderer() {
         // 注册路径点渲染器
-        LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(context -> WaypointRenderer.getInstance().render(context));
+        LevelRenderEvents.COLLECT_SUBMITS.register(context -> WaypointRenderer.getInstance().render(context));
         LevelRenderEvents.COLLECT_SUBMITS.register(WorldComponentRenderer::render);
     }
 

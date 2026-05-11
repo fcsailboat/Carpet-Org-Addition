@@ -60,7 +60,7 @@ public final class WaypointUpdateS2CPacket implements CustomPacketPayload {
     }
 
     public WaypointUpdateS2CPacket(BlockPos blockPos, Level world) {
-        this(blockPos.getCenter(), ServerUtils.getId(world), -1);
+        this(ServerUtils.getBlockCenter(blockPos), ServerUtils.getId(world), -1);
     }
 
     public Vec3 getTarget() {

@@ -325,6 +325,14 @@ public class ServerUtils {
         return entity.blockPosition();
     }
 
+    public static Vec3 getBlockCenter(BlockPos blockPos) {
+        return new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+    }
+
+    public static Vec3 getBlockBottomCenter(BlockPos blockPos) {
+        return new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
+    }
+
     public static Component getName(Item item) {
         return item.components().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
     }
