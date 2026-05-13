@@ -2,6 +2,8 @@ package ui.fx
 
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.value.ChangeListener
+import javafx.css.PseudoClass
 import javafx.geometry.Pos
 import javafx.scene.control.CheckBox
 import javafx.scene.control.Label
@@ -19,6 +21,7 @@ class SortableListCell<T>(
     private val pane = HBox(5.0, this.checkBox, this.label)
     private var insertIndicator: InsertIndicator = InsertIndicator.NONE
     private var currentProperty: BooleanProperty? = null
+    private var strikethroughListener: ChangeListener<Boolean>? = null
     private var draggedItem: T? = null
 
     init {
@@ -92,24 +95,32 @@ class SortableListCell<T>(
 
     override fun updateItem(item: T?, empty: Boolean) {
         super.updateItem(item, empty)
-        this.currentProperty?.let {
-            this.checkBox.selectedProperty().unbindBidirectional(it)
+        this.currentProperty?.let { property ->
+            this.checkBox.selectedProperty().unbindBidirectional(property)
+            this.strikethroughListener?.let { property.removeListener(it) }
         }
         this.currentProperty = null
+        this.strikethroughListener = null
+        this.text = null
         if (empty || item == null) {
             this.graphic = null
             this.insertIndicator = InsertIndicator.NONE
+            this.label.pseudoClassStateChanged(STRIKETHROUGH_PSEUDO, false)
             this.updateInsertIndicatorStyle()
-            this.text = null
         } else {
-            val prop = checkStates.getOrPut(item) { SimpleBooleanProperty(false) }
-            this.checkBox.selectedProperty().bindBidirectional(prop)
-            this.currentProperty = prop
+            val property = checkStates.getOrPut(item) { SimpleBooleanProperty(false) }
+            this.checkBox.selectedProperty().bindBidirectional(property)
+            this.currentProperty = property
             this.label.text = this.nameSupplier(item)
+            val listener = ChangeListener<Boolean> { _, _, newValue ->
+                this.label.pseudoClassStateChanged(STRIKETHROUGH_PSEUDO, !newValue)
+            }
+            property.addListener(listener)
+            this.label.pseudoClassStateChanged(STRIKETHROUGH_PSEUDO, !property.value)
+            this.strikethroughListener = listener
             this.graphic = this.pane
             this.insertIndicator = InsertIndicator.NONE
             this.updateInsertIndicatorStyle()
-            this.text = null
         }
     }
 
@@ -131,5 +142,9 @@ class SortableListCell<T>(
 
     private enum class InsertIndicator {
         NONE, ABOVE, BELOW
+    }
+
+    companion object {
+        private val STRIKETHROUGH_PSEUDO = PseudoClass.getPseudoClass("strikethrough")
     }
 }
