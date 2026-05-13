@@ -16,7 +16,7 @@ import org.apache.commons.collections4.list.SetUniqueList
 import publish.JarBuilder
 import util.archiveStagingFile
 import util.listVersion
-import java.nio.file.Path
+import java.nio.file.Path.of
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 
@@ -47,22 +47,17 @@ class BuildTab : SkeletonTab() {
             }
         }
         this.leftBox.children.add(titledPane)
-        this.refreshVersionList()
     }
 
     override fun onFileChooserUpdate() {
-        this.refreshVersionList()
-    }
-
-    private fun refreshVersionList() {
-        val versions = listVersion(Path.of(this.folderPathField.text))
-        this.checkStates.clear()
+        val versions = listVersion(of(folderPathField.text))
+        checkStates.clear()
         for (version in AppConfiguration.getDefaultSelectionVersions()) {
-            this.checkStates[version] = SimpleBooleanProperty(true)
+            checkStates[version] = SimpleBooleanProperty(true)
         }
-        this.versionList.clear()
-        this.versionList.addAll(versions)
-        this.listView.prefHeight = CELL_SIZE * max(versions.size, 3)
+        versionList.clear()
+        versionList.addAll(versions)
+        listView.prefHeight = CELL_SIZE * max(versions.size, 3)
     }
 
     private fun addStartButton() {

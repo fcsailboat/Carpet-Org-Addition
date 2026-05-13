@@ -58,6 +58,7 @@ abstract class SkeletonTab : VBox() {
             maxWidth = Double.MAX_VALUE
             maxHeight = 30.0
             text = AppConfiguration.getRoot().absolutePath
+            onFileChooserUpdate()
         }
         this.fileBrowseButton.setOnAction {
             val chooser = DirectoryChooser().apply {
