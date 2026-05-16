@@ -24,6 +24,7 @@ class SortableListCell<T>(
     private var insertIndicator: InsertIndicator = InsertIndicator.NONE
     private var currentProperty: BooleanProperty? = null
     private var strikethroughListener: ChangeListener<Boolean>? = null
+    var checkBoxChangeListener: (() -> Unit)? = null
 
     init {
         this.pane.alignment = Pos.CENTER_LEFT
@@ -117,6 +118,7 @@ class SortableListCell<T>(
             this.label.text = this.nameSupplier(item)
             val listener = ChangeListener<Boolean> { _, _, newValue ->
                 this.label.pseudoClassStateChanged(STRIKETHROUGH_PSEUDO, !newValue)
+                this.checkBoxChangeListener?.let { it() }
             }
             property.addListener(listener)
             this.label.pseudoClassStateChanged(STRIKETHROUGH_PSEUDO, !property.value)

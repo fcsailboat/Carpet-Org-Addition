@@ -87,25 +87,16 @@ class Branch {
         if (this === other) {
             return true
         }
-        if (javaClass != other?.javaClass) {
+        if (other == null || javaClass != other.javaClass) {
             return false
         }
         other as Branch
-        if (git != other.git) {
-            return false
-        }
-        if (name != other.name) {
-            return false
-        }
-        return true
+        return name == other.name
     }
 
     override fun hashCode(): Int {
-        var result = git.hashCode()
-        result = 31 * result + name.hashCode()
-        return result
+        return this.name.hashCode()
     }
-
 
     companion object {
         fun listLocalBranch(git: Git): List<Branch> {

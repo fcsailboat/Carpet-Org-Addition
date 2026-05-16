@@ -32,6 +32,11 @@ class WritableUniqueListView<T> : VBox(), Iterable<T> {
         }
     var sorter: Comparator<T>? = null
     val size: Int get() = this.observableList.size
+    var fixedCellSize: Double
+        get() = this.listView.fixedCellSize
+        set(value) {
+            this.listView.fixedCellSize = value
+        }
 
     init {
         this.children.add(this.listView)
@@ -97,6 +102,16 @@ class WritableUniqueListView<T> : VBox(), Iterable<T> {
     fun removeIf(predicate: Predicate<T>) {
         this.deduplicator.removeIf(predicate)
         this.observableList.removeIf(predicate)
+    }
+
+    fun sort() {
+        if (this.sorter != null) {
+            FXCollections.sort(this.observableList, this.sorter)
+        }
+    }
+
+    fun sort(comparator: Comparator<T>) {
+        FXCollections.sort(this.observableList, comparator)
     }
 
     override fun iterator(): Iterator<T> {
