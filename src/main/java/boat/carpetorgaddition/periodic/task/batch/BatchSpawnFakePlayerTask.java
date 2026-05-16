@@ -111,7 +111,7 @@ public class BatchSpawnFakePlayerTask extends ServerTask {
             if (this.isTimeExpired()) {
                 return;
             }
-            this.iterator.next().spawn();
+            ScopedValue.where(REQUEST, true).run(() -> this.iterator.next().spawn());
         }
         PlayerManagerCommand.sendPlayerJoinMessage(this.server, this.count);
         // 显示玩家召唤者

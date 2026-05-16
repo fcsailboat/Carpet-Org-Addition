@@ -116,6 +116,7 @@
     "util.MinecraftClientMixin",
     "util.MinecraftServerMixin",
     "util.PlayerManagerMixin",
+    "util.ResolvableProfileDynamicMixin",
     "util.ScreenHandlerMixin",
     "util.ServerPlayerEntityMixin",
     "util.ServerPlayNetworkHandlerMixin",

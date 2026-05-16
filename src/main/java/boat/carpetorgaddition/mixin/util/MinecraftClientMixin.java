@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
-    @WrapOperation(method = "readInputStream", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
-    private void suppressionWarning(Logger instance, String key, Object url, Object result, Operation<Void> original) {
+    @WrapOperation(method = {"readInputStreamWithEtag", "buildHttpException"}, at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    private void suppressionWarning(Logger instance, String message, Object url, Object result, Operation<Void> original) {
         if (BatchSpawnFakePlayerTask.REQUEST.orElse(false)) {
             return;
         }
-        original.call(instance, key, url, result);
+        original.call(instance, message, url, result);
     }
 }
