@@ -9,12 +9,14 @@ import javafx.scene.control.CheckBox
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.input.ClipboardContent
+import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.HBox
 
 class SortableListCell<T>(
     private val checkStates: MutableMap<T, BooleanProperty>,
-    private val nameSupplier: (T) -> String
+    private val nameSupplier: (T) -> String,
+    private val maxValidIndex: () -> Int
 ) : ListCell<T>() {
     private val checkBox = CheckBox()
     private val label = Label()
@@ -22,7 +24,6 @@ class SortableListCell<T>(
     private var insertIndicator: InsertIndicator = InsertIndicator.NONE
     private var currentProperty: BooleanProperty? = null
     private var strikethroughListener: ChangeListener<Boolean>? = null
-    private var draggedItem: T? = null
 
     init {
         this.pane.alignment = Pos.CENTER_LEFT
@@ -30,7 +31,6 @@ class SortableListCell<T>(
             if (this.isEmpty) {
                 return@setOnDragDetected
             }
-            this.draggedItem = this.item
             val dragboard = this.startDragAndDrop(TransferMode.MOVE)
             val content = ClipboardContent()
             content.putString(this.index.toString())
@@ -38,14 +38,15 @@ class SortableListCell<T>(
             event.consume()
         }
         this.setOnDragOver { event ->
-            if (event.gestureSource != this && event.dragboard.hasString()) {
+            val gestureSourceIndex = this.gestureSourceIndex(event)
+            if (event.gestureSource != this && event.dragboard.hasString() && isDragValid(gestureSourceIndex)) {
                 event.acceptTransferModes(TransferMode.MOVE)
                 val height = this.height
                 val mouseY = event.y
                 val newIndicator = if (mouseY < height / 2) InsertIndicator.ABOVE else InsertIndicator.BELOW
                 if (newIndicator != this.insertIndicator) {
                     this.insertIndicator = newIndicator
-                    this.updateInsertIndicatorStyle()
+                    this.updateInsertIndicatorStyle(gestureSourceIndex)
                 }
             }
             event.consume()
@@ -54,13 +55,13 @@ class SortableListCell<T>(
             if (event.gestureSource != this && event.dragboard.hasString()) {
                 val mouseY = event.y
                 this.insertIndicator = if (mouseY < this.height / 2) InsertIndicator.ABOVE else InsertIndicator.BELOW
-                this.updateInsertIndicatorStyle()
+                this.updateInsertIndicatorStyle(this.gestureSourceIndex(event))
             }
             event.consume()
         }
         this.setOnDragExited { event ->
             this.insertIndicator = InsertIndicator.NONE
-            this.updateInsertIndicatorStyle()
+            this.updateInsertIndicatorStyle(this.gestureSourceIndex(event))
             event.consume()
         }
         this.setOnDragDropped { event ->
@@ -87,10 +88,13 @@ class SortableListCell<T>(
         }
         this.setOnDragDone { event ->
             this.insertIndicator = InsertIndicator.NONE
-            this.updateInsertIndicatorStyle()
-            this.draggedItem = null
+            this.updateInsertIndicatorStyle(this.gestureSourceIndex(event))
             event.consume()
         }
+    }
+
+    private fun gestureSourceIndex(event: DragEvent): Int {
+        return event.dragboard.string?.toIntOrNull() ?: -1
     }
 
     override fun updateItem(item: T?, empty: Boolean) {
@@ -106,7 +110,6 @@ class SortableListCell<T>(
             this.graphic = null
             this.insertIndicator = InsertIndicator.NONE
             this.label.pseudoClassStateChanged(STRIKETHROUGH_PSEUDO, false)
-            this.updateInsertIndicatorStyle()
         } else {
             val property = checkStates.getOrPut(item) { SimpleBooleanProperty(false) }
             this.checkBox.selectedProperty().bindBidirectional(property)
@@ -120,12 +123,12 @@ class SortableListCell<T>(
             this.strikethroughListener = listener
             this.graphic = this.pane
             this.insertIndicator = InsertIndicator.NONE
-            this.updateInsertIndicatorStyle()
         }
+        this.resetInsertIndicatorStyle()
     }
 
-    private fun updateInsertIndicatorStyle() {
-        when (this.insertIndicator) {
+    private fun updateInsertIndicatorStyle(gestureSourceIndex: Int) {
+        when (if (this.isDragValid(gestureSourceIndex)) this.insertIndicator else InsertIndicator.NONE) {
             InsertIndicator.ABOVE -> {
                 this.style = "-fx-border-color: dodgerblue; -fx-border-width: 2 0 0 0; -fx-border-style: solid;"
             }
@@ -135,9 +138,20 @@ class SortableListCell<T>(
             }
 
             InsertIndicator.NONE -> {
-                this.style = ""
+                resetInsertIndicatorStyle()
             }
         }
+    }
+
+    private fun resetInsertIndicatorStyle() {
+        this.style = ""
+    }
+
+    private fun isDragValid(gestureSourceIndex: Int): Boolean {
+        if (gestureSourceIndex == -1) {
+            return false
+        }
+        return this.index <= this.maxValidIndex() && gestureSourceIndex <= this.maxValidIndex()
     }
 
     private enum class InsertIndicator {

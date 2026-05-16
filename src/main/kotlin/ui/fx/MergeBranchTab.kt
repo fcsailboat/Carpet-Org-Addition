@@ -22,7 +22,9 @@ class MergeBranchTab : SkeletonTab() {
     private fun addBranchList() {
         val title = TitledPane("选择分支", this.listView)
         this.listView.cellFactory = {
-            SortableListCell(this.checkStates) { it.name }
+            SortableListCell(this.checkStates, { it.name }, {
+                this.checkStates.entries.stream().filter { it.value.value }.filter { it != null }.count().toInt() - 1
+            })
         }
         this.leftBox.children.add(title)
     }
