@@ -22,6 +22,8 @@ class MergeBranchTab : SkeletonTab() {
         this.addCurrentProceed()
         this.addFileChooser()
         this.addBranchList()
+        this.addSpace()
+        this.addProgressBar()
     }
 
     private fun addBranchList() {
