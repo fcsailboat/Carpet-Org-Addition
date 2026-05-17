@@ -2,29 +2,162 @@ package ui.fx
 
 import Publisher
 import javafx.beans.property.BooleanProperty
+import javafx.concurrent.Task
+import javafx.concurrent.Worker
+import javafx.scene.control.Alert
 import javafx.scene.control.Button
+import javafx.scene.control.ButtonType
 import javafx.scene.control.TitledPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.eclipse.jgit.api.Git
 import publish.Branch
-import util.versionCompare
+import publish.MinecraftVersion
 import java.io.File
 import java.io.IOException
+import kotlin.jvm.optionals.getOrNull
 
 class MergeBranchTab : SkeletonTab() {
     private val listView = WritableUniqueListView<Branch>()
     private val checkStates = HashMap<Branch, BooleanProperty>()
     private val branches = HashMap<String, Branch>()
+    private val stateHolder = WorkStateHolder<WorkStatus>(WorkStatus.READY)
 
     init {
         this.addCurrentProceed()
         this.addFileChooser()
         this.addBranchList()
+        this.addMergeButton()
         this.addSpace()
         this.addProgressBar()
     }
+
+    private fun addMergeButton() {
+        val box = HBox()
+        val button = Button()
+        this.stateHolder.addChangeValidator {
+            if (it == WorkStatus.RUNNING) {
+                if (this.isOrdered()) {
+                    return@addChangeValidator true
+                }
+                val alert = Alert(Alert.AlertType.CONFIRMATION)
+                alert.title = "分支未排序"
+                alert.headerText = "已选择的分支尚未按版本排序，是否继续合并？"
+                val result = alert.showAndWait().getOrNull() ?: return@addChangeValidator false
+                return@addChangeValidator result == ButtonType.OK
+            }
+            return@addChangeValidator true
+        }
+        this.stateHolder.addChangeListener {
+            when (it) {
+                WorkStatus.READY -> button.text = "合并分支"
+                WorkStatus.RUNNING -> button.text = "停止合并"
+                WorkStatus.STOPPING -> button.text = "正在停止"
+            }
+        }
+        this.stateHolder.addChangeValidator {
+            if (it == WorkStatus.RUNNING && this.listView.toList().count { branch -> branch.isChecked() } < 2) {
+                this.logMessage("至少需要选择两个版本！")
+                return@addChangeValidator false
+            }
+            return@addChangeValidator true
+        }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.RUNNING) {
+                this.mergeBranch()
+            }
+        }
+        this.stateHolder.addChangeListener {
+            button.isDisable = it == WorkStatus.STOPPING
+            this.stateHolder.cancel = it == WorkStatus.STOPPING
+        }
+        this.stateHolder.addChangeListener {
+            this.fileBrowseButton.isDisable = it != WorkStatus.READY
+        }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.READY) {
+                this.setCurrentProceed("当前状态", "合并未开始")
+            }
+        }
+        button.onAction = {
+            when (this.stateHolder.workState) {
+                WorkStatus.READY -> this.stateHolder.changeWorkState(WorkStatus.RUNNING)
+                WorkStatus.RUNNING -> this.stateHolder.changeWorkState(WorkStatus.STOPPING)
+                else -> {}
+            }
+        }
+        button.maxWidth = Double.MAX_VALUE
+        HBox.setHgrow(button, Priority.ALWAYS)
+        box.children.add(button)
+        this.stateHolder.changeWorkState(WorkStatus.READY)
+        this.leftBox.children.add(box)
+    }
+
+    private fun mergeBranch() {
+        val branches = this.getCheckedBranches()
+        val totals = branches.size
+        val task = object : Task<Unit>() {
+            override fun call() {
+                updateProgress(0L, totals.toLong())
+                for (index in 0 until totals - 1) {
+                    if (stateHolder.cancel) {
+                        break
+                    }
+                    val current = branches[index]
+                    val next = branches[index + 1]
+                    updateMessage("${next.name} <- ${current.name}")
+                    Thread.sleep(2000)
+                    updateProgress(index.toLong() + 1L, totals.toLong() - 1)
+                }
+            }
+        }
+        task.progressProperty().addListener { _, _, newValue ->
+            this.setProgress(newValue.toDouble(), totals)
+        }
+        task.messageProperty().addListener { _, _, newValue ->
+            this.setCurrentProceed("当前状态", newValue)
+        }
+        task.addFinishedListener {
+            try {
+                when (it) {
+                    Worker.State.SUCCEEDED -> {
+                        if (this.stateHolder.cancel) {
+                            this.logMessage("合并已停止！")
+                        } else {
+                            this.logMessage("合并完成！")
+                        }
+                    }
+
+                    Worker.State.FAILED -> {
+                        this.logMessage("合并中止！")
+                        val e = task.exception
+                        this.logMessage("错误: ${e?.asString()}")
+                    }
+
+                    else -> {}
+                }
+            } finally {
+                this.stateHolder.changeWorkState(WorkStatus.READY)
+            }
+        }
+        Thread(task, "Merge Branch Worker").start()
+    }
+
+    private fun isOrdered(): Boolean {
+        val list = this.getCheckedBranches()
+        for (i in 0 until list.size - 1) {
+            val current = list[i]
+            val next = list[i + 1]
+            if (MinecraftVersion(current.name) >= MinecraftVersion(next.name)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun getCheckedBranches(): List<Branch> =
+        this.listView.toList().stream().filter { branch -> branch.isChecked() }.toList()
 
     private fun addBranchList() {
         val box = VBox(3.0)
@@ -44,6 +177,10 @@ class MergeBranchTab : SkeletonTab() {
                 this.checkBoxChangeListener = {
                     this@MergeBranchTab.listView.sort()
                 }
+                this.freeze(this@MergeBranchTab.stateHolder.workState != WorkStatus.READY)
+                this@MergeBranchTab.stateHolder.addChangeListener {
+                    this.freeze(it != WorkStatus.READY)
+                }
             }
         }
         val button = Button("自动排序")
@@ -54,11 +191,15 @@ class MergeBranchTab : SkeletonTab() {
                 } else if (!o1.isChecked() && o2.isChecked()) {
                     1
                 } else if (o1.isChecked() && o2.isChecked()) {
-                    -versionCompare(o1.name, o2.name)
+                    MinecraftVersion(o1.name).compareTo(MinecraftVersion(o2.name))
                 } else {
                     0
                 }
             }
+        }
+        this.stateHolder.addChangeListener {
+            val disable = it != WorkStatus.READY
+            button.isDisable = disable
         }
         button.maxWidth = Double.MAX_VALUE
         HBox.setHgrow(button, Priority.ALWAYS)
@@ -66,7 +207,6 @@ class MergeBranchTab : SkeletonTab() {
         box.children.add(this.listView)
         box.children.add(button)
         val title = TitledPane("选择分支", box)
-
         this.leftBox.children.add(title)
     }
 
@@ -86,5 +226,11 @@ class MergeBranchTab : SkeletonTab() {
             this.listView.clear()
             Publisher.LOGGER.error("无法打开Git仓库：${this.folderPathField.text}", e)
         }
+    }
+
+    private enum class WorkStatus {
+        READY,
+        RUNNING,
+        STOPPING
     }
 }

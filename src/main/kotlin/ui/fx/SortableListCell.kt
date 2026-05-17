@@ -150,10 +150,14 @@ class SortableListCell<T>(
     }
 
     private fun isDragValid(gestureSourceIndex: Int): Boolean {
-        if (gestureSourceIndex == -1) {
+        if (gestureSourceIndex == -1 || this.checkBox.isDisable) {
             return false
         }
         return this.index <= this.maxValidIndex() && gestureSourceIndex <= this.maxValidIndex()
+    }
+
+    fun freeze(disable: Boolean) {
+        this.checkBox.isDisable = disable
     }
 
     private enum class InsertIndicator {
