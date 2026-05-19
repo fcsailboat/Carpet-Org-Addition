@@ -1,4 +1,4 @@
-package ui.fx
+package ui
 
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
@@ -32,11 +32,6 @@ class WritableUniqueListView<T> : VBox(), Iterable<T> {
         }
     var sorter: Comparator<T>? = null
     val size: Int get() = this.observableList.size
-    var fixedCellSize: Double
-        get() = this.listView.fixedCellSize
-        set(value) {
-            this.listView.fixedCellSize = value
-        }
 
     init {
         this.children.add(this.listView)

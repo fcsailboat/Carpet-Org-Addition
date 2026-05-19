@@ -1,4 +1,4 @@
-package ui.fx
+package ui
 
 import java.util.concurrent.atomic.AtomicBoolean
 

@@ -1,4 +1,4 @@
-package ui.fx
+package ui
 
 import Publisher
 import javafx.application.Application

@@ -1,4 +1,4 @@
-package ui.fx
+package ui
 
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty

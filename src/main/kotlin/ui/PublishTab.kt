@@ -1,4 +1,4 @@
-package ui.fx
+package ui
 
 import AppConfiguration
 import javafx.application.Platform
