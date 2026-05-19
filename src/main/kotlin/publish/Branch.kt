@@ -22,7 +22,7 @@ class Branch {
         return VersionFormats.parse(this.name) != VersionFormats.INVALID
     }
 
-    fun acceptMerge(other: Branch, logger: (String) -> Unit) {
+    fun acceptMerge(other: Branch, logger: (String) -> Unit): Boolean {
         if (this.name == other.name) {
             throw IllegalArgumentException("分支不应与自身合并")
         }
@@ -33,6 +33,7 @@ class Branch {
             throw IllegalStateException("无法签出分支", e)
         }
         var reset = true
+        var skipped = false
         try {
             val result = this.git.merge()
                 .include(other.ref())
@@ -43,6 +44,7 @@ class Branch {
                 }
 
                 MergeResult.MergeStatus.ALREADY_UP_TO_DATE -> {
+                    skipped = true
                     logger("${this.name}已是最新状态")
                 }
 
@@ -83,6 +85,7 @@ class Branch {
             }
             throw e
         }
+        return skipped
     }
 
     override fun equals(other: Any?): Boolean {

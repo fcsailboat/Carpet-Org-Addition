@@ -6,10 +6,7 @@ import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.concurrent.Task
 import javafx.concurrent.Worker
-import javafx.scene.control.Alert
-import javafx.scene.control.Button
-import javafx.scene.control.ButtonType
-import javafx.scene.control.TitledPane
+import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -25,14 +22,23 @@ class MergeBranchTab : SkeletonTab() {
     private val checkStates = HashMap<Branch, BooleanProperty>()
     private val branches = HashMap<String, Branch>()
     private val stateHolder = WorkStateHolder<WorkStatus>(WorkStatus.READY)
+    private val runClient = CheckBox("运行客户端")
 
     init {
         this.addCurrentProceed()
         this.addFileChooser()
         this.addBranchList()
         this.addMergeButton()
+        this.addRunClientCheckBox()
         this.addSpace()
         this.addProgressBar()
+    }
+
+    private fun addRunClientCheckBox() {
+        val box = HBox()
+        this.runClient.isSelected = true
+        box.children.add(this.runClient)
+        this.leftBox.children.add(box)
     }
 
     private fun addMergeButton() {
@@ -76,6 +82,7 @@ class MergeBranchTab : SkeletonTab() {
         }
         this.stateHolder.addChangeListener {
             this.fileBrowseButton.isDisable = it != WorkStatus.READY
+            this.runClient.isDisable = it != WorkStatus.READY
         }
         this.stateHolder.addChangeListener {
             if (it == WorkStatus.READY) {
@@ -113,8 +120,23 @@ class MergeBranchTab : SkeletonTab() {
                     logEmptyMessage()
                     logDividingLineLater()
                     logMessageLater("正在将${prev.name}合并到${current.name}")
-                    current.acceptMerge(prev) {
+                    val skipped = current.acceptMerge(prev) {
                         logMessageLater(it)
+                    }
+                    if (runClient.isSelected) {
+                        if (skipped) {
+                            logMessageLater("已跳过启动客户端")
+                        } else {
+                            logMessageLater("正在启动客户端")
+                            val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "runClient")
+                            processBuilder.directory(AppConfiguration.getWorkingDirectory()).inheritIO()
+                            val process = processBuilder.start()
+                            val exitCode = process.waitFor()
+                            if (exitCode != 0) {
+                                throw IllegalStateException("客户端异常终止，退出码：$exitCode")
+                            }
+                            logMessageLater("完成")
+                        }
                     }
                     updateProgress(index.toLong(), totals.toLong() - 1)
                 }
@@ -131,16 +153,16 @@ class MergeBranchTab : SkeletonTab() {
                 when (it) {
                     Worker.State.SUCCEEDED -> {
                         if (this.stateHolder.cancel) {
-                            this.logMessage("合并已停止！")
+                            this.logMessage("合并已被取消！")
                         } else {
                             this.logMessage("合并完成！")
                         }
                     }
 
                     Worker.State.FAILED -> {
-                        this.logMessage("合并中止！")
                         val e = task.exception
                         this.logMessage("错误: ${e?.asString()}")
+                        this.logMessage("合并异常终止！")
                         Publisher.LOGGER.error("Cannot merge: ", e)
                     }
 
