@@ -9,13 +9,13 @@ import org.eclipse.jgit.lib.Ref
 
 class Branch {
     private val git: Git
-    private val ref: Ref
+    private var ref: () -> Ref
     val name: String
 
-    private constructor(git: Git, ref: Ref) {
+    private constructor(git: Git, refName: String) {
         this.git = git
-        this.ref = ref
-        this.name = ref.name.replace("refs/heads/", "")
+        this.ref = { git.repository.exactRef(refName) ?: throw IllegalStateException("分支${this.name}不存在") }
+        this.name = refName.replace("refs/heads/", "")
     }
 
     private fun isValidBranch(): Boolean {
@@ -23,17 +23,19 @@ class Branch {
     }
 
     fun acceptMerge(other: Branch, logger: (String) -> Unit) {
-        if (!this.git.status().call().isClean) {
-            throw IllegalStateException("无法签出分支，工作区存在未处理更改")
-        }
         if (this.name == other.name) {
             throw IllegalArgumentException("分支不应与自身合并")
         }
-        this.git.checkout().setName(this.name).call()
+        logger("切换到${this.name}分支")
+        try {
+            this.git.checkout().setName(this.name).call()
+        } catch (e: Exception) {
+            throw IllegalStateException("无法签出分支", e)
+        }
         var reset = true
         try {
             val result = this.git.merge()
-                .include(other.ref)
+                .include(other.ref())
                 .call()
             when (result.mergeStatus) {
                 MergeResult.MergeStatus.FAST_FORWARD -> {
@@ -105,7 +107,7 @@ class Branch {
                     .call()
                     .stream()
                     .filter { it.name.startsWith("refs/heads/") }
-                    .map { Branch(git, it) }
+                    .map { Branch(git, it.name) }
                     .filter { it.isValidBranch() }
                     .toList()
             } catch (_: RepositoryNotFoundException) {

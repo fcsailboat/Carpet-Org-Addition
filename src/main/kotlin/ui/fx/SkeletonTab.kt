@@ -57,13 +57,13 @@ abstract class SkeletonTab : VBox() {
             style = "-fx-border-color: derive(-fx-base,-30%); -fx-border-width: 1px;"
             maxWidth = Double.MAX_VALUE
             maxHeight = 30.0
-            text = AppConfiguration.getRoot().absolutePath
+            text = AppConfiguration.getWorkingDirectory().absolutePath
             onFileChooserUpdate()
         }
         this.fileBrowseButton.setOnAction {
             val chooser = DirectoryChooser().apply {
                 title = "选择目录"
-                initialDirectory = AppConfiguration.getRoot()
+                initialDirectory = AppConfiguration.getWorkingDirectory()
             }
             val selectedDir = chooser.showDialog(this.fileBrowseButton.scene.window)
             if (selectedDir != null) {

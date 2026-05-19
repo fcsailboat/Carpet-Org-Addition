@@ -1,7 +1,9 @@
 package ui.fx
 
+import AppConfiguration
 import Publisher
 import javafx.beans.property.BooleanProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.concurrent.Task
 import javafx.concurrent.Worker
 import javafx.scene.control.Alert
@@ -95,25 +97,31 @@ class MergeBranchTab : SkeletonTab() {
     }
 
     private fun mergeBranch() {
+        this.clearMessage()
         val branches = this.getCheckedBranches()
         val totals = branches.size
         val task = object : Task<Unit>() {
             override fun call() {
                 updateProgress(0L, totals.toLong())
-                for (index in 0 until totals - 1) {
+                for (index in 1 until totals) {
                     if (stateHolder.cancel) {
                         break
                     }
+                    val prev = branches[index - 1]
                     val current = branches[index]
-                    val next = branches[index + 1]
-                    updateMessage("${next.name} <- ${current.name}")
-                    Thread.sleep(2000)
-                    updateProgress(index.toLong() + 1L, totals.toLong() - 1)
+                    updateMessage("${current.name} <- ${prev.name}")
+                    logEmptyMessage()
+                    logDividingLineLater()
+                    logMessageLater("正在将${prev.name}合并到${current.name}")
+                    current.acceptMerge(prev) {
+                        logMessageLater(it)
+                    }
+                    updateProgress(index.toLong(), totals.toLong() - 1)
                 }
             }
         }
         task.progressProperty().addListener { _, _, newValue ->
-            this.setProgress(newValue.toDouble(), totals)
+            this.setProgress(newValue.toDouble(), totals - 1)
         }
         task.messageProperty().addListener { _, _, newValue ->
             this.setCurrentProceed("当前状态", newValue)
@@ -133,6 +141,7 @@ class MergeBranchTab : SkeletonTab() {
                         this.logMessage("合并中止！")
                         val e = task.exception
                         this.logMessage("错误: ${e?.asString()}")
+                        Publisher.LOGGER.error("Cannot merge: ", e)
                     }
 
                     else -> {}
@@ -184,19 +193,7 @@ class MergeBranchTab : SkeletonTab() {
             }
         }
         val button = Button("自动排序")
-        button.onAction = {
-            this.listView.sort { o1, o2 ->
-                if (o1.isChecked() && !o2.isChecked()) {
-                    -1
-                } else if (!o1.isChecked() && o2.isChecked()) {
-                    1
-                } else if (o1.isChecked() && o2.isChecked()) {
-                    MinecraftVersion(o1.name).compareTo(MinecraftVersion(o2.name))
-                } else {
-                    0
-                }
-            }
-        }
+        button.onAction = { this.listView.sort { o1, o2 -> comparator(o1, o2) } }
         this.stateHolder.addChangeListener {
             val disable = it != WorkStatus.READY
             button.isDisable = disable
@@ -208,6 +205,19 @@ class MergeBranchTab : SkeletonTab() {
         box.children.add(button)
         val title = TitledPane("选择分支", box)
         this.leftBox.children.add(title)
+    }
+
+    private fun comparator(o1: Branch, o2: Branch): Int {
+        if (o1.isChecked() && !o2.isChecked()) {
+            return -1
+        }
+        if (!o1.isChecked() && o2.isChecked()) {
+            return 1
+        }
+        if (o1.isChecked() && o2.isChecked()) {
+            return MinecraftVersion(o1.name).compareTo(MinecraftVersion(o2.name))
+        }
+        return 0
     }
 
     private fun Branch.isChecked(): Boolean {
@@ -225,6 +235,17 @@ class MergeBranchTab : SkeletonTab() {
         } catch (e: IOException) {
             this.listView.clear()
             Publisher.LOGGER.error("无法打开Git仓库：${this.folderPathField.text}", e)
+        }
+        for (branch in this.listView) {
+            if (branch.name in AppConfiguration.getDefaultSelectionVersions()) {
+                val property = this.checkStates.getOrPut(branch) {
+                    SimpleBooleanProperty(true)
+                }
+                property.value = true
+            }
+        }
+        this.listView.sort { o1, o2 ->
+            comparator(o1, o2)
         }
     }
 

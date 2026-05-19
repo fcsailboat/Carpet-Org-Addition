@@ -11,11 +11,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
 
 class JarBuilder {
+    private val git: Git
     private val branch: String
     private val format: VersionFormats
     private val logger: (String) -> Unit
 
-    constructor(branch: String, logger: (String) -> Unit) {
+    constructor(git: Git, branch: String, logger: (String) -> Unit) {
+        this.git = git
         this.branch = branch
         this.format = VersionFormats.parse(branch)
         this.logger = logger
@@ -67,7 +69,7 @@ class JarBuilder {
      */
     private fun switch() {
         this.logger("切换到${this.branch}分支")
-        GIT.checkout().setName(this.branch).call()
+        this.git.checkout().setName(this.branch).call()
     }
 
     private fun build() {
@@ -110,9 +112,5 @@ class JarBuilder {
         }
         process.destroyForcibly()
         throw IllegalStateException("[${this.branch}] Command execution timeout")
-    }
-
-    companion object {
-        val GIT: Git = Git.open(AppConfiguration.getRoot())
     }
 }

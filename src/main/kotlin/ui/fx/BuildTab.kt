@@ -13,9 +13,11 @@ import javafx.scene.control.cell.CheckBoxListCell
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.apache.commons.collections4.list.SetUniqueList
+import org.eclipse.jgit.api.Git
 import publish.JarBuilder
 import util.archiveStagingFile
 import util.listVersion
+import java.io.File
 import java.nio.file.Path.of
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
@@ -88,12 +90,13 @@ class BuildTab : SkeletonTab() {
             val task = object : Task<Unit>() {
                 override fun call() {
                     updateProgress(0L, totals.toLong())
+                    val git = Git.open(File(folderPathField.text))
                     for ((index, version) in list.withIndex()) {
                         if (stopFlag.get()) {
                             break
                         }
                         updateMessage(version)
-                        val builder = JarBuilder(version) { logMessageLater(it) }
+                        val builder = JarBuilder(git, version) { logMessageLater(it) }
                         logDividingLineLater()
                         builder.run()
                         logDividingLineLater()

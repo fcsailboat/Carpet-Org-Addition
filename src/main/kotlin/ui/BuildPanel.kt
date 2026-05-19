@@ -189,7 +189,7 @@ class BuildPanel : SimplePanel {
                     return true
                 }
                 this.setCurrentVersion(version)
-                val builder = JarBuilder(version) {
+                val builder = JarBuilder(TODO(), version) {
                     this.log(it)
                 }
                 this.log("-".repeat(80))

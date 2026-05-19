@@ -7,6 +7,7 @@ import java.io.File
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.Path
 
 class AppConfiguration {
     companion object {
@@ -21,8 +22,24 @@ class AppConfiguration {
             return array.asList().stream().map { it.asString }.toList()
         }
 
+        private fun getConfigDirectory(): File {
+            return File("./publisher", "config")
+        }
+
+        private fun readConfig(): JsonObject {
+            val file = File(this.getConfigDirectory(), "config.json")
+            val str = Files.readString(file.absoluteFile.toPath(), Charsets.UTF_8)
+            return GSON.fromJson(str, JsonObject::class.java)
+        }
+
         fun getRoot(): File {
             return File(".").absoluteFile.normalize()
+        }
+
+        fun getWorkingDirectory(): File {
+            val json = this.readConfig()
+            val path = json.getAsJsonPrimitive("working_directory")?.asString ?: "."
+            return Path.of(path).toFile().absoluteFile.normalize()
         }
 
         fun getBuildOutput(): File {
@@ -42,7 +59,7 @@ class AppConfiguration {
         }
 
         fun getVersionSupport(): List<String> {
-            val file = File(this.getPublisher(), "config/cache.json")
+            val file = File(this.getConfigDirectory(), "cache.json")
             if (file.isFile()) {
                 val lines: List<String> = Files.readAllLines(file.toPath())
                 val builder = StringBuilder()
@@ -82,7 +99,7 @@ class AppConfiguration {
         }
 
         private fun getJsonObject(): JsonObject {
-            val file = File(this.getPublisher(), "config/config.json")
+            val file = File(this.getConfigDirectory(), "config.json")
             if (!file.exists()) {
                 val json = JsonObject()
                 json.add("versions", JsonArray())
