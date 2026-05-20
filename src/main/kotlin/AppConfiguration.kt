@@ -2,6 +2,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import publish.MinecraftVersion
 import java.io.BufferedInputStream
 import java.io.File
 import java.net.URI
@@ -12,13 +13,14 @@ import java.nio.file.Path
 class AppConfiguration {
     companion object {
         private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+        private lateinit var configJson: JsonObject
 
         fun getToken(): String {
             return getJsonObject().get("token").asString
         }
 
         fun getDefaultSelectionVersions(): List<String> {
-            val array: JsonArray = getJsonObject().get("versions").asJsonArray
+            val array: JsonArray = getJsonObject().get("selection_versions").asJsonArray
             return array.asList().stream().map { it.asString }.toList()
         }
 
@@ -58,13 +60,44 @@ class AppConfiguration {
             return File(this.getRoot(), "publisher")
         }
 
-        fun getJavaPath(version: Int): Path {
+        fun getJavaPath(minecraftVersion: String): Path {
+            val version = this.getJavaDependVersion(minecraftVersion)
             val map = this.getJsonObject().get("java_paths")
                 ?.asJsonObject?.entrySet()
                 ?.associate { (key, value) -> key to Path.of(value.asString) }
                 ?: mapOf()
             return map["java_$version"]
                 ?: throw IllegalArgumentException("Missing or invalid 'java_paths' for version $version")
+        }
+
+        private fun getJavaDependVersion(minecraftVersion: String): Int {
+            val entries = this.getJsonObject().get("java_depends")?.asJsonObject?.entrySet() ?: setOf()
+            for (entry in entries) {
+                val predicate = this.parseJavaDependVersion(entry.key)
+                if (predicate(minecraftVersion)) {
+                    return entry.value.asJsonPrimitive.asInt
+                }
+            }
+            throw IllegalArgumentException(minecraftVersion)
+        }
+
+        private fun parseJavaDependVersion(expression: String): (String) -> Boolean {
+            if (MinecraftVersion(expression).isValid()) {
+                return { it == expression }
+            }
+            val split = expression.split("-")
+            if (split.isEmpty() && expression.endsWith("+")) {
+                return { MinecraftVersion(it) > MinecraftVersion(split[0]) }
+            }
+            if (split.size == 1 && expression.endsWith("-")) {
+                return { MinecraftVersion(it) < MinecraftVersion(split[0]) }
+            }
+            if (split.size == 2) {
+                return {
+                    MinecraftVersion(it) >= MinecraftVersion(split[0]) && MinecraftVersion(it) <= MinecraftVersion(split[1])
+                }
+            }
+            throw IllegalArgumentException("Unable to parse Java dependency versions: $expression")
         }
 
         fun getVersionSupport(): List<String> {
@@ -108,6 +141,9 @@ class AppConfiguration {
         }
 
         private fun getJsonObject(): JsonObject {
+            if (this::configJson.isInitialized) {
+                return this.configJson
+            }
             val file = File(this.getConfigDirectory(), "config.json")
             if (!file.exists()) {
                 val json = JsonObject()
@@ -118,7 +154,8 @@ class AppConfiguration {
                 file.writeText(GSON.toJson(json))
             }
             val text = file.readText()
-            return GSON.fromJson(text, JsonObject::class.java)
+            this.configJson = GSON.fromJson(text, JsonObject::class.java)
+            return this.configJson
         }
     }
 }

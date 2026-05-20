@@ -99,7 +99,7 @@ class JarBuilder {
     private fun tryBuild() {
         val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "build")
         processBuilder.directory(this.workingDirectory).inheritIO()
-        val javaPath = AppConfiguration.getJavaPath(21).absolutePathString()
+        val javaPath = AppConfiguration.getJavaPath(this.branch).absolutePathString()
         processBuilder.environment()["JAVA_HOME"] = javaPath
         Publisher.LOGGER.info("JAVA_HOME=$javaPath")
         Publisher.LOGGER.info("Working directory: ${this.workingDirectory}")
