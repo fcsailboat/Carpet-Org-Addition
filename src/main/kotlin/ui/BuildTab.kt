@@ -4,7 +4,6 @@ import AppConfiguration
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.collections.FXCollections
 import javafx.concurrent.Task
 import javafx.concurrent.Worker
 import javafx.scene.Node
@@ -12,24 +11,19 @@ import javafx.scene.control.*
 import javafx.scene.control.cell.CheckBoxListCell
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import org.apache.commons.collections4.list.SetUniqueList
+import javafx.util.Callback
 import org.eclipse.jgit.api.Git
 import publish.JarBuilder
 import util.archiveStagingFile
 import util.listVersion
 import java.io.File
 import java.nio.file.Path.of
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.max
 
 
 class BuildTab : SkeletonTab() {
-    private val versionList = FXCollections.observableList(SetUniqueList.setUniqueList(ArrayList<String>()))
-    private val listView = ListView(this.versionList)
+    private val listView = WritableUniqueListView<String>()
     private val checkStates = HashMap<String, BooleanProperty>()
-    private val startBuildButton = Button()
-    private var workState = WorkStatus.READY
-    private val stopFlag = AtomicBoolean(false)
+    private val stateHolder = WorkStateHolder(WorkStatus.READY)
 
     init {
         this.addCurrentProceed()
@@ -42,10 +36,23 @@ class BuildTab : SkeletonTab() {
 
     private fun addVersionList() {
         val titledPane = TitledPane("选择版本", this.listView)
-        this.listView.fixedCellSize = CELL_SIZE
-        this.listView.cellFactory = CheckBoxListCell.forListView {
-            this.checkStates.getOrPut(it) {
-                SimpleBooleanProperty(false)
+        this.listView.cellFactory = Callback<ListView<String>, ListCell<String>> {
+            object : CheckBoxListCell<String>({ item ->
+                checkStates.getOrPut(item) { SimpleBooleanProperty(false) }
+            }) {
+                override fun updateItem(item: String?, empty: Boolean) {
+                    super.updateItem(item, empty)
+                    tooltip = if (!empty && item != null) {
+                        Tooltip("Java版本：${AppConfiguration.getJavaDependVersion(item)}")
+                    } else {
+                        null
+                    }
+                }
+            }.apply {
+                this.isDisable = stateHolder.workState != WorkStatus.READY
+                stateHolder.addChangeListener {
+                    this.isDisable = it != WorkStatus.READY
+                }
             }
         }
         this.leftBox.children.add(titledPane)
@@ -57,20 +64,49 @@ class BuildTab : SkeletonTab() {
         for (version in AppConfiguration.getDefaultSelectionVersions()) {
             checkStates[version] = SimpleBooleanProperty(true)
         }
-        versionList.clear()
-        versionList.addAll(versions)
-        listView.prefHeight = CELL_SIZE * max(versions.size, 3)
+        this.listView.clear()
+        this.listView.addAll(versions)
     }
 
     private fun addStartButton() {
         val box = HBox()
-        box.children.add(this.startBuildButton)
-        HBox.setHgrow(this.startBuildButton, Priority.ALWAYS)
-        this.startBuildButton.maxWidth = Double.MAX_VALUE
-        this.setButtonState(WorkStatus.READY)
-        this.startBuildButton.setOnAction {
-            when (this.workState) {
-                WorkStatus.RUNNING -> this.setButtonState(WorkStatus.WAIT_TO_STOP)
+        val button = Button()
+        box.children.add(button)
+        HBox.setHgrow(button, Priority.ALWAYS)
+        button.maxWidth = Double.MAX_VALUE
+        this.stateHolder.addChangeListener {
+            this.fileBrowseButton.isDisable = it != WorkStatus.READY
+            button.isDisable = it == WorkStatus.STOPPING
+        }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.READY) {
+                this.setCurrentProceed("无")
+            }
+        }
+        this.stateHolder.addChangeListener {
+            if (it == WorkStatus.STOPPING) {
+                this.stateHolder.cancel = true
+            }
+        }
+        this.stateHolder.addChangeListener {
+            when (it) {
+                WorkStatus.READY -> {
+                    button.text = "开始构建"
+                }
+
+                WorkStatus.RUNNING -> {
+                    button.text = "停止构建"
+                }
+
+                WorkStatus.STOPPING -> {
+                    button.text = "正在停止..."
+                }
+            }
+        }
+        this.stateHolder.changeWorkState(WorkStatus.READY)
+        button.setOnAction {
+            when (this.stateHolder.workState) {
+                WorkStatus.RUNNING -> this.stateHolder.changeWorkState(WorkStatus.STOPPING)
                 WorkStatus.READY -> this.startBuildTask()
                 else -> {}
             }
@@ -79,13 +115,14 @@ class BuildTab : SkeletonTab() {
     }
 
     private fun startBuildTask() {
-        val list = this.versionList.stream().filter { it.isChecked() }.toList().reversed()
+        val list = this.listView.toList().stream().filter { it.isChecked() }.toList().reversed()
         if (list.isEmpty()) {
             this.logMessage("未选择任何版本！")
             return
         }
         if (this.handleStaging()) {
-            this.onTaskStarted()
+            this.stateHolder.changeWorkState(WorkStatus.RUNNING)
+            this.stateHolder.cancel = false
             val totals = list.size
             val task = object : Task<Unit>() {
                 override fun call() {
@@ -93,14 +130,14 @@ class BuildTab : SkeletonTab() {
                     val workingDirectory = File(folderPathField.text)
                     val git = Git.open(workingDirectory)
                     for ((index, version) in list.withIndex()) {
-                        if (stopFlag.get()) {
+                        if (stateHolder.cancel) {
                             break
                         }
                         updateMessage(version)
+                        logEmptyMessage()
+                        logDividingLineLater()
                         val builder = JarBuilder(git, workingDirectory, version) { logMessageLater(it) }
-                        logDividingLineLater()
                         builder.run()
-                        logDividingLineLater()
                         updateProgress(index.toLong() + 1, totals.toLong())
                     }
                 }
@@ -115,7 +152,7 @@ class BuildTab : SkeletonTab() {
                 try {
                     when (it) {
                         Worker.State.SUCCEEDED -> {
-                            if (this.stopFlag.get()) {
+                            if (this.stateHolder.cancel) {
                                 this.logMessage("构建已停止！")
                             } else {
                                 this.logMessage("构建完成！")
@@ -129,16 +166,11 @@ class BuildTab : SkeletonTab() {
                         else -> {}
                     }
                 } finally {
-                    this.setButtonState(WorkStatus.READY)
+                    this.stateHolder.changeWorkState(WorkStatus.READY)
                 }
             }
             Thread(task, "Build Worker").start()
         }
-    }
-
-    private fun onTaskStarted() {
-        this.setButtonState(WorkStatus.RUNNING)
-        this.stopFlag.set(false)
     }
 
     private fun handleStaging(): Boolean {
@@ -190,32 +222,10 @@ class BuildTab : SkeletonTab() {
         return checkStates[this]?.value ?: false
     }
 
-    private fun setButtonState(state: WorkStatus) {
-        this.workState = state
-        this.fileBrowseButton.isDisable = state != WorkStatus.READY
-        this.startBuildButton.isDisable = state == WorkStatus.WAIT_TO_STOP
-        this.listView.isDisable = state != WorkStatus.READY
-        when (state) {
-            WorkStatus.READY -> {
-                this.startBuildButton.text = "开始构建"
-                this.setCurrentProceed("无")
-            }
-
-            WorkStatus.RUNNING -> {
-                this.startBuildButton.text = "停止构建"
-            }
-
-            WorkStatus.WAIT_TO_STOP -> {
-                this.startBuildButton.text = "正在停止..."
-                this.stopFlag.set(true)
-            }
-        }
-    }
-
     private enum class WorkStatus {
         READY,
         RUNNING,
-        WAIT_TO_STOP
+        STOPPING
     }
 
     private companion object {

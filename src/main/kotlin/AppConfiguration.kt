@@ -60,8 +60,7 @@ class AppConfiguration {
             return File(this.getRoot(), "publisher")
         }
 
-        fun getJavaPath(minecraftVersion: String): Path {
-            val version = this.getJavaDependVersion(minecraftVersion)
+        fun getJavaPath(version: Int): Path {
             val map = this.getJsonObject().get("java_paths")
                 ?.asJsonObject?.entrySet()
                 ?.associate { (key, value) -> key to Path.of(value.asString) }
@@ -70,7 +69,7 @@ class AppConfiguration {
                 ?: throw IllegalArgumentException("Missing or invalid 'java_paths' for version $version")
         }
 
-        private fun getJavaDependVersion(minecraftVersion: String): Int {
+        fun getJavaDependVersion(minecraftVersion: String): Int {
             val entries = this.getJsonObject().get("java_depends")?.asJsonObject?.entrySet() ?: setOf()
             for (entry in entries) {
                 val predicate = this.parseJavaDependVersion(entry.key)
@@ -85,12 +84,12 @@ class AppConfiguration {
             if (MinecraftVersion(expression).isValid()) {
                 return { it == expression }
             }
-            val split = expression.split("-")
-            if (split.isEmpty() && expression.endsWith("+")) {
-                return { MinecraftVersion(it) > MinecraftVersion(split[0]) }
+            val split = expression.split("-").filter { it.isNotEmpty() }
+            if (split.size == 1 && expression.endsWith("+")) {
+                return { MinecraftVersion(it) >= MinecraftVersion(split[0].removeSuffix("+")) }
             }
             if (split.size == 1 && expression.endsWith("-")) {
-                return { MinecraftVersion(it) < MinecraftVersion(split[0]) }
+                return { MinecraftVersion(it) <= MinecraftVersion(split[0]) }
             }
             if (split.size == 2) {
                 return {
