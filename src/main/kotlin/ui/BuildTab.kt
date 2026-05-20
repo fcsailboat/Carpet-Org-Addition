@@ -90,13 +90,14 @@ class BuildTab : SkeletonTab() {
             val task = object : Task<Unit>() {
                 override fun call() {
                     updateProgress(0L, totals.toLong())
-                    val git = Git.open(File(folderPathField.text))
+                    val workingDirectory = File(folderPathField.text)
+                    val git = Git.open(workingDirectory)
                     for ((index, version) in list.withIndex()) {
                         if (stopFlag.get()) {
                             break
                         }
                         updateMessage(version)
-                        val builder = JarBuilder(git, version) { logMessageLater(it) }
+                        val builder = JarBuilder(git, workingDirectory, version) { logMessageLater(it) }
                         logDividingLineLater()
                         builder.run()
                         logDividingLineLater()

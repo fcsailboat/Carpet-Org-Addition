@@ -15,9 +15,11 @@ class JarBuilder {
     private val branch: String
     private val format: VersionFormats
     private val logger: (String) -> Unit
+    private val workingDirectory: File
 
-    constructor(git: Git, branch: String, logger: (String) -> Unit) {
+    constructor(git: Git, workingDirectory: File, branch: String, logger: (String) -> Unit) {
         this.git = git
+        this.workingDirectory = workingDirectory
         this.branch = branch
         this.format = VersionFormats.parse(branch)
         this.logger = logger
@@ -33,7 +35,8 @@ class JarBuilder {
     }
 
     private fun moveFile() {
-        val files = AppConfiguration.getBuildOutput().listFiles() ?: throw IllegalArgumentException()
+        val files = AppConfiguration.getBuildOutput(this.workingDirectory).listFiles()
+            ?: throw IllegalArgumentException()
         val list = files.asList().stream()
             .filter { it.isFile }
             .filter { "sources" !in it.name }
@@ -51,7 +54,7 @@ class JarBuilder {
     }
 
     private fun archive() {
-        val output = AppConfiguration.getBuildOutput()
+        val output = AppConfiguration.getBuildOutput(this.workingDirectory)
         val archive = File(output, "archive")
         if (!archive.exists()) {
             archive.mkdirs()
@@ -95,8 +98,11 @@ class JarBuilder {
 
     private fun tryBuild() {
         val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "build")
-        processBuilder.directory(AppConfiguration.getRoot()).inheritIO()
-        Publisher.LOGGER.info("Working directory: ${AppConfiguration.getRoot()}")
+        processBuilder.directory(this.workingDirectory).inheritIO()
+        val javaPath = AppConfiguration.getJavaPath(21).absolutePathString()
+        processBuilder.environment()["JAVA_HOME"] = javaPath
+        Publisher.LOGGER.info("JAVA_HOME=$javaPath")
+        Publisher.LOGGER.info("Working directory: ${this.workingDirectory}")
         val process = processBuilder.start()
         // 要求在10分钟内完成，下载依赖可能需要相当长的时间
         val finished = process.waitFor(600, TimeUnit.SECONDS)

@@ -36,14 +36,14 @@ class AppConfiguration {
             return File(".").absoluteFile.normalize()
         }
 
-        fun getWorkingDirectory(): File {
+        fun getDefaultWorkingDirectory(): File {
             val json = this.readConfig()
             val path = json.getAsJsonPrimitive("working_directory")?.asString ?: "."
             return Path.of(path).toFile().absoluteFile.normalize()
         }
 
-        fun getBuildOutput(): File {
-            return File(this.getRoot(), "build/libs")
+        fun getBuildOutput(workingDirectory: File): File {
+            return File(workingDirectory, "build/libs")
         }
 
         fun getStaging(): File {
@@ -54,8 +54,17 @@ class AppConfiguration {
             return File(this.getPublisher(), "dist/archive")
         }
 
-        fun getPublisher(): File {
+        private fun getPublisher(): File {
             return File(this.getRoot(), "publisher")
+        }
+
+        fun getJavaPath(version: Int): Path {
+            val map = this.getJsonObject().get("java_paths")
+                ?.asJsonObject?.entrySet()
+                ?.associate { (key, value) -> key to Path.of(value.asString) }
+                ?: mapOf()
+            return map["java_$version"]
+                ?: throw IllegalArgumentException("Missing or invalid 'java_paths' for version $version")
         }
 
         fun getVersionSupport(): List<String> {

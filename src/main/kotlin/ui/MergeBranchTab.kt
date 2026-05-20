@@ -129,7 +129,7 @@ class MergeBranchTab : SkeletonTab() {
                         } else {
                             logMessageLater("正在启动客户端")
                             val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "runClient")
-                            processBuilder.directory(AppConfiguration.getWorkingDirectory()).inheritIO()
+                            processBuilder.directory(File(folderPathField.text)).inheritIO()
                             val process = processBuilder.start()
                             val exitCode = process.waitFor()
                             if (exitCode != 0) {
