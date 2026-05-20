@@ -13,14 +13,16 @@ import kotlin.io.path.absolutePathString
 class JarBuilder {
     private val git: Git
     private val branch: String
+    private val skipTests: Boolean
     private val format: VersionFormats
     private val logger: (String) -> Unit
     private val workingDirectory: File
 
-    constructor(git: Git, workingDirectory: File, branch: String, logger: (String) -> Unit) {
+    constructor(git: Git, workingDirectory: File, branch: String, skipTests: Boolean, logger: (String) -> Unit) {
         this.git = git
         this.workingDirectory = workingDirectory
         this.branch = branch
+        this.skipTests = skipTests
         this.format = VersionFormats.parse(branch)
         this.logger = logger
     }
@@ -97,7 +99,12 @@ class JarBuilder {
     }
 
     private fun tryBuild() {
-        val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "build")
+        val command = arrayListOf("cmd", "/c", "gradlew", "build")
+        if (this.skipTests) {
+            command.add("-x")
+            command.add("test")
+        }
+        val processBuilder = ProcessBuilder(command)
         processBuilder.directory(this.workingDirectory).inheritIO()
         val javaVersion = AppConfiguration.getJavaDependVersion(this.branch)
         this.logger("Java版本：$javaVersion")

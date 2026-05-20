@@ -33,7 +33,7 @@ abstract class SkeletonTab : VBox() {
     }
 
     private fun addMessagePanel() {
-        val pane = TitledPane("信息", this.messageArea)
+        val pane = TitledPane("详细信息", this.messageArea)
         this.messageArea.isEditable = false
         pane.isCollapsible = false
         pane.isAnimated = false
@@ -172,6 +172,5 @@ abstract class SkeletonTab : VBox() {
 
     companion object {
         val FORMATTER = DecimalFormat("#.##")
-        const val CELL_SIZE = 20.0
     }
 }

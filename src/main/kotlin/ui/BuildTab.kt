@@ -24,14 +24,25 @@ class BuildTab : SkeletonTab() {
     private val listView = WritableUniqueListView<String>()
     private val checkStates = HashMap<String, BooleanProperty>()
     private val stateHolder = WorkStateHolder(WorkStatus.READY)
+    private val skipTests = CheckBox("跳过单元测试")
 
     init {
         this.addCurrentProceed()
         this.addFileChooser()
         this.addVersionList()
         this.addStartButton()
+        this.addSkipTestsCheckBox()
         this.addSpace()
         this.addProgressBar()
+    }
+
+    private fun addSkipTestsCheckBox() {
+        val box = HBox()
+        box.children.add(this.skipTests)
+        this.stateHolder.addChangeListener {
+            this.skipTests.isDisable = it != WorkStatus.READY
+        }
+        this.leftBox.children.add(box)
     }
 
     private fun addVersionList() {
@@ -136,7 +147,12 @@ class BuildTab : SkeletonTab() {
                         updateMessage(version)
                         logEmptyMessage()
                         logDividingLineLater()
-                        val builder = JarBuilder(git, workingDirectory, version) { logMessageLater(it) }
+                        val builder = JarBuilder(
+                            git,
+                            workingDirectory,
+                            version,
+                            skipTests.isSelected
+                        ) { logMessageLater(it) }
                         builder.run()
                         updateProgress(index.toLong() + 1, totals.toLong())
                     }
