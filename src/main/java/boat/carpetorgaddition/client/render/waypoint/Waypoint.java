@@ -88,7 +88,7 @@ public abstract class Waypoint implements WorldRenderComponent {
         this(world.dimension(), target, icon, duration, persistent);
     }
 
-    // TODO 路径点渲染可能会被半透明方块遮挡
+    // FIXME 路径点渲染可能会被半透明方块遮挡
     @Override
     public void render(LevelRenderContext context) {
         PoseStack poseStack = context.poseStack();
