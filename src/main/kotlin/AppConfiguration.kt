@@ -9,6 +9,7 @@ import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.absolutePathString
 
 class AppConfiguration {
     companion object {
@@ -16,22 +17,16 @@ class AppConfiguration {
         private lateinit var configJson: JsonObject
 
         fun getToken(): String {
-            return getJsonObject().get("token").asString
+            return readConfig().get("token").asString
         }
 
         fun getDefaultSelectionVersions(): List<String> {
-            val array: JsonArray = getJsonObject().get("selection_versions").asJsonArray
+            val array: JsonArray = readConfig().get("selection_versions").asJsonArray
             return array.asList().stream().map { it.asString }.toList()
         }
 
         private fun getConfigDirectory(): File {
             return File("./publisher", "config")
-        }
-
-        private fun readConfig(): JsonObject {
-            val file = File(this.getConfigDirectory(), "config.json")
-            val str = Files.readString(file.absoluteFile.toPath(), Charsets.UTF_8)
-            return GSON.fromJson(str, JsonObject::class.java)
         }
 
         fun getRoot(): File {
@@ -61,7 +56,7 @@ class AppConfiguration {
         }
 
         fun getJavaPath(version: Int): Path {
-            val map = this.getJsonObject().get("java_paths")
+            val map = this.readConfig().get("java_paths")
                 ?.asJsonObject?.entrySet()
                 ?.associate { (key, value) -> key to Path.of(value.asString) }
                 ?: mapOf()
@@ -70,7 +65,7 @@ class AppConfiguration {
         }
 
         fun getJavaDependVersion(minecraftVersion: String): Int {
-            val entries = this.getJsonObject().get("java_depends")?.asJsonObject?.entrySet() ?: setOf()
+            val entries = this.readConfig().get("java_depends")?.asJsonObject?.entrySet() ?: setOf()
             for (entry in entries) {
                 val predicate = this.parseJavaDependVersion(entry.key)
                 if (predicate(minecraftVersion)) {
@@ -139,22 +134,36 @@ class AppConfiguration {
                 .toList()
         }
 
-        private fun getJsonObject(): JsonObject {
+        private fun readConfig(): JsonObject {
             if (this::configJson.isInitialized) {
                 return this.configJson
             }
             val file = File(this.getConfigDirectory(), "config.json")
             if (!file.exists()) {
-                val json = JsonObject()
-                json.add("versions", JsonArray())
-                json.addProperty("token", "")
-                Publisher.LOGGER.info("Init config/config.json")
+                val json = initConfig()
                 file.parentFile.mkdirs()
                 file.writeText(GSON.toJson(json))
             }
             val text = file.readText()
             this.configJson = GSON.fromJson(text, JsonObject::class.java)
             return this.configJson
+        }
+
+        private fun initConfig(): JsonObject {
+            val json = JsonObject()
+            json.add("selection_versions", JsonArray())
+            json.addProperty("token", "*".repeat(64))
+            json.addProperty("working_directory", Path.of(".").absolutePathString())
+            val javaPaths = JsonObject()
+            javaPaths.addProperty("java_${Runtime.version().feature()}", System.getProperty("java.home"))
+            json.add("java_paths", javaPaths)
+            val javaDepends = JsonObject()
+            javaDepends.addProperty("1.20.4-", 17)
+            javaDepends.addProperty("1.20.5-1.21.11", 21)
+            javaDepends.addProperty("26.1+", 25)
+            json.add("java_depends", javaDepends)
+            Publisher.LOGGER.info("Init config/config.json")
+            return json
         }
     }
 }

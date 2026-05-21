@@ -12,6 +12,7 @@ import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.inputStream
 import kotlin.io.path.isDirectory
 import kotlin.math.max
@@ -60,26 +61,36 @@ fun versionCompare(s1: String, s2: String): Int {
  * 移动文件，如果目标文件存在，比较文件内容，相同则覆盖，否则抛出异常
  */
 fun moveOrReplaceFile(from: Path, to: Path) {
-    try {
-        Files.move(from, to)
-    } catch (e: FileAlreadyExistsException) {
-        if (fileEquivalent(from, to)) {
-            Files.move(from, to, StandardCopyOption.REPLACE_EXISTING)
-        } else {
-            throw e
+    if (from.toFile().isFile) {
+        Files.createDirectories(to.parent)
+        try {
+            Files.move(from, to)
+        } catch (e: FileAlreadyExistsException) {
+            if (fileEquivalent(from, to)) {
+                Files.move(from, to, StandardCopyOption.REPLACE_EXISTING)
+            } else {
+                throw e
+            }
         }
+    } else {
+        throw IllegalArgumentException("${from.absolutePathString()} is not a file")
     }
 }
 
 fun copyOrReplaceFile(from: Path, to: Path) {
-    try {
-        Files.copy(from, to)
-    } catch (e: FileAlreadyExistsException) {
-        if (fileEquivalent(from, to)) {
-            Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING)
-        } else {
-            throw e
+    if (from.toFile().isFile) {
+        Files.createDirectories(to.parent)
+        try {
+            Files.copy(from, to)
+        } catch (e: FileAlreadyExistsException) {
+            if (fileEquivalent(from, to)) {
+                Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING)
+            } else {
+                throw e
+            }
         }
+    } else {
+        throw IllegalArgumentException("${from.absolutePathString()} is not a file")
     }
 }
 
