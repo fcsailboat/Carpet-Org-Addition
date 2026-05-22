@@ -6,6 +6,7 @@ import meta.VersionFormats
 import org.eclipse.jgit.api.Git
 import util.copyOrReplaceFile
 import util.moveOrReplaceFile
+import util.startChildProcess
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
@@ -99,20 +100,17 @@ class JarBuilder {
     }
 
     private fun tryBuild() {
-        val command = arrayListOf("cmd", "/c", "gradlew", "build")
+        val command = arrayListOf("gradlew", "build")
         if (this.skipTests) {
             command.add("-x")
             command.add("test")
         }
-        val processBuilder = ProcessBuilder(command)
-        processBuilder.directory(this.workingDirectory).inheritIO()
         val javaVersion = AppConfiguration.getJavaDependVersion(this.branch)
         this.logger("Java版本：$javaVersion")
-        val javaPath = AppConfiguration.getJavaPath(javaVersion).absolutePathString()
-        processBuilder.environment()["JAVA_HOME"] = javaPath
-        Publisher.LOGGER.info("JAVA_HOME=$javaPath")
+        val javaPath = AppConfiguration.getJavaPath(javaVersion)
+        val process = startChildProcess(command, this.workingDirectory, javaPath)
+        Publisher.LOGGER.info("JAVA_HOME=${javaPath.absolutePathString()}")
         Publisher.LOGGER.info("Working directory: ${this.workingDirectory}")
-        val process = processBuilder.start()
         // 要求在10分钟内完成，下载依赖可能需要相当长的时间
         val finished = process.waitFor(600, TimeUnit.SECONDS)
         if (finished) {

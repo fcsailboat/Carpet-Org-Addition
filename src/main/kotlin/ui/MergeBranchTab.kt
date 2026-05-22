@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox
 import org.eclipse.jgit.api.Git
 import publish.Branch
 import publish.MinecraftVersion
+import util.startChildProcess
 import java.io.File
 import java.io.IOException
 import kotlin.jvm.optionals.getOrNull
@@ -128,9 +129,11 @@ class MergeBranchTab : SkeletonTab() {
                             logMessageLater("已跳过启动客户端")
                         } else {
                             logMessageLater("正在启动客户端")
-                            val processBuilder = ProcessBuilder("cmd", "/c", "gradlew", "runClient")
-                            processBuilder.directory(File(folderPathField.text)).inheritIO()
-                            val process = processBuilder.start()
+                            val command = listOf("gradlew", "runClient")
+                            val directory = File(folderPathField.text)
+                            val javaVersion = AppConfiguration.getJavaDependVersion(current.name)
+                            val javaPath = AppConfiguration.getJavaPath(javaVersion)
+                            val process = startChildProcess(command, directory, javaPath)
                             val exitCode = process.waitFor()
                             if (exitCode != 0) {
                                 throw IllegalStateException("客户端异常终止，退出码：$exitCode")

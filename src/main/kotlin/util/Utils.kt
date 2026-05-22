@@ -154,3 +154,14 @@ fun revealInFileManager(file: File) {
         }
     }
 }
+
+fun startChildProcess(command: List<String>, directory: File, javaPath: Path): Process {
+    val list = ArrayList<String>()
+    list.add("cmd")
+    list.add("/c")
+    list.addAll(command)
+    val processBuilder = ProcessBuilder(list)
+    processBuilder.directory(directory).inheritIO()
+    processBuilder.environment()["JAVA_HOME"] = javaPath.absolutePathString()
+    return processBuilder.start()
+}

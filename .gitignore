@@ -5,3 +5,4 @@ out/
 /.gradle/
 /.idea
 /.kotlin
+/logs
