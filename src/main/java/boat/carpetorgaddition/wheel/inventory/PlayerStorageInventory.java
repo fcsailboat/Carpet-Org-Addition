@@ -297,6 +297,10 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
         return false;
     }
 
+    public boolean replenishment(int threshold) {
+        return replenishment(InteractionHand.MAIN_HAND, threshold);
+    }
+
     /**
      * 从物品栏中寻找可合并物品补充到手上
      *
