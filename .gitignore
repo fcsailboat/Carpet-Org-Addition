@@ -2,3 +2,4 @@
 libs/
 /config/
 /transferstation/
+__pycache__
