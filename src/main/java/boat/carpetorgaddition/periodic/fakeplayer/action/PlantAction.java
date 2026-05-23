@@ -9,7 +9,6 @@ import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import carpet.patches.EntityPlayerMPFake;
-import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -262,7 +261,7 @@ public class PlantAction extends AbstractPlayerAction {
      * @return 是否完成挖掘
      */
     private boolean breakBlock(BlockPos cropPos) {
-        boolean breakBlock = this.excavator.mining(cropPos, Direction.DOWN, !getFakePlayer().isCreative());
+        boolean breakBlock = this.excavator.mining(cropPos, Direction.DOWN, !this.getFakePlayer().isCreative());
         this.cropPos = breakBlock ? null : cropPos;
         return breakBlock;
     }
@@ -275,14 +274,12 @@ public class PlantAction extends AbstractPlayerAction {
     private boolean useToolBreakBlock(BlockPos cropPos) {
         // 如果有工具，拿在主手，剑可以瞬间破坏竹子，它也是工具物品
         this.inventory.replenish(itemStack -> itemStack.has(DataComponents.TOOL));
-        boolean breakBlock = this.excavator.mining(cropPos, Direction.DOWN);
-        this.cropPos = breakBlock ? null : cropPos;
-        return breakBlock;
+        return breakBlock(cropPos);
     }
 
     @Override
     public List<Component> info() {
-        return Lists.newArrayList(this.getInfoLocalizationKey().translate(this.getFakePlayer().getDisplayName()));
+        return List.of(this.getInfoLocalizationKey().translate(this.getFakePlayer().getDisplayName()));
     }
 
     @Override
