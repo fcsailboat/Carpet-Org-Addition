@@ -297,6 +297,51 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
         return false;
     }
 
+    /**
+     * 从物品栏中寻找可合并物品补充到手上
+     *
+     * @param hand      存放物品的手
+     * @param threshold 手上物品数量小于或等于阈值时触发补货
+     * @return 手上是否有充足的物品或是否成功触发补货
+     */
+    public boolean replenishment(InteractionHand hand, int threshold) {
+        ItemStack stackInHand = this.getStack(hand);
+        if (stackInHand.getCount() > threshold || InventoryUtils.isItemStackFull(stackInHand)) {
+            return true;
+        }
+        boolean pickItemFromShulker = CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value();
+        IntArrayList shulkers = new IntArrayList();
+        for (int i = 0; i < this.getContainerSize(); i++) {
+            ItemStack itemStack = this.getItem(i);
+            if (itemStack == stackInHand || itemStack.isEmpty()) {
+                continue;
+            }
+            if (InventoryUtils.canMerge(itemStack, stackInHand)) {
+                InventoryUtils.mergeStack(itemStack, stackInHand);
+                return true;
+            } else if (pickItemFromShulker && InventoryUtils.isShulkerBoxItem(itemStack)) {
+                shulkers.add(i);
+            }
+        }
+        if (pickItemFromShulker) {
+            for (int i = 0; i < shulkers.size(); i++) {
+                int index = shulkers.getInt(i);
+                int deficit = stackInHand.getMaxStackSize() - stackInHand.getCount();
+                Predicate<ItemStack> predicate = itemStack -> InventoryUtils.canMerge(itemStack, stackInHand);
+                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.player, this.getItem(index), predicate, deficit);
+                if (content.isEmpty()) {
+                    continue;
+                }
+                InventoryUtils.mergeStack(content, stackInHand);
+                if (!content.isEmpty()) {
+                    this.insertWithShulkerBoxPriority(content);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void merge(Predicate<ItemStack> predicate) {
         Container container = this.getMain();
         for (int i = 0; i < container.getContainerSize(); i++) {

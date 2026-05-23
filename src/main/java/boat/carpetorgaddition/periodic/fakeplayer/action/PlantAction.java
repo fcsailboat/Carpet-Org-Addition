@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -57,8 +58,8 @@ public class PlantAction extends AbstractPlayerAction {
             // 根据副手的物品是什么来决定种植什么农作物
             ItemStack cropsItem = this.getFakePlayer().getOffhandItem();
             // 获取当前种植的是什么类型的农作物
-            FarmType farmType = FarmType.getFarmType(cropsItem);
-            if (farmType == FarmType.NONE) {
+            CropType cropType = CropType.getCropType(cropsItem);
+            if (cropType == CropType.NONE) {
                 return;
             }
             // 获取玩家交互距离内的所有方块
@@ -67,7 +68,7 @@ public class PlantAction extends AbstractPlayerAction {
             AABB box = new AABB(this.getFakePlayer().blockPosition()).inflate(Math.min(range, 10.0));
             for (BlockPos blockPos : new BlockPosTraverser(box)) {
                 if (this.getFakePlayer().isWithinBlockInteractionRange(blockPos, 0)) {
-                    if (tryPlanting(blockPos, farmType, cropsItem)) {
+                    if (this.tryPlanting(blockPos, cropType, cropsItem)) {
                         continue;
                     }
                     break;
@@ -81,10 +82,11 @@ public class PlantAction extends AbstractPlayerAction {
      *
      * @return 是否应该继续本tick种植
      */
-    private boolean tryPlanting(BlockPos blockPos, FarmType farmType, ItemStack cropsItem) {
-        return switch (farmType) {
-            case CROPS -> this.plantingCrops(cropsItem, blockPos);
-            case BAMBOO -> this.plantingBamboo(blockPos);
+    private boolean tryPlanting(BlockPos blockPos, CropType cropType, ItemStack cropsItem) {
+        return switch (cropType) {
+            case CROPS -> this.plantCrops(cropsItem, blockPos);
+            case NETHER_WART -> this.plantNetherWart(blockPos);
+            case BAMBOO -> this.plantBamboo(blockPos);
             default -> true;
         };
     }
@@ -94,9 +96,9 @@ public class PlantAction extends AbstractPlayerAction {
      *
      * @return 是否需要继续循环
      */
-    private boolean plantingCrops(ItemStack itemStack, BlockPos blockPos) {
+    private boolean plantCrops(ItemStack itemStack, BlockPos blockPos) {
         Level world = ServerUtils.getWorld(this.getFakePlayer());
-        if (!world.getBlockState(blockPos).is(Blocks.FARMLAND)) {
+        if (!world.getBlockState(blockPos).is(BlockTags.SUPPORTS_CROPS)) {
             return true;
         }
         InventoryMenu screenHandler = this.getFakePlayer().inventoryMenu;
@@ -113,7 +115,7 @@ public class PlantAction extends AbstractPlayerAction {
         // 如果耕地上方方块是空气，种植农作物
         if (thereAreManySeeds && blockState.isAir()) {
             // 种植农作物
-            planting(world, itemStack, blockPos, upPos);
+            plant(world, itemStack, blockPos, upPos);
         }
         // 种植农作物后，收集或催熟
         Block block = blockState.getBlock();
@@ -143,8 +145,30 @@ public class PlantAction extends AbstractPlayerAction {
         return true;
     }
 
+    /**
+     * 种植下界疣
+     */
+    private boolean plantNetherWart(BlockPos soulSandPos) {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
+        if (!world.getBlockState(soulSandPos).is(BlockTags.SUPPORTS_NETHER_WART)) {
+            return true;
+        }
+        BlockPos above = soulSandPos.above();
+        if (this.inventory.replenishment(InteractionHand.OFF_HAND, 1)) {
+            if (world.getBlockState(above).isAir()) {
+                this.plant(world, fakePlayer.getOffhandItem(), soulSandPos, above);
+            }
+        }
+        BlockState blockState = world.getBlockState(above);
+        if (blockState.is(Blocks.NETHER_WART) && blockState.getValue(NetherWartBlock.AGE) == 3) {
+            return this.breakBlock(above);
+        }
+        return true;
+    }
+
     // 种植竹子
-    private boolean plantingBamboo(BlockPos plantablePos) {
+    private boolean plantBamboo(BlockPos plantablePos) {
         Level world = ServerUtils.getWorld(this.getFakePlayer());
         // 是否可以种植竹子
         if (!world.getBlockState(plantablePos).is(BlockTags.SUPPORTS_BAMBOO)
@@ -222,10 +246,10 @@ public class PlantAction extends AbstractPlayerAction {
     }
 
     // 种植
-    private void planting(Level world, ItemStack itemStack, BlockPos blockPos, BlockPos lookPos) {
+    private void plant(Level world, ItemStack itemStack, BlockPos farmlandPos, BlockPos cropPos) {
         // 让假玩家看向该位置（这不是必须的）
-        this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, lookPos.getCenter());
-        BlockHitResult hitResult = new BlockHitResult(blockPos.getCenter(), Direction.UP, lookPos, false);
+        this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, cropPos.getCenter());
+        BlockHitResult hitResult = new BlockHitResult(farmlandPos.getCenter(), Direction.UP, cropPos, false);
         this.getFakePlayer().gameMode.useItemOn(this.getFakePlayer(), world, itemStack, InteractionHand.OFF_HAND, hitResult);
         // 摆动手
         this.getFakePlayer().swing(InteractionHand.OFF_HAND, true);
@@ -352,11 +376,15 @@ public class PlantAction extends AbstractPlayerAction {
         return 1;
     }
 
-    public enum FarmType {
+    public enum CropType {
         /**
          * 种植普通农作物，小麦、土豆、胡萝卜，甜菜，以及火把花，瓶子草
          */
         CROPS,
+        /**
+         * 种植下界疣
+         */
+        NETHER_WART,
         /**
          * 种植竹子
          */
@@ -366,7 +394,7 @@ public class PlantAction extends AbstractPlayerAction {
          */
         NONE;
 
-        public static FarmType getFarmType(ItemStack itemStack) {
+        public static CropType getCropType(ItemStack itemStack) {
             if (itemStack.isEmpty()) {
                 return NONE;
             }
@@ -377,6 +405,9 @@ public class PlantAction extends AbstractPlayerAction {
                  || itemStack.is(Items.TORCHFLOWER_SEEDS)
                  || itemStack.is(Items.PITCHER_POD))) {
                 return CROPS;
+            }
+            if (itemStack.is(Items.NETHER_WART)) {
+                return NETHER_WART;
             }
             if (itemStack.is(Items.BAMBOO)) {
                 return BAMBOO;
