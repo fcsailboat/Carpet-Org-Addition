@@ -251,11 +251,11 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
      *
      * @return 是否移动成功
      */
-    public boolean replenishment(Predicate<ItemStack> predicate) {
-        return this.replenishment(InteractionHand.MAIN_HAND, predicate);
+    public boolean replenish(Predicate<ItemStack> predicate) {
+        return this.replenish(InteractionHand.MAIN_HAND, predicate);
     }
 
-    public boolean replenishment(InteractionHand hand, Predicate<ItemStack> predicate) {
+    public boolean replenish(InteractionHand hand, Predicate<ItemStack> predicate) {
         ItemStack stackInHand = this.getStack(hand);
         if (predicate.test(stackInHand)) {
             return true;
@@ -297,8 +297,8 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
         return false;
     }
 
-    public boolean replenishment(int threshold) {
-        return replenishment(InteractionHand.MAIN_HAND, threshold);
+    public boolean replenish(int threshold) {
+        return replenish(InteractionHand.MAIN_HAND, threshold);
     }
 
     /**
@@ -308,7 +308,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
      * @param threshold 手上物品数量小于或等于阈值时触发补货
      * @return 手上是否有充足的物品或是否成功触发补货
      */
-    public boolean replenishment(InteractionHand hand, int threshold) {
+    public boolean replenish(InteractionHand hand, int threshold) {
         ItemStack stackInHand = this.getStack(hand);
         if (stackInHand.getCount() > threshold || InventoryUtils.isItemStackFull(stackInHand)) {
             return true;

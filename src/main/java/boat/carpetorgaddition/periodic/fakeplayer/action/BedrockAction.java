@@ -549,7 +549,7 @@ public class BedrockAction extends AbstractPlayerAction {
             // 当前位置下方是移动的活塞
             return StepResult.COMPLETION;
         }
-        this.inventory.replenishment(InteractionHand.OFF_HAND, stack -> stack.is(Items.LEVER));
+        this.inventory.replenish(InteractionHand.OFF_HAND, stack -> stack.is(Items.LEVER));
         FakePlayerUtils.look(fakePlayer, direction.getOpposite());
         BlockHitResult hitResult = new BlockHitResult(bedrockPos.getCenter(), direction, bedrockPos, false);
         // 放置拉杆
@@ -726,7 +726,7 @@ public class BedrockAction extends AbstractPlayerAction {
             }
             boolean broken = breakBlock(blockPos, true);
             if (broken && hasTorch) {
-                this.inventory.replenishment(InteractionHand.OFF_HAND, itemStack -> itemStack.is(Items.TORCH));
+                this.inventory.replenish(InteractionHand.OFF_HAND, itemStack -> itemStack.is(Items.TORCH));
                 placeBlock(blockPos);
                 return StepResult.COMPLETION;
             } else {
@@ -784,7 +784,7 @@ public class BedrockAction extends AbstractPlayerAction {
     }
 
     private void switchTool(BlockState blockState, Level world, BlockPos blockPos, EntityPlayerMPFake player) {
-        boolean replenishment = this.inventory.replenishment(itemStack -> {
+        boolean replenishSuccess = this.inventory.replenish(itemStack -> {
             if (this.getFakePlayer().isCreative()) {
                 return itemStack.getItem().canDestroyBlock(player.getMainHandItem(), blockState, world, blockPos, player);
             }
@@ -797,11 +797,11 @@ public class BedrockAction extends AbstractPlayerAction {
             }
             return itemStack.getDestroySpeed(blockState) > 1F;
         });
-        if (replenishment) {
+        if (replenishSuccess) {
             return;
         }
         // 工具没有切换成功，使用其他物品替换手上工具以避免工具损坏
-        this.inventory.replenishment(itemStack -> !isDamaged(itemStack));
+        this.inventory.replenish(itemStack -> !isDamaged(itemStack));
     }
 
     /**
@@ -819,7 +819,7 @@ public class BedrockAction extends AbstractPlayerAction {
         ServerPlayerGameMode interactionManager = fakePlayer.gameMode;
         // 看向与活塞相反的方向
         FakePlayerUtils.look(fakePlayer, direction.getOpposite());
-        this.inventory.replenishment(InteractionHand.OFF_HAND, itemStack -> itemStack.is(Items.PISTON));
+        this.inventory.replenish(InteractionHand.OFF_HAND, itemStack -> itemStack.is(Items.PISTON));
         // 放置活塞
         BlockHitResult hitResult = new BlockHitResult(Vec3.upFromBottomCenterOf(bedrockPos, 1.0), direction, bedrockPos.above(), false);
         InteractionResult result = interactionManager.useItemOn(fakePlayer, ServerUtils.getWorld(fakePlayer), fakePlayer.getOffhandItem(), InteractionHand.OFF_HAND, hitResult);
@@ -881,8 +881,8 @@ public class BedrockAction extends AbstractPlayerAction {
             EntityPlayerMPFake fakePlayer = this.getFakePlayer();
             Level world = ServerUtils.getWorld(fakePlayer);
             if (this.canInteract(blockPos) &&
-                (this.inventory.replenishment(InteractionHand.OFF_HAND, canDrainFluid(world, blockPos)) ||
-                 this.inventory.replenishment(InteractionHand.OFF_HAND, itemStack -> itemStack.is(Items.PISTON)))) {
+                (this.inventory.replenish(InteractionHand.OFF_HAND, canDrainFluid(world, blockPos)) ||
+                 this.inventory.replenish(InteractionHand.OFF_HAND, itemStack -> itemStack.is(Items.PISTON)))) {
                 placeBlock(blockPos);
             }
             iterator.remove();
@@ -917,7 +917,7 @@ public class BedrockAction extends AbstractPlayerAction {
         }
         if (this.getFakePlayer().canEat(false)) {
             if (this.getFakePlayer().getUseItem().isEmpty()) {
-                if (this.inventory.replenishment(InventoryUtils::isFoodItem)) {
+                if (this.inventory.replenish(InventoryUtils::isFoodItem)) {
                     ServerPlayerGameMode interactionManager = this.getFakePlayer().gameMode;
                     Level world = ServerUtils.getWorld(this.getFakePlayer());
                     ItemStack food = this.getFakePlayer().getMainHandItem();

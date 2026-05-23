@@ -101,7 +101,7 @@ public class PlantAction extends AbstractPlayerAction {
         BlockPos upPos = blockPos.above();
         BlockState blockState = world.getBlockState(upPos);
         // 如果耕地上方方块是空气，种植农作物
-        if ((fakePlayer.isCreative() || this.inventory.replenishment(InteractionHand.OFF_HAND, 1)) && blockState.isAir()) {
+        if ((fakePlayer.isCreative() || this.inventory.replenish(InteractionHand.OFF_HAND, 1)) && blockState.isAir()) {
             // 种植农作物
             plant(world, itemStack, blockPos, upPos);
         }
@@ -143,7 +143,7 @@ public class PlantAction extends AbstractPlayerAction {
             return true;
         }
         BlockPos above = soulSandPos.above();
-        if (fakePlayer.isCreative() || this.inventory.replenishment(InteractionHand.OFF_HAND, 1)) {
+        if (fakePlayer.isCreative() || this.inventory.replenish(InteractionHand.OFF_HAND, 1)) {
             if (world.getBlockState(above).isAir()) {
                 this.plant(world, fakePlayer.getOffhandItem(), soulSandPos, above);
             }
@@ -243,7 +243,7 @@ public class PlantAction extends AbstractPlayerAction {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 补货执行了两次，第一次是将骨粉物品移动到主手，第二次是检查骨粉是否只有一个，如果只有一个，则继续从物品栏中获取骨粉并移动到主手，但如果假玩家是创造模式，则不需要再次补货
         // 保留一个骨粉是为了更方便的捡起地上的骨粉
-        if (this.inventory.replenishment(predicate) && (fakePlayer.isCreative() || this.inventory.replenishment(1))) {
+        if (this.inventory.replenish(predicate) && (fakePlayer.isCreative() || this.inventory.replenish(1))) {
             ItemStack itemStack = fakePlayer.getMainHandItem();
             Vec3 centerPos = cropPos.getCenter();
             // 让假玩家看向该位置（这不是必须的）
@@ -274,7 +274,7 @@ public class PlantAction extends AbstractPlayerAction {
      */
     private boolean useToolBreakBlock(BlockPos cropPos) {
         // 如果有工具，拿在主手，剑可以瞬间破坏竹子，它也是工具物品
-        this.inventory.replenishment(itemStack -> itemStack.has(DataComponents.TOOL));
+        this.inventory.replenish(itemStack -> itemStack.has(DataComponents.TOOL));
         boolean breakBlock = this.excavator.mining(cropPos, Direction.DOWN);
         this.cropPos = breakBlock ? null : cropPos;
         return breakBlock;
