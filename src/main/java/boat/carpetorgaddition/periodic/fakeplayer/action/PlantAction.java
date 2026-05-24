@@ -305,7 +305,7 @@ public class PlantAction extends AbstractPlayerAction {
     @Override
     protected void onAssignPlayer() {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        this.inventory = new PlayerStorageInventory(fakePlayer);
+        this.inventory = PlayerStorageInventory.of(fakePlayer);
         this.excavator = PlayerComponentCoordinator.getCoordinator(fakePlayer).getBlockExcavator();
     }
 

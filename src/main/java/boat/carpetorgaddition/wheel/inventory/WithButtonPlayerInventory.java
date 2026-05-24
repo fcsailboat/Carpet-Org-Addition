@@ -157,7 +157,7 @@ public class WithButtonPlayerInventory implements Container {
         this.intervalAttack.addMutualExclusion(this.continuousAttack);
         this.continuousAttack.addMutualExclusion(this.intervalAttack);
         ArrayList<Container> list = new ArrayList<>();
-        PlayerDecomposedContainer decomposer = new PlayerStorageInventory(player);
+        PlayerDecomposedContainer decomposer = PlayerStorageInventory.of(player);
         list.add(stopAll);
         list.add(decomposer.getArmor());
         list.add(this.intervalAttack);

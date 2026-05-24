@@ -245,7 +245,7 @@ public class FakePlayerUtils {
      * 合并玩家物品栏中的空潜影盒（如果可堆叠）
      */
     public static void mergeEmptyShulkerBox(ServerPlayer player) {
-        PlayerStorageInventory inventory = new PlayerStorageInventory(player);
+        PlayerStorageInventory inventory = PlayerStorageInventory.of(player);
         inventory.merge(shulkerBox -> InventoryUtils.isShulkerBoxItem(shulkerBox) && InventoryUtils.isNonOrEmptyContainer(shulkerBox));
     }
 }

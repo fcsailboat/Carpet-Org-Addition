@@ -96,7 +96,6 @@ public class ClientFinderCommand extends AbstractClientCommand {
     }
 
     @Override
-
     public String getDefaultName() {
         return "clientfinder";
     }

@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+// 选项可以是数字0-4的的字符串形式，但枚举字段名称不能为数字，因此该类不是枚举类
 public final class CommandPermissionLevel {
     private static final Map<String, CommandPermissionLevel> LEVELS = new HashMap<>();
     public static final CommandPermissionLevel TRUE = of("true");
     public static final CommandPermissionLevel FALSE = of("false");
     public static final CommandPermissionLevel OPS = of("ops");
-
     private final String option;
     private final Permission permission;
 

@@ -18,6 +18,7 @@ import org.jetbrains.annotations.CheckReturnValue;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.function.Predicate;
 
 /**
@@ -28,8 +29,9 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
     private final Inventory playerInventory;
     private final ServerPlayer player;
     private final IntList indexMapping;
+    private static final IdentityHashMap<ServerPlayer, PlayerStorageInventory> CACHE = new IdentityHashMap<>();
 
-    public PlayerStorageInventory(ServerPlayer player) {
+    private PlayerStorageInventory(ServerPlayer player) {
         this.playerInventory = player.getInventory();
         this.player = player;
         IntArrayList list = new IntArrayList(37);
@@ -39,6 +41,17 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
         }
         list.add(Inventory.SLOT_OFFHAND);
         this.indexMapping = new IntImmutableList(list);
+    }
+
+    public static PlayerStorageInventory of(ServerPlayer player) {
+        if (player.isRemoved()) {
+            throw new IllegalArgumentException("Player is removed");
+        }
+        return CACHE.computeIfAbsent(player, PlayerStorageInventory::new);
+    }
+
+    public static void cleanupStaleEntries() {
+        CACHE.entrySet().removeIf(entry -> entry.getKey().isRemoved());
     }
 
     @Override
