@@ -72,7 +72,7 @@
   "carpet.rule.openVillagerInventory.name": "打开村民物品栏",
   "carpet.rule.openVillagerInventory.desc": "允许通过潜行右键打开村民背包",
   "carpet.rule.peacefulCreeper.name": "和平的苦力怕",
-  "carpet.rule.peacefulCreeper.desc": "苦力怕不会与玩家敌对",
+  "carpet.rule.peacefulCreeper.desc": "苦力怕不会与其他生物敌对",
   "carpet.rule.commandXpTransfer.name": "经验转移",
   "carpet.rule.commandXpTransfer.desc": "启用/xpTransfer命令用来在玩家间互相分享经验",
   "carpet.rule.commandSpectator.name": "生存旁观切换命令",

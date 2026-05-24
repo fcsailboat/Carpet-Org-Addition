@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
@@ -29,7 +28,7 @@ public abstract class CreeperEntityMixin {
     // 和平的苦力怕
     @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
     private void setTarget(LivingEntity target, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.PEACEFUL_CREEPER.value() && target instanceof Player) {
+        if (CarpetOrgAdditionSettings.PEACEFUL_CREEPER.value()) {
             ci.cancel();
         }
     }

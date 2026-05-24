@@ -42,7 +42,7 @@
   "carpet.rule.openCarpetPermission.desc": "Allow /carpet in command singleplayer game",
   "carpet.rule.openGameRulePermission.desc": "Allow players without permission to use /gamerule command",
   "carpet.rule.openVillagerInventory.desc": "Allow to open villager inventory when sneaking",
-  "carpet.rule.peacefulCreeper.desc": "Creeper will not attack player",
+  "carpet.rule.peacefulCreeper.desc": "Creeper will not attack other mobs",
   "carpet.rule.commandXpTransfer.desc": "Enable /xpTransfer to transfer experience between players",
   "carpet.rule.commandSpectator.desc": "Enable /spectator to switch between spectator and survival mode",
   "carpet.rule.commandFinder.desc": "Enable /finder command to search for blocks or items in certain ranges",
