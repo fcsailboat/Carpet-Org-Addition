@@ -9,6 +9,7 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -69,7 +70,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 合成物品
         this.stonecutting(inventory);
-        FakePlayerUtils.mergeEmptyShulkerBox(fakePlayer);
+        PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
             fakePlayer.drop(itemStack, false, true);

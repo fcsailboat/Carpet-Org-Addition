@@ -6,11 +6,7 @@ import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerPathfinder;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
-import boat.carpetorgaddition.util.EnchantmentUtils;
-import boat.carpetorgaddition.util.InventoryUtils;
-import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
@@ -550,7 +546,7 @@ public class BedrockAction extends AbstractPlayerAction {
             return StepResult.COMPLETION;
         }
         this.inventory.replenish(InteractionHand.OFF_HAND, stack -> stack.is(Items.LEVER));
-        FakePlayerUtils.look(fakePlayer, direction.getOpposite());
+        PlayerUtils.look(fakePlayer, direction.getOpposite());
         BlockHitResult hitResult = new BlockHitResult(bedrockPos.getCenter(), direction, bedrockPos, false);
         // 放置拉杆
         interactionManager.useItemOn(fakePlayer, world, fakePlayer.getOffhandItem(), InteractionHand.OFF_HAND, hitResult);
@@ -818,7 +814,7 @@ public class BedrockAction extends AbstractPlayerAction {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         ServerPlayerGameMode interactionManager = fakePlayer.gameMode;
         // 看向与活塞相反的方向
-        FakePlayerUtils.look(fakePlayer, direction.getOpposite());
+        PlayerUtils.look(fakePlayer, direction.getOpposite());
         this.inventory.replenish(InteractionHand.OFF_HAND, itemStack -> itemStack.is(Items.PISTON));
         // 放置活塞
         BlockHitResult hitResult = new BlockHitResult(Vec3.upFromBottomCenterOf(bedrockPos, 1.0), direction, bedrockPos.above(), false);

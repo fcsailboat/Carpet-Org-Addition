@@ -11,11 +11,13 @@ import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -168,5 +170,33 @@ public class PlayerUtils {
 
     public static void closeScreen(ServerPlayer player) {
         player.closeContainer();
+    }
+
+    /**
+     * 将要丢弃的物品堆栈对象复制一份并丢出，然后将原本的物品堆栈对象删除
+     *
+     * @param player    当前要丢弃物品的玩家
+     * @param itemStack 要丢弃的物品堆栈对象
+     * @apiNote 此方法不应用于丢弃GUI中的物品，因为这不会触发{@link AbstractContainerMenu#clicked}的行为
+     */
+    public static void dropCopyItemAndClear(ServerPlayer player, ItemStack itemStack) {
+        player.drop(itemStack.copyAndClear(), false, false);
+    }
+
+    /**
+     * 让玩家看向某个方向
+     */
+    public static void look(ServerPlayer player, Direction direction) {
+        EntityPlayerActionPack actionPack = getActionPack(player);
+        actionPack.look(direction);
+    }
+
+    public static void click(ServerPlayer player, InteractionHand hand) {
+        EntityPlayerActionPack actionPack = getActionPack(player);
+        EntityPlayerActionPack.ActionType type = switch (hand) {
+            case MAIN_HAND -> EntityPlayerActionPack.ActionType.ATTACK;
+            case OFF_HAND -> EntityPlayerActionPack.ActionType.USE;
+        };
+        actionPack.start(type, EntityPlayerActionPack.Action.once());
     }
 }

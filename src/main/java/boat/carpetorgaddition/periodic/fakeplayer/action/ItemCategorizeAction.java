@@ -2,8 +2,8 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -75,7 +75,7 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
                 }
             }
             // 丢弃该物品堆栈
-            FakePlayerUtils.dropItem(this.getFakePlayer(), itemStack);
+            PlayerUtils.dropCopyItemAndClear(this.getFakePlayer(), itemStack);
         }
     }
 
@@ -114,7 +114,7 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
                 this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, this.test(itemStack) ? this.thisVec : this.otherVec);
             }
             // 丢弃潜影盒内物品堆栈
-            FakePlayerUtils.dropItem(this.getFakePlayer(), itemStack);
+            PlayerUtils.dropCopyItemAndClear(this.getFakePlayer(), itemStack);
         }
         return itemStack;
     }

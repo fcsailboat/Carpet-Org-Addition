@@ -8,6 +8,7 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
@@ -50,7 +51,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
     protected void tick() {
         AutoGrowInventory inventory = new AutoGrowInventory();
         this.craft(inventory);
-        FakePlayerUtils.mergeEmptyShulkerBox(this.getFakePlayer());
+        PlayerStorageInventory.of(this.getFakePlayer()).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
             this.getFakePlayer().drop(itemStack, false, true);

@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
 import boat.carpetorgaddition.util.CommandUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
@@ -111,8 +112,8 @@ public interface FakePlayerStartupAction extends Consumer<EntityPlayerMPFake> {
 
         private Consumer<EntityPlayerMPFake> function() {
             return switch (this) {
-                case USE -> fakePlayer -> FakePlayerUtils.click(fakePlayer, InteractionHand.OFF_HAND);
-                case ATTACK -> fakePlayer -> FakePlayerUtils.click(fakePlayer, InteractionHand.MAIN_HAND);
+                case USE -> fakePlayer -> PlayerUtils.click(fakePlayer, InteractionHand.OFF_HAND);
+                case ATTACK -> fakePlayer -> PlayerUtils.click(fakePlayer, InteractionHand.MAIN_HAND);
                 case KILL -> fakePlayer -> fakePlayer.kill(ServerUtils.getWorld(fakePlayer));
             };
         }

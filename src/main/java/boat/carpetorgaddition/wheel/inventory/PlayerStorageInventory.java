@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
@@ -161,7 +161,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
             return false;
         }
         // 潜影盒和物品栏都没有足够空间，丢弃物品
-        FakePlayerUtils.dropItem(this.player, remaining);
+        PlayerUtils.dropCopyItemAndClear(this.player, remaining);
         return true;
     }
 
@@ -179,7 +179,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
             return;
         }
         // 物品栏和潜影盒都没有足够空间，丢弃物品
-        FakePlayerUtils.dropItem(this.player, remaining);
+        PlayerUtils.dropCopyItemAndClear(this.player, remaining);
     }
 
     /**
@@ -372,6 +372,10 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
                 }
             }
         }
+    }
+
+    public void mergeEmptyShulkerBox() {
+        this.merge(shulkerBox -> InventoryUtils.isShulkerBoxItem(shulkerBox) && InventoryUtils.isNonOrEmptyContainer(shulkerBox));
     }
 
     private int getHandSlotIndex(InteractionHand hand) {
