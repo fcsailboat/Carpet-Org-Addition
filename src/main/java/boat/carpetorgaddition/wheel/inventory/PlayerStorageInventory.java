@@ -7,6 +7,7 @@ import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -46,6 +47,9 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
     public static PlayerStorageInventory of(ServerPlayer player) {
         if (player.isRemoved()) {
             throw new IllegalArgumentException("Player is removed");
+        }
+        if (player instanceof FakePlayer) {
+            return new PlayerStorageInventory(player);
         }
         return CACHE.computeIfAbsent(player, PlayerStorageInventory::new);
     }
