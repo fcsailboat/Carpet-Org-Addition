@@ -25,6 +25,14 @@ import java.util.function.Function;
 
 public class BatchSpawnFakePlayerTask extends ServerTask {
     /**
+     * 最大预加载时间，超时则抛出异常中止任务
+     */
+    public static final long MAX_PRELOADING_TIME = 60 * 1000L;
+    /**
+     * 是否正在预加载玩家档案，用于抑制{@code Couldn't find profile with name: {}}警告
+     */
+    public static final ScopedValue<Boolean> REQUEST = ScopedValue.newInstance();
+    /**
      * 所有要召唤的玩家
      */
     private final Set<FakePlayerSpawner> spawners = ConcurrentHashMap.newKeySet();
@@ -50,10 +58,6 @@ public class BatchSpawnFakePlayerTask extends ServerTask {
      * 任务的开始时间
      */
     private final long startTime;
-    /**
-     * 是否正在预加载玩家档案，用于抑制{@code Couldn't find profile with name: {}}警告
-     */
-    public static final ScopedValue<Boolean> REQUEST = ScopedValue.newInstance();
 
     public BatchSpawnFakePlayerTask(MinecraftServer server, CommandSourceStack source, Function<String, FakePlayerSpawner> spawner, List<String> names) {
         super(source);
@@ -87,6 +91,9 @@ public class BatchSpawnFakePlayerTask extends ServerTask {
         int size = this.spawners.size();
         long time = ServerUtils.getWorld(this.source).getGameTime();
         if (this.preload) {
+            if (this.getElapsedTime() > MAX_PRELOADING_TIME) {
+                this.throwTimeoutException();
+            }
             // 任务开始前几个游戏刻不显示进度
             boolean progress = time - this.startTime > 10;
             LocalizationKey key = PlayerManagerCommand.BATCH.then("preload");

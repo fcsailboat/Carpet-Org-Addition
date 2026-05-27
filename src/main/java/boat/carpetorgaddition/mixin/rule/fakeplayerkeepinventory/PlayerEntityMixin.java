@@ -19,7 +19,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Unique
     private final Player thisPlayer = (Player) (Object) this;
 
-    protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
+    @SuppressWarnings("unused")
+    private PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
 

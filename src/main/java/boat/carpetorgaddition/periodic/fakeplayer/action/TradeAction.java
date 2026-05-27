@@ -7,7 +7,9 @@ import boat.carpetorgaddition.mixin.accessor.MerchantScreenHandlerAccessor;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
@@ -98,7 +100,7 @@ public class TradeAction extends AbstractPlayerAction {
             }
             // 尝试交易物品
             tryTrade(merchantScreenHandler);
-            FakePlayerUtils.mergeEmptyShulkerBox(fakePlayer);
+            PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
             if (this.voidTrade) {
                 // 如果是虚空交易，交易完毕后关闭交易GUI
                 fakePlayer.closeContainer();
@@ -284,6 +286,11 @@ public class TradeAction extends AbstractPlayerAction {
     // 检查槽位上的物品是否可以交易
     private boolean slotItemCanTrade(ItemStack slotItem, ItemStack tradeItem) {
         return (slotItem.getCount() >= tradeItem.getCount()) || slotItem.getCount() >= slotItem.getMaxStackSize();
+    }
+
+    @Override
+    public void onFakePlayerLogout() {
+        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
     }
 
     @Override

@@ -4,10 +4,9 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.NavigatorCommand;
 import boat.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
-import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.SubtitleOverlay;
@@ -16,34 +15,34 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 
-public abstract class AbstractNavigator {
+public abstract class Navigator {
     protected static final LocalizationKey IN = NavigatorCommand.HUD.then("in");
     protected static final LocalizationKey REACH = NavigatorCommand.HUD.then("reach");
     protected final ServerPlayer player;
     protected final MinecraftServer server;
     protected final NavigatorManager manager;
 
-    public AbstractNavigator(ServerPlayer player) {
+    public Navigator(ServerPlayer player) {
         this.player = player;
         this.server = ServerUtils.getServer(player);
         this.manager = PlayerComponentCoordinator.getCoordinator(this.player).getNavigatorManager();
     }
 
     /**
-     * 开始导航时调用
-     */
-    public void onStart() {
-        this.syncWaypoint(true);
-    }
-
-    /**
      * 每个游戏刻都调用
      */
     public abstract void tick();
+
+    /**
+     * 导航器更新时调用
+     */
+    public void onUpdate() {
+        this.syncWaypoint(true);
+    }
 
     /**
      * 此导航器的结束条件
@@ -55,9 +54,9 @@ public abstract class AbstractNavigator {
     /**
      * @return 此导航器的浅拷贝副本
      */
-    public abstract AbstractNavigator copy(ServerPlayer player);
+    public abstract Navigator copy(ServerPlayer player);
 
-    @NotNull
+    @NonNull
     protected Component getHUDText(Vec3 vec3d, Component displayName, int distance) {
         // 添加左右箭头
         Map.Entry<String, String> entry = switch (forwardAngle(this.player, vec3d)) {
@@ -69,18 +68,18 @@ public abstract class AbstractNavigator {
             case 3 -> Map.entry("<<< ", "    ");
             default -> Map.entry("    ", "    ");
         };
-        TextBuilder builder = TextBuilder.of();
-        builder.append(entry.getKey());
-        builder.append(displayName);
+        TextJoiner joiner = new TextJoiner();
+        joiner.append(entry.getKey());
+        joiner.append(displayName);
         // 添加上下箭头
-        builder.append(switch (verticalAngle(this.player, vec3d)) {
+        joiner.append(switch (verticalAngle(this.player, vec3d)) {
             case 1 -> " ↑ ";
             case -1 -> " ↓ ";
             default -> "   ";
         });
-        builder.append(NavigatorCommand.HUD.then("distance").translate(distance));
-        builder.append(entry.getValue());
-        return builder.build();
+        joiner.append(NavigatorCommand.HUD.then("distance").translate(distance));
+        joiner.append(entry.getValue());
+        return joiner.join();
     }
 
     /**
@@ -132,13 +131,9 @@ public abstract class AbstractNavigator {
      */
     public void syncWaypoint(boolean force) {
         // 更新上一个坐标
-        if (force || this.updateRequired()) {
-            // 要求玩家有执行/navigate命令的权限
-            boolean hasPermission = CommandUtils.canUseCommand(this.player.createCommandSourceStack(), CarpetOrgAdditionSettings.COMMAND_NAVIGATE);
-            if (CarpetOrgAdditionSettings.SYNC_NAVIGATE_WAYPOINT.value() && hasPermission) {
-                WaypointUpdateS2CPacket packet = this.createPacket();
-                ServerPlayNetworking.send(this.player, packet);
-            }
+        if ((force || this.updateRequired()) && CarpetOrgAdditionSettings.SYNC_NAVIGATE_WAYPOINT.value()) {
+            WaypointUpdateS2CPacket packet = this.createPacket();
+            ServerPlayNetworking.send(this.player, packet);
         }
     }
 

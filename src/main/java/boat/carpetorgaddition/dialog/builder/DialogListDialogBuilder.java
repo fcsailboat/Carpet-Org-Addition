@@ -10,7 +10,7 @@ import net.minecraft.server.dialog.ActionButton;
 import net.minecraft.server.dialog.CommonDialogData;
 import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.dialog.DialogListDialog;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

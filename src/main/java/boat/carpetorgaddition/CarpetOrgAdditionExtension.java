@@ -13,6 +13,7 @@ import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.GameProfileCache;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
 import boat.carpetorgaddition.wheel.text.Translation;
 import carpet.CarpetExtension;
@@ -126,6 +127,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
                     .filter(realPlayer -> !(realPlayer instanceof EntityPlayerMPFake))
                     .forEach(realPlayer -> ServerPlayNetworking.send(realPlayer, new PlayerTypeSyncS2CPacket(player.getUUID(), false)));
         }
+        PlayerStorageInventory.cleanupStaleEntries();
     }
 
     /**
@@ -154,14 +156,14 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     public void onServerClosed(MinecraftServer server) {
         GameProfileCache.getInstance().save();
         PermissionManager.reset();
-        GlobalConfigs.getInstance().save();
+        GlobalConfigs.save();
         OfflinePlayerSearchTask.clear();
     }
 
     // 设置模组翻译
     @Override
     public Map<String, String> canHasTranslations(String lang) {
-        return Translation.getInstance().getTranslation();
+        return Translation.getInstance().getTranslation(lang);
     }
 
     // 注册记录器

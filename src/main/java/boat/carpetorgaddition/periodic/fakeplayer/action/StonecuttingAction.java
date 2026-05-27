@@ -6,8 +6,10 @@ import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -68,7 +70,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 合成物品
         this.stonecutting(inventory);
-        FakePlayerUtils.mergeEmptyShulkerBox(fakePlayer);
+        PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
             fakePlayer.drop(itemStack, false, true);
@@ -141,7 +143,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                     return true;
                 }
             } else if (InventoryUtils.isShulkerBoxItem(itemStack)) {
-                if (itemStack.getCount() == 1 && InventoryUtils.isEmptyShulkerBox(itemStack)) {
+                if (itemStack.getCount() == 1 && InventoryUtils.isNonOrEmptyContainer(itemStack)) {
                     continue;
                 }
                 shulkerSlotIndex.add(index);
@@ -235,6 +237,11 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 .map(recipe -> recipe.assemble(new SingleRecipeInput(itemStack)))
                 .orElse(ItemStack.EMPTY);
         return ServerUtils.getDefaultName(result);
+    }
+
+    @Override
+    public void onFakePlayerLogout() {
+        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
     }
 
     @Override

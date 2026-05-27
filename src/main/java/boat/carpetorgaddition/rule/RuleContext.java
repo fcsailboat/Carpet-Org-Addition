@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.rule;
 
-import carpet.api.settings.CarpetRule;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,24 +13,25 @@ public final class RuleContext<T> {
     private final Collection<String> suggestions;
     private final boolean isRemove;
     private final boolean isHidden;
+    @Nullable
     private final CustomRuleControl<T> control;
     private final T value;
     private final String name;
-    private final Supplier<CarpetRule<T>> ruleSupplier;
+    private final Supplier<BuiltRule<T>> ruleSupplier;
     private final List<BooleanSupplier> conditions;
-    private volatile CarpetRule<T> rule;
+    private volatile BuiltRule<T> rule;
 
     public RuleContext(
             Class<T> type,
             T value,
             String name,
-            Supplier<CarpetRule<T>> ruleSupplier,
+            Supplier<BuiltRule<T>> ruleSupplier,
             List<BooleanSupplier> conditions,
             Collection<String> categories,
             Collection<String> suggestions,
             boolean isRemove,
             boolean isHidden,
-            CustomRuleControl<T> control
+            @Nullable CustomRuleControl<T> control
     ) {
         this.name = name;
         this.ruleSupplier = ruleSupplier;
@@ -44,7 +45,7 @@ public final class RuleContext<T> {
         this.control = control;
     }
 
-    public CarpetRule<T> rule() {
+    public BuiltRule<T> rule() {
         // 在单人游戏中，初始化可能在客户端和服务端同时进行
         if (this.rule == null) {
             synchronized (this) {
@@ -70,6 +71,7 @@ public final class RuleContext<T> {
         return this.isRemove;
     }
 
+    @Nullable
     public CustomRuleControl<T> getCustomRuleControl() {
         return this.control;
     }

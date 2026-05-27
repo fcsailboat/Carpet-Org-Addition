@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -16,8 +17,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class ClientUtils {
     /**
      * 获取客户端玩家
      */
-    @NotNull
+    @NonNull
     @Contract(pure = true)
     public static LocalPlayer getPlayer() {
         LocalPlayer player = getClient().player;
@@ -75,7 +76,7 @@ public class ClientUtils {
     /**
      * 获取玩家所处客户端世界
      */
-    @NotNull
+    @NonNull
     @Contract(pure = true)
     public static ClientLevel getWorld() {
         ClientLevel world = getClient().level;
@@ -85,7 +86,7 @@ public class ClientUtils {
         return world;
     }
 
-    @NotNull
+    @NonNull
     @Contract(pure = true)
     public static ServerLevel getServerWorld() {
         IntegratedServer server = Objects.requireNonNull(getServer(), "Attempted to get server while not in a game");
@@ -96,7 +97,7 @@ public class ClientUtils {
     /**
      * @return 获取游戏渲染器
      */
-    @NotNull
+    @NonNull
     public static GameRenderer getGameRenderer() {
         return getClient().gameRenderer;
     }
@@ -133,7 +134,7 @@ public class ClientUtils {
      * 获取当前打开菜单
      */
     @SuppressWarnings("unused")
-    @NotNull
+    @NonNull
     public static AbstractContainerMenu getContainerMenu() {
         return getPlayer().containerMenu;
     }
@@ -166,5 +167,9 @@ public class ClientUtils {
 
     public static User getSession() {
         return getClient().getUser();
+    }
+
+    public static RegistryAccess getRegistryAccess() {
+        return getPlayer().connection.registryAccess();
     }
 }

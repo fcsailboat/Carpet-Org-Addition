@@ -59,7 +59,7 @@ public class MailCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_MAIL))
+                .requires(source -> CarpetOrgAdditionSettings.COMMAND_MAIL.value().hasPermission(source))
                 .then(Commands.literal("send")
                         .then(Commands.argument(CommandUtils.PLAYER, GameProfileArgument.gameProfile())
                                 .executes(this::send)))

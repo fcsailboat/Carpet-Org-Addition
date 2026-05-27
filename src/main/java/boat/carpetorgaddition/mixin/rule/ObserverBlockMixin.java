@@ -24,8 +24,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ObserverBlock.class)
 public abstract class ObserverBlockMixin extends DirectionalBlock {
     @Shadow
-    protected abstract void startSignal(LevelReader world, ScheduledTickAccess tickView, BlockPos pos);
+    protected abstract void startSignal(LevelReader level, ScheduledTickAccess ticks, BlockPos pos);
 
+    @SuppressWarnings("unused")
     private ObserverBlockMixin(Properties settings) {
         super(settings);
     }

@@ -25,7 +25,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -62,7 +62,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
     private int retryCount;
     private static final int FOLLOW_RANGE = 48;
 
-    public GeneralPathfinder(Supplier<@NotNull EntityPlayerMPFake> fakePlayerSupplier, Supplier<Optional<BlockPos>> targetSupplier) {
+    public GeneralPathfinder(Supplier<@NonNull EntityPlayerMPFake> fakePlayerSupplier, Supplier<Optional<BlockPos>> targetSupplier) {
         this.target = targetSupplier;
         this.fakePlayerSupplier = fakePlayerSupplier;
         this.pathfinding();

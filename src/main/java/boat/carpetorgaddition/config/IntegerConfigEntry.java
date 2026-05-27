@@ -29,11 +29,6 @@ public class IntegerConfigEntry implements ConfigEntry<JsonPrimitive> {
         return new JsonPrimitive(this.value);
     }
 
-    @Override
-    public Class<JsonPrimitive> getType() {
-        return JsonPrimitive.class;
-    }
-
     public int getIntValue() {
         return this.value;
     }

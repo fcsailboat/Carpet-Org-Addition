@@ -11,12 +11,12 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 导航点更新数据包
- *
  */
+@NullMarked
 public final class WaypointUpdateS2CPacket implements CustomPacketPayload {
     private final Vec3 target;
     private final Identifier worldId;
@@ -77,7 +77,7 @@ public final class WaypointUpdateS2CPacket implements CustomPacketPayload {
     }
 
     @Override
-    public @NonNull Type<? extends CustomPacketPayload> type() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

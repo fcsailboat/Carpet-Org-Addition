@@ -35,7 +35,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -71,7 +71,7 @@ public class OrangeCommand extends AbstractServerCommand {
                         .executes(this::openDialog)));
     }
 
-    private @NotNull SuggestionProvider<CommandSourceStack> suggestRule() {
+    private @NonNull SuggestionProvider<CommandSourceStack> suggestRule() {
         return (_, builder) -> SharedSuggestionProvider.suggest(CustomRuleValueManager.NAME_TO_RULES.values().stream().map(CarpetRule::name), builder);
     }
 

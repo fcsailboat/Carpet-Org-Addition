@@ -13,7 +13,7 @@ public class FakePlayerComponentCoordinator extends PlayerComponentCoordinator {
     private final FakePlayerActionManager fakePlayerActionManager;
     private final BlockExcavator blockExcavator;
 
-    public FakePlayerComponentCoordinator(EntityPlayerMPFake fakePlayer) {
+    FakePlayerComponentCoordinator(EntityPlayerMPFake fakePlayer) {
         super(fakePlayer);
         this.fakePlayerActionManager = new FakePlayerActionManager(fakePlayer);
         this.blockExcavator = new BlockExcavator(fakePlayer);

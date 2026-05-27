@@ -7,18 +7,19 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(AnvilMenu.class)
 public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
-    public AnvilScreenHandlerMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory, ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
+    @SuppressWarnings("unused")
+    private AnvilScreenHandlerMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory, ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
     }
 
     @WrapOperation(method = "createResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/Enchantment;canEnchant(Lnet/minecraft/world/item/ItemStack;)Z"))
-    private boolean isAcceptableItem(Enchantment instance, ItemStack stack, Operation<Boolean> original) {
-        return ScopedValue.where(CarpetOrgAdditionSettings.ENCHANTER, this.player).call(() -> original.call(instance, stack));
+    private boolean isAcceptableItem(Enchantment instance, ItemStack itemStack, Operation<Boolean> original) {
+        return ScopedValue.where(CarpetOrgAdditionSettings.ENCHANTER, this.player).call(() -> original.call(instance, itemStack));
     }
 }

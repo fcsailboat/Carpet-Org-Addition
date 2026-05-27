@@ -45,7 +45,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -61,7 +61,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION))
+                .requires(source -> CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION.value().hasPermission(source))
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(thenSorting())
                         .then(Commands.literal("empty")
@@ -137,7 +137,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     private LiteralArgumentBuilder<CommandSourceStack> thenSorting() {
         LiteralArgumentBuilder<CommandSourceStack> sorting = Commands.literal("sorting");
         RequiredArgumentBuilder<CommandSourceStack, Result> result = null;
-        int max = GlobalConfigs.getInstance().getPlayerActionMaxSortingItemCount();
+        int max = GlobalConfigs.getPlayerActionMaxSortingItemCount();
         for (int i = max; i >= 0; i--) {
             final int count = i + 1;
             var argument = Commands.argument("item" + count, ItemPredicateArgument.itemPredicate(this.access));

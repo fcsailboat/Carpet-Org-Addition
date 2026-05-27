@@ -8,15 +8,13 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
-import java.util.Objects;
 
-public class InventoryCraftAction extends CraftAction {
+public class InventoryCraftAction extends AbstractCraftAction {
     public InventoryCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
         super(fakePlayer, predicates);
     }
@@ -24,11 +22,6 @@ public class InventoryCraftAction extends CraftAction {
     @Override
     protected int getCraftGridSize() {
         return 4;
-    }
-
-    @Override
-    protected int getCraftGridStart() {
-        return 1;
     }
 
     @Override
@@ -43,11 +36,12 @@ public class InventoryCraftAction extends CraftAction {
 
     @Override
     protected int getInventoryEnd() {
-        return Objects.requireNonNull(this.getScreenHandler()).slots.size();
+        return this.getScreenHandler().slots.size();
     }
 
     @Override
-    protected @Nullable AbstractContainerMenu getScreenHandler() {
+    @NonNull
+    protected InventoryMenu getScreenHandler() {
         return this.getFakePlayer().inventoryMenu;
     }
 
@@ -65,8 +59,7 @@ public class InventoryCraftAction extends CraftAction {
         joiner.enter(() -> this.addCraftRecipe(joiner, craftOutput));
         // 合成方格状态
         joiner.newline(key.then("state").translate(name));
-        InventoryMenu playerScreenHandler = this.getFakePlayer().inventoryMenu;
-        joiner.enter(() -> this.addCraftGridState(joiner, playerScreenHandler));
+        joiner.enter(() -> this.addCraftGridState(joiner, this.getScreenHandler()));
         return joiner.collect();
     }
 
@@ -111,5 +104,12 @@ public class InventoryCraftAction extends CraftAction {
     @Override
     public ActionSerializeType getActionSerializeType() {
         return ActionSerializeType.INVENTORY_CRAFT;
+    }
+
+    @Override
+    public void onFakePlayerLogout() {
+        this.getFakePlayerNullable().ifPresent(fakePlayer -> this.getScreenHandler().removed(fakePlayer));
+        // 如果假玩家是从其他动作切换到物品栏合成的，则上一次动作可能有物品残留
+        super.onFakePlayerLogout();
     }
 }

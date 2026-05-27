@@ -4,7 +4,7 @@ import boat.carpetorgaddition.network.NetworkPacketRegister;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 不可用槽位同步数据包
@@ -13,6 +13,7 @@ import org.jspecify.annotations.NonNull;
  * @param from   槽位的起始索引
  * @param to     槽位的结束索引
  */
+@NullMarked
 public record UnavailableSlotSyncS2CPacket(int syncId, int from, int to) implements CustomPacketPayload {
     public static final Type<UnavailableSlotSyncS2CPacket> ID = NetworkPacketRegister.ofType("unavailable_slot_sync");
     public static final StreamCodec<RegistryFriendlyByteBuf, UnavailableSlotSyncS2CPacket> CODEC = new StreamCodec<>() {
@@ -33,7 +34,7 @@ public record UnavailableSlotSyncS2CPacket(int syncId, int from, int to) impleme
     };
 
     @Override
-    public @NonNull Type<? extends CustomPacketPayload> type() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

@@ -35,23 +35,8 @@ public class ItemStackCounter implements Counter<ItemStack> {
     }
 
     @Override
-    public int size() {
-        return this.counter.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.counter.isEmpty();
-    }
-
-    @Override
     public Stream<Object2IntMap.Entry<ItemStack>> stream() {
         return this.counter.stream().map(entry -> Object2IntMap.entry(entry.getKey().asItemStack(), entry.getIntValue()));
-    }
-
-    @Override
-    public Set<ItemStack> keySet() {
-        return this.counter.keySet().stream().map(ItemIdentity::asItemStack).collect(Collectors.toSet());
     }
 
     @Override

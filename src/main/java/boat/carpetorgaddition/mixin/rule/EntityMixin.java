@@ -20,8 +20,8 @@ public abstract class EntityMixin {
     @Inject(method = "maxUpStep", at = @At("HEAD"), cancellable = true)
     private void getStepHeight(CallbackInfoReturnable<Float> cir) {
         if (CarpetOrgAdditionSettings.CLIMBING_BOAT.value()
-                && thisEntity instanceof Boat boatEntity
-                && boatEntity.getControllingPassenger() instanceof Player) {
+            && thisEntity instanceof Boat boatEntity
+            && boatEntity.getControllingPassenger() instanceof Player) {
             cir.setReturnValue(1.0F);
         }
     }

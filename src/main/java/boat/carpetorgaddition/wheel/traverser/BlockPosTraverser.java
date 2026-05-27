@@ -4,7 +4,7 @@ import boat.carpetorgaddition.util.ServerUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -39,7 +39,7 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
     /**
      * 类对象是不可变的，因此不需要考虑并发修改的问题
      */
-    @NotNull
+    @NonNull
     @Override
     public Iterator<BlockPos> iterator() {
         return new Iterator<>() {

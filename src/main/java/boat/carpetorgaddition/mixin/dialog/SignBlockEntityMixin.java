@@ -20,18 +20,18 @@ import java.util.Optional;
 @Mixin(SignBlockEntity.class)
 public class SignBlockEntityMixin {
     @WrapOperation(method = "executeClickCommandsIfPresent", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;handleCustomClickAction(Lnet/minecraft/resources/Identifier;Ljava/util/Optional;)V"))
-    private void setPlayer(MinecraftServer instance, Identifier identifier, Optional<Tag> optional, Operation<Void> original, @Local(argsOnly = true) Player player) {
+    private void setPlayer(MinecraftServer instance, Identifier id, Optional<Tag> payload, Operation<Void> original, @Local(argsOnly = true, name = "player") Player player) {
         if (player instanceof ServerPlayer) {
             ScopedValue.where(CustomClickActionContext.CURRENT_PLAYER, (ServerPlayer) player)
-                    .run(() -> original.call(instance, identifier, optional));
+                    .run(() -> original.call(instance, id, payload));
         } else {
-            original.call(instance, identifier, optional);
+            original.call(instance, id, payload);
         }
     }
 
     @WrapOperation(method = "executeClickCommandsIfPresent", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;handleCustomClickAction(Lnet/minecraft/resources/Identifier;Ljava/util/Optional;)V"))
-    private void setActionSource(MinecraftServer instance, Identifier identifier, Optional<Tag> optional, Operation<Void> original) {
+    private void setActionSource(MinecraftServer instance, Identifier id, Optional<Tag> payload, Operation<Void> original) {
         ScopedValue.where(CustomClickActionContext.ACTION_SOURCE, ActionSource.SIGN)
-                .run(() -> original.call(instance, identifier, optional));
+                .run(() -> original.call(instance, id, payload));
     }
 }

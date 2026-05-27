@@ -29,11 +29,6 @@ public class BooleanConfigEntry implements ConfigEntry<JsonPrimitive> {
         return new JsonPrimitive(this.value);
     }
 
-    @Override
-    public Class<JsonPrimitive> getType() {
-        return JsonPrimitive.class;
-    }
-
     public boolean getBooleanValue() {
         return this.value;
     }

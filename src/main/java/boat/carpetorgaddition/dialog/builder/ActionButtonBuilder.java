@@ -10,10 +10,11 @@ import net.minecraft.server.dialog.ActionButton;
 import net.minecraft.server.dialog.CommonButtonData;
 import net.minecraft.server.dialog.action.Action;
 import net.minecraft.server.dialog.action.CustomAll;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
+@SuppressWarnings("unused")
 public class ActionButtonBuilder {
     /**
      * 按钮的渲染文本
@@ -42,13 +43,11 @@ public class ActionButtonBuilder {
         return new ActionButtonBuilder(label);
     }
 
-    @SuppressWarnings("unused")
     public ActionButtonBuilder setTooltip(@Nullable Component tooltip) {
         this.tooltip = tooltip;
         return this;
     }
 
-    @SuppressWarnings("unused")
     public ActionButtonBuilder setWidth(int width) {
         this.width = width;
         return this;

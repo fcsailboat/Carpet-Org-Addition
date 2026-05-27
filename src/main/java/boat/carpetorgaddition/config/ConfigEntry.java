@@ -16,8 +16,6 @@ public interface ConfigEntry<T extends JsonElement> {
      */
     T getValue();
 
-    Class<T> getType();
-
     default boolean shouldBeSaved() {
         return true;
     }

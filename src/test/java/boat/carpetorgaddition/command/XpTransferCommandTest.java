@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.command;
 
 import boat.carpetorgaddition.wheel.ExperienceTransfer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ public class XpTransferCommandTest {
 
     @Disabled
     @RepeatedTest(124)
-    public void testTransferAll(@NotNull RepetitionInfo info) {
+    public void testTransferAll(@NonNull RepetitionInfo info) {
         int level = (int) Math.pow(info.getCurrentRepetition(), 4);
         System.out.println("等级：" + level);
         MockPlayer player = new MockPlayer(level);

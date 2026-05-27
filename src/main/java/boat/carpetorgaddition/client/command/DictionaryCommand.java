@@ -31,7 +31,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gamerules.GameRule;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -91,7 +91,7 @@ public class DictionaryCommand extends AbstractClientCommand {
     }
 
     // 将字符串id转换成可以单击复制的形式
-    @NotNull
+    @NonNull
     private Component canCopyId(String id) {
         return TextBuilder.of(id)
                 .setCopyToClipboard(id)

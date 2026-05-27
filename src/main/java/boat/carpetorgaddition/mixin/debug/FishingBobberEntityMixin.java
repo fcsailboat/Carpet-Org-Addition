@@ -20,7 +20,7 @@ public class FishingBobberEntityMixin {
     private int timeUntilLured;
 
     @Inject(method = "catchingFish", at = @At("HEAD"))
-    private void tick(BlockPos pos, CallbackInfo ci) {
+    private void tick(CallbackInfo ci) {
         int fixedTime = DebugSettings.fixedFishingHookTime.get();
         if (fixedTime == -1) {
             return;
@@ -29,8 +29,8 @@ public class FishingBobberEntityMixin {
     }
 
     @WrapOperation(method = "catchingFish", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;isRainingAt(Lnet/minecraft/core/BlockPos;)Z"))
-    private boolean hasRain(Level instance, BlockPos blockPos, Operation<Boolean> original) {
-        return DebugSettings.fixedFishingHookTime.get() != -1 && original.call(instance, blockPos);
+    private boolean hasRain(Level instance, BlockPos pos, Operation<Boolean> original) {
+        return DebugSettings.fixedFishingHookTime.get() != -1 && original.call(instance, pos);
     }
 
     @WrapOperation(method = "catchingFish", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;canSeeSky(Lnet/minecraft/core/BlockPos;)Z"))

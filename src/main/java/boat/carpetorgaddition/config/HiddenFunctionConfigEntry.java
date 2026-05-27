@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.config;
 
 import com.google.gson.JsonPrimitive;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class HiddenFunctionConfigEntry implements ConfigEntry<JsonPrimitive> {
     private boolean enable;
@@ -28,11 +28,6 @@ public class HiddenFunctionConfigEntry implements ConfigEntry<JsonPrimitive> {
     @Override
     public boolean shouldBeSaved() {
         return this.shouldBeSaved;
-    }
-
-    @Override
-    public Class<JsonPrimitive> getType() {
-        return JsonPrimitive.class;
     }
 
     @Override

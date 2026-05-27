@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PiglinAi.class)
 public abstract class PiglinBrainMixin {
     @Inject(method = "admireGoldItem", at = @At("HEAD"), cancellable = true)
-    private static void setAdmiringItem(LivingEntity entity, CallbackInfo ci) {
+    private static void setAdmiringItem(LivingEntity body, CallbackInfo ci) {
         Long time = CarpetOrgAdditionSettings.CUSTOM_PIGLIN_BARTERING_TIME.value();
         if (time != -1) {
-            entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, time);
+            body.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, time);
             ci.cancel();
         }
     }

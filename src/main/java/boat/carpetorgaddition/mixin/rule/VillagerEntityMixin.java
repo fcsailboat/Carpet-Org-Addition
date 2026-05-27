@@ -24,7 +24,8 @@ public abstract class VillagerEntityMixin extends AbstractVillager {
     @Unique
     private final Villager thisVillager = (Villager) (Object) this;
 
-    public VillagerEntityMixin(EntityType<? extends AbstractVillager> entityType, Level world) {
+    @SuppressWarnings("unused")
+    private VillagerEntityMixin(EntityType<? extends AbstractVillager> entityType, Level world) {
         super(entityType, world);
     }
 

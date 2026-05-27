@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.mixin.util.carpet;
 
-import boat.carpetorgaddition.rule.OrgRule;
+import boat.carpetorgaddition.rule.BuiltRule;
 import carpet.api.settings.CarpetRule;
 import carpet.api.settings.RuleHelper;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class RuleHelperMixin {
     @Inject(method = "translatedName", at = @At("HEAD"), cancellable = true)
     private static void translatedName(CarpetRule<?> rule, CallbackInfoReturnable<String> cir) {
-        if (rule instanceof OrgRule<?> orgRule) {
-            String displayName = orgRule.getDisplayName();
+        if (rule instanceof BuiltRule<?> builtRule) {
+            String displayName = builtRule.getDisplayName();
             if (displayName.isEmpty()) {
                 return;
             }
@@ -23,8 +23,8 @@ public class RuleHelperMixin {
 
     @Inject(method = "translatedDescription", at = @At("HEAD"), cancellable = true)
     private static void translatedDescription(CarpetRule<?> rule, CallbackInfoReturnable<String> cir) {
-        if (rule instanceof OrgRule<?> orgRule) {
-            String displayDesc = orgRule.getDisplayDesc();
+        if (rule instanceof BuiltRule<?> builtRule) {
+            String displayDesc = builtRule.getDisplayDesc();
             if (displayDesc.isEmpty()) {
                 return;
             }

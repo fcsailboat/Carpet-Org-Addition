@@ -203,14 +203,14 @@ public class CommandProvider {
      * 打开玩家设置合成GUI
      */
     public static String openPlayerCraftGui(EntityPlayerMPFake fakePlayer) {
-        return "/playerAction %s craft gui".formatted(PlayerUtils.getName(fakePlayer));
+        return "/%s %s craft gui".formatted(getCommandName(PlayerActionCommand.class), PlayerUtils.getName(fakePlayer));
     }
 
     /**
      * 打开玩家设置切石机GUI
      */
     public static String openPlayerStonecuttingGui(EntityPlayerMPFake fakePlayer) {
-        return "/playerAction %s stonecutting gui".formatted(PlayerUtils.getName(fakePlayer));
+        return "/%s %s stonecutting gui".formatted(getCommandName(PlayerActionCommand.class), PlayerUtils.getName(fakePlayer));
     }
 
     private static <T extends AbstractServerCommand> String getCommandName(Class<T> clazz) {

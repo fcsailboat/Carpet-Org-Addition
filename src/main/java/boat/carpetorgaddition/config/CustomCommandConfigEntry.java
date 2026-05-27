@@ -6,7 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.util.Map;
@@ -49,11 +49,6 @@ public class CustomCommandConfigEntry implements ConfigEntry<JsonObject> {
             }
         }
         return json;
-    }
-
-    @Override
-    public Class<JsonObject> getType() {
-        return JsonObject.class;
     }
 
     /**

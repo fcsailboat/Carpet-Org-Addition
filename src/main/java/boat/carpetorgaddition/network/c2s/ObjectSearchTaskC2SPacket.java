@@ -6,8 +6,9 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public record ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type key, String name, JsonObject json) implements CustomPacketPayload {
     public static final int CURRENT_VERSION = 1;
     public static final CustomPacketPayload.Type<ObjectSearchTaskC2SPacket> ID = NetworkPacketRegister.ofType("object_search_task");
@@ -26,7 +27,7 @@ public record ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type key, Stri
         public ObjectSearchTaskC2SPacket decode(RegistryFriendlyByteBuf buf) {
             int version = buf.readInt();
             if (version > CURRENT_VERSION) {
-                return new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.INVALID, "Invalid", null);
+                return new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.INVALID, "Invalid", new JsonObject());
             }
             ObjectSearchTaskC2SPacket.Type type = switch (buf.readUtf()) {
                 case "item" -> ObjectSearchTaskC2SPacket.Type.ITEM;
@@ -44,7 +45,7 @@ public record ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type key, Stri
     };
 
     @Override
-    public CustomPacketPayload.@NonNull Type<? extends CustomPacketPayload> type() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 

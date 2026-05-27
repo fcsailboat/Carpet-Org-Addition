@@ -2,19 +2,13 @@ package boat.carpetorgaddition.periodic.fakeplayer;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.InventoryUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
-import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
@@ -49,17 +43,6 @@ public class FakePlayerUtils {
     public static final int MAX_LOOP_COUNT = 1200;
 
     private FakePlayerUtils() {
-    }
-
-    /**
-     * 将要丢弃的物品堆栈对象复制一份并丢出，然后将原本的物品堆栈对象删除
-     *
-     * @param player    当前要丢弃物品的玩家
-     * @param itemStack 要丢弃的物品堆栈对象
-     * @apiNote 此方法不应用于丢弃GUI中的物品，因为这不会触发{@link AbstractContainerMenu#clicked}的行为
-     */
-    public static void dropItem(ServerPlayer player, ItemStack itemStack) {
-        player.drop(itemStack.copyAndClear(), false, false);
     }
 
     /**
@@ -125,34 +108,6 @@ public class FakePlayerUtils {
         return true;
     }
 
-    public static void pickupAndMoveItemStack(AbstractContainerMenu screenHandler, int fromIndex, int toIndex, EntityPlayerMPFake player) {
-        // 如果鼠标光标上有物品，先把光标上的物品丢弃
-        if (!screenHandler.getCarried().isEmpty()) {
-            screenHandler.clicked(EMPTY_SPACE_SLOT_INDEX, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, player);
-        }
-        screenHandler.clicked(fromIndex, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, player);
-        screenHandler.clicked(toIndex, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, player);
-    }
-
-    /**
-     * 功能与{@link FakePlayerUtils#pickupAndMoveItemStack(AbstractContainerMenu, int, int, EntityPlayerMPFake)}基本一致，只是本方法使用右键拿取物品，即一次拿取一半的物品
-     *
-     * @param screenHandler 玩家当前打开的GUI
-     * @param fromIndex     从哪个槽位拿取物品
-     * @param toIndex       将物品放在哪个槽位
-     * @param player        操作GUI的假玩家
-     */
-    public static void pickupAndMoveHalfItemStack(AbstractContainerMenu screenHandler, int fromIndex, int toIndex, EntityPlayerMPFake player) {
-        // 如果鼠标光标上有物品，先把光标上的物品丢弃
-        if (!screenHandler.getCarried().isEmpty()) {
-            screenHandler.clicked(EMPTY_SPACE_SLOT_INDEX, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, player);
-        }
-        // 右击拾取物品
-        screenHandler.clicked(fromIndex, PICKUP_RIGHT_CLICK, ContainerInput.PICKUP, player);
-        // 放置物品依然是左键单击
-        screenHandler.clicked(toIndex, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, player);
-    }
-
     /**
      * 收集槽位上的物品
      *
@@ -205,23 +160,6 @@ public class FakePlayerUtils {
     }
 
     /**
-     * 让玩家看向某个方向
-     */
-    public static void look(EntityPlayerMPFake fakePlayer, Direction direction) {
-        EntityPlayerActionPack actionPack = PlayerUtils.getActionPack(fakePlayer);
-        actionPack.look(direction);
-    }
-
-    public static void click(EntityPlayerMPFake fakePlayer, InteractionHand hand) {
-        EntityPlayerActionPack actionPack = PlayerUtils.getActionPack(fakePlayer);
-        EntityPlayerActionPack.ActionType type = switch (hand) {
-            case MAIN_HAND -> EntityPlayerActionPack.ActionType.ATTACK;
-            case OFF_HAND -> EntityPlayerActionPack.ActionType.USE;
-        };
-        actionPack.start(type, EntityPlayerActionPack.Action.once());
-    }
-
-    /**
      * 获取物品堆栈的文本表示形式<br>
      * 返回格式为 [物品ID首字母大写]，可以通过鼠标悬停查看物品名称和数量
      */
@@ -239,13 +177,5 @@ public class FakePlayerUtils {
         String capitalizeFirstLetter = "[" + Character.toUpperCase(split[index].charAt(0)) + "]";
         Component hover = TextBuilder.combineAll(ServerUtils.getDefaultName(itemStack), "*" + itemStack.getCount());
         return TextBuilder.of(capitalizeFirstLetter).setHover(hover).build();
-    }
-
-    /**
-     * 合并玩家物品栏中的空潜影盒（如果可堆叠）
-     */
-    public static void mergeEmptyShulkerBox(ServerPlayer player) {
-        PlayerStorageInventory inventory = new PlayerStorageInventory(player);
-        inventory.merge(InventoryUtils::isEmptyShulkerBox);
     }
 }

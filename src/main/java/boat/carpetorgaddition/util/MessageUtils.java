@@ -83,6 +83,10 @@ public class MessageUtils {
         MessageUtils.sendMessage(source, builder.build());
     }
 
+    public static void sendErrorMessage(ServerPlayer player, Component message, Throwable e) {
+        sendErrorMessage(player.createCommandSourceStack(), message, e);
+    }
+
     public static void sendErrorMessage(CommandSourceStack source, Component message, Throwable e) {
         String error = CommandUtils.getExceptionString(e);
         TextBuilder builder = TextBuilder.of(message);

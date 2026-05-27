@@ -1,6 +1,5 @@
 package boat.carpetorgaddition.util;
 
-import boat.carpetorgaddition.rule.RuleAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -20,14 +19,14 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.*;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Predicate;
 
 public class CommandUtils {
     public static final String PLAYER = "player";
@@ -246,71 +245,8 @@ public class CommandUtils {
         MessageUtils.sendVanillaErrorMessage(source, e);
     }
 
-    /**
-     * @return 玩家是否有执行某一命令的权限
-     * @see CommandHelper#canUseCommand(CommandSourceStack, Object)
-     */
-    public static boolean canUseCommand(int level, Object value) {
-        return switch (value) {
-            case Boolean bool -> bool;
-            case String str -> switch (str.toLowerCase(Locale.ROOT)) {
-                case "ops", "2" -> level >= 2;
-                case "1", "3", "4" -> level >= Integer.parseInt(str);
-                case "0", "true" -> true;
-                default -> false;
-            };
-            case null -> false;
-            default -> canUseCommand(level, value.toString());
-        };
-    }
-
-    /**
-     * @return 玩家是否有执行某一命令的权限
-     */
-    public static boolean canUseCommand(PermissionCheck permissionCheck, Object value) {
-        return switch (value) {
-            case Boolean bool -> bool;
-            case String str -> switch (str.toLowerCase(Locale.ROOT)) {
-                case "ops", "2" -> permissionCheck.check(parsePermissionPredicate(2));
-                case "1", "3", "4" -> permissionCheck.check(parsePermissionPredicate(Integer.parseInt(str)));
-                case "0", "true" -> true;
-                default -> false;
-            };
-            case null, default -> false;
-        };
-    }
-
-    public static boolean canUseCommand(PermissionSet predicate, Object value) {
-        return switch (value) {
-            case Boolean bool -> bool;
-            case String str -> switch (str.toLowerCase(Locale.ROOT)) {
-                case "ops", "2" -> predicate.hasPermission(parsePermission(2));
-                case "1", "3", "4" -> predicate.hasPermission(parsePermission(Integer.parseInt(str)));
-                case "0", "true" -> true;
-                default -> false;
-            };
-            case null, default -> false;
-        };
-    }
-
-    private static LevelBasedPermissionSet parsePermissionPredicate(int level) {
-        return LevelBasedPermissionSet.forLevel(PermissionLevel.byId(level));
-    }
-
     public static Permission parsePermission(int level) {
         return new Permission.HasCommandLevel(PermissionLevel.byId(level));
-    }
-
-    /**
-     * @return 玩家是否有执行某一命令的权限
-     * @see CommandHelper#canUseCommand(CommandSourceStack, Object)
-     */
-    public static Predicate<CommandSourceStack> canUseCommand(RuleAccessor<String> supplier) {
-        return source -> canUseCommand(source, supplier.value());
-    }
-
-    public static boolean canUseCommand(CommandSourceStack source, RuleAccessor<String> supplier) {
-        return canUseCommand(source, supplier.value());
     }
 
     public static boolean canUseCommand(CommandSourceStack source, String rule) {
@@ -337,21 +273,8 @@ public class CommandUtils {
         return Optional.empty();
     }
 
-    public static <T> T call(ThrowingIOSupplier<T> supplier) throws CommandSyntaxException {
-        try {
-            return supplier.get();
-        } catch (IOException e) {
-            throw createIOErrorException(e);
-        }
-    }
-
     @FunctionalInterface
     public interface ThrowingRunnable {
         void run() throws CommandSyntaxException;
-    }
-
-    @FunctionalInterface
-    public interface ThrowingIOSupplier<T> {
-        T get() throws IOException;
     }
 }

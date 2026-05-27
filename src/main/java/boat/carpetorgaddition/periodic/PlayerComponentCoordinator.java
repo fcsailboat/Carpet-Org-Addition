@@ -23,7 +23,7 @@ public class PlayerComponentCoordinator {
      */
     private boolean versionMismatchNotified = false;
 
-    public PlayerComponentCoordinator(ServerPlayer player) {
+    PlayerComponentCoordinator(ServerPlayer player) {
         this.player = player;
         this.server = ServerUtils.getServer(player);
         this.navigatorManager = new NavigatorManager(player);

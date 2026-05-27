@@ -2,7 +2,6 @@ package boat.carpetorgaddition.command;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.mixin.accessor.carpet.SettingsManagerAccessor;
-import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -28,7 +27,7 @@ public class RuleSearchCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_RULE_SEARCH))
+                .requires(source -> CarpetOrgAdditionSettings.COMMAND_RULE_SEARCH.value().hasPermission(source))
                 .then(Commands.argument("rule", StringArgumentType.greedyString())
                         .executes(this::listRule)));
     }

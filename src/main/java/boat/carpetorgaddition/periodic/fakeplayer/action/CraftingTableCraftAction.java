@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class CraftingTableCraftAction extends CraftAction {
+public class CraftingTableCraftAction extends AbstractCraftAction {
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("craft");
 
     public CraftingTableCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
@@ -28,11 +28,6 @@ public class CraftingTableCraftAction extends CraftAction {
     @Override
     protected int getCraftGridSize() {
         return 9;
-    }
-
-    @Override
-    protected int getCraftGridStart() {
-        return 1;
     }
 
     @Override

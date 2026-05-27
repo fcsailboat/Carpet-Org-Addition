@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.periodic.navigator;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.NavigatorCommand;
 import boat.carpetorgaddition.network.s2c.WaypointClearS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
@@ -12,12 +13,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class NavigatorManager {
     @Nullable
-    private AbstractNavigator navigator;
-    private boolean isUpdated = false;
+    private Navigator navigator;
+    private boolean updated = false;
     private final ServerPlayer player;
 
     public NavigatorManager(ServerPlayer player) {
@@ -29,17 +30,17 @@ public class NavigatorManager {
             return;
         }
         try {
-            if (this.navigator.isArrive()) {
+            if (this.navigator.isArrive() || !CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(this.player)) {
                 this.clearNavigator();
-            } else {
-                if (this.isUpdated) {
-                    this.isUpdated = false;
-                    this.navigator.onStart();
-                }
-                this.navigator.tick();
+                return;
             }
+            if (this.updated) {
+                this.updated = false;
+                this.navigator.onUpdate();
+            }
+            this.navigator.tick();
         } catch (RuntimeException e) {
-            MessageUtils.sendErrorMessage(this.player.createCommandSourceStack(), NavigatorCommand.KEY.then("error").translate(), e);
+            MessageUtils.sendErrorMessage(this.player, NavigatorCommand.KEY.then("error").translate(), e);
             CarpetOrgAddition.LOGGER.error("The navigator did not work as expected", e);
             // 清除导航器
             this.clearNavigator();
@@ -47,7 +48,7 @@ public class NavigatorManager {
     }
 
     @Nullable
-    public AbstractNavigator getNavigator() {
+    public Navigator getNavigator() {
         return this.navigator;
     }
 
@@ -67,20 +68,20 @@ public class NavigatorManager {
         this.setNavigator(new HasNamePosNavigator(this.player, blockPos, world, name));
     }
 
-    private void setNavigator(@Nullable AbstractNavigator navigator) {
+    private void setNavigator(@Nullable Navigator navigator) {
         ServerPlayNetworking.send(this.player, WaypointClearS2CPacket.INSTANCE);
         this.navigator = navigator;
-        this.isUpdated = true;
+        this.updated = true;
     }
 
     public void clearNavigator() {
-        this.setNavigator((AbstractNavigator) null);
+        this.setNavigator((Navigator) null);
         ServerPlayNetworking.send(this.player, WaypointClearS2CPacket.INSTANCE);
     }
 
     public void setNavigatorFromOldPlayer(ServerPlayer oldPlayer) {
         NavigatorManager manager = PlayerComponentCoordinator.getCoordinator(oldPlayer).getNavigatorManager();
-        AbstractNavigator navigator = manager.getNavigator();
+        Navigator navigator = manager.getNavigator();
         this.navigator = navigator == null ? null : navigator.copy(this.player);
     }
 }

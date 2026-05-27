@@ -1,7 +1,7 @@
 package boat.carpetorgaddition;
 
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
-import boat.carpetorgaddition.periodic.navigator.AbstractNavigator;
+import boat.carpetorgaddition.periodic.navigator.Navigator;
 import boat.carpetorgaddition.periodic.navigator.NavigatorManager;
 import boat.carpetorgaddition.rule.*;
 import boat.carpetorgaddition.rule.value.*;
@@ -38,10 +38,6 @@ public class CarpetOrgAdditionSettings {
      */
     public static final ScopedValue<Boolean> USE_CHANNELING_TRIDENT = ScopedValue.newInstance();
     private static final Set<RuleContext<?>> RULES = new LinkedHashSet<>();
-    public static final String OPS = "ops";
-    public static final String TRUE = "true";
-    public static final String FALSE = "false";
-    private static final List<String> COMMAND_OPTIONS = List.of(TRUE, FALSE, OPS, "0", "1", "2", "3", "4");
     public static final String ORG = "Org";
     public static final String HIDDEN = "Hidden";
 
@@ -51,10 +47,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 制作物品分身
      */
-    public static final RuleAccessor<String> COMMAND_ITEM_SHADOWING = register(
-            RuleFactory.create(String.class, "commandItemShadowing", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_ITEM_SHADOWING = register(
+            RuleFactory.of("commandItemShadowing", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -62,7 +56,7 @@ public class CarpetOrgAdditionSettings {
      * 设置基岩硬度
      */
     public static final RuleAccessor<Float> SET_BEDROCK_HARDNESS = register(
-            RuleFactory.create(Float.class, "setBedrockHardness", -1F)
+            RuleFactory.of("setBedrockHardness", -1F)
                     .setRemoved()
                     .addValidator(
                             value -> value >= 0F || value == -1F,
@@ -75,7 +69,7 @@ public class CarpetOrgAdditionSettings {
      * 绑定诅咒无效化
      */
     public static final RuleAccessor<Boolean> BINDING_CURSE_INVALIDATION = register(
-            RuleFactory.create(Boolean.class, "bindingCurseInvalidation", false)
+            RuleFactory.of("bindingCurseInvalidation", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -84,7 +78,7 @@ public class CarpetOrgAdditionSettings {
      * 禁用钓鱼开阔水域检测
      */
     public static final RuleAccessor<Boolean> DISABLE_OPEN_OR_WATER_DETECTION = register(
-            RuleFactory.create(Boolean.class, "disableOpenOrWaterDetection", false)
+            RuleFactory.of("disableOpenOrWaterDetection", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -93,7 +87,7 @@ public class CarpetOrgAdditionSettings {
      * 创造玩家免疫/kill
      */
     public static final RuleAccessor<Boolean> CREATIVE_IMMUNE_KILL = register(
-            RuleFactory.create(Boolean.class, "creativeImmuneKill", false)
+            RuleFactory.of("creativeImmuneKill", false)
                     .addCategories(RuleCategory.CREATIVE)
                     .build()
     );
@@ -102,7 +96,7 @@ public class CarpetOrgAdditionSettings {
      * 盯着末影人眼睛看时不会激怒末影人
      */
     public static final RuleAccessor<Boolean> STARING_ENDERMAN_NOT_ANGRY = register(
-            RuleFactory.create(Boolean.class, "staringEndermanNotAngry", false)
+            RuleFactory.of("staringEndermanNotAngry", false)
                     .addCategories(RuleCategory.SURVIVAL, RuleCategory.FEATURE)
                     .build()
     );
@@ -111,7 +105,7 @@ public class CarpetOrgAdditionSettings {
      * 耕地防踩踏
      */
     public static final RuleAccessor<Boolean> FARMLAND_PREVENT_STEPPING = register(
-            RuleFactory.create(Boolean.class, "farmlandPreventStepping", false)
+            RuleFactory.of("farmlandPreventStepping", false)
                     .addCategories(RuleCategory.SURVIVAL, RuleCategory.FEATURE)
                     .build()
     );
@@ -120,7 +114,7 @@ public class CarpetOrgAdditionSettings {
      * 最大方块交互距离
      */
     public static final RuleAccessor<Double> MAX_BLOCK_PLACE_DISTANCE = register(
-            RuleFactory.create(Double.class, "maxBlockPlaceDistance", -1.0)
+            RuleFactory.of("maxBlockPlaceDistance", -1.0)
                     .addCategories(RuleCategory.SURVIVAL, RuleCategory.FEATURE)
                     .addValidator(
                             newValue -> (newValue >= 0.0 && newValue <= RuleUtils.MAX_DISTANCE) || newValue == -1.0,
@@ -133,7 +127,7 @@ public class CarpetOrgAdditionSettings {
      * 简易更新跳略器
      */
     public static final RuleAccessor<Boolean> SIMPLE_UPDATE_SKIPPER = register(
-            RuleFactory.create(Boolean.class, "simpleUpdateSkipper", false)
+            RuleFactory.of("simpleUpdateSkipper", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -142,7 +136,7 @@ public class CarpetOrgAdditionSettings {
      * 引雷忽略条件
      */
     public static final RuleAccessor<IgnoreChannelingConditions> CHANNELING_IGNORE_CONDITIONS = register(
-            RuleFactory.create(IgnoreChannelingConditions.class, "channelingIgnoreConditions", IgnoreChannelingConditions.FALSE)
+            RuleFactory.of("channelingIgnoreConditions", IgnoreChannelingConditions.FALSE)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -151,7 +145,7 @@ public class CarpetOrgAdditionSettings {
      * 无伤末影珍珠
      */
     public static final RuleAccessor<Boolean> NOT_DAMAGE_ENDER_PEARL = register(
-            RuleFactory.create(Boolean.class, "notDamageEnderPearl", false)
+            RuleFactory.of("notDamageEnderPearl", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -160,7 +154,7 @@ public class CarpetOrgAdditionSettings {
      * 禁用伤害免疫
      */
     public static final RuleAccessor<Boolean> DISABLE_DAMAGE_IMMUNITY = register(
-            RuleFactory.create(Boolean.class, "disableDamageImmunity", false)
+            RuleFactory.of("disableDamageImmunity", false)
                     .setRemoved()
                     .addCategories(RuleCategory.FEATURE)
                     .build()
@@ -170,7 +164,7 @@ public class CarpetOrgAdditionSettings {
      * 禁止蝙蝠生成
      */
     public static final RuleAccessor<Boolean> DISABLE_BAT_CAN_SPAWN = register(
-            RuleFactory.create(Boolean.class, "disableBatCanSpawn", false)
+            RuleFactory.of("disableBatCanSpawn", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -179,7 +173,7 @@ public class CarpetOrgAdditionSettings {
      * 海龟蛋快速孵化
      */
     public static final RuleAccessor<Boolean> TURTLE_EGG_FAST_HATCH = register(
-            RuleFactory.create(Boolean.class, "turtleEggFastHatch", false)
+            RuleFactory.of("turtleEggFastHatch", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -188,7 +182,7 @@ public class CarpetOrgAdditionSettings {
      * 强制打开容器
      */
     public static final RuleAccessor<ForceOpenContainer> FORCE_OPEN_CONTAINER = register(
-            RuleFactory.create(ForceOpenContainer.class, "forceOpenContainer", ForceOpenContainer.FALSE)
+            RuleFactory.of("forceOpenContainer", ForceOpenContainer.FALSE)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -197,7 +191,7 @@ public class CarpetOrgAdditionSettings {
      * 村民无限交易
      */
     public static final RuleAccessor<Boolean> VILLAGER_INFINITE_TRADE = register(
-            RuleFactory.create(Boolean.class, "villagerInfiniteTrade", false)
+            RuleFactory.of("villagerInfiniteTrade", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -206,7 +200,7 @@ public class CarpetOrgAdditionSettings {
      * 烟花火箭使用冷却
      */
     public static final RuleAccessor<Boolean> FIREWORK_ROCKET_USE_COOLDOWN = register(
-            RuleFactory.create(Boolean.class, "fireworkRocketUseCooldown", false)
+            RuleFactory.of("fireworkRocketUseCooldown", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -215,7 +209,7 @@ public class CarpetOrgAdditionSettings {
      * 激流忽略条件
      */
     public static final RuleAccessor<Boolean> RIPTIDE_IGNORE_CONDITIONS = register(
-            RuleFactory.create(Boolean.class, "riptideIgnoreConditions", false)
+            RuleFactory.of("riptideIgnoreConditions", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -224,7 +218,7 @@ public class CarpetOrgAdditionSettings {
      * 将镐作为基岩的有效采集工具
      */
     public static final RuleAccessor<Boolean> PICKAXE_MINED_BEDROCK = register(
-            RuleFactory.create(Boolean.class, "pickaxeMinedBedrock", false)
+            RuleFactory.of("pickaxeMinedBedrock", false)
                     .setRemoved()
                     .addCategories(RuleCategory.FEATURE)
                     .build()
@@ -234,7 +228,7 @@ public class CarpetOrgAdditionSettings {
      * 村民回血
      */
     public static final RuleAccessor<Boolean> VILLAGER_HEAL = register(
-            RuleFactory.create(Boolean.class, "villagerHeal", false)
+            RuleFactory.of("villagerHeal", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -243,7 +237,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家回血
      */
     public static final RuleAccessor<Boolean> FAKE_PLAYER_HEAL = register(
-            RuleFactory.create(Boolean.class, "fakePlayerHeal", false)
+            RuleFactory.of("fakePlayerHeal", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -252,7 +246,7 @@ public class CarpetOrgAdditionSettings {
      * 最大方块交互距离适用于实体
      */
     public static final RuleAccessor<Boolean> MAX_BLOCK_PLACE_DISTANCE_REFER_TO_ENTITY = register(
-            RuleFactory.create(Boolean.class, "maxBlockPlaceDistanceReferToEntity", false)
+            RuleFactory.of("maxBlockPlaceDistanceReferToEntity", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -261,7 +255,7 @@ public class CarpetOrgAdditionSettings {
      * 击退棒
      */
     public static final RuleAccessor<Boolean> KNOCKBACK_STICK = register(
-            RuleFactory.create(Boolean.class, "knockbackStick", false)
+            RuleFactory.of("knockbackStick", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -270,7 +264,7 @@ public class CarpetOrgAdditionSettings {
      * 禁止重生方块爆炸
      */
     public static final RuleAccessor<Boolean> DISABLE_RESPAWN_BLOCKS_EXPLODE = register(
-            RuleFactory.create(Boolean.class, "disableRespawnBlocksExplode", false)
+            RuleFactory.of("disableRespawnBlocksExplode", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -279,7 +273,7 @@ public class CarpetOrgAdditionSettings {
      * CCE更新抑制器
      */
     public static final RuleAccessor<String> CCE_UPDATE_SUPPRESSION = register(
-            RuleFactory.create(String.class, "CCEUpdateSuppression", "false")
+            RuleFactory.of("CCEUpdateSuppression", "false")
                     .addCategories(RuleCategory.FEATURE)
                     .addOptions("true", "false")
                     .setLenient()
@@ -290,8 +284,8 @@ public class CarpetOrgAdditionSettings {
      * 开放{@code /seed}命令权限
      */
     public static final RuleAccessor<Boolean> OPEN_SEED_PERMISSION = register(
-            RuleFactory.create(Boolean.class, "openSeedPermission", false)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("openSeedPermission", false)
+                    .setCommand()
                     .build()
     );
 
@@ -299,8 +293,9 @@ public class CarpetOrgAdditionSettings {
      * 开放{@code /carpet}命令权限
      */
     public static final RuleAccessor<Boolean> OPEN_CARPET_PERMISSION = register(
-            RuleFactory.create(Boolean.class, "openCarpetPermission", false)
-                    .addCategories(RuleCategory.COMMAND, RuleCategory.CLIENT)
+            RuleFactory.of("openCarpetPermission", false)
+                    .setCommand()
+                    .setClient()
                     .build()
     );
 
@@ -308,8 +303,8 @@ public class CarpetOrgAdditionSettings {
      * 开放{@code /gamerule}命令权限
      */
     public static final RuleAccessor<Boolean> OPEN_GAME_RULE_PERMISSION = register(
-            RuleFactory.create(Boolean.class, "openGameRulePermission", false)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("openGameRulePermission", false)
+                    .setCommand()
                     .build()
     );
 
@@ -317,7 +312,7 @@ public class CarpetOrgAdditionSettings {
      * 打开村民物品栏
      */
     public static final RuleAccessor<Boolean> OPEN_VILLAGER_INVENTORY = register(
-            RuleFactory.create(Boolean.class, "openVillagerInventory", false)
+            RuleFactory.of("openVillagerInventory", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -326,7 +321,7 @@ public class CarpetOrgAdditionSettings {
      * 和平的苦力怕
      */
     public static final RuleAccessor<Boolean> PEACEFUL_CREEPER = register(
-            RuleFactory.create(Boolean.class, "peacefulCreeper", false)
+            RuleFactory.of("peacefulCreeper", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -334,50 +329,40 @@ public class CarpetOrgAdditionSettings {
     /**
      * 经验转移
      */
-    public static final RuleAccessor<String> COMMAND_XP_TRANSFER = register(
-            RuleFactory.create(String.class, "commandXpTransfer", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_XP_TRANSFER = register(
+            RuleFactory.of("commandXpTransfer", CommandPermissionLevel.OPS)
                     .build()
     );
 
     /**
      * 生存旁观切换命令
      */
-    public static final RuleAccessor<String> COMMAND_SPECTATOR = register(
-            RuleFactory.create(String.class, "commandSpectator", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_SPECTATOR = register(
+            RuleFactory.of("commandSpectator", CommandPermissionLevel.OPS)
                     .build()
     );
 
     /**
      * 查找器命令
      */
-    public static final RuleAccessor<String> COMMAND_FINDER = register(
-            RuleFactory.create(String.class, "commandFinder", TRUE)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_FINDER = register(
+            RuleFactory.of("commandFinder", CommandPermissionLevel.TRUE)
                     .build()
     );
 
     /**
      * 自杀
      */
-    public static final RuleAccessor<String> COMMAND_KILL_ME = register(
-            RuleFactory.create(String.class, "commandKillMe", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_KILL_ME = register(
+            RuleFactory.of("commandKillMe", CommandPermissionLevel.OPS)
                     .build()
     );
 
     /**
      * 路径点管理器
      */
-    public static final RuleAccessor<String> COMMAND_LOCATIONS = register(
-            RuleFactory.create(String.class, "commandLocations", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_LOCATIONS = register(
+            RuleFactory.of("commandLocations", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -385,7 +370,7 @@ public class CarpetOrgAdditionSettings {
      * 生命值不满可以进食
      */
     public static final RuleAccessor<Boolean> HEALTH_NOT_FULL_CAN_EAT = register(
-            RuleFactory.create(Boolean.class, "healthNotFullCanEat", false)
+            RuleFactory.of("healthNotFullCanEat", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -394,7 +379,7 @@ public class CarpetOrgAdditionSettings {
      * 可采集刷怪笼
      */
     public static final RuleAccessor<Boolean> CAN_MINE_SPAWNER = register(
-            RuleFactory.create(Boolean.class, "canMineSpawner", false)
+            RuleFactory.of("canMineSpawner", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -403,7 +388,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家生成时无击退
      */
     public static final RuleAccessor<Boolean> FAKE_PLAYER_SPAWN_NO_KNOCKBACK = register(
-            RuleFactory.create(Boolean.class, "fakePlayerSpawnNoKnockback", false)
+            RuleFactory.of("fakePlayerSpawnNoKnockback", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -412,7 +397,7 @@ public class CarpetOrgAdditionSettings {
      * 可激活侦测器
      */
     public static final RuleAccessor<Boolean> CAN_ACTIVATES_OBSERVER = register(
-            RuleFactory.create(Boolean.class, "canActivatesObserver", false)
+            RuleFactory.of("canActivatesObserver", false)
                     .addCategories(RuleCategory.FEATURE, RuleCategory.SURVIVAL)
                     .build()
     );
@@ -421,7 +406,7 @@ public class CarpetOrgAdditionSettings {
      * 禁止水结冰
      */
     public static final RuleAccessor<Boolean> DISABLE_WATER_FREEZES = register(
-            RuleFactory.create(Boolean.class, "disableWaterFreezes", false)
+            RuleFactory.of("disableWaterFreezes", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -430,7 +415,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家动作保留物品
      */
     public static final RuleAccessor<Boolean> FAKE_PLAYER_ACTION_KEEP_ITEM = register(
-            RuleFactory.create(Boolean.class, "fakePlayerActionKeepItem", false)
+            RuleFactory.of("fakePlayerActionKeepItem", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -438,10 +423,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 绘制粒子线命令
      */
-    public static final RuleAccessor<String> COMMAND_PARTICLE_LINE = register(
-            RuleFactory.create(String.class, "commandParticleLine", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_PARTICLE_LINE = register(
+            RuleFactory.of("commandParticleLine", CommandPermissionLevel.FALSE)
                     .setRemoved()
                     .build()
     );
@@ -450,7 +433,7 @@ public class CarpetOrgAdditionSettings {
      * 禁止特定生物在和平模式下被清除
      */
     public static final RuleAccessor<Boolean> DISABLE_MOB_PEACEFUL_DESPAWN = register(
-            RuleFactory.create(Boolean.class, "disableMobPeacefulDespawn", false)
+            RuleFactory.of("disableMobPeacefulDespawn", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -459,7 +442,7 @@ public class CarpetOrgAdditionSettings {
      * 船可以直接走向一格高的方块
      */
     public static final RuleAccessor<Boolean> CLIMBING_BOAT = register(
-            RuleFactory.create(Boolean.class, "climbingBoat", false)
+            RuleFactory.of("climbingBoat", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -468,7 +451,7 @@ public class CarpetOrgAdditionSettings {
      * 可重复使用的锻造模板
      */
     public static final RuleAccessor<ReusableSmithingTemplate> REUSABLE_SMITHING_TEMPLATE = register(
-            RuleFactory.create(ReusableSmithingTemplate.class, "reusableSmithingTemplate", ReusableSmithingTemplate.FALSE)
+            RuleFactory.of("reusableSmithingTemplate", ReusableSmithingTemplate.FALSE)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -477,8 +460,8 @@ public class CarpetOrgAdditionSettings {
      * 开放/tp命令权限
      */
     public static final RuleAccessor<Boolean> OPEN_TP_PERMISSION = register(
-            RuleFactory.create(Boolean.class, "openTpPermission", false)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("openTpPermission", false)
+                    .setCommand()
                     .build()
     );
 
@@ -486,7 +469,7 @@ public class CarpetOrgAdditionSettings {
      * 易碎深板岩
      */
     public static final RuleAccessor<Boolean> SOFT_DEEPSLATE = register(
-            RuleFactory.create(Boolean.class, "softDeepslate", false)
+            RuleFactory.of("softDeepslate", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -495,7 +478,7 @@ public class CarpetOrgAdditionSettings {
      * 易碎黑曜石
      */
     public static final RuleAccessor<Boolean> SOFT_OBSIDIAN = register(
-            RuleFactory.create(Boolean.class, "softObsidian", false)
+            RuleFactory.of("softObsidian", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -504,7 +487,7 @@ public class CarpetOrgAdditionSettings {
      * 易碎矿石
      */
     public static final RuleAccessor<Boolean> SOFT_ORES = register(
-            RuleFactory.create(Boolean.class, "softOres", false)
+            RuleFactory.of("softOres", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -513,7 +496,7 @@ public class CarpetOrgAdditionSettings {
      * 更好的不死图腾
      */
     public static final RuleAccessor<BetterTotemOfUndying> BETTER_TOTEM_OF_UNDYING = register(
-            RuleFactory.create(BetterTotemOfUndying.class, "betterTotemOfUndying", BetterTotemOfUndying.VANILLA)
+            RuleFactory.of("betterTotemOfUndying", BetterTotemOfUndying.VANILLA)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -521,10 +504,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 假玩家动作命令
      */
-    public static final RuleAccessor<String> COMMAND_PLAYER_ACTION = register(
-            RuleFactory.create(String.class, "commandPlayerAction", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_PLAYER_ACTION = register(
+            RuleFactory.of("commandPlayerAction", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -532,7 +513,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家合成支持潜影盒
      */
     public static final RuleAccessor<Boolean> FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING = register(
-            RuleFactory.create(Boolean.class, "fakePlayerShulkerBoxItemHandling", false)
+            RuleFactory.of("fakePlayerShulkerBoxItemHandling", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -541,7 +522,7 @@ public class CarpetOrgAdditionSettings {
      * 自定义猪灵交易时间
      */
     public static final RuleAccessor<Long> CUSTOM_PIGLIN_BARTERING_TIME = register(
-            RuleFactory.create(Long.class, "customPiglinBarteringTime", -1L)
+            RuleFactory.of("customPiglinBarteringTime", -1L)
                     .addCategories(RuleCategory.SURVIVAL)
                     .addValidator(
                             newValue -> newValue >= 0 || newValue == -1,
@@ -554,7 +535,7 @@ public class CarpetOrgAdditionSettings {
      * 快速设置假玩家合成
      */
     public static final RuleAccessor<QuickSettingFakePlayerCraft> QUICK_SETTING_FAKE_PLAYER_CRAFT = register(
-            RuleFactory.create(QuickSettingFakePlayerCraft.class, "quickSettingFakePlayerCraft", QuickSettingFakePlayerCraft.FALSE)
+            RuleFactory.of("quickSettingFakePlayerCraft", QuickSettingFakePlayerCraft.FALSE)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -563,7 +544,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家死亡不掉落
      */
     public static final RuleAccessor<Boolean> FAKE_PLAYER_KEEP_INVENTORY = register(
-            RuleFactory.create(Boolean.class, "fakePlayerKeepInventory", false)
+            RuleFactory.of("fakePlayerKeepInventory", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -572,7 +553,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家死亡不掉落条件
      */
     public static final RuleAccessor<FakePlayerKeepInventoryCondition> FAKE_PLAYER_KEEP_INVENTORY_CONDITION = register(
-            RuleFactory.create(FakePlayerKeepInventoryCondition.class, "fakePlayerKeepInventoryCondition", FakePlayerKeepInventoryCondition.UNCONDITIONAL)
+            RuleFactory.of("fakePlayerKeepInventoryCondition", FakePlayerKeepInventoryCondition.UNCONDITIONAL)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -580,20 +561,16 @@ public class CarpetOrgAdditionSettings {
     /**
      * 苦力怕命令
      */
-    public static final RuleAccessor<String> COMMAND_CREEPER = register(
-            RuleFactory.create(String.class, "commandCreeper", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_CREEPER = register(
+            RuleFactory.of("commandCreeper", CommandPermissionLevel.FALSE)
                     .build()
     );
 
     /**
      * 规则搜索命令
      */
-    public static final RuleAccessor<String> COMMAND_RULE_SEARCH = register(
-            RuleFactory.create(String.class, "commandRuleSearch", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_RULE_SEARCH = register(
+            RuleFactory.of("commandRuleSearch", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -601,7 +578,7 @@ public class CarpetOrgAdditionSettings {
      * 增强闪电苦力怕
      */
     public static final RuleAccessor<Boolean> SUPER_CHARGED_CREEPER = register(
-            RuleFactory.create(Boolean.class, "superChargedCreeper", false)
+            RuleFactory.of("superChargedCreeper", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -610,7 +587,7 @@ public class CarpetOrgAdditionSettings {
      * 玩家掉落头颅
      */
     public static final RuleAccessor<Boolean> PLAYER_DROP_HEAD = register(
-            RuleFactory.create(Boolean.class, "playerDropHead", false)
+            RuleFactory.of("playerDropHead", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -619,7 +596,7 @@ public class CarpetOrgAdditionSettings {
      * 信标范围扩展
      */
     public static final RuleAccessor<Integer> BEACON_RANGE_EXPAND = register(
-            RuleFactory.create(Integer.class, "beaconRangeExpand", 0)
+            RuleFactory.of("beaconRangeExpand", 0)
                     .addCategories(RuleCategory.SURVIVAL)
                     .addValidator(
                             integer -> integer <= RuleUtils.MAX_BEACON_RANGE,
@@ -632,7 +609,7 @@ public class CarpetOrgAdditionSettings {
      * 信标世界高度
      */
     public static final RuleAccessor<Boolean> BEACON_WORLD_HEIGHT = register(
-            RuleFactory.create(Boolean.class, "beaconWorldHeight", false)
+            RuleFactory.of("beaconWorldHeight", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -641,8 +618,8 @@ public class CarpetOrgAdditionSettings {
      * 可高亮方块坐标
      */
     public static final RuleAccessor<CanHighlightBlockPos> CAN_HIGHLIGHT_BLOCK_POS = register(
-            RuleFactory.create(CanHighlightBlockPos.class, "canHighlightBlockPos", CanHighlightBlockPos.DEFAULT)
-                    .addCategories(RuleCategory.SURVIVAL, RuleCategory.CLIENT)
+            RuleFactory.of("canHighlightBlockPos", CanHighlightBlockPos.DEFAULT)
+                    .addCategories(RuleCategory.SURVIVAL)
                     .setClient()
                     .build()
     );
@@ -650,10 +627,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 玩家管理器命令
      */
-    public static final RuleAccessor<String> COMMAND_PLAYER_MANAGER = register(
-            RuleFactory.create(String.class, "commandPlayerManager", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_PLAYER_MANAGER = register(
+            RuleFactory.of("commandPlayerManager", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -661,11 +636,7 @@ public class CarpetOrgAdditionSettings {
      * 方块掉落物直接进入物品栏
      */
     public static final RuleAccessor<BlockDropsDirectlyEnterInventory> BLOCK_DROPS_DIRECTLY_ENTER_INVENTORY = register(
-            RuleFactory.create(
-                            BlockDropsDirectlyEnterInventory.class,
-                            "blockDropsDirectlyEnterInventory",
-                            BlockDropsDirectlyEnterInventory.FALSE
-                    )
+            RuleFactory.of("blockDropsDirectlyEnterInventory", BlockDropsDirectlyEnterInventory.FALSE)
                     .addCategories(RuleCategory.SURVIVAL)
                     .setCustomRuleSwitch(enabled -> {
                                 BlockDropsDirectlyEnterInventory value = CarpetOrgAdditionSettings.BLOCK_DROPS_DIRECTLY_ENTER_INVENTORY.value();
@@ -683,7 +654,7 @@ public class CarpetOrgAdditionSettings {
      * 海龟蛋快速采集
      */
     public static final RuleAccessor<Boolean> TURTLE_EGG_FAST_MINE = register(
-            RuleFactory.create(Boolean.class, "turtleEggFastMine", false)
+            RuleFactory.of("turtleEggFastMine", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -691,10 +662,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 导航器
      */
-    public static final RuleAccessor<String> COMMAND_NAVIGATE = register(
-            RuleFactory.create(String.class, "commandNavigate", TRUE)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_NAVIGATE = register(
+            RuleFactory.of("commandNavigate", CommandPermissionLevel.TRUE)
                     .build()
     );
 
@@ -702,7 +671,7 @@ public class CarpetOrgAdditionSettings {
      * 玩家死亡产生的掉落物不会自然消失
      */
     public static final RuleAccessor<Boolean> PLAYER_DROPS_NOT_DESPAWNING = register(
-            RuleFactory.create(Boolean.class, "playerDropsNotDespawning", false)
+            RuleFactory.of("playerDropsNotDespawning", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -711,7 +680,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家最大物品操作次数
      */
     public static final RuleAccessor<Integer> FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT = register(
-            RuleFactory.create(Integer.class, "fakePlayerMaxItemOperationCount", 3)
+            RuleFactory.of("fakePlayerMaxItemOperationCount", 3)
                     .addCategories(RuleCategory.SURVIVAL)
                     .addOptions(1, 3, 5, -1)
                     .setLenient()
@@ -726,7 +695,7 @@ public class CarpetOrgAdditionSettings {
      * 假玩家生成时内存泄漏修复
      */
     public static final RuleAccessor<Boolean> FAKE_PLAYER_SPAWN_MEMORY_LEAK_FIX = register(
-            RuleFactory.create(Boolean.class, "fakePlayerSpawnMemoryLeakFix", false)
+            RuleFactory.of("fakePlayerSpawnMemoryLeakFix", false)
                     .addCategories(RuleCategory.BUGFIX)
                     .build()
     );
@@ -734,10 +703,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 快递命令
      */
-    public static final RuleAccessor<String> COMMAND_MAIL = register(
-            RuleFactory.create(String.class, "commandMail", OPS)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> COMMAND_MAIL = register(
+            RuleFactory.of("commandMail", CommandPermissionLevel.OPS)
                     .build()
     );
 
@@ -745,7 +712,7 @@ public class CarpetOrgAdditionSettings {
      * 抑制方块破坏位置不匹配警告
      */
     public static final RuleAccessor<Boolean> SUPPRESSION_MISMATCH_IN_DESTROY_BLOCK_POS_WARN = register(
-            RuleFactory.create(Boolean.class, "suppressionMismatchInDestroyBlockPosWarn", false)
+            RuleFactory.of("suppressionMismatchInDestroyBlockPosWarn", false)
                     .addCategories(RuleCategory.EXPERIMENTAL)
                     .build()
     );
@@ -754,13 +721,12 @@ public class CarpetOrgAdditionSettings {
      * 同步导航器航点
      */
     public static final RuleAccessor<Boolean> SYNC_NAVIGATE_WAYPOINT = register(
-            RuleFactory.create(Boolean.class, "syncNavigateWaypoint", true)
-                    .addCategories(RuleCategory.CLIENT)
+            RuleFactory.of("syncNavigateWaypoint", true)
                     .addListener((source, value) -> {
                         if (source == null) {
                             return;
                         }
-                        List<AbstractNavigator> list = source.getServer().getPlayerList().getPlayers()
+                        List<Navigator> list = source.getServer().getPlayerList().getPlayers()
                                 .stream()
                                 .map(PlayerComponentCoordinator::getCoordinator)
                                 .map(PlayerComponentCoordinator::getNavigatorManager)
@@ -771,7 +737,7 @@ public class CarpetOrgAdditionSettings {
                         if (value) {
                             list.forEach(navigator -> navigator.syncWaypoint(true));
                         } else {
-                            list.forEach(AbstractNavigator::clear);
+                            list.forEach(Navigator::clear);
                         }
                     })
                     .setClient()
@@ -783,7 +749,7 @@ public class CarpetOrgAdditionSettings {
      * 潜影盒堆叠
      */
     public static final RuleAccessor<Boolean> SHULKER_BOX_STACKABLE = register(
-            RuleFactory.create(Boolean.class, "shulkerBoxStackable", false)
+            RuleFactory.of("shulkerBoxStackable", false)
                     .addCategories(RuleCategory.EXPERIMENTAL)
                     .build()
     );
@@ -792,8 +758,7 @@ public class CarpetOrgAdditionSettings {
      * 最大服务器交互距离同步客户端
      */
     public static final RuleAccessor<Boolean> MAX_BLOCK_PLACE_DISTANCE_SYNC_CLIENT = register(
-            RuleFactory.create(Boolean.class, "maxBlockPlaceDistanceSyncClient", true)
-                    .addCategories(RuleCategory.CLIENT)
+            RuleFactory.of("maxBlockPlaceDistanceSyncClient", true)
                     .setClient()
                     .build()
     );
@@ -802,7 +767,7 @@ public class CarpetOrgAdditionSettings {
      * 限制幻翼生成
      */
     public static final RuleAccessor<Boolean> LIMIT_PHANTOM_SPAWN = register(
-            RuleFactory.create(Boolean.class, "limitPhantomSpawn", false)
+            RuleFactory.of("limitPhantomSpawn", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -811,7 +776,7 @@ public class CarpetOrgAdditionSettings {
      * 立即应用工具效果
      */
     public static final RuleAccessor<Boolean> APPLY_TOOL_EFFECTS_IMMEDIATELY = register(
-            RuleFactory.create(Boolean.class, "applyToolEffectsImmediately", false)
+            RuleFactory.of("applyToolEffectsImmediately", false)
                     .addCategories(RuleCategory.BUGFIX)
                     .setHidden()
                     .build()
@@ -821,7 +786,7 @@ public class CarpetOrgAdditionSettings {
      * 强制补货
      */
     public static final RuleAccessor<Boolean> FORCE_RESTOCK = register(
-            RuleFactory.create(Boolean.class, "forceRestock", false)
+            RuleFactory.of("forceRestock", false)
                     .setHidden()
                     .build()
     );
@@ -830,7 +795,7 @@ public class CarpetOrgAdditionSettings {
      * 自动同步玩家状态
      */
     public static final RuleAccessor<Boolean> AUTO_SYNC_PLAYER_STATUS = register(
-            RuleFactory.create(Boolean.class, "autoSyncPlayerStatus", false)
+            RuleFactory.of("autoSyncPlayerStatus", false)
                     .setHidden()
                     .build()
     );
@@ -839,8 +804,7 @@ public class CarpetOrgAdditionSettings {
      * 记录玩家命令
      */
     public static final RuleAccessor<Boolean> RECORD_PLAYER_COMMAND = register(
-            RuleFactory.create(Boolean.class, "recordPlayerCommand", false)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("recordPlayerCommand", false)
                     .build()
     );
 
@@ -848,7 +812,7 @@ public class CarpetOrgAdditionSettings {
      * 保护类魔咒兼容
      */
     public static final RuleAccessor<Boolean> PROTECTION_ENCHANTMENT_COMPATIBLE = register(
-            RuleFactory.create(Boolean.class, "protectionEnchantmentCompatible", false)
+            RuleFactory.of("protectionEnchantmentCompatible", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -857,7 +821,7 @@ public class CarpetOrgAdditionSettings {
      * 伤害类魔咒兼容
      */
     public static final RuleAccessor<Boolean> DAMAGE_ENCHANTMENT_COMPATIBLE = register(
-            RuleFactory.create(Boolean.class, "damageEnchantmentCompatible", false)
+            RuleFactory.of("damageEnchantmentCompatible", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -866,8 +830,7 @@ public class CarpetOrgAdditionSettings {
      * 每页最大行数
      */
     public static final RuleAccessor<Integer> MAX_LINES_PER_PAGE = register(
-            RuleFactory.create(Integer.class, "maxLinesPerPage", 10)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("maxLinesPerPage", 10)
                     .addOptions(10, 15, 20, 25)
                     .addValidator(newValue -> newValue > 0, () -> ValidatorFeedbacks.greaterThan(0))
                     .setLenient()
@@ -878,7 +841,7 @@ public class CarpetOrgAdditionSettings {
      * 不死图腾无敌时间
      */
     public static final RuleAccessor<Boolean> TOTEM_OF_UNDYING_INVINCIBLE_TIME = register(
-            RuleFactory.create(Boolean.class, "totemOfUndyingInvincibleTime", false)
+            RuleFactory.of("totemOfUndyingInvincibleTime", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .setHidden()
                     .build()
@@ -887,20 +850,16 @@ public class CarpetOrgAdditionSettings {
     /**
      * /player命令打开玩家物品栏
      */
-    public static final RuleAccessor<String> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY = register(
-            RuleFactory.create(String.class, "playerCommandOpenPlayerInventory", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY = register(
+            RuleFactory.of("playerCommandOpenPlayerInventory", CommandPermissionLevel.FALSE)
                     .build()
     );
 
     /**
      * /player命令假玩家传送
      */
-    public static final RuleAccessor<String> PLAYER_COMMAND_TELEPORT_FAKE_PLAYER = register(
-            RuleFactory.create(String.class, "playerCommandTeleportFakePlayer", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> PLAYER_COMMAND_TELEPORT_FAKE_PLAYER = register(
+            RuleFactory.of("playerCommandTeleportFakePlayer", CommandPermissionLevel.FALSE)
                     .build()
     );
 
@@ -908,7 +867,7 @@ public class CarpetOrgAdditionSettings {
      * 村民虚空交易
      */
     public static final RuleAccessor<Boolean> VILLAGER_VOID_TRADING = register(
-            RuleFactory.create(Boolean.class, "villagerVoidTrading", false)
+            RuleFactory.of("villagerVoidTrading", false)
                     .addCategories(RuleCategory.FEATURE)
                     .build()
     );
@@ -917,7 +876,7 @@ public class CarpetOrgAdditionSettings {
      * 经验球合并
      */
     public static final RuleAccessor<Boolean> EXPERIENCE_ORB_MERGE = register(
-            RuleFactory.create(Boolean.class, "experienceOrbMerge", false)
+            RuleFactory.of("experienceOrbMerge", false)
                     .addCategories(RuleCategory.FEATURE)
                     .setHidden()
                     .build()
@@ -927,7 +886,7 @@ public class CarpetOrgAdditionSettings {
      * 快捷潜影盒
      */
     public static final RuleAccessor<Boolean> QUICK_SHULKER = register(
-            RuleFactory.create(Boolean.class, "quickShulker", false)
+            RuleFactory.of("quickShulker", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .setHidden()
                     .build()
@@ -937,7 +896,7 @@ public class CarpetOrgAdditionSettings {
      * 禁用创造容器掉落
      */
     public static final RuleAccessor<Boolean> DISABLE_CREATIVE_CONTAINER_DROPS = register(
-            RuleFactory.create(Boolean.class, "disableCreativeContainerDrops", false)
+            RuleFactory.of("disableCreativeContainerDrops", false)
                     .addCategories(RuleCategory.CREATIVE)
                     .build()
     );
@@ -946,7 +905,7 @@ public class CarpetOrgAdditionSettings {
      * 显示假玩家召唤者
      */
     public static final RuleAccessor<Boolean> DISPLAY_PLAYER_SUMMONER = register(
-            RuleFactory.create(Boolean.class, "displayPlayerSummoner", false)
+            RuleFactory.of("displayPlayerSummoner", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -955,7 +914,7 @@ public class CarpetOrgAdditionSettings {
      * 设置铁砧经验消耗上限
      */
     public static final RuleAccessor<Integer> SET_ANVIL_EXPERIENCE_CONSUMPTION_LIMIT = register(
-            RuleFactory.create(Integer.class, "setAnvilExperienceConsumptionLimit", -1)
+            RuleFactory.of("setAnvilExperienceConsumptionLimit", -1)
                     .addCategories(RuleCategory.SURVIVAL)
                     .addValidator(
                             integer -> integer == -1 || integer > 0 && integer <= 10000,
@@ -970,7 +929,7 @@ public class CarpetOrgAdditionSettings {
      * 禁用熔炉掉落经验
      */
     public static final RuleAccessor<Boolean> DISABLE_FURNACE_DROP_EXPERIENCE = register(
-            RuleFactory.create(Boolean.class, "disableFurnaceDropExperience", false)
+            RuleFactory.of("disableFurnaceDropExperience", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .setHidden()
                     .build()
@@ -980,8 +939,8 @@ public class CarpetOrgAdditionSettings {
      * /player命令打开玩家物品栏选项
      */
     public static final RuleAccessor<OpenPlayerInventoryCommandOption> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY_OPTION = register(
-            RuleFactory.create(OpenPlayerInventoryCommandOption.class, "playerCommandOpenPlayerInventoryOption", OpenPlayerInventoryCommandOption.FAKE_PLAYER)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("playerCommandOpenPlayerInventoryOption", OpenPlayerInventoryCommandOption.FAKE_PLAYER)
+                    .setCommand()
                     .build()
     );
 
@@ -989,8 +948,8 @@ public class CarpetOrgAdditionSettings {
      * 玩家管理器强制添加注释
      */
     public static final RuleAccessor<Boolean> PLAYER_MANAGER_FORCE_COMMENT = register(
-            RuleFactory.create(Boolean.class, "playerManagerForceComment", false)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("playerManagerForceComment", false)
+                    .setCommand()
                     .build()
     );
 
@@ -999,7 +958,7 @@ public class CarpetOrgAdditionSettings {
      */
     @SuppressWarnings("Convert2MethodRef")
     public static final RuleAccessor<Integer> ITEM_PICKUP_RANGE_EXPAND = register(
-            RuleFactory.create(Integer.class, "itemPickupRangeExpand", 0)
+            RuleFactory.of("itemPickupRangeExpand", 0)
                     .addCategories(RuleCategory.FEATURE)
                     .addValidator(integer -> integer >= 0, () -> ValidatorFeedbacks.greaterThanOrEqual(0))
                     .setHidden()
@@ -1018,7 +977,7 @@ public class CarpetOrgAdditionSettings {
      * 物品拾取范围扩展玩家控制
      */
     public static final RuleAccessor<Boolean> ITEM_PICKUP_RANGE_EXPAND_PLAYER_CONTROL = register(
-            RuleFactory.create(Boolean.class, "itemPickupRangeExpandPlayerControl", false)
+            RuleFactory.of("itemPickupRangeExpandPlayerControl", false)
                     .addCategories(RuleCategory.FEATURE)
                     .setHidden()
                     .build()
@@ -1028,8 +987,8 @@ public class CarpetOrgAdditionSettings {
      * 打开玩家物品栏GCA样式
      */
     public static final RuleAccessor<Boolean> PLAYER_COMMAND_OPEN_PLAYER_INVENTORY_GCA_STYLE = register(
-            RuleFactory.create(Boolean.class, "playerCommandOpenPlayerInventoryGcaStyle", true)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("playerCommandOpenPlayerInventoryGcaStyle", true)
+                    .setCommand()
                     .build()
     );
 
@@ -1037,7 +996,7 @@ public class CarpetOrgAdditionSettings {
      * 易碎下界合金
      */
     public static final RuleAccessor<Boolean> SOFT_NETHERITE = register(
-            RuleFactory.create(Boolean.class, "softNetherite", false)
+            RuleFactory.of("softNetherite", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -1046,7 +1005,7 @@ public class CarpetOrgAdditionSettings {
      * 禁用风弹效果
      */
     public static final RuleAccessor<Boolean> DISABLE_WIND_CHARGE_EFFECT = register(
-            RuleFactory.create(Boolean.class, "disableWindChargeEffect", false)
+            RuleFactory.of("disableWindChargeEffect", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -1054,10 +1013,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * {@code /player}命令召唤玩家模型
      */
-    public static final RuleAccessor<String> PLAYER_COMMAND_SUMMON_MANNEQUIN = register(
-            RuleFactory.create(String.class, "playerCommandSummonMannequin", FALSE)
-                    .addCategories(RuleCategory.COMMAND)
-                    .addOptions(COMMAND_OPTIONS)
+    public static final RuleAccessor<CommandPermissionLevel> PLAYER_COMMAND_SUMMON_MANNEQUIN = register(
+            RuleFactory.of("playerCommandSummonMannequin", CommandPermissionLevel.FALSE)
                     .build()
     );
 
@@ -1065,7 +1022,7 @@ public class CarpetOrgAdditionSettings {
      * 打开玩家物品栏
      */
     public static final RuleAccessor<OpenPlayerInventory> OPEN_PLAYER_INVENTORY = register(
-            RuleFactory.create(OpenPlayerInventory.class, "openPlayerInventory", OpenPlayerInventory.FALSE)
+            RuleFactory.of("openPlayerInventory", OpenPlayerInventory.FALSE)
                     .addCategories(RuleCategory.SURVIVAL)
                     .build()
     );
@@ -1074,8 +1031,18 @@ public class CarpetOrgAdditionSettings {
      * 关闭当前屏幕界面
      */
     public static final RuleAccessor<Boolean> PLAYER_COMMAND_CLOSE_SCREEN = register(
-            RuleFactory.create(Boolean.class, "playerCommandCloseScreen", false)
-                    .addCategories(RuleCategory.COMMAND)
+            RuleFactory.of("playerCommandCloseScreen", false)
+                    .setCommand()
+                    .build()
+    );
+
+    /**
+     * 真正的和平模式
+     */
+    public static final RuleAccessor<Boolean> TRUE_PEACEFUL_MODE = register(
+            RuleFactory.of("truePeacefulMode", false)
+                    .addCategories(RuleCategory.SURVIVAL)
+                    .setHidden()
                     .build()
     );
 

@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -113,7 +113,7 @@ public class ObjectSearchTaskCodecs {
         }
     };
 
-    private static @NotNull JsonArray createItemArray(List<Item> list) {
+    private static @NonNull JsonArray createItemArray(List<Item> list) {
         JsonArray array = new JsonArray();
         int len = 0;
         for (Item item : list) {

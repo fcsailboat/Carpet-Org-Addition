@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.rule.value;
 
+@SuppressWarnings("unused")
 public enum CanHighlightBlockPos {
     /**
      * 不显示高亮路径点按钮

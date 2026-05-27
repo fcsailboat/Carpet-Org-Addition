@@ -3,7 +3,7 @@ package boat.carpetorgaddition.wheel;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -66,30 +66,11 @@ public class SimpleCounter<E> implements Counter<E> {
         return this.counter.getInt(element);
     }
 
-    /**
-     * 获取集合内总共有多少种元素
-     *
-     * @return 集合的大小
-     */
-    @Override
-    public int size() {
-        return counter.size();
-    }
-
-    /**
-     * @return 当前集合是否为空
-     */
-    @Override
-    public boolean isEmpty() {
-        return this.counter.isEmpty();
-    }
-
     @Override
     public Stream<Object2IntMap.Entry<E>> stream() {
         return this.counter.object2IntEntrySet().stream();
     }
 
-    @Override
     public Set<E> keySet() {
         return this.counter.keySet();
     }
@@ -99,7 +80,7 @@ public class SimpleCounter<E> implements Counter<E> {
         return this.counter.object2IntEntrySet();
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Iterator<E> iterator() {
         return new Iterator<>() {

@@ -12,11 +12,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 
 public class CustomRuleValueManager {
     public static final HashMap<String, CarpetRule<?>> NAME_TO_RULES = new HashMap<>();
@@ -172,7 +175,8 @@ public class CustomRuleValueManager {
         return CustomRuleEntry.of(name, rule, control);
     }
 
-    public static Optional<CustomRuleEntry> get(@NotNull CarpetRule<?> rule) {
+    @SuppressWarnings("unused")
+    public static Optional<CustomRuleEntry> get(@NonNull CarpetRule<?> rule) {
         CustomRuleControl<?> control = RULE_TO_CONTROL.get(rule);
         String name = rule.name();
         return CustomRuleEntry.of(name, rule, control);
@@ -185,9 +189,5 @@ public class CustomRuleValueManager {
         }
         String name = rule.name();
         return CustomRuleEntry.of(name, rule, control);
-    }
-
-    public static List<String> values() {
-        return NAME_TO_RULES.values().stream().map(CarpetRule::name).toList();
     }
 }

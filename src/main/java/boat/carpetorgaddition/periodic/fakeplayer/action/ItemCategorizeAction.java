@@ -2,8 +2,8 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -75,7 +75,7 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
                 }
             }
             // 丢弃该物品堆栈
-            FakePlayerUtils.dropItem(this.getFakePlayer(), itemStack);
+            PlayerUtils.dropCopyItemAndClear(this.getFakePlayer(), itemStack);
         }
     }
 
@@ -94,8 +94,8 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
             }
             // 一轮循环结束后，再重新将当前物品设置为物品栏中的潜影盒
             itemStack = inventory.getItem(index);
-            //判断潜影盒是否为空
-            if (InventoryUtils.isEmptyShulkerBox(itemStack)) {
+            // 判断潜影盒是否为空
+            if (InventoryUtils.isNonOrEmptyContainer(itemStack)) {
                 // 如果为空，将朝向设置为丢出非指定物品的方向，然后结束循环
                 // 设置当前朝向为丢出非指定物品朝向
                 this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, this.otherVec);
@@ -114,7 +114,7 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
                 this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, this.test(itemStack) ? this.thisVec : this.otherVec);
             }
             // 丢弃潜影盒内物品堆栈
-            FakePlayerUtils.dropItem(this.getFakePlayer(), itemStack);
+            PlayerUtils.dropCopyItemAndClear(this.getFakePlayer(), itemStack);
         }
         return itemStack;
     }

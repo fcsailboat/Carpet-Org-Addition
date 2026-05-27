@@ -9,12 +9,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class HasNamePosNavigator extends BlockPosNavigator {
     private final Component name;
 
-    public HasNamePosNavigator(@NotNull ServerPlayer player, BlockPos blockPos, Level world, Component name) {
+    public HasNamePosNavigator(@NonNull ServerPlayer player, BlockPos blockPos, Level world, Component name) {
         super(player, blockPos, world);
         this.name = name;
     }

@@ -4,7 +4,7 @@ import boat.carpetorgaddition.util.MathUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.BlockPos;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -96,7 +96,7 @@ public class CylinderBlockPosTraverser extends BlockPosTraverser {
     }
 
     @Override
-    @NotNull
+    @NonNull
     public Iterator<BlockPos> iterator() {
         return new Iterator<>() {
             private final Iterator<BlockPos> iterator = CylinderBlockPosTraverser.super.iterator();

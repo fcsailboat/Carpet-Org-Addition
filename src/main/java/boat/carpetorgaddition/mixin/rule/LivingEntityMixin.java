@@ -20,8 +20,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DeathProtection;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -86,7 +86,7 @@ public abstract class LivingEntityMixin {
     }
 
     @Unique
-    @NotNull
+    @NonNull
     // 从物品栏获取不死图腾
     private static ItemStack pickTotem(Player player) {
         NonNullList<ItemStack> mainInventory = player.getInventory().getNonEquipmentItems();

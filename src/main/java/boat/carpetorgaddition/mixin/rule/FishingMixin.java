@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(FishingHook.class)
 public class FishingMixin {
     @Inject(method = "calculateOpenWater", at = @At("HEAD"), cancellable = true)
-    private void isOpenOrWaterAround(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void isOpenOrWaterAround(BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
         if (CarpetOrgAdditionSettings.DISABLE_OPEN_OR_WATER_DETECTION.value()) {
             cir.setReturnValue(true);
         }

@@ -5,8 +5,10 @@ import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
@@ -29,13 +31,13 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class CraftAction extends AbstractPlayerAction {
+public abstract class AbstractCraftAction extends AbstractPlayerAction {
     /**
      * 物品合成所使用的物品栏
      */
     protected final ItemStackPredicate[] predicates;
 
-    public CraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
+    public AbstractCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
         super(fakePlayer);
         int size = this.getCraftGridSize();
         if (predicates.length != size) {
@@ -49,14 +51,14 @@ public abstract class CraftAction extends AbstractPlayerAction {
     protected void tick() {
         AutoGrowInventory inventory = new AutoGrowInventory();
         this.craft(inventory);
-        FakePlayerUtils.mergeEmptyShulkerBox(this.getFakePlayer());
+        PlayerStorageInventory.of(this.getFakePlayer()).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
             this.getFakePlayer().drop(itemStack, false, true);
         }
     }
 
-    protected void craft(AutoGrowInventory inventory) {
+    private void craft(AutoGrowInventory inventory) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         AbstractContainerMenu screenHandler = this.getScreenHandler();
         if (screenHandler == null) {
@@ -186,7 +188,9 @@ public abstract class CraftAction extends AbstractPlayerAction {
     /**
      * @return 合成方格的起始索引
      */
-    protected abstract int getCraftGridStart();
+    protected int getCraftGridStart() {
+        return 1;
+    }
 
     /**
      * @return 合成方格的结束索引
@@ -247,6 +251,12 @@ public abstract class CraftAction extends AbstractPlayerAction {
     }
 
     @Override
+    public void onFakePlayerLogout() {
+        // 在假玩家退出游戏前关闭工作台，使合成方格中的物品回到玩家物品栏，
+        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
+    }
+
+    @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         for (int i = 0; i < this.predicates.length; i++) {
@@ -265,7 +275,7 @@ public abstract class CraftAction extends AbstractPlayerAction {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        CraftAction that = (CraftAction) o;
+        AbstractCraftAction that = (AbstractCraftAction) o;
         return Objects.deepEquals(predicates, that.predicates);
     }
 

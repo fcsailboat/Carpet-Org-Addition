@@ -2,6 +2,7 @@ package boat.util.docs.rule;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.rule.RuleContext;
+import boat.carpetorgaddition.rule.value.CommandPermissionLevel;
 import carpet.api.settings.RuleCategory;
 import carpet.api.settings.RuleHelper;
 
@@ -72,7 +73,7 @@ public class RuleInformation {
     // 获取参数类型名称
     private String getArgumentType() {
         Class<?> type = this.context.getType();
-        if (String.class.isAssignableFrom(type)) {
+        if (String.class.isAssignableFrom(type) || CommandPermissionLevel.class.isAssignableFrom(type)) {
             return "字符串";
         }
         if (byte.class.isAssignableFrom(type) || short.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)

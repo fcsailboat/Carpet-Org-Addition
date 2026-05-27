@@ -21,7 +21,7 @@ import java.util.List;
 public class KillCommandMixin {
     // 创造玩家免疫kill
     @Inject(method = "kill", at = @At(value = "HEAD"))
-    private static void execute(CallbackInfoReturnable<Integer> cir, @Local(argsOnly = true) LocalRef<Collection<? extends Entity>> reference) throws CommandSyntaxException {
+    private static void execute(CallbackInfoReturnable<Integer> cir, @Local(argsOnly = true, name = "victims") LocalRef<Collection<? extends Entity>> reference) throws CommandSyntaxException {
         if (CarpetOrgAdditionSettings.CREATIVE_IMMUNE_KILL.value()) {
             Collection<? extends Entity> entities = reference.get();
             List<? extends Entity> list = entities.stream().filter(entity -> !isCreativePlayer(entity)).toList();

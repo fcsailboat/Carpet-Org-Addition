@@ -53,8 +53,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -127,7 +127,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                         .then(Commands.literal("clear")
                                 .executes(context -> this.addStartupRunCommandFunction(context, -1)))));
         this.dispatcher.register(Commands.literal(name)
-                .requires(CommandUtils.canUseCommand(CarpetOrgAdditionSettings.COMMAND_PLAYER_MANAGER))
+                .requires(source -> CarpetOrgAdditionSettings.COMMAND_PLAYER_MANAGER.value().hasPermission(source))
                 .then(Commands.literal("save")
                         .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                 .executes(context -> savePlayerData(context, false))
@@ -264,7 +264,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     // cancel子命令自动补全
-    @NotNull
+    @NonNull
     private SuggestionProvider<CommandSourceStack> cancelSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
@@ -322,7 +322,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     // relogin子命令自动补全
-    @NotNull
+    @NonNull
     private SuggestionProvider<CommandSourceStack> reLoginTaskSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
@@ -901,11 +901,11 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     private void validateMultiPlayerUsability(CommandContext<CommandSourceStack> context, CommandSourceStack source) throws CommandSyntaxException {
         LocalizationKey key = STARTUP.then("run");
-        if (GlobalConfigs.getInstance().isAllowMpPlayerStartupCmd()) {
+        if (GlobalConfigs.isAllowMpPlayerStartupCmd()) {
             if (Commands.LEVEL_OWNERS.check(source.permissions())) {
                 return;
             }
-            throw key.then("permission").raise();
+            throw key.then("permission").toSyntaxException();
         }
         String name = StringArgumentType.getString(context, "name");
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);

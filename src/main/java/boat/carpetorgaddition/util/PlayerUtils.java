@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAdditionExtension;
-import boat.carpetorgaddition.mixin.accessor.carpet.LoggerAccessor;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
@@ -10,15 +9,15 @@ import carpet.api.settings.RuleHelper;
 import carpet.api.settings.SettingsManager;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
-import carpet.logging.Logger;
-import carpet.logging.LoggerRegistry;
 import carpet.patches.EntityPlayerMPFake;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -169,19 +168,35 @@ public class PlayerUtils {
         ServerPlayNetworking.send(player, payload);
     }
 
-    public static boolean isSubscribeLogger(ServerPlayer player, String name) {
-        Logger logger = LoggerRegistry.getLogger(name);
-        if (logger == null) {
-            return false;
-        }
-        if (logger.hasOnlineSubscribers()) {
-            LoggerAccessor accessor = (LoggerAccessor) logger;
-            return accessor.getSubscribedOnlinePlayers().containsKey(getName(player));
-        }
-        return false;
-    }
-
     public static void closeScreen(ServerPlayer player) {
         player.closeContainer();
+    }
+
+    /**
+     * 将要丢弃的物品堆栈对象复制一份并丢出，然后将原本的物品堆栈对象删除
+     *
+     * @param player    当前要丢弃物品的玩家
+     * @param itemStack 要丢弃的物品堆栈对象
+     * @apiNote 此方法不应用于丢弃GUI中的物品，因为这不会触发{@link AbstractContainerMenu#clicked}的行为
+     */
+    public static void dropCopyItemAndClear(ServerPlayer player, ItemStack itemStack) {
+        player.drop(itemStack.copyAndClear(), false, false);
+    }
+
+    /**
+     * 让玩家看向某个方向
+     */
+    public static void look(ServerPlayer player, Direction direction) {
+        EntityPlayerActionPack actionPack = getActionPack(player);
+        actionPack.look(direction);
+    }
+
+    public static void click(ServerPlayer player, InteractionHand hand) {
+        EntityPlayerActionPack actionPack = getActionPack(player);
+        EntityPlayerActionPack.ActionType type = switch (hand) {
+            case MAIN_HAND -> EntityPlayerActionPack.ActionType.ATTACK;
+            case OFF_HAND -> EntityPlayerActionPack.ActionType.USE;
+        };
+        actionPack.start(type, EntityPlayerActionPack.Action.once());
     }
 }

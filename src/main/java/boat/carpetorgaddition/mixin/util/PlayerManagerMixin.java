@@ -39,7 +39,7 @@ public class PlayerManagerMixin {
      * 如果被打开物品栏的玩家在物品栏被打开的期间上线，则自动关闭打开物品栏玩家的GUI
      */
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
-    private void closePlayerInventory(Connection connection, ServerPlayer player, CommonListenerCookie clientData, CallbackInfo ci) {
+    private void closePlayerInventory(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
         MinecraftServer server = ServerUtils.getServer(player);
         ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
         FabricPlayerAccessManager accessManager = coordinator.getAccessManager();

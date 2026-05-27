@@ -2,7 +2,7 @@ package boat.carpetorgaddition.translate;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -70,7 +70,7 @@ public class TranslateParser {
         }
 
         @Override
-        public @NotNull String toString() {
+        public @NonNull String toString() {
             return this.key + "=" + this.value;
         }
     }

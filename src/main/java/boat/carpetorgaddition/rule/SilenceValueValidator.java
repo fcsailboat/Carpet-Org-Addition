@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.rule;
 
 import net.minecraft.commands.CommandSourceStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @FunctionalInterface
 public interface SilenceValueValidator<T> {

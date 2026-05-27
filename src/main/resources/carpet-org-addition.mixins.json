@@ -28,6 +28,7 @@
     "debug.ItemStackMixin",
     "debug.PhantomSpawnerMixin",
     "debug.PlayerEntityMixin",
+    "debug.WanderingTraderSpawnerMixin",
     "debug.accessor.ExperienceOrbEntityAccessor",
     "debug.accessor.HandledScreenAccessor",
     "dialog.MinecraftServerMixin",

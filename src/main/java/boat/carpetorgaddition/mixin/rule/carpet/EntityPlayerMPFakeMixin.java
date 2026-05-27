@@ -19,6 +19,7 @@ public class EntityPlayerMPFakeMixin extends ServerPlayer {
     @Unique
     private final EntityPlayerMPFake thisPlayer = (EntityPlayerMPFake) (Object) this;
 
+    @SuppressWarnings("unused")
     private EntityPlayerMPFakeMixin(MinecraftServer server, ServerLevel world, GameProfile profile, ClientInformation clientOptions) {
         super(server, world, profile, clientOptions);
     }

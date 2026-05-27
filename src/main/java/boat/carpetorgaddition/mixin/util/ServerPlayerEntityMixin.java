@@ -11,11 +11,7 @@ import boat.carpetorgaddition.wheel.screen.WithButtonPlayerInventoryScreenHandle
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ClientInformation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -38,7 +34,7 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     private PlayerComponentCoordinator manager;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(MinecraftServer server, ServerLevel world, GameProfile profile, ClientInformation clientOptions, CallbackInfo ci) {
+    private void init(CallbackInfo ci) {
         this.manager = PlayerComponentCoordinator.of(thisPlayer);
     }
 
@@ -53,22 +49,22 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     }
 
     @Inject(method = "restoreFrom", at = @At("HEAD"))
-    private void copyFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
+    private void copyFrom(ServerPlayer oldPlayer, boolean restoreAll, CallbackInfo ci) {
         this.manager.copyFrom(oldPlayer);
     }
 
     @Inject(method = "openMenu", at = @At(value = "RETURN", ordinal = 2))
-    private void openHandledScreen(MenuProvider factory, CallbackInfoReturnable<OptionalInt> cir, @Local(name = "menu") AbstractContainerMenu screenHandler) {
+    private void openHandledScreen(MenuProvider provider, CallbackInfoReturnable<OptionalInt> cir, @Local(name = "menu") AbstractContainerMenu menu) {
         // 同步不可用槽位
-        if (screenHandler instanceof UnavailableSlotSyncInterface anInterface) {
-            ServerPlayNetworking.send(thisPlayer, new UnavailableSlotSyncS2CPacket(screenHandler.containerId, anInterface.from(), anInterface.to()));
-        } else if (screenHandler instanceof WithButtonPlayerInventoryScreenHandler) {
-            ServerPlayNetworking.send(thisPlayer, new WithButtonScreenSyncS2CPacket(screenHandler.containerId));
+        if (menu instanceof UnavailableSlotSyncInterface anInterface) {
+            ServerPlayNetworking.send(thisPlayer, new UnavailableSlotSyncS2CPacket(menu.containerId, anInterface.from(), anInterface.to()));
+        } else if (menu instanceof WithButtonPlayerInventoryScreenHandler) {
+            ServerPlayNetworking.send(thisPlayer, new WithButtonScreenSyncS2CPacket(menu.containerId));
         }
         // 同步槽位背景纹理
-        if (screenHandler instanceof BackgroundSpriteSyncServer anInterface) {
+        if (menu instanceof BackgroundSpriteSyncServer anInterface) {
             anInterface.getBackgroundSprite().forEach((index, identifier) ->
-                    ServerPlayNetworking.send(thisPlayer, new BackgroundSpriteSyncS2CPacket(screenHandler.containerId, index, identifier)));
+                    ServerPlayNetworking.send(thisPlayer, new BackgroundSpriteSyncS2CPacket(menu.containerId, index, identifier)));
         }
     }
 

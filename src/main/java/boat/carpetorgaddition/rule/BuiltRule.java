@@ -4,29 +4,32 @@ import boat.carpetorgaddition.CarpetOrgAdditionExtension;
 import boat.carpetorgaddition.exception.TranslatableInvalidRuleValueException;
 import boat.carpetorgaddition.rule.validator.StrictValueValidator;
 import boat.carpetorgaddition.rule.validator.ValueValidator;
+import boat.carpetorgaddition.rule.value.CommandPermissionLevel;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys.Data.Type;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.api.settings.CarpetRule;
-import carpet.api.settings.RuleCategory;
 import carpet.api.settings.RuleHelper;
 import carpet.api.settings.SettingsManager;
-import carpet.utils.CommandHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
 
-public class OrgRule<T> implements CarpetRule<T> {
+public class BuiltRule<T> implements CarpetRule<T> {
+    /**
+     * 规则值是否改变了，用于隐藏规则更改后的命令反馈
+     */
+    public static final ThreadLocal<Boolean> RULE_UNCHANGED = ThreadLocal.withInitial(() -> false);
     private final String name;
     private final String displayName;
     private final String displayDesc;
     private final Collection<String> categories;
     private final Collection<String> suggestions;
-    @NotNull
+    @NonNull
     private T value;
     private final T defaultValue;
     private final boolean canBeToggledClientSide;
@@ -46,16 +49,16 @@ public class OrgRule<T> implements CarpetRule<T> {
     private final List<RuleListener<T>> listeners = new ArrayList<>();
     private final boolean strict;
     /**
-     * 规则值是否改变了，用于隐藏规则更改后的命令反馈
+     * 规则是否被启用了
      */
-    public static final ThreadLocal<Boolean> RULE_UNCHANGED = ThreadLocal.withInitial(() -> false);
+    private boolean enable = false;
 
-    public OrgRule(
+    public BuiltRule(
             Class<T> type,
             String name,
             Collection<String> categories,
             Collection<String> suggestions,
-            @NotNull T value,
+            @NonNull T value,
             boolean canBeToggledClientSide,
             List<ValueValidator<T>> valueValidators,
             List<SilenceValueValidator<T>> silenceValidators,
@@ -85,20 +88,12 @@ public class OrgRule<T> implements CarpetRule<T> {
         if (this.strict()) {
             this.valueValidators.addFirst(new StrictValueValidator<>(this));
         }
-        // 更改规则时将命令同步到客户端
-        if (this.categories.contains(RuleCategory.COMMAND)) {
-            this.listeners.add((source, _) -> {
-                if (source != null) {
-                    CommandHelper.notifyPlayersCommandsChanged(source.getServer());
-                }
-            });
-        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private RuleValueParser<T> createParser() {
         Map.Entry<Component, Function<String, T>> entry = switch (this.defaultValue) {
-            case String _ -> Map.entry(Type.STRING.translate(), this.type::cast);
+            case String _ -> Map.entry(Type.STRING.translate(), s -> this.type.cast(s.toLowerCase(Locale.ROOT)));
             case Boolean _ -> Map.entry(Type.BOOLEAN.translate(), s -> this.type.cast(parseBoolean(s)));
             case Integer _ -> Map.entry(Type.INTEGER.translate(), s -> this.type.cast(Integer.parseInt(s)));
             case Long _ -> Map.entry(Type.LONG.translate(), s -> this.type.cast(Long.parseLong(s)));
@@ -109,6 +104,8 @@ public class OrgRule<T> implements CarpetRule<T> {
                 // 只有枚举名称全部为大写时才能匹配
                 return (T) Enum.valueOf(clazz, s.toUpperCase(Locale.ROOT));
             });
+            case CommandPermissionLevel _ ->
+                    Map.entry(Type.STRING.translate(), s -> this.type.cast(CommandPermissionLevel.of(s)));
             default -> {
                 String message = "Unsupported type for %s %s".formatted(this.getClass().getSimpleName(), this.type);
                 throw new UnsupportedOperationException(message);
@@ -215,6 +212,7 @@ public class OrgRule<T> implements CarpetRule<T> {
         boolean canChanged = this.silenceValidators.stream().allMatch(observer -> observer.validate(source, value));
         if (canChanged) {
             this.value = value;
+            this.enable = value instanceof Boolean ? (Boolean) value : !this.value.equals(this.defaultValue);
             if (source != null) {
                 this.settingsManager().notifyRuleChanged(source, this, userInput);
             }
@@ -237,7 +235,7 @@ public class OrgRule<T> implements CarpetRule<T> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        OrgRule<?> that = (OrgRule<?>) o;
+        BuiltRule<?> that = (BuiltRule<?>) o;
         return Objects.equals(this.name, that.name);
     }
 
@@ -249,6 +247,10 @@ public class OrgRule<T> implements CarpetRule<T> {
     @Override
     public String toString() {
         return this.name + ": " + RuleHelper.toRuleString(value());
+    }
+
+    public boolean isEnable() {
+        return this.enable;
     }
 
     @FunctionalInterface
