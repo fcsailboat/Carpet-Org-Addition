@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.wheel.inventory;
 
+import boat.carpetorgaddition.periodic.task.search.AbstractOfflinePlayerSearchTask;
 import boat.carpetorgaddition.util.ServerUtils;
 import com.google.common.collect.Queues;
 import com.mojang.authlib.GameProfile;
@@ -59,9 +60,13 @@ public class FabricPlayerAccessManager {
     }
 
     public FabricPlayerAccessor getOrCreateBlocking(NameAndId gameProfile, BooleanSupplier interrupt) {
+        boolean upgrading = AbstractOfflinePlayerSearchTask.UPGRADING.orElse(false);
         return this.accessors.computeIfAbsent(gameProfile, _ -> {
             // 在多个线程调用构造方法存在并发问题
-            Supplier<FabricPlayerAccessor> supplier = () -> new FabricPlayerAccessor(this.server, gameProfile, this);
+            Supplier<FabricPlayerAccessor> supplier = () ->
+                    ScopedValue.where(AbstractOfflinePlayerSearchTask.UPGRADING, upgrading).call(
+                            () -> new FabricPlayerAccessor(this.server, gameProfile, this)
+                    );
             FabricPlayerAccessorEntry entry = new FabricPlayerAccessorEntry(supplier, interrupt);
             this.queue.add(entry);
             Lock lock = entry.getLock();

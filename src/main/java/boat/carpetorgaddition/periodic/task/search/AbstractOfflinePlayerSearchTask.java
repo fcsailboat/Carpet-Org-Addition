@@ -54,6 +54,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
      */
     public static final Set<UUID> INVALID_PLAYER_DATAS = ConcurrentHashMap.newKeySet();
     public static final ScopedValue<UUID> CURRENT_UUID = ScopedValue.newInstance();
+    public static final ScopedValue<Boolean> UPGRADING = ScopedValue.newInstance();
     public static final String UNKNOWN = "[Unknown]";
     private static final DateTimeFormatter FORMATTER = FileNameDateFormatter.FORMATTER;
     private static final ThreadPoolExecutor CPU_TASK_EXECUTOR = new ThreadPoolExecutor(
@@ -295,7 +296,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
             INVALID_PLAYER_DATAS.add(uuid);
             return false;
         }
-        FabricPlayerAccessor accessor = this.accessManager.getOrCreateBlocking(entry, this::isCancelled);
+        FabricPlayerAccessor accessor = ScopedValue.where(UPGRADING, true).call(() -> this.accessManager.getOrCreateBlocking(entry, this::isCancelled));
         OfflinePlayerInventory inventory = new OfflinePlayerInventory(accessor);
         inventory.setShowLog(false);
         inventory.startOpen(this.player);
