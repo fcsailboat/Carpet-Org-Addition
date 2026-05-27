@@ -116,6 +116,7 @@
     "util.CommandRegistryAccessMixin",
     "util.MinecraftClientMixin",
     "util.MinecraftServerMixin",
+    "util.PlayerListMixin",
     "util.PlayerManagerMixin",
     "util.ResolvableProfileDynamicMixin",
     "util.ScreenHandlerMixin",

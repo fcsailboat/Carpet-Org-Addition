@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.wheel.inventory;
 
+import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
 import com.google.common.collect.Queues;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
@@ -56,9 +57,13 @@ public class FabricPlayerAccessManager {
     }
 
     public FabricPlayerAccessor getOrCreateBlocking(NameAndId gameProfile) {
+        boolean upgrading = OfflinePlayerSearchTask.UPGRADING.orElse(false);
         return this.accessors.computeIfAbsent(gameProfile, _ -> {
             // 在多个线程调用构造方法存在并发问题
-            Supplier<FabricPlayerAccessor> supplier = () -> new FabricPlayerAccessor(this.server, gameProfile, this);
+            Supplier<FabricPlayerAccessor> supplier = () ->
+                    ScopedValue.where(OfflinePlayerSearchTask.UPGRADING, upgrading).call(
+                            () -> new FabricPlayerAccessor(this.server, gameProfile, this)
+                    );
             FabricPlayerAccessorEntry entry = new FabricPlayerAccessorEntry(supplier);
             this.queue.add(entry);
             Lock lock = entry.getLock();
