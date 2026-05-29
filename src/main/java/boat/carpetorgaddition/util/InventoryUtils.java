@@ -168,8 +168,15 @@ public class InventoryUtils {
      * @return 物品是非容器或空容器返回{@code true}，否则返回{@code false}
      */
     public static boolean isNonOrEmptyContainer(ItemStack itemStack) {
+        return isNonOrEmptyContainer(itemStack, true);
+    }
+
+    /**
+     * @param checkStacking 如果物品是堆叠的，直接认为物品是非（或空）容器
+     */
+    public static boolean isNonOrEmptyContainer(ItemStack itemStack, boolean checkStacking) {
         // 正常情况下有物品的容器无法堆叠
-        if (itemStack.getCount() != 1) {
+        if (checkStacking && itemStack.getCount() != 1) {
             return true;
         }
         ItemContainerContents component = itemStack.get(DataComponents.CONTAINER);
