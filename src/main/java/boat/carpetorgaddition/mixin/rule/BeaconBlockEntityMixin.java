@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.mixin.rule;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
-import boat.carpetorgaddition.wheel.BeaconRangeBox;
+import boat.carpetorgaddition.wheel.misc.BeaconRangeBox;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.entity.player.Player;

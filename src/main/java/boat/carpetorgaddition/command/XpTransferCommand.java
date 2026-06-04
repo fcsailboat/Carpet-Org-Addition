@@ -6,7 +6,7 @@ import boat.carpetorgaddition.exception.OperationTimeoutException;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.wheel.ExperienceTransfer;
+import boat.carpetorgaddition.wheel.misc.ExperienceTransfer;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;

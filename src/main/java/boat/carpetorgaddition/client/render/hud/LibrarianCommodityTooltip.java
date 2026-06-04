@@ -5,6 +5,7 @@ import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.network.c2s.LibrarianCommodityQueryC2SPacket;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.misc.LibrarianCommodityEntry;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;

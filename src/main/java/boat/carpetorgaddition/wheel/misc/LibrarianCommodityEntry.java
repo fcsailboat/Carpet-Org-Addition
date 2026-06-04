@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.client.render.hud;
+package boat.carpetorgaddition.wheel.misc;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
