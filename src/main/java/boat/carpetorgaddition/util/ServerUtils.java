@@ -9,10 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -36,6 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.phys.Vec3;
@@ -48,6 +46,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
 @NullMarked
@@ -291,6 +290,10 @@ public class ServerUtils {
         return Objects.requireNonNull(server.getLevel(key));
     }
 
+    public static BlockState getBlockState(MinecraftServer server, GlobalPos globalPos) {
+        return Objects.requireNonNull(server.getLevel(globalPos.dimension())).getBlockState(globalPos.pos());
+    }
+
     @Contract("_ -> !null")
     public static MinecraftServer getServer(ServerPlayer player) {
         return getWorld(player).getServer();
@@ -524,5 +527,9 @@ public class ServerUtils {
 
     public static Identifier ofIdentifier(String id) {
         return Identifier.fromNamespaceAndPath(CarpetOrgAdditionConstants.MOD_ID, id);
+    }
+
+    public static void forEachPlayer(MinecraftServer server, Consumer<ServerPlayer> consumer) {
+        server.getPlayerList().getPlayers().forEach(consumer);
     }
 }

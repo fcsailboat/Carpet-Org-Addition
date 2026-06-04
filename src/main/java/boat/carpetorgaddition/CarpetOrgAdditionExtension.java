@@ -5,6 +5,7 @@ import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.command.SpectatorCommand;
 import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.logger.Loggers;
+import boat.carpetorgaddition.network.handler.LibrarianCommodityPacketHandler;
 import boat.carpetorgaddition.network.s2c.PlayerTypeSyncS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
@@ -128,6 +129,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
                     .forEach(realPlayer -> ServerPlayNetworking.send(realPlayer, new PlayerTypeSyncS2CPacket(player.getUUID(), false)));
         }
         PlayerStorageInventory.cleanupStaleEntries();
+        LibrarianCommodityPacketHandler.cleanupStaleEntries();
     }
 
     /**

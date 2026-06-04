@@ -29,7 +29,11 @@ public final class LoggerAccessor {
     }
 
     public boolean isSubscribed(ServerPlayer player) {
-        return getSubscribedOnlinePlayers().containsKey(PlayerUtils.getName(player));
+        Map<String, String> map = getSubscribedOnlinePlayers();
+        if (map.isEmpty()) {
+            return false;
+        }
+        return map.containsKey(PlayerUtils.getName(player));
     }
 
     public Map<String, String> getSubscribedOnlinePlayers() {
@@ -52,7 +56,6 @@ public final class LoggerAccessor {
         return this.hidden;
     }
 
-    @SuppressWarnings("unused")
     public void onSubscribe(ServerPlayer player) {
         this.subscribeCallback.accept(player);
     }

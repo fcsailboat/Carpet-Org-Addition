@@ -4,6 +4,8 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.client.command.ClientCommandRegister;
 import boat.carpetorgaddition.client.render.PathfinderRenderComponent;
 import boat.carpetorgaddition.client.render.WorldComponentRenderer;
+import boat.carpetorgaddition.client.render.hud.LibrarianCommodityEntry;
+import boat.carpetorgaddition.client.render.hud.LibrarianCommodityTooltip;
 import boat.carpetorgaddition.client.render.waypoint.NavigatorWaypoint;
 import boat.carpetorgaddition.client.render.waypoint.Waypoint;
 import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
@@ -107,6 +109,9 @@ public class CarpetOrgAdditionClientRegister {
                 WorldComponentRenderer.add(WorldComponentRenderer.ENTITY_ID_KEY, id, new PathfinderRenderComponent(id, packet.getVec3List()));
             }
         });
+        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityResponseS2CPacket.ID, (payload, _) -> LibrarianCommodityTooltip.getInstance().setOffer(new LibrarianCommodityEntry(payload.blockPos(), payload.price(), payload.commodity())));
+        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityCacheInvalidationS2CPacket.ID, (_, _) -> LibrarianCommodityTooltip.getInstance().failure());
+        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityFunctionS2CPacket.ID, (payload, _) -> LibrarianCommodityTooltip.getInstance().setEnable(payload.enable()));
     }
 
     /**
@@ -116,6 +121,7 @@ public class CarpetOrgAdditionClientRegister {
         // 注册路径点渲染器
         LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register(context -> WaypointRenderer.getInstance().render(context));
         LevelRenderEvents.COLLECT_SUBMITS.register(WorldComponentRenderer::render);
+        LibrarianCommodityTooltip.init();
     }
 
     /**

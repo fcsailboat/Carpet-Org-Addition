@@ -94,6 +94,7 @@ public class EnchantmentUtils {
     /**
      * @return 获取一个附魔的名字，不带等级
      */
+    @Deprecated
     public static Component getName(Enchantment enchantment) {
         TextBuilder builder = TextBuilder.of(enchantment.description());
         Holder<Enchantment> entry = Holder.direct(enchantment);
@@ -107,12 +108,31 @@ public class EnchantmentUtils {
      * @param level 附魔的等级
      * @return 获取一个附魔的名字，带有等级
      */
+    @Deprecated
     public static Component getName(Enchantment enchantment, int level) {
         TextJoiner joiner = new TextJoiner();
         joiner.append(getName(enchantment));
         if (level != 1 || enchantment.getMaxLevel() != 1) {
             joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
         }
+        return joiner.join();
+    }
+
+    public static Component getName(Holder<Enchantment> holder) {
+        TextBuilder builder = TextBuilder.of(holder.value().description());
+        // 如果是诅咒附魔，设置为红色，否则，设置为灰色
+        ChatFormatting color = holder.is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.GRAY;
+        builder.setColor(color);
+        return builder.build();
+    }
+
+    public static Component getName(Holder<Enchantment> holder, int level) {
+        TextJoiner joiner = new TextJoiner();
+        joiner.append(getName(holder));
+        if (level == 1 && holder.value().getMaxLevel() == 1) {
+            return joiner.join();
+        }
+        joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
         return joiner.join();
     }
 
