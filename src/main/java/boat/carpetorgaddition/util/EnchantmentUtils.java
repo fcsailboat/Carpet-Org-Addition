@@ -128,12 +128,13 @@ public class EnchantmentUtils {
 
     public static Component getName(Holder<Enchantment> holder, int level) {
         TextJoiner joiner = new TextJoiner();
-        joiner.append(getName(holder));
-        if (level == 1 && holder.value().getMaxLevel() == 1) {
-            return joiner.join();
+        joiner.append(holder.value().description());
+        if (level != 1 || holder.value().getMaxLevel() != 1) {
+            joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
         }
-        joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
-        return joiner.join();
+        return TextBuilder.of(joiner.join())
+                .setColor(holder.is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.GRAY)
+                .build();
     }
 
     /**

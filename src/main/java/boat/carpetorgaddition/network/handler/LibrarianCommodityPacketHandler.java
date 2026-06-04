@@ -5,6 +5,7 @@ import boat.carpetorgaddition.network.c2s.LibrarianCommodityQueryC2SPacket;
 import boat.carpetorgaddition.network.s2c.LibrarianCommodityResponseS2CPacket;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.misc.LibrarianCommodityEntry;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.common.collect.MapMaker;
 import net.fabricmc.fabric.api.entity.FakePlayer;
@@ -29,10 +30,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @NullMarked
 public class LibrarianCommodityPacketHandler implements ServerPlayNetworking.PlayPayloadHandler<LibrarianCommodityQueryC2SPacket> {
@@ -105,13 +103,14 @@ public class LibrarianCommodityPacketHandler implements ServerPlayNetworking.Pla
     }
 
     private void sendNetworkPacket(ServerPlayer player, BlockPos blockPos, Villager villager) {
+        List<Map.Entry<Integer, ItemStack>> offers = new ArrayList<>();
         for (MerchantOffer offer : villager.getOffers()) {
             if (offer.getResult().is(Items.ENCHANTED_BOOK)) {
-                PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityResponseS2CPacket(blockPos, offer.getCostA().getCount(), offer.getResult()));
-                return;
+                offers.add(Map.entry(offer.getCostA().getCount(), offer.getResult()));
             }
         }
-        PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityResponseS2CPacket(blockPos, -1, ItemStack.EMPTY));
+        LibrarianCommodityEntry entry = new LibrarianCommodityEntry(blockPos, offers);
+        PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityResponseS2CPacket(entry));
     }
 
     public static void cleanupStaleEntries() {

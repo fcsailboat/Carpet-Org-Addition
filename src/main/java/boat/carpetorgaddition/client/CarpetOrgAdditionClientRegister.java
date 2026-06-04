@@ -11,7 +11,6 @@ import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.debug.client.render.HudDebugRendererRegister;
 import boat.carpetorgaddition.network.s2c.*;
-import boat.carpetorgaddition.wheel.misc.LibrarianCommodityEntry;
 import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncSlot;
 import boat.carpetorgaddition.wheel.screen.UnavailableSlotClientSide;
 import boat.carpetorgaddition.wheel.screen.WithButtonScreenClientSide;
@@ -109,7 +108,7 @@ public class CarpetOrgAdditionClientRegister {
                 WorldComponentRenderer.add(WorldComponentRenderer.ENTITY_ID_KEY, id, new PathfinderRenderComponent(id, packet.getVec3List()));
             }
         });
-        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityResponseS2CPacket.ID, (payload, _) -> LibrarianCommodityTooltip.getInstance().setOffer(new LibrarianCommodityEntry(payload.blockPos(), payload.price(), payload.commodity())));
+        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityResponseS2CPacket.ID, (payload, _) -> LibrarianCommodityTooltip.getInstance().setOffers(payload.entry()));
         ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityCacheInvalidationS2CPacket.ID, (_, _) -> LibrarianCommodityTooltip.getInstance().failure());
         ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityFunctionS2CPacket.ID, (payload, _) -> LibrarianCommodityTooltip.getInstance().setEnable(payload.enable()));
     }
