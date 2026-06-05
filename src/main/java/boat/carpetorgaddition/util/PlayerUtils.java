@@ -10,6 +10,7 @@ import carpet.api.settings.SettingsManager;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -198,5 +199,12 @@ public class PlayerUtils {
             case OFF_HAND -> EntityPlayerActionPack.ActionType.USE;
         };
         actionPack.start(type, EntityPlayerActionPack.Action.once());
+    }
+
+    public static boolean isRealPlayer(ServerPlayer player) {
+        return switch (player) {
+            case EntityPlayerMPFake _, FakePlayer _ -> false;
+            case ServerPlayer _ -> true;
+        };
     }
 }

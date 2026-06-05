@@ -10,6 +10,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -52,9 +53,9 @@ public class LibrarianCommodityTooltip implements HudElement {
     private LibrarianCommodityTooltip() {
     }
 
-    // TODO 加入游戏时发生记录器状态，退出游戏时清除开关标记
     public static void init() {
         HudElementRegistry.addFirst(ServerUtils.ofIdentifier("librarian_commodity_tooltip"), INSTANCE);
+        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> INSTANCE.setEnable(false));
     }
 
     public static LibrarianCommodityTooltip getInstance() {
