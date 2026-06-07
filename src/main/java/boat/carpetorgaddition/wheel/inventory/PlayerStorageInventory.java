@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
@@ -8,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.fabric.api.entity.FakePlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -15,6 +17,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jspecify.annotations.NullMarked;
 
@@ -261,6 +265,38 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
             ItemStack split = from.split(1);
             this.setItem(toIndex, split);
         }
+    }
+
+    /**
+     * 将挖掘指定方块的不是即将损坏的合适工具移动至主手
+     */
+    public void switchToAppropriateTool(Level world, BlockPos blockPos) {
+        BlockState blockState = world.getBlockState(blockPos);
+        boolean replenishSuccess = this.replenish(itemStack -> {
+            if (this.player.isCreative()) {
+                return itemStack.getItem().canDestroyBlock(player.getMainHandItem(), blockState, world, blockPos, player);
+            }
+            // 不使用低耐久工具
+            if (this.isFragileWithMending(itemStack)) {
+                return false;
+            }
+            return itemStack.getDestroySpeed(blockState) > 1F;
+        });
+        if (replenishSuccess) {
+            return;
+        }
+        // 工具没有切换成功，使用其他物品替换手上工具以避免工具损坏
+        this.replenish(itemStack -> !this.isFragileWithMending(itemStack));
+    }
+
+    /**
+     * @return 物品是否即将损坏且具有经验修补附魔
+     */
+    private boolean isFragileWithMending(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        return itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10 && EnchantmentUtils.canRepairWithXp(itemStack);
     }
 
     /**

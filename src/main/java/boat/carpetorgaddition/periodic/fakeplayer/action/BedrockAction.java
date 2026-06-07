@@ -779,6 +779,10 @@ public class BedrockAction extends AbstractPlayerAction {
         return this.excavator.mining(blockPos, Direction.DOWN, false);
     }
 
+    /**
+     * @deprecated 改用{@link PlayerStorageInventory#switchToAppropriateTool(Level, BlockPos)}
+     */
+    @Deprecated
     private void switchTool(BlockState blockState, Level world, BlockPos blockPos, EntityPlayerMPFake player) {
         boolean replenishSuccess = this.inventory.replenish(itemStack -> {
             if (this.getFakePlayer().isCreative()) {

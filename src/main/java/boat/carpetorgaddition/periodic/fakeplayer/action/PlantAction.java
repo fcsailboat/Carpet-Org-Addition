@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
+import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -13,7 +14,6 @@ import com.google.gson.JsonObject;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -81,9 +81,41 @@ public class PlantAction extends AbstractPlayerAction {
         return switch (cropType) {
             case CROPS -> this.plantCrops(cropsItem, blockPos);
             case NETHER_WART -> this.plantNetherWart(blockPos);
+            case MELON -> this.plantMelon(blockPos, cropsItem);
             case BAMBOO -> this.plantBamboo(blockPos);
-            default -> true;
+            case NONE -> false;
         };
+    }
+
+    private boolean plantMelon(BlockPos farmlandPos, ItemStack seedItem) {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
+        if (!world.getBlockState(farmlandPos).is(BlockTags.SUPPORTS_STEM_CROPS)) {
+            return true;
+        }
+        BlockPos up = farmlandPos.above();
+        BlockState blockState = world.getBlockState(up);
+        if (seedItem.is(Items.MELON_SEEDS)) {
+            return this.plantMelon(blockState, up, world, Blocks.MELON, Blocks.MELON_STEM, Blocks.ATTACHED_MELON_STEM);
+        } else if (seedItem.is(Items.PUMPKIN_SEEDS)) {
+            return this.plantMelon(blockState, up, world, Blocks.PUMPKIN, Blocks.PUMPKIN_STEM, Blocks.ATTACHED_PUMPKIN_STEM);
+        } else {
+            return true;
+        }
+    }
+
+    private boolean plantMelon(BlockState blockState, BlockPos stemPos, ServerLevel world, Block melon, Block stem, Block attachedStem) {
+        if (blockState.is(attachedStem)) {
+            Direction direction = blockState.getValue(AttachedStemBlock.FACING);
+            BlockPos melonPos = stemPos.relative(direction);
+            if (world.getBlockState(melonPos).is(melon)) {
+                this.inventory.switchToAppropriateTool(world, melonPos);
+                return this.breakBlock(melonPos);
+            }
+        } else if (blockState.is(stem) && blockState.getValue(StemBlock.AGE) < StemBlock.MAX_AGE) {
+            this.fertilize(world, stemPos);
+        }
+        return true;
     }
 
     /**
@@ -271,9 +303,10 @@ public class PlantAction extends AbstractPlayerAction {
      *
      * @return 是否完成挖掘
      */
+    @Deprecated
     private boolean useToolBreakBlock(BlockPos cropPos) {
         // 如果有工具，拿在主手，剑可以瞬间破坏竹子，它也是工具物品
-        this.inventory.replenish(itemStack -> itemStack.has(DataComponents.TOOL));
+        this.inventory.replenish(InventoryUtils::isToolItem);
         return breakBlock(cropPos);
     }
 
@@ -342,6 +375,10 @@ public class PlantAction extends AbstractPlayerAction {
          */
         BAMBOO,
         /**
+         * 种植西瓜和南瓜
+         */
+        MELON,
+        /**
          * 一个占位符，表示什么都不种植
          */
         NONE;
@@ -363,6 +400,9 @@ public class PlantAction extends AbstractPlayerAction {
             }
             if (itemStack.is(Items.BAMBOO)) {
                 return BAMBOO;
+            }
+            if (itemStack.is(Items.MELON_SEEDS) || itemStack.is(Items.PUMPKIN_SEEDS)) {
+                return MELON;
             }
             return NONE;
         }
