@@ -5,6 +5,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
 import boat.carpetorgaddition.util.EnchantmentUtils;
+import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemIdentity;
@@ -22,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.InteractionHand;
@@ -113,23 +115,40 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         ServerUtils.lookAt(this.getFakePlayer(), ServerUtils.getEyePos(villager));
         MerchantOffers offers = villager.getOffers();
         for (MerchantOffer offer : offers) {
-            int count = offer.getCostA().getCount();
-            if (count <= this.maxPrice && this.verify(offer.getResult())) {
-                this.complete(villager);
+            ItemStack itemStack = offer.getBaseCostA();
+            int count = itemStack.getCount();
+            int level = this.verify(offer.getResult());
+            if (count <= this.maxPrice && level != -1) {
+                this.complete(villager, level, itemStack.getCount());
                 return true;
             }
         }
         return false;
     }
 
-    private void complete(Villager villager) {
+    private void complete(Villager villager, int level, int price) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 在原版中，拴绳无法拴住村民，将拴绳移出主手是为了与拴绳可拴村民等功能兼容
         this.inventory.replenish(itemStack -> !(itemStack.is(Items.NAME_TAG) || itemStack.is(Items.VILLAGER_SPAWN_EGG) || itemStack.is(Items.LEAD)));
         villager.mobInteract(fakePlayer, InteractionHand.MAIN_HAND);
-        if (this.tryTrade(fakePlayer, villager.getOffers())) {
-
-        }
+        boolean trade = this.tryTrade(fakePlayer, villager.getOffers());
+        LocalizationKey key = this.getLocalizationKey().then("complete");
+        MinecraftServer server = ServerUtils.getServer(fakePlayer);
+        MessageUtils.sendMessage(server, key
+                .translate(fakePlayer.getDisplayName(), EnchantmentUtils.getName(this.enchantmentHolder, level))
+        );
+        Int2IntMap.Entry range = getPriceRange(this.enchantmentHolder, level);
+        MessageUtils.sendMessage(server, key
+                .then("price")
+                .builder(price, range.getIntKey(), range.getIntValue())
+                .setColor(PriceLevel.getPriceLevel(price, range.getIntKey(), range.getIntValue()).getColor())
+                .build());
+        MessageUtils.sendMessage(server, key
+                .then(trade ? "locked" : "unlocked")
+                .builder()
+                .setGrayItalic()
+                .build());
+        PlayerUtils.closeScreen(fakePlayer);
         this.stop();
     }
 
@@ -145,27 +164,25 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                 ) {
                     TradeAction action = new TradeAction(fakePlayer, i, false);
                     // 交易一次以锁定交易
-                    boolean result = action.tradeOnce(menu, fakePlayer);
-                    PlayerUtils.closeScreen(fakePlayer);
-                    return result;
+                    return action.tradeOnce(menu, fakePlayer);
                 }
             }
         }
         return false;
     }
 
-    private boolean verify(ItemStack enchantmentBook) {
+    private int verify(ItemStack enchantmentBook) {
         ItemEnchantments enchantments = enchantmentBook.get(DataComponents.STORED_ENCHANTMENTS);
         if (enchantments == null) {
-            return false;
+            return -1;
         }
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
             if (entry.getKey().equals(this.enchantmentHolder)) {
                 int level = entry.getIntValue();
-                return level >= this.minLevel;
+                return level >= this.minLevel ? level : -1;
             }
         }
-        return false;
+        return -1;
     }
 
     @Override
