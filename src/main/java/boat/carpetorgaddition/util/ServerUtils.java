@@ -532,4 +532,9 @@ public class ServerUtils {
     public static void forEachPlayer(MinecraftServer server, Consumer<ServerPlayer> consumer) {
         server.getPlayerList().getPlayers().forEach(consumer);
     }
+
+    public static long getTime(MinecraftServer server) {
+        ServerLevel level = server.getLevel(Level.OVERWORLD);
+        return level == null ? -1L : level.getGameTime();
+    }
 }

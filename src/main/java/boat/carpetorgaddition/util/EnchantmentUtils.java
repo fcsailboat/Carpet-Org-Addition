@@ -137,6 +137,10 @@ public class EnchantmentUtils {
                 .build();
     }
 
+    public static int getMaxLevel(Holder.Reference<Enchantment> enchantment) {
+        return enchantment.value().getMaxLevel();
+    }
+
     /**
      * @return 指定物品是否可以使用经验修复
      */

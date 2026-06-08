@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.ItemIdentity;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
@@ -439,6 +440,23 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
                 return true;
             }
             if (pickItemFromShulker && InventoryUtils.contains(itemStack, predicate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasMaterial(ItemIdentity identity, int count, boolean offHand) {
+        int sum = 0;
+        ItemStack offhandItem = this.getPlayer().getOffhandItem();
+        for (ItemStack itemStack : this) {
+            if (offHand && itemStack == offhandItem) {
+                continue;
+            }
+            if (identity.is(itemStack)) {
+                sum += itemStack.getCount();
+            }
+            if (sum >= count) {
                 return true;
             }
         }

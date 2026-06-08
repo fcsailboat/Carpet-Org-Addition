@@ -528,7 +528,7 @@
   "carpet-org-addition.logger.obsidian.generate": "A piece of obsidian has been generated at %s",
   "carpet-org-addition.logger.librarian.price": "Price: %s(%s-%s)",
   "carpet-org-addition.logger.librarian.level": "Level: %s(1-%s)",
-  "carpet-org-addition.logger.librarian.no_enchanted_book": "No Enchanted Book",
+  "carpet-org-addition.logger.librarian.no_enchanted_book": "No enchanted book trade",
   "carpet-org-addition.dialog.text.version": "Version: %s",
   "carpet-org-addition.dialog.title.function": "Function",
   "carpet-org-addition.dialog.title.open_inventory": "Open Player Inventory",

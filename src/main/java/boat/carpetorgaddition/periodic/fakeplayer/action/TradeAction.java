@@ -27,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ChunkPos;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
@@ -118,34 +119,46 @@ public class TradeAction extends AbstractPlayerAction {
             if (loopCount > 1000) {
                 throw new InfiniteLoopException();
             }
-            //如果当前交易以锁定，直接结束方法
-            MerchantOffer tradeOffer = screenHandler.getOffers().get(this.index);
-            if (tradeOffer.isOutOfStock()) {
-                return;
-            }
-            // 选择要交易物品的索引
-            screenHandler.setSelectionHint(this.index);
-            // 填充交易槽位
-            if (switchItem(screenHandler, tradeOffer)) {
-                // 判断输出槽是否有物品，如果有，丢出物品，否则停止交易，结束方法
-                Slot outputSlot = screenHandler.getSlot(2);
-                // 假玩家可能交易出其他交易选项的物品，请参阅：https://bugs.mojang.com/browse/MC-215441
-                if (outputSlot.hasItem()) {
-                    this.compareAndThrow(screenHandler, 2, tradeOffer.getResult(), fakePlayer);
-                    if (CarpetOrgAdditionSettings.VILLAGER_INFINITE_TRADE.value()
-                        && CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value() > 0
-                        && loopCount >= CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value()) {
-                        return;
-                    }
-                } else {
-                    throw new IllegalStateException("Villager failed to provide the trade item");
-                }
-            } else {
-                // 除非假玩家物品栏内已经没有足够的物品用来交易，否则填充交易槽位不会失败
+            if (trade(screenHandler, fakePlayer, loopCount, false, null)) {
                 return;
             }
             // 如果启用了村民无限交易或当前为虚空交易，则尽可能完成所有交易
         } while (this.voidTrade || CarpetOrgAdditionSettings.VILLAGER_INFINITE_TRADE.value());
+    }
+
+    public boolean tradeOnce(MerchantMenu screenHandler, EntityPlayerMPFake fakePlayer) {
+        MutableBoolean bool = new MutableBoolean(false);
+        this.trade(screenHandler, fakePlayer, 0, true, bool);
+        return bool.booleanValue();
+    }
+
+    private boolean trade(MerchantMenu screenHandler, EntityPlayerMPFake fakePlayer, int loopCount, boolean once, MutableBoolean bool) {
+        //如果当前交易以锁定，直接结束方法
+        MerchantOffer tradeOffer = screenHandler.getOffers().get(this.index);
+        if (tradeOffer.isOutOfStock()) {
+            return true;
+        }
+        // 选择要交易物品的索引
+        screenHandler.setSelectionHint(this.index);
+        // 填充交易槽位
+        if (switchItem(screenHandler, tradeOffer)) {
+            // 判断输出槽是否有物品，如果有，丢出物品，否则停止交易，结束方法
+            Slot outputSlot = screenHandler.getSlot(2);
+            // 假玩家可能交易出其他交易选项的物品，请参阅：https://bugs.mojang.com/browse/MC-215441
+            if (outputSlot.hasItem()) {
+                if (bool != null) {
+                    bool.setTrue();
+                }
+                this.compareAndThrow(screenHandler, 2, tradeOffer.getResult(), once, fakePlayer);
+                int maxTradeCount = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
+                return CarpetOrgAdditionSettings.VILLAGER_INFINITE_TRADE.value() && maxTradeCount > 0 && loopCount >= maxTradeCount;
+            } else {
+                throw new IllegalStateException("Villager failed to provide the trade item");
+            }
+        } else {
+            // 除非假玩家物品栏内已经没有足够的物品用来交易，否则填充交易槽位不会失败
+            return true;
+        }
     }
 
     // 选择物品
@@ -254,11 +267,14 @@ public class TradeAction extends AbstractPlayerAction {
      * @see <a href="https://bugs.mojang.com/browse/MC-157977">MC-157977</a>
      * @see <a href="https://bugs.mojang.com/browse/MC-215441">MC-215441</a>
      */
-    public void compareAndThrow(AbstractContainerMenu screenHandler, int slotIndex, ItemStack itemStack, EntityPlayerMPFake player) {
+    public void compareAndThrow(AbstractContainerMenu screenHandler, int slotIndex, ItemStack itemStack, boolean once, EntityPlayerMPFake player) {
         InventoryUtils.assertEmptyStack(screenHandler.getCarried());
         Slot slot = screenHandler.getSlot(slotIndex);
         while (slot.hasItem() && ItemStack.isSameItemSameComponents(itemStack, slot.getItem()) && slot.mayPickup(player)) {
             screenHandler.clicked(slotIndex, FakePlayerUtils.THROW_Q, ContainerInput.THROW, player);
+            if (once) {
+                break;
+            }
         }
     }
 

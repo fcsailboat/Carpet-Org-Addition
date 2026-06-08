@@ -3,6 +3,8 @@ package boat.carpetorgaddition.client.render.hud;
 import boat.carpetorgaddition.client.render.Tooltip;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.network.c2s.LibrarianCommodityQueryC2SPacket;
+import boat.carpetorgaddition.periodic.fakeplayer.action.LibrarianTradeFindAction;
+import boat.carpetorgaddition.periodic.fakeplayer.action.LibrarianTradeFindAction.PriceLevel;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.misc.LibrarianCommodityEntry;
@@ -27,7 +29,6 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -112,9 +113,9 @@ public class LibrarianCommodityTooltip implements HudElement {
                 int level = entry.getIntValue();
                 Component name = EnchantmentUtils.getName(holder, level);
                 list.add(name);
-                Int2IntMap.Entry range = getPriceRange(holder, level);
+                Int2IntMap.Entry range = LibrarianTradeFindAction.getPriceRange(holder, level);
                 int price = offer.getKey();
-                PriceLevel priceLevel = this.getPriceLevel(price, range.getIntKey(), range.getIntValue());
+                PriceLevel priceLevel = PriceLevel.getPriceLevel(price, range.getIntKey(), range.getIntValue());
                 list.add(
                         KEY.then("price")
                                 .builder(price, range.getIntKey(), range.getIntValue())
@@ -139,27 +140,6 @@ public class LibrarianCommodityTooltip implements HudElement {
         graphics.tooltip(font, components, width / 2 + 20, height / 2 + 25 - ((offers.size() - 1) * 20), DefaultTooltipPositioner.INSTANCE, null);
     }
 
-    private Int2IntMap.Entry getPriceRange(Holder<Enchantment> enchantment, int level) {
-        int min = 2 + level * 3;
-        int max = 6 + level * 13;
-        if (enchantment.is(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
-            return Int2IntMap.entry(min * 2, max * 2);
-        } else {
-            return Int2IntMap.entry(min, max);
-        }
-    }
-
-    private PriceLevel getPriceLevel(int price, int min, int max) {
-        int total = max - min + 1;
-        if (price < min + total / 3) {
-            return PriceLevel.LOW;
-        } else if (price < min + (2 * total) / 3) {
-            return PriceLevel.MEDIUM;
-        } else {
-            return PriceLevel.HIGH;
-        }
-    }
-
     public void setOffers(LibrarianCommodityEntry offers) {
         this.offers = offers;
     }
@@ -170,19 +150,5 @@ public class LibrarianCommodityTooltip implements HudElement {
 
     public void failure() {
         this.previous = null;
-    }
-
-    public enum PriceLevel {
-        LOW,
-        MEDIUM,
-        HIGH;
-
-        private ChatFormatting getColor() {
-            return switch (this) {
-                case LOW -> ChatFormatting.GREEN;
-                case MEDIUM -> ChatFormatting.YELLOW;
-                case HIGH -> ChatFormatting.DARK_RED;
-            };
-        }
     }
 }

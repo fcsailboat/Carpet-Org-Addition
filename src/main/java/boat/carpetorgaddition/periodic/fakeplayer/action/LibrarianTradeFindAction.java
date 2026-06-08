@@ -1,0 +1,271 @@
+package boat.carpetorgaddition.periodic.fakeplayer.action;
+
+import boat.carpetorgaddition.command.PlayerActionCommand;
+import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
+import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
+import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
+import boat.carpetorgaddition.util.EnchantmentUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.ItemIdentity;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
+import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
+import boat.carpetorgaddition.wheel.text.LocalizationKey;
+import boat.carpetorgaddition.wheel.text.TextBuilder;
+import carpet.patches.EntityPlayerMPFake;
+import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+public class LibrarianTradeFindAction extends AbstractPlayerAction {
+    private final BlockPos lecternPos;
+    private final Holder.Reference<Enchantment> enchantmentHolder;
+    private final long startTime;
+    private final int minLevel;
+    private final int maxPrice;
+    /**
+     * 是否正在挖掘方块
+     */
+    private boolean diggingBlock = false;
+    @Nullable
+    private Villager prevVillager = null;
+    private LibrarianVillagerPoiCache caches;
+    private PlayerStorageInventory inventory;
+    private static final LocalizationKey KEY = PlayerActionCommand.KEY.then("librarian");
+
+    public LibrarianTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, Holder.Reference<Enchantment> enchantmentHolder, int level, int price, long startTime) {
+        super(fakePlayer);
+        this.lecternPos = lecternPos;
+        this.enchantmentHolder = enchantmentHolder;
+        this.startTime = startTime;
+        this.minLevel = level == -1 ? enchantmentHolder.value().getMaxLevel() : level;
+        this.maxPrice = price == -1 ? Integer.MAX_VALUE : price;
+    }
+
+    @Override
+    protected void tick() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
+        if (this.diggingBlock) {
+            BlockExcavator blockExcavator = PlayerComponentCoordinator.getCoordinator(fakePlayer).getBlockExcavator();
+            this.inventory.switchToAppropriateTool(world, this.lecternPos);
+            ServerUtils.lookAt(fakePlayer, Vec3.atBottomCenterOf(this.lecternPos));
+            if (blockExcavator.mining(this.lecternPos, Direction.DOWN)) {
+                this.diggingBlock = false;
+            }
+            return;
+        }
+        BlockState blockState = world.getBlockState(this.lecternPos);
+        if (blockState.is(Blocks.LECTERN)) {
+            if (this.checkAndStopIfCompleted(world)) {
+                return;
+            }
+            this.diggingBlock = true;
+        } else if (blockState.isAir() || blockState.is(Blocks.WATER)) {
+            if (this.inventory.replenish(itemStack -> itemStack.is(Items.LECTERN))) {
+                BlockHitResult hitResult = new BlockHitResult(Vec3.atBottomCenterOf(this.lecternPos), Direction.DOWN, this.lecternPos, false);
+                PlayerUtils.useItemOn(fakePlayer, hitResult);
+                if (this.prevVillager != null) {
+                    ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(this.prevVillager));
+                }
+            }
+        }
+    }
+
+    private boolean checkAndStopIfCompleted(ServerLevel world) {
+        if (world.getPoiManager().getType(this.lecternPos).filter(type -> type.is(PoiTypes.LIBRARIAN)).isEmpty()) {
+            return false;
+        }
+        Optional<Villager> optional = this.caches.getVillager(world, this.lecternPos);
+        if (optional.isEmpty()) {
+            return true;
+        }
+        Villager villager = optional.get();
+        this.prevVillager = villager;
+        ServerUtils.lookAt(this.getFakePlayer(), ServerUtils.getEyePos(villager));
+        MerchantOffers offers = villager.getOffers();
+        for (MerchantOffer offer : offers) {
+            int count = offer.getCostA().getCount();
+            if (count <= this.maxPrice && this.verify(offer.getResult())) {
+                this.complete(villager);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void complete(Villager villager) {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        // 在原版中，拴绳无法拴住村民，将拴绳移出主手是为了与拴绳可拴村民等功能兼容
+        this.inventory.replenish(itemStack -> !(itemStack.is(Items.NAME_TAG) || itemStack.is(Items.VILLAGER_SPAWN_EGG) || itemStack.is(Items.LEAD)));
+        villager.mobInteract(fakePlayer, InteractionHand.MAIN_HAND);
+        if (this.tryTrade(fakePlayer, villager.getOffers())) {
+
+        }
+        this.stop();
+    }
+
+    private boolean tryTrade(EntityPlayerMPFake fakePlayer, MerchantOffers offers) {
+        if (PlayerUtils.getCurrentScreen(fakePlayer) instanceof MerchantMenu menu) {
+            for (int i = 0; i < offers.size(); i++) {
+                MerchantOffer offer = offers.get(i);
+                ItemStack costA = offer.getCostA();
+                ItemStack costB = offer.getCostB();
+                if (
+                        this.inventory.hasMaterial(new ItemIdentity(costA), costA.getCount(), false)
+                        && this.inventory.hasMaterial(new ItemIdentity(costB), costB.getCount(), false)
+                ) {
+                    TradeAction action = new TradeAction(fakePlayer, i, false);
+                    // 交易一次以锁定交易
+                    boolean result = action.tradeOnce(menu, fakePlayer);
+                    PlayerUtils.closeScreen(fakePlayer);
+                    return result;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean verify(ItemStack enchantmentBook) {
+        ItemEnchantments enchantments = enchantmentBook.get(DataComponents.STORED_ENCHANTMENTS);
+        if (enchantments == null) {
+            return false;
+        }
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+            if (entry.getKey().equals(this.enchantmentHolder)) {
+                int level = entry.getIntValue();
+                return level >= this.minLevel;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public List<Component> info() {
+        ArrayList<Component> list = new ArrayList<>();
+        LocalizationKey key = this.getInfoLocalizationKey();
+        list.add(key.translate(this.getFakePlayer().getDisplayName()));
+        list.add(key.then("enchantment").translate(EnchantmentUtils.getName(this.enchantmentHolder)));
+        int maxLevel = EnchantmentUtils.getMaxLevel(this.enchantmentHolder);
+        TextBuilder levelText = key.then(this.minLevel == maxLevel ? "max_level" : "level").builder(this.minLevel);
+        levelText.setHover(key.then("level").then("prompt").translate(maxLevel));
+        list.add(levelText.build());
+        Int2IntMap.Entry range = getPriceRange(this.enchantmentHolder, this.minLevel);
+        int minPrice = range.getIntKey();
+        TextBuilder priceText = key.then(minPrice == this.maxPrice ? "min_price" : "price").builder(this.maxPrice);
+        priceText.setHover(key.then("price").then("prompt").translate(range.getIntKey(), range.getIntValue(), this.minLevel));
+        list.add(priceText.build());
+        return list;
+    }
+
+    @Override
+    public JsonObject toJson() {
+        return null;
+    }
+
+    @Override
+    protected LocalizationKey getLocalizationKey() {
+        return KEY;
+    }
+
+    @Override
+    public ActionSerializeType getActionSerializeType() {
+        return null;
+    }
+
+    @Override
+    protected void onAssignPlayer() {
+        this.caches = ServerComponentCoordinator.getCoordinator(ServerUtils.getServer(this.getFakePlayer())).getLibrarianVillagerPoiCache();
+        this.inventory = PlayerStorageInventory.of(this.getFakePlayer());
+    }
+
+    @Override
+    protected void onClearPlayer() {
+        this.caches = null;
+        this.inventory = null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LibrarianTradeFindAction that = (LibrarianTradeFindAction) o;
+        return minLevel == that.minLevel && Objects.equals(enchantmentHolder, that.enchantmentHolder) && maxPrice == that.maxPrice;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.enchantmentHolder, this.minLevel, this.maxPrice);
+    }
+
+    /**
+     * 获取附魔书交易价格区间
+     *
+     * @param enchantment 魔咒类型
+     * @param level       魔咒等级
+     * @see <a href="https://zh.minecraft.wiki/w/%E4%BA%A4%E6%98%93#%E5%9B%BE%E4%B9%A6%E7%AE%A1%E7%90%86%E5%91%98">交易#图书管理员</a>
+     */
+    public static Int2IntMap.Entry getPriceRange(Holder<Enchantment> enchantment, int level) {
+        int min = 2 + level * 3;
+        int max = 6 + level * 13;
+        if (enchantment.is(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
+            return Int2IntMap.entry(min * 2, max * 2);
+        } else {
+            return Int2IntMap.entry(min, max);
+        }
+    }
+
+    public enum PriceLevel {
+        LOW,
+        MEDIUM,
+        HIGH;
+
+        public static PriceLevel getPriceLevel(int price, int min, int max) {
+            int total = max - min + 1;
+            if (price < min + total / 3) {
+                return PriceLevel.LOW;
+            } else if (price < min + (2 * total) / 3) {
+                return PriceLevel.MEDIUM;
+            } else {
+                return PriceLevel.HIGH;
+            }
+        }
+
+        public ChatFormatting getColor() {
+            return switch (this) {
+                case LOW -> ChatFormatting.GREEN;
+                case MEDIUM -> ChatFormatting.YELLOW;
+                case HIGH -> ChatFormatting.DARK_RED;
+            };
+        }
+    }
+}

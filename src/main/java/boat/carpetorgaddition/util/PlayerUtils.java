@@ -24,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -49,6 +51,10 @@ public class PlayerUtils {
     public static void openScreenHandler(Player player, MenuConstructor baseFactory, Component name) {
         SimpleMenuProvider factory = new SimpleMenuProvider(baseFactory, name);
         player.openMenu(factory);
+    }
+
+    public static AbstractContainerMenu getCurrentScreen(Player player) {
+        return player.containerMenu;
     }
 
     /**
@@ -206,5 +212,14 @@ public class PlayerUtils {
             case EntityPlayerMPFake _, FakePlayer _ -> false;
             case ServerPlayer _ -> true;
         };
+    }
+
+    public static void useItemOn(ServerPlayer player, final BlockHitResult hitResult) {
+        useItemOn(player, ServerUtils.getWorld(player), InteractionHand.MAIN_HAND, hitResult);
+    }
+
+    public static void useItemOn(ServerPlayer player, Level world, final InteractionHand hand, final BlockHitResult hitResult) {
+        ItemStack itemStack = player.getItemInHand(hand);
+        player.gameMode.useItemOn(player, world, itemStack, hand, hitResult);
     }
 }

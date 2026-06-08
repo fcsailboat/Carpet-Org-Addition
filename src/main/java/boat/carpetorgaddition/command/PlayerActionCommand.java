@@ -29,26 +29,36 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument.Result;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public class PlayerActionCommand extends AbstractServerCommand {
     private static final CommandPermission AI_PERMISSION = PermissionManager.registerHiddenCommand("playerAction.player.bedrock.ai", PermissionLevel.PASS);
@@ -131,7 +141,26 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                 .requires(_ -> CarpetOrgAddition.isDebugMode())
                                 .executes(context -> this.raise(context, null))
                                 .then(Commands.argument("message", StringArgumentType.string())
-                                        .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))));
+                                        .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
+                        .then(Commands.literal("librarian")
+                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
+                                .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                        .then(Commands.argument("lecternPos", BlockPosArgument.blockPos())
+                                                .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
+                                                .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                                        .suggests(PlayerActionCommand::suggestEnchantmentLevel)
+                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                .executes(context -> this.setLibrarianTradeFind(context, IntegerArgumentType.getInteger(context, "level"), IntegerArgumentType.getInteger(context, "price")))))
+                                                .then(Commands.literal("max")
+                                                        .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
+                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))));
+    }
+
+    private static CompletableFuture<Suggestions> suggestEnchantmentLevel(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+        Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+        int maxLevel = holder.value().getMaxLevel();
+        return SharedSuggestionProvider.suggest(IntStream.rangeClosed(1, maxLevel).mapToObj(Integer::toString), builder);
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> thenSorting() {
@@ -475,7 +504,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         return 1;
     }
 
-    // 打开控制假人合成物品的GUI
+    // 打开控制假玩家合成物品的GUI
     private int openFakePlayerCraftGui(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
@@ -502,6 +531,19 @@ public class PlayerActionCommand extends AbstractServerCommand {
             return 1;
         }
         return 0;
+    }
+
+    private int setLibrarianTradeFind(CommandContext<CommandSourceStack> context, int level, int price) throws CommandSyntaxException {
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+        BlockPos blockPos = BlockPosArgument.getBlockPos(context, "lecternPos");
+        MinecraftServer server = context.getSource().getServer();
+        long startTime = ServerUtils.getTime(server);
+        LibrarianTradeFindAction action = new LibrarianTradeFindAction(fakePlayer, blockPos, holder, level, price, startTime);
+        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
+        FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
+        actionManager.setAction(action);
+        return 1;
     }
 
     @Override
