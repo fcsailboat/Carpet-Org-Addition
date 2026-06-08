@@ -132,6 +132,10 @@ public class TextJoiner {
         return TextBuilder.joinList(this.list);
     }
 
+    public TextBuilder builder() {
+        return TextBuilder.of(this.join());
+    }
+
     public List<Component> collect() {
         return Collections.unmodifiableList(this.list);
     }

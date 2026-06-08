@@ -19,6 +19,7 @@ import boat.carpetorgaddition.wheel.screen.CraftingSetRecipeScreenHandler;
 import boat.carpetorgaddition.wheel.screen.StonecutterSetRecipeScreenHandler;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -31,6 +32,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -537,12 +539,55 @@ public class PlayerActionCommand extends AbstractServerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
         BlockPos blockPos = BlockPosArgument.getBlockPos(context, "lecternPos");
-        MinecraftServer server = context.getSource().getServer();
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
         long startTime = ServerUtils.getTime(server);
         LibrarianTradeFindAction action = new LibrarianTradeFindAction(fakePlayer, blockPos, holder, level, price, startTime);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.setAction(action);
+        LocalizationKey reason = LibrarianTradeFindAction.KEY.then("reason");
+        ArrayList<Component> list = new ArrayList<>();
+        int maxLevel = holder.value().getMaxLevel();
+        if (level != -1 && level > maxLevel) {
+            list.add(reason
+                    .then("level")
+                    .builder(level, maxLevel)
+                    .setColor(ChatFormatting.GRAY)
+                    .build());
+        }
+        int minPrice = LibrarianTradeFindAction.getPriceRange(holder, level == -1 ? maxLevel : level).getIntKey();
+        if (price != -1 && price < minPrice) {
+            list.add(reason
+                    .then("price")
+                    .builder(price, minPrice)
+                    .setColor(ChatFormatting.GRAY)
+                    .build());
+        }
+        switch (list.size()) {
+            case 0 -> {
+            }
+            case 1 -> {
+                Component message = LibrarianTradeFindAction.KEY.then("unfeasible").then("short").translate(list.getFirst());
+                MessageUtils.sendMessage(source, message);
+            }
+            default -> {
+                Component head = LibrarianTradeFindAction.KEY.then("unfeasible").then("short").translate("");
+                MessageUtils.sendEmptyMessage(source);
+                MessageUtils.sendMessage(source, head);
+                for (int i = 0; i < list.size(); i++) {
+                    TextJoiner joiner = new TextJoiner();
+                    Component each = joiner
+                            .append(i + 1)
+                            .append(". ")
+                            .append(list.get(i))
+                            .builder()
+                            .setColor(ChatFormatting.GRAY)
+                            .build();
+                    MessageUtils.sendMessage(source, each);
+                }
+            }
+        }
         return 1;
     }
 

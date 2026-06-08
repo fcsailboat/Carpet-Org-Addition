@@ -183,4 +183,8 @@ public class MessageUtils {
     public static void sendEmptyMessage(CommandContext<CommandSourceStack> context) {
         sendEmptyMessage(context.getSource());
     }
+
+    public static void sendEmptyMessage(MinecraftServer server) {
+        sendMessage(server, TextBuilder.empty());
+    }
 }

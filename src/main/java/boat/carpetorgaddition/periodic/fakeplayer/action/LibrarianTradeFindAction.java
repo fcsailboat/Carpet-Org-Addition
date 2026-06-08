@@ -69,11 +69,23 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
      * 是否正在挖掘方块
      */
     private boolean diggingBlock = false;
+    /**
+     * 已经缺货的时间
+     */
+    private long outOfStockTime = 0L;
+    /**
+     * 是否已经发送缺货通知
+     */
+    private boolean outOfStockNotice = false;
+    /**
+     * 是否已经发送交易锁定通知
+     */
+    private boolean lockedNotice = false;
     @Nullable
     private Villager prevVillager = null;
     private LibrarianVillagerPoiCache caches;
     private PlayerStorageInventory inventory;
-    private static final LocalizationKey KEY = PlayerActionCommand.KEY.then("librarian");
+    public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("librarian");
 
     public LibrarianTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, Holder.Reference<Enchantment> enchantmentHolder, int level, int price, long startTime) {
         super(fakePlayer);
@@ -105,11 +117,27 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
             this.diggingBlock = true;
         } else if (blockState.isAir() || blockState.is(Blocks.WATER)) {
             if (this.inventory.replenish(itemStack -> itemStack.is(Items.LECTERN))) {
+                this.outOfStockTime = 0L;
+                this.outOfStockNotice = false;
                 BlockHitResult hitResult = new BlockHitResult(Vec3.atBottomCenterOf(this.lecternPos), Direction.DOWN, this.lecternPos, false);
                 PlayerUtils.useItemOn(fakePlayer, hitResult);
                 this.refreshCount++;
                 if (this.prevVillager != null) {
                     ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(this.prevVillager));
+                }
+            } else {
+                this.outOfStockTime++;
+                if (this.outOfStockTime >= 100L && !this.outOfStockNotice) {
+                    MinecraftServer server = ServerUtils.getServer(fakePlayer);
+                    MessageUtils.sendEmptyMessage(server);
+                    MessageUtils.sendMessage(server, KEY.then("pause").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
+                    MessageUtils.sendMessage(server, KEY.then("reason").translate(KEY
+                            .then("reason")
+                            .then("lectern")
+                            .builder()
+                            .setColor(ChatFormatting.GRAY)
+                            .build()));
+                    this.outOfStockNotice = true;
                 }
             }
         }
@@ -125,7 +153,22 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
         Villager villager = optional.get();
         this.prevVillager = villager;
-        ServerUtils.lookAt(this.getFakePlayer(), ServerUtils.getEyePos(villager));
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        MinecraftServer server = ServerUtils.getServer(fakePlayer);
+        if (villager.getVillagerXp() != 0 && !this.lockedNotice) {
+            Component head = KEY.then("unfeasible").translate(fakePlayer.getDisplayName(), this.getDisplayName());
+            MessageUtils.sendEmptyMessage(server);
+            MessageUtils.sendMessage(server, head);
+            LocalizationKey reason = KEY.then("reason");
+            MessageUtils.sendMessage(server, reason
+                    .translate(reason
+                            .then("locked")
+                            .builder()
+                            .setColor(ChatFormatting.GRAY)
+                            .build()));
+            this.lockedNotice = true;
+        }
+        ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(villager));
         MerchantOffers offers = villager.getOffers();
         for (MerchantOffer offer : offers) {
             ItemStack itemStack = offer.getBaseCostA();
@@ -147,6 +190,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         boolean trade = this.tryTrade(fakePlayer, villager.getOffers());
         LocalizationKey key = this.getLocalizationKey().then("complete");
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
+        MessageUtils.sendEmptyMessage(server);
         MessageUtils.sendMessage(server, key
                 .builder(fakePlayer.getDisplayName(), EnchantmentUtils.getName(this.enchantmentHolder, level))
                 .setHover(new TextJoiner()
