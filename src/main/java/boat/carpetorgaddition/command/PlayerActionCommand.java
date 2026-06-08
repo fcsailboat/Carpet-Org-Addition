@@ -30,8 +30,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -61,6 +63,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class PlayerActionCommand extends AbstractServerCommand {
     private static final CommandPermission AI_PERMISSION = PermissionManager.registerHiddenCommand("playerAction.player.bedrock.ai", PermissionLevel.PASS);
@@ -152,11 +155,26 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                                 .then(Commands.argument("level", IntegerArgumentType.integer(1))
                                                         .suggests(PlayerActionCommand::suggestEnchantmentLevel)
                                                         .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                .suggests(suggestMixPrice(false))
                                                                 .executes(context -> this.setLibrarianTradeFind(context, IntegerArgumentType.getInteger(context, "level"), IntegerArgumentType.getInteger(context, "price")))))
                                                 .then(Commands.literal("max")
                                                         .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
                                                         .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                .suggests(suggestMixPrice(true))
                                                                 .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))));
+    }
+
+    private static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
+        return (context, builder) -> {
+            Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+            int level = maxLevel ? holder.value().getMaxLevel() : IntegerArgumentType.getInteger(context, "level");
+            Int2IntMap.Entry range = LibrarianTradeFindAction.getPriceRange(holder, level);
+            int min = range.getIntKey();
+            if (min > 64) {
+                return null;
+            }
+            return SharedSuggestionProvider.suggest(Stream.of(min).map(String::valueOf), builder);
+        };
     }
 
     private static CompletableFuture<Suggestions> suggestEnchantmentLevel(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) throws CommandSyntaxException {
