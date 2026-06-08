@@ -11,8 +11,10 @@ import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemIdentity;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
+import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -50,8 +52,18 @@ import java.util.Optional;
 public class LibrarianTradeFindAction extends AbstractPlayerAction {
     private final BlockPos lecternPos;
     private final Holder.Reference<Enchantment> enchantmentHolder;
+    /**
+     * 刷交易的开始时间
+     */
     private final long startTime;
+    private int refreshCount = 0;
+    /**
+     * 最小接受附魔书等级
+     */
     private final int minLevel;
+    /**
+     * 最大接受附魔书价格
+     */
     private final int maxPrice;
     /**
      * 是否正在挖掘方块
@@ -95,6 +107,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
             if (this.inventory.replenish(itemStack -> itemStack.is(Items.LECTERN))) {
                 BlockHitResult hitResult = new BlockHitResult(Vec3.atBottomCenterOf(this.lecternPos), Direction.DOWN, this.lecternPos, false);
                 PlayerUtils.useItemOn(fakePlayer, hitResult);
+                this.refreshCount++;
                 if (this.prevVillager != null) {
                     ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(this.prevVillager));
                 }
@@ -135,14 +148,25 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         LocalizationKey key = this.getLocalizationKey().then("complete");
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         MessageUtils.sendMessage(server, key
-                .translate(fakePlayer.getDisplayName(), EnchantmentUtils.getName(this.enchantmentHolder, level))
-        );
+                .builder(fakePlayer.getDisplayName(), EnchantmentUtils.getName(this.enchantmentHolder, level))
+                .setHover(new TextJoiner()
+                        .newline(key
+                                .then("time_taken")
+                                .translate(TextProvider.tickToTime(ServerUtils.getTime(server) - this.startTime)))
+                        .newline(key
+                                .then("refresh_count")
+                                .translate(this.refreshCount))
+                        .join())
+                .build());
         Int2IntMap.Entry range = getPriceRange(this.enchantmentHolder, level);
         MessageUtils.sendMessage(server, key
                 .then("price")
-                .builder(price, range.getIntKey(), range.getIntValue())
-                .setColor(PriceLevel.getPriceLevel(price, range.getIntKey(), range.getIntValue()).getColor())
-                .build());
+                .translate(key
+                        .then("price")
+                        .then("value")
+                        .builder(price, range.getIntKey(), range.getIntValue())
+                        .setColor(PriceLevel.getPriceLevel(price, range.getIntKey(), range.getIntValue()).getColor())
+                        .build()));
         MessageUtils.sendMessage(server, key
                 .then(trade ? "locked" : "unlocked")
                 .builder()
