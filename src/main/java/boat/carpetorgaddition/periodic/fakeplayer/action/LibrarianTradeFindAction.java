@@ -275,7 +275,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.addProperty("enchantment", this.enchantmentHolder.key().identifier().toString());
-        json.add("block_pos", ActionSerializeType.toJson(this.lecternPos));
+        json.add("block_pos", toJson(this.lecternPos));
         json.addProperty("min_level", this.minLevel);
         json.addProperty("max_price", this.maxPrice);
         json.addProperty("start_time", this.startTime);

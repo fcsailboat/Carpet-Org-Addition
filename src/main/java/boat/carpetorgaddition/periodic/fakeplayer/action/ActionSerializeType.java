@@ -156,7 +156,7 @@ public enum ActionSerializeType {
         Identifier id = Identifier.parse(json.get("enchantment").getAsString());
         MinecraftServer server = ServerUtils.getCurrentServer().orElseThrow(() -> new IllegalStateException("Server not started"));
         Holder.Reference<Enchantment> enchantment = EnchantmentUtils.parse(server, id).orElseThrow(() -> new IllegalStateException("Unable to parse the enchantment: " + id));
-        BlockPos blockPos = toBlockPos(json.get("block_pos").getAsJsonArray());
+        BlockPos blockPos = AbstractPlayerAction.fromJson(json.get("block_pos").getAsJsonObject());
         int minLevel = json.get("min_level").getAsInt();
         int maxPrice = json.get("max_price").getAsInt();
         int startTime = json.get("start_time").getAsInt();
