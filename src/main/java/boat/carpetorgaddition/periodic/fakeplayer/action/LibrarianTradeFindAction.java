@@ -273,7 +273,14 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
 
     @Override
     public JsonObject toJson() {
-        return null;
+        JsonObject json = new JsonObject();
+        json.addProperty("enchantment", this.enchantmentHolder.key().identifier().toString());
+        json.add("block_pos", ActionSerializeType.toJson(this.lecternPos));
+        json.addProperty("min_level", this.minLevel);
+        json.addProperty("max_price", this.maxPrice);
+        json.addProperty("start_time", this.startTime);
+        json.addProperty("refresh_count", this.refreshCount);
+        return json;
     }
 
     @Override
@@ -283,7 +290,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
 
     @Override
     public ActionSerializeType getActionSerializeType() {
-        return null;
+        return ActionSerializeType.LIBRARIAN;
     }
 
     @Override
@@ -303,13 +310,16 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        LibrarianTradeFindAction that = (LibrarianTradeFindAction) o;
-        return minLevel == that.minLevel && Objects.equals(enchantmentHolder, that.enchantmentHolder) && maxPrice == that.maxPrice;
+        LibrarianTradeFindAction action = (LibrarianTradeFindAction) o;
+        return this.minLevel == action.minLevel
+               && this.maxPrice == action.maxPrice
+               && Objects.equals(this.lecternPos, action.lecternPos)
+               && Objects.equals(this.enchantmentHolder, action.enchantmentHolder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.enchantmentHolder, this.minLevel, this.maxPrice);
+        return Objects.hash(this.lecternPos, this.enchantmentHolder, this.minLevel, this.maxPrice);
     }
 
     /**
@@ -327,6 +337,10 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         } else {
             return Int2IntMap.entry(min, max);
         }
+    }
+
+    public void setRefreshCount(int refreshCount) {
+        this.refreshCount = refreshCount;
     }
 
     public enum PriceLevel {

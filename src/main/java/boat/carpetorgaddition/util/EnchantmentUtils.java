@@ -1,10 +1,15 @@
 package boat.carpetorgaddition.util;
 
+import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -12,6 +17,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.EnchantmentTags;
@@ -153,5 +159,17 @@ public class EnchantmentUtils {
             }
         }
         return false;
+    }
+
+    public static Optional<Holder.Reference<Enchantment>> parse(MinecraftServer server, Identifier id) {
+        CommandRegistryAccessor accessor = (CommandRegistryAccessor) server.getCommands();
+        CommandBuildContext access = accessor.carpet_Org_Addition$getAccess();
+        ResourceArgument<Enchantment> resourced = ResourceArgument.resource(access, Registries.ENCHANTMENT);
+        try {
+            Holder.Reference<Enchantment> enchantment = resourced.parse(new StringReader(id.toString()));
+            return Optional.of(enchantment);
+        } catch (CommandSyntaxException e) {
+            return Optional.empty();
+        }
     }
 }

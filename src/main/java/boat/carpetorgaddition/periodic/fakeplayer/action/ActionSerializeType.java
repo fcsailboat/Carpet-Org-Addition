@@ -1,12 +1,17 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
+import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -146,7 +151,20 @@ public enum ActionSerializeType {
             }
         }
     }),
-    GOTO(_ -> new StopAction(null));
+    GOTO(_ -> new StopAction(null)),
+    LIBRARIAN(json -> {
+        Identifier id = Identifier.parse(json.get("enchantment").getAsString());
+        MinecraftServer server = ServerUtils.getCurrentServer().orElseThrow(() -> new IllegalStateException("Server not started"));
+        Holder.Reference<Enchantment> enchantment = EnchantmentUtils.parse(server, id).orElseThrow(() -> new IllegalStateException("Unable to parse the enchantment: " + id));
+        BlockPos blockPos = toBlockPos(json.get("block_pos").getAsJsonArray());
+        int minLevel = json.get("min_level").getAsInt();
+        int maxPrice = json.get("max_price").getAsInt();
+        int startTime = json.get("start_time").getAsInt();
+        int refreshCount = json.get("refresh_count").getAsInt();
+        LibrarianTradeFindAction action = new LibrarianTradeFindAction(null, blockPos, enchantment, minLevel, maxPrice, startTime);
+        action.setRefreshCount(refreshCount);
+        return action;
+    });
 
     private final String serializedName;
     private final Function<JsonObject, AbstractPlayerAction> deserializer;
