@@ -149,8 +149,8 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                         .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
                         .then(Commands.literal("librarian")
                                 .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
-                                .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
-                                        .then(Commands.argument("lecternPos", BlockPosArgument.blockPos())
+                                .then(Commands.argument("jobSite", BlockPosArgument.blockPos())
+                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
                                                 .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
                                                 .then(Commands.argument("level", IntegerArgumentType.integer(1))
                                                         .suggests(PlayerActionCommand::suggestEnchantmentLevel)
@@ -556,7 +556,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     private int setLibrarianTradeFind(CommandContext<CommandSourceStack> context, int level, int price) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
-        BlockPos blockPos = BlockPosArgument.getBlockPos(context, "lecternPos");
+        BlockPos blockPos = BlockPosArgument.getBlockPos(context, "jobSite");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         long startTime = ServerUtils.getTime(server);
