@@ -62,7 +62,7 @@ public class BlockExcavator {
         Level world = ServerUtils.getWorld(this.player);
         ServerPlayerGameMode interactionManager = this.player.gameMode;
         GameType gameMode = interactionManager.getGameModeForPlayer();
-        // 当前方块是可以破坏的
+        // 当前方块无法破坏
         if (this.player.blockActionRestricted(world, blockPos, gameMode)) {
             return false;
         }
@@ -117,7 +117,8 @@ public class BlockExcavator {
             return true;
         } else {
             this.currentBreakingPos = blockPos;
-            this.currentBreakingProgress = 0F;
+            // 将变量设置为2*delta是为了避免方块成功破坏前有几帧画面方块裂纹消失
+            this.currentBreakingProgress = 2 * delta;
         }
         return false;
     }
