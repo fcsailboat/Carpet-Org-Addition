@@ -30,6 +30,7 @@ public class NetworkPacketRegister {
         PayloadTypeRegistry.clientboundPlay().register(LibrarianCommodityResponseS2CPacket.ID, LibrarianCommodityResponseS2CPacket.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(LibrarianCommodityCacheInvalidationS2CPacket.ID, LibrarianCommodityCacheInvalidationS2CPacket.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(LibrarianCommodityFunctionS2CPacket.ID, LibrarianCommodityFunctionS2CPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(OldPlayerInventoryScreenSyncS2CPacket.ID, OldPlayerInventoryScreenSyncS2CPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(ObjectSearchTaskC2SPacket.ID, ObjectSearchTaskC2SPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(LibrarianCommodityQueryC2SPacket.ID, LibrarianCommodityQueryC2SPacket.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ObjectSearchTaskC2SPacket.ID, new ObjectSearchTaskPacketHandler());

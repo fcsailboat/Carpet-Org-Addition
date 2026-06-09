@@ -114,7 +114,7 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
     }
 
     /**
-     * 重写按住Shift键移动物品
+     * 按住Shift键移动物品
      *
      * @param player    当前移动物品的玩家
      * @param slotIndex 快速移动的插槽索引
@@ -122,9 +122,13 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
      */
     @Override
     public @NonNull ItemStack quickMoveStack(@NonNull Player player, int slotIndex) {
+        return quickMove(this, slotIndex);
+    }
+
+    public static @NonNull ItemStack quickMove(AbstractContainerMenu screenHandler, int slotIndex) {
         ItemStack itemStack = ItemStack.EMPTY;
         // 获取当前点击的槽位对象
-        Slot slot = this.slots.get(slotIndex);
+        Slot slot = screenHandler.slots.get(slotIndex);
         // 检查当前槽位上是否有物品
         if (slot.hasItem()) {
             // 获取当前槽位上的物品堆栈对象
@@ -132,12 +136,12 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
             itemStack = slotItemStack.copy();
             // 如果当前槽位位于GUI的上半部分，将物品移动的玩家物品栏槽位
             if (slotIndex < 54) {
-                if (this.quickMove(slotItemStack, 54, this.slots.size(), true)) {
+                if (quickMove(screenHandler, slotItemStack, 54, screenHandler.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             } else {
                 // 否则，将物品从玩家物品栏移动到玩家物品栏
-                if (this.quickMove(slotItemStack, 0, 41, false)) {
+                if (quickMove(screenHandler, slotItemStack, 0, 41, false)) {
                     return ItemStack.EMPTY;
                 }
             }
@@ -154,8 +158,8 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
     /**
      * @return 是否有物品移动了
      */
-    private boolean quickMove(ItemStack stack, int startIndex, int endIndex, boolean fromLast) {
-        return ScopedValue.where(QUICK_MOVING_ITEM, true).call(() -> !this.moveItemStackTo(stack, startIndex, endIndex, fromLast));
+    private static boolean quickMove(AbstractContainerMenu screenHandler, ItemStack stack, int startIndex, int endIndex, boolean fromLast) {
+        return ScopedValue.where(QUICK_MOVING_ITEM, true).call(() -> !screenHandler.moveItemStackTo(stack, startIndex, endIndex, fromLast));
     }
 
     @Override

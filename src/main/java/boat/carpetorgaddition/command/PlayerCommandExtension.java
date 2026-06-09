@@ -33,7 +33,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-// TODO 假玩家物品栏界面中，物品不能快速移动到马凯和鞍槽位（应改为不尝试快速移动到这两个槽位）
 public class PlayerCommandExtension {
     public static final LocalizationKey KEY = LocalizationKeys.COMMAND.then("player");
     public static final LocalizationKey INVENTORY = KEY.then("inventory");

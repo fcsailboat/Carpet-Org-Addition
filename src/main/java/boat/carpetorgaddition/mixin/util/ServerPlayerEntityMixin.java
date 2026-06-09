@@ -1,10 +1,13 @@
 package boat.carpetorgaddition.mixin.util;
 
 import boat.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
+import boat.carpetorgaddition.network.s2c.OldPlayerInventoryScreenSyncS2CPacket;
 import boat.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
 import boat.carpetorgaddition.network.s2c.WithButtonScreenSyncS2CPacket;
 import boat.carpetorgaddition.periodic.PeriodicTaskManagerInterface;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
+import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.screen.AbstractPlayerInventoryScreenHandler;
 import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncServer;
 import boat.carpetorgaddition.wheel.screen.UnavailableSlotSyncInterface;
 import boat.carpetorgaddition.wheel.screen.WithButtonPlayerInventoryScreenHandler;
@@ -29,13 +32,13 @@ import java.util.OptionalInt;
 @Mixin(value = ServerPlayer.class, priority = 1001)
 public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     @Unique
-    private final ServerPlayer thisPlayer = (ServerPlayer) (Object) this;
+    private final ServerPlayer self = (ServerPlayer) (Object) this;
     @Unique
     private PlayerComponentCoordinator manager;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
-        this.manager = PlayerComponentCoordinator.of(thisPlayer);
+        this.manager = PlayerComponentCoordinator.of(self);
     }
 
     @Override
@@ -56,15 +59,18 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     @Inject(method = "openMenu", at = @At(value = "RETURN", ordinal = 2))
     private void openHandledScreen(MenuProvider provider, CallbackInfoReturnable<OptionalInt> cir, @Local(name = "menu") AbstractContainerMenu menu) {
         // 同步不可用槽位
-        if (menu instanceof UnavailableSlotSyncInterface anInterface) {
-            ServerPlayNetworking.send(thisPlayer, new UnavailableSlotSyncS2CPacket(menu.containerId, anInterface.from(), anInterface.to()));
+        if (menu instanceof UnavailableSlotSyncInterface unavailable) {
+            PlayerUtils.sendNetworkPacket(this.self, new UnavailableSlotSyncS2CPacket(menu.containerId, unavailable.from(), unavailable.to()));
         } else if (menu instanceof WithButtonPlayerInventoryScreenHandler) {
-            ServerPlayNetworking.send(thisPlayer, new WithButtonScreenSyncS2CPacket(menu.containerId));
+            PlayerUtils.sendNetworkPacket(this.self, new WithButtonScreenSyncS2CPacket(menu.containerId));
         }
         // 同步槽位背景纹理
-        if (menu instanceof BackgroundSpriteSyncServer anInterface) {
-            anInterface.getBackgroundSprite().forEach((index, identifier) ->
-                    ServerPlayNetworking.send(thisPlayer, new BackgroundSpriteSyncS2CPacket(menu.containerId, index, identifier)));
+        if (menu instanceof BackgroundSpriteSyncServer background) {
+            background.getBackgroundSprite().forEach((index, identifier) ->
+                    ServerPlayNetworking.send(this.self, new BackgroundSpriteSyncS2CPacket(menu.containerId, index, identifier)));
+        }
+        if (menu instanceof AbstractPlayerInventoryScreenHandler<?>) {
+            PlayerUtils.sendNetworkPacket(this.self, new OldPlayerInventoryScreenSyncS2CPacket(menu.containerId));
         }
     }
 

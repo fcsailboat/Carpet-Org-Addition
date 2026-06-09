@@ -11,7 +11,9 @@ import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.debug.client.render.HudDebugRendererRegister;
 import boat.carpetorgaddition.network.s2c.*;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncSlot;
+import boat.carpetorgaddition.wheel.screen.OldVersionPlayerInventoryScreenClientSide;
 import boat.carpetorgaddition.wheel.screen.UnavailableSlotClientSide;
 import boat.carpetorgaddition.wheel.screen.WithButtonScreenClientSide;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -80,6 +82,13 @@ public class CarpetOrgAdditionClientRegister {
             AbstractContainerMenu screen = context.player().containerMenu;
             if (screen.containerId == payload.syncId() && screen instanceof WithButtonScreenClientSide packet) {
                 packet.carpet_Org_Addition$setWithButton();
+            }
+        });
+        ClientPlayNetworking.registerGlobalReceiver(OldPlayerInventoryScreenSyncS2CPacket.ID, (payload, context) -> {
+            AbstractContainerMenu screen = PlayerUtils.getCurrentScreen(context.player());
+            int containerId = screen.containerId;
+            if (containerId == payload.syncId() && screen instanceof OldVersionPlayerInventoryScreenClientSide clientSide) {
+                clientSide.carpet_Org_Addition$setOldPlayerInventoryScreen();
             }
         });
         // 背景精灵同步数据包
