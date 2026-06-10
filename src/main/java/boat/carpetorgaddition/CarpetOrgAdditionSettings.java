@@ -1051,7 +1051,6 @@ public class CarpetOrgAdditionSettings {
      * <p>
      * 该功能是不完善的，它仅支持常规物品使用和工具损坏补货，但不支持以下物品使用的补货：
      * <ul>
-     * <li>触发不死图腾</li>
      * <li>盔甲损坏</li>
      * </ul>
      * </p>

@@ -54,6 +54,15 @@ public abstract class LivingEntityMixin {
         original.call(instance, hand, itemStack);
     }
 
+    @WrapOperation(method = "checkTotemDeathProtection", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
+    private void restock(ItemStack instance, int amount, Operation<Void> original, @Local(name = "hand") InteractionHand hand) {
+        ItemStack copy = instance.copy();
+        original.call(instance, amount);
+        if ((Object) this instanceof EntityPlayerMPFake fakePlayer) {
+            this.restock(copy, instance, hand, fakePlayer);
+        }
+    }
+
     @Unique
     private boolean restock(ItemStack copy, ItemStack itemStack, InteractionHand hand, EntityPlayerMPFake fakePlayer) {
         if (FakePlayerActionManager.IN_ACTION.orElse(false)) {
