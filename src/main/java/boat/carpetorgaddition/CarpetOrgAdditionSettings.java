@@ -492,7 +492,6 @@ public class CarpetOrgAdditionSettings {
                     .build()
     );
 
-    // TODO 可能不会影响安全挂机
     /**
      * 更好的不死图腾
      */

@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jspecify.annotations.NonNull;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +36,8 @@ import java.util.Map;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+    @Unique
+    protected final ScopedValue<MutableBoolean> useTotemOfUndying = ScopedValue.newInstance();
     @Unique
     private final LivingEntity self = (LivingEntity) (Object) this;
 
@@ -69,6 +72,15 @@ public abstract class LivingEntityMixin {
     @Expression("itemStack != null")
     @ModifyExpressionValue(method = "checkTotemDeathProtection", at = @At("MIXINEXTRAS:EXPRESSION"))
     private boolean tryUseTotem(boolean original, @Local(name = "protectionItem") LocalRef<ItemStack> stackRef, @Local(name = "protection") LocalRef<DeathProtection> componentRef) {
+        boolean success = this.canTriggerTotemOfUndying(original, stackRef, componentRef);
+        if (success && this.useTotemOfUndying.isBound()) {
+            this.useTotemOfUndying.get().setTrue();
+        }
+        return success;
+    }
+
+    @Unique
+    private boolean canTriggerTotemOfUndying(boolean original, LocalRef<ItemStack> stackRef, LocalRef<DeathProtection> componentRef) {
         if (original) {
             return true;
         }
