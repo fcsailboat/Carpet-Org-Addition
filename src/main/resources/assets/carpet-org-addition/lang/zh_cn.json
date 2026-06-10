@@ -248,6 +248,8 @@
   "carpet.rule.openPlayerInventory.extra.3": "any_player：允许打开任意玩家物品栏",
   "carpet.rule.truePeacefulMode.name": "真正的和平模式",
   "carpet.rule.truePeacefulMode.desc": "生物不会与玩家敌对",
+  "carpet.rule.fakePlayerAutoRestock.name": "假玩家自动补货",
+  "carpet.rule.fakePlayerAutoRestock.desc": "允许假玩家在物品缺货时自动补充物品",
   "carpet-org-addition.rule.message.disableRespawnBlocksExplode": "已禁用重生方块爆炸",
   "carpet-org-addition.rule.message.CCEUpdateSuppression": "你不能打开用于更新抑制的潜影盒",
   "carpet-org-addition.rule.message.displayPlayerSummoner": "↑由%s召唤",

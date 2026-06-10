@@ -298,6 +298,9 @@ public class InventoryUtils {
                 return;
             }
             int shortage = Math.min(retain.getMaxStackSize() - retain.getCount(), sacrifice.getCount());
+            if (shortage == 0) {
+                return;
+            }
             retain.grow(shortage);
             sacrifice.shrink(shortage);
         } else {
@@ -513,5 +516,19 @@ public class InventoryUtils {
                 },
                 list -> new SimpleContainer(list.toArray(ItemStack[]::new))
         );
+    }
+
+    /**
+     * @return 物品是否即将损坏且具有经验修补附魔
+     */
+    public static boolean isFragileWithMending(ItemStack itemStack) {
+        return isFragile(itemStack) && EnchantmentUtils.canRepairWithXp(itemStack);
+    }
+
+    public static boolean isFragile(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        return itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10;
     }
 }

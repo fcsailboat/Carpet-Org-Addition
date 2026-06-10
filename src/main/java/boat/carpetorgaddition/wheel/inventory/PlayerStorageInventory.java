@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
-import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.ItemIdentity;
@@ -278,7 +277,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
                 return itemStack.getItem().canDestroyBlock(player.getMainHandItem(), blockState, world, blockPos, player);
             }
             // 不使用低耐久工具
-            if (this.isFragileWithMending(itemStack)) {
+            if (InventoryUtils.isFragileWithMending(itemStack)) {
                 return false;
             }
             return itemStack.getDestroySpeed(blockState) > 1F;
@@ -287,17 +286,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
             return;
         }
         // 工具没有切换成功，使用其他物品替换手上工具以避免工具损坏
-        this.replenish(itemStack -> !this.isFragileWithMending(itemStack));
-    }
-
-    /**
-     * @return 物品是否即将损坏且具有经验修补附魔
-     */
-    private boolean isFragileWithMending(ItemStack itemStack) {
-        if (itemStack.isEmpty()) {
-            return false;
-        }
-        return itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10 && EnchantmentUtils.canRepairWithXp(itemStack);
+        this.replenish(itemStack -> !InventoryUtils.isFragileWithMending(itemStack));
     }
 
     /**
@@ -317,13 +306,13 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
         boolean pickItemFromShulker = CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value();
         ArrayList<Integer> shulkers = new ArrayList<>();
         // 当前手槽位
-        int headSlot = this.getHandSlotIndex(hand);
+        int handSlot = this.getHandSlotIndex(hand);
         for (int i = 0; i < this.getContainerSize(); i++) {
-            if (i == headSlot) {
+            if (i == handSlot) {
                 continue;
             }
             if (predicate.test(this.getItem(i))) {
-                this.swap(i, headSlot);
+                this.swap(i, handSlot);
                 return true;
             } else if (pickItemFromShulker) {
                 ItemStack shulker = this.getItem(i);
