@@ -544,18 +544,6 @@ _值可以为负数，表示向内收缩指定格数_<br>
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
 
-### 可高亮方块坐标(canHighlightBlockPos)
-
-在方块坐标文本右侧添加一个按钮用来单击高亮方块坐标<br>
-_false：禁用本条规则_<br>
-_ommc：使用OMMC的高亮路径点_<br>
-_default：使用CarpetOrgAddition的高亮路径点_<br>
-
-- 类型：`枚举`
-- 默认值：`default`
-- 参考选项：`false`，`ommc`，`default`
-- 分类：`Org`，`生存`，`客户端`
-
 ### 玩家管理器(commandPlayerManager)
 
 启用/playerManager命令用来管理假玩家快速上线

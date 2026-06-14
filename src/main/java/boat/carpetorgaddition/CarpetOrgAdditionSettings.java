@@ -621,6 +621,7 @@ public class CarpetOrgAdditionSettings {
             RuleFactory.of("canHighlightBlockPos", CanHighlightBlockPos.DEFAULT)
                     .addCategories(RuleCategory.SURVIVAL)
                     .setClient()
+                    .setRemoved()
                     .build()
     );
 
