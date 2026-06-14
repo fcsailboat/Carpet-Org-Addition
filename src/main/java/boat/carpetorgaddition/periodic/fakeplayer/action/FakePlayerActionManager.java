@@ -19,6 +19,7 @@ public class FakePlayerActionManager {
      * 调试用途，用于手动抛出异常
      */
     private String debugExceptionMessage = null;
+    public static final ScopedValue<Boolean> IN_ACTION = ScopedValue.newInstance();
 
     public FakePlayerActionManager(EntityPlayerMPFake fakePlayer) {
         this.fakePlayer = fakePlayer;
@@ -35,7 +36,7 @@ public class FakePlayerActionManager {
                 }
             }
             // 根据假玩家动作类型执行动作
-            this.action.execute();
+            ScopedValue.where(IN_ACTION, true).run(() -> this.action.execute());
         } catch (RuntimeException e) {
             CarpetOrgAddition.LOGGER.error(
                     "{} encountered an unexpected error while executing '{}': ",

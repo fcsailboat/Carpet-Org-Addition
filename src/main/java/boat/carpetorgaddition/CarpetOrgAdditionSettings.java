@@ -1046,6 +1046,22 @@ public class CarpetOrgAdditionSettings {
                     .build()
     );
 
+    /**
+     * 假玩家自动补货<br>
+     * <p>
+     * 该功能是不完善的，它仅支持常规物品使用和工具损坏补货，但不支持以下物品使用的补货：
+     * <ul>
+     * <li>盔甲损坏</li>
+     * </ul>
+     * </p>
+     */
+    public static final RuleAccessor<Boolean> FAKE_PLAYER_AUTO_RESTOCK = register(
+            RuleFactory.of("fakePlayerAutoRestock", false)
+                    .addCategories(RuleCategory.SURVIVAL)
+                    .setHidden()
+                    .build()
+    );
+
     private static <T> RuleAccessor<T> register(RuleContext<T> context) {
         RULES.add(context);
         return new RuleAccessor<>(context);

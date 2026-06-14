@@ -1,6 +1,8 @@
 package boat.carpetorgaddition.network;
 
+import boat.carpetorgaddition.network.c2s.LibrarianCommodityQueryC2SPacket;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket;
+import boat.carpetorgaddition.network.handler.LibrarianCommodityPacketHandler;
 import boat.carpetorgaddition.network.handler.ObjectSearchTaskPacketHandler;
 import boat.carpetorgaddition.network.s2c.*;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -25,8 +27,14 @@ public class NetworkPacketRegister {
         PayloadTypeRegistry.clientboundPlay().register(BackgroundSpriteSyncS2CPacket.ID, BackgroundSpriteSyncS2CPacket.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(FakePlayerPathfinderS2CPacket.ID, FakePlayerPathfinderS2CPacket.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(PlayerTypeSyncS2CPacket.ID, PlayerTypeSyncS2CPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(LibrarianCommodityResponseS2CPacket.ID, LibrarianCommodityResponseS2CPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(LibrarianCommodityCacheInvalidationS2CPacket.ID, LibrarianCommodityCacheInvalidationS2CPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(LibrarianCommodityFunctionS2CPacket.ID, LibrarianCommodityFunctionS2CPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(OldPlayerInventoryScreenSyncS2CPacket.ID, OldPlayerInventoryScreenSyncS2CPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(ObjectSearchTaskC2SPacket.ID, ObjectSearchTaskC2SPacket.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(LibrarianCommodityQueryC2SPacket.ID, LibrarianCommodityQueryC2SPacket.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ObjectSearchTaskC2SPacket.ID, new ObjectSearchTaskPacketHandler());
+        ServerPlayNetworking.registerGlobalReceiver(LibrarianCommodityQueryC2SPacket.ID, new LibrarianCommodityPacketHandler());
     }
 
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> ofType(String id) {

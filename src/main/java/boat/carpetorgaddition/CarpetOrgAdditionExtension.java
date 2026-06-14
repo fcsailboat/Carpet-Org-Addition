@@ -5,11 +5,14 @@ import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.command.SpectatorCommand;
 import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.logger.Loggers;
+import boat.carpetorgaddition.network.handler.LibrarianCommodityPacketHandler;
+import boat.carpetorgaddition.network.s2c.LibrarianCommodityFunctionS2CPacket;
 import boat.carpetorgaddition.network.s2c.PlayerTypeSyncS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.parcel.ParcelManager;
 import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.GameProfileCache;
@@ -78,6 +81,13 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
         // 加载假玩家安全挂机
         PlayerManagerCommand.loadSafeAfk(player);
         this.teleportSpectatorPlayer(player, server);
+        this.syncPlayerType(player, coordinator, server);
+        if (PlayerUtils.isRealPlayer(player) && Loggers.LIBRARIAN.isSubscribed(player)) {
+            PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityFunctionS2CPacket(true));
+        }
+    }
+
+    private void syncPlayerType(ServerPlayer player, ServerComponentCoordinator coordinator, MinecraftServer server) {
         switch (player) {
             case EntityPlayerMPFake fakePlayer -> {
                 coordinator.getSavedFakePlayer().put(fakePlayer);
@@ -128,6 +138,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
                     .forEach(realPlayer -> ServerPlayNetworking.send(realPlayer, new PlayerTypeSyncS2CPacket(player.getUUID(), false)));
         }
         PlayerStorageInventory.cleanupStaleEntries();
+        LibrarianCommodityPacketHandler.cleanupStaleEntries();
     }
 
     /**

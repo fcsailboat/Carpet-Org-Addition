@@ -19,6 +19,7 @@ import boat.carpetorgaddition.wheel.screen.CraftingSetRecipeScreenHandler;
 import boat.carpetorgaddition.wheel.screen.StonecutterSetRecipeScreenHandler;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -29,26 +30,40 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument.Result;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class PlayerActionCommand extends AbstractServerCommand {
     private static final CommandPermission AI_PERMISSION = PermissionManager.registerHiddenCommand("playerAction.player.bedrock.ai", PermissionLevel.PASS);
@@ -131,7 +146,40 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                 .requires(_ -> CarpetOrgAddition.isDebugMode())
                                 .executes(context -> this.raise(context, null))
                                 .then(Commands.argument("message", StringArgumentType.string())
-                                        .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))));
+                                        .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
+                        .then(Commands.literal("librarian")
+                                .then(Commands.argument("jobSite", BlockPosArgument.blockPos())
+                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                                .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
+                                                .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                                        .suggests(PlayerActionCommand::suggestEnchantmentLevel)
+                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                .suggests(suggestMixPrice(false))
+                                                                .executes(context -> this.setLibrarianTradeFind(context, IntegerArgumentType.getInteger(context, "level"), IntegerArgumentType.getInteger(context, "price")))))
+                                                .then(Commands.literal("max")
+                                                        .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
+                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                .suggests(suggestMixPrice(true))
+                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))));
+    }
+
+    private static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
+        return (context, builder) -> {
+            Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+            int level = maxLevel ? holder.value().getMaxLevel() : IntegerArgumentType.getInteger(context, "level");
+            Int2IntMap.Entry range = LibrarianTradeFindAction.getPriceRange(holder, level);
+            int min = range.getIntKey();
+            if (min > 64) {
+                return null;
+            }
+            return SharedSuggestionProvider.suggest(Stream.of(min).map(String::valueOf), builder);
+        };
+    }
+
+    private static CompletableFuture<Suggestions> suggestEnchantmentLevel(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+        Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+        int maxLevel = holder.value().getMaxLevel();
+        return SharedSuggestionProvider.suggest(IntStream.rangeClosed(1, maxLevel).mapToObj(Integer::toString), builder);
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> thenSorting() {
@@ -475,7 +523,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         return 1;
     }
 
-    // 打开控制假人合成物品的GUI
+    // 打开控制假玩家合成物品的GUI
     private int openFakePlayerCraftGui(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
@@ -502,6 +550,62 @@ public class PlayerActionCommand extends AbstractServerCommand {
             return 1;
         }
         return 0;
+    }
+
+    private int setLibrarianTradeFind(CommandContext<CommandSourceStack> context, int level, int price) throws CommandSyntaxException {
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+        BlockPos blockPos = BlockPosArgument.getBlockPos(context, "jobSite");
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
+        long startTime = ServerUtils.getTime(server);
+        LibrarianTradeFindAction action = new LibrarianTradeFindAction(fakePlayer, blockPos, holder, level, price, startTime);
+        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
+        FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
+        actionManager.setAction(action);
+        LocalizationKey reason = LibrarianTradeFindAction.KEY.then("reason");
+        ArrayList<Component> list = new ArrayList<>();
+        int maxLevel = holder.value().getMaxLevel();
+        if (level != -1 && level > maxLevel) {
+            list.add(reason
+                    .then("level")
+                    .builder(level, maxLevel)
+                    .setColor(ChatFormatting.GRAY)
+                    .build());
+        }
+        int minPrice = LibrarianTradeFindAction.getPriceRange(holder, level == -1 ? maxLevel : level).getIntKey();
+        if (price != -1 && price < minPrice) {
+            list.add(reason
+                    .then("price")
+                    .builder(price, minPrice)
+                    .setColor(ChatFormatting.GRAY)
+                    .build());
+        }
+        switch (list.size()) {
+            case 0 -> {
+            }
+            case 1 -> {
+                Component message = LibrarianTradeFindAction.KEY.then("unfeasible").then("short").translate(list.getFirst());
+                MessageUtils.sendMessage(source, message);
+            }
+            default -> {
+                Component head = LibrarianTradeFindAction.KEY.then("unfeasible").then("short").translate("");
+                MessageUtils.sendEmptyMessage(source);
+                MessageUtils.sendMessage(source, head);
+                for (int i = 0; i < list.size(); i++) {
+                    TextJoiner joiner = new TextJoiner();
+                    Component each = joiner
+                            .append(i + 1)
+                            .append(". ")
+                            .append(list.get(i))
+                            .builder()
+                            .setColor(ChatFormatting.GRAY)
+                            .build();
+                    MessageUtils.sendMessage(source, each);
+                }
+            }
+        }
+        return 1;
     }
 
     @Override

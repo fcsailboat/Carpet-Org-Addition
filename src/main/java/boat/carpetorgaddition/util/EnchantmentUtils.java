@@ -1,10 +1,15 @@
 package boat.carpetorgaddition.util;
 
+import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -12,6 +17,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.EnchantmentTags;
@@ -94,6 +100,7 @@ public class EnchantmentUtils {
     /**
      * @return 获取一个附魔的名字，不带等级
      */
+    @Deprecated
     public static Component getName(Enchantment enchantment) {
         TextBuilder builder = TextBuilder.of(enchantment.description());
         Holder<Enchantment> entry = Holder.direct(enchantment);
@@ -107,6 +114,7 @@ public class EnchantmentUtils {
      * @param level 附魔的等级
      * @return 获取一个附魔的名字，带有等级
      */
+    @Deprecated
     public static Component getName(Enchantment enchantment, int level) {
         TextJoiner joiner = new TextJoiner();
         joiner.append(getName(enchantment));
@@ -114,6 +122,29 @@ public class EnchantmentUtils {
             joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
         }
         return joiner.join();
+    }
+
+    public static Component getName(Holder<Enchantment> holder) {
+        TextBuilder builder = TextBuilder.of(holder.value().description());
+        // 如果是诅咒附魔，设置为红色，否则，设置为灰色
+        ChatFormatting color = holder.is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.GRAY;
+        builder.setColor(color);
+        return builder.build();
+    }
+
+    public static Component getName(Holder<Enchantment> holder, int level) {
+        TextJoiner joiner = new TextJoiner();
+        joiner.append(holder.value().description());
+        if (level != 1 || holder.value().getMaxLevel() != 1) {
+            joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
+        }
+        return TextBuilder.of(joiner.join())
+                .setColor(holder.is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.GRAY)
+                .build();
+    }
+
+    public static int getMaxLevel(Holder.Reference<Enchantment> enchantment) {
+        return enchantment.value().getMaxLevel();
     }
 
     /**
@@ -128,5 +159,17 @@ public class EnchantmentUtils {
             }
         }
         return false;
+    }
+
+    public static Optional<Holder.Reference<Enchantment>> parse(MinecraftServer server, Identifier id) {
+        CommandRegistryAccessor accessor = (CommandRegistryAccessor) server.getCommands();
+        CommandBuildContext access = accessor.carpet_Org_Addition$getAccess();
+        ResourceArgument<Enchantment> resourced = ResourceArgument.resource(access, Registries.ENCHANTMENT);
+        try {
+            Holder.Reference<Enchantment> enchantment = resourced.parse(new StringReader(id.toString()));
+            return Optional.of(enchantment);
+        } catch (CommandSyntaxException e) {
+            return Optional.empty();
+        }
     }
 }

@@ -14,6 +14,15 @@ import java.util.Optional;
 
 @Mixin(value = LoggerRegistry.class, remap = false)
 public class LoggerRegistryMixin {
+    // 记录器订阅事件
+    @Inject(method = "subscribePlayer", at = @At(value = "INVOKE", target = "Lcarpet/logging/Logger;addPlayer(Ljava/lang/String;Ljava/lang/String;)V"))
+    private static void subscribePlayer(String playerName, String logName, String option, CallbackInfo ci) {
+        ServerUtils.getCurrentServer()
+                .map(MinecraftServer::getPlayerList)
+                .map(list -> list.getPlayerByName(playerName))
+                .ifPresent(player -> Loggers.getLogger(logName).ifPresent(accessor -> accessor.onSubscribe(player)));
+    }
+
     // 记录器取消订阅事件
     @Inject(method = "unsubscribePlayer", at = @At(value = "INVOKE", target = "Ljava/util/Map;size()I"))
     private static void unsubscribePlayer(String playerName, String logName, CallbackInfo ci) {

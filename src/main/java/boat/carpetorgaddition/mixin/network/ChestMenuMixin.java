@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.mixin.network;
 
+import boat.carpetorgaddition.wheel.screen.AbstractPlayerInventoryScreenHandler;
 import boat.carpetorgaddition.wheel.screen.WithButtonPlayerInventoryScreenHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -21,8 +22,11 @@ public class ChestMenuMixin extends ScreenHandlerMixin {
     @Environment(EnvType.CLIENT)
     @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true)
     private void quickMove(Player player, int slotIndex, CallbackInfoReturnable<ItemStack> cir) {
+        ChestMenu menu = (ChestMenu) (Object) this;
         if (this.carpet_Org_Addition$isWithButton()) {
-            cir.setReturnValue(WithButtonPlayerInventoryScreenHandler.quickMoveStack((ChestMenu) (Object) this, slotIndex));
+            cir.setReturnValue(WithButtonPlayerInventoryScreenHandler.quickMoveStack(menu, slotIndex));
+        } else if (this.carpet_Org_Addition$isOldPlayerInventoryScreen()) {
+            cir.setReturnValue(AbstractPlayerInventoryScreenHandler.quickMove(menu, slotIndex));
         }
     }
 }

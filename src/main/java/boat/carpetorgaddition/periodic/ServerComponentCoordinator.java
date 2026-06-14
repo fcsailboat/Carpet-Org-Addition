@@ -8,6 +8,7 @@ import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.rule.CustomRuleValueManager;
 import boat.carpetorgaddition.rule.RuleConfig;
 import boat.carpetorgaddition.wheel.inventory.FabricPlayerAccessManager;
+import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
@@ -40,6 +41,7 @@ public class ServerComponentCoordinator {
     private final RuleConfig ruleConfig;
     private final DialogProvider dialogProvider;
     private final FakePlayerResidents fakePlayerResidents;
+    private final LibrarianVillagerPoiCache librarianVillagerPoiCache;
     public static final ScopedValue<MinecraftServer> SERVER_INSTANCE = ScopedValue.newInstance();
 
     public ServerComponentCoordinator(MinecraftServer server) {
@@ -52,6 +54,7 @@ public class ServerComponentCoordinator {
         this.ruleConfig = new RuleConfig(server);
         this.dialogProvider = new DialogProvider(server);
         this.fakePlayerResidents = new FakePlayerResidents(server);
+        librarianVillagerPoiCache = new LibrarianVillagerPoiCache(server);
     }
 
     /**
@@ -106,6 +109,10 @@ public class ServerComponentCoordinator {
 
     public FakePlayerResidents getSavedFakePlayer() {
         return this.fakePlayerResidents;
+    }
+
+    public LibrarianVillagerPoiCache getLibrarianVillagerPoiCache() {
+        return this.librarianVillagerPoiCache;
     }
 
     private void onServerSave() {

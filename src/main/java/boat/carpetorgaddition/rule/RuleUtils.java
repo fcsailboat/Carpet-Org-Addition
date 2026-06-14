@@ -2,6 +2,7 @@ package boat.carpetorgaddition.rule;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.exception.ProductionEnvironmentError;
 import boat.carpetorgaddition.mixin.accessor.DamageTrackerAccessor;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -51,7 +52,7 @@ public class RuleUtils {
 
     static {
         if (!CarpetOrgAddition.isDebugMode() && NON_EMPTY_SHULKER_BOX_STACKABLE) {
-            throw new AssertionError();
+            ProductionEnvironmentError.fail();
         }
     }
 
@@ -173,6 +174,6 @@ public class RuleUtils {
         return instance instanceof ItemStack itemStack
                && CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value()
                && InventoryUtils.isShulkerBoxItem(itemStack)
-               && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isNonOrEmptyContainer(itemStack));
+               && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isNonOrEmptyContainer(itemStack, false));
     }
 }

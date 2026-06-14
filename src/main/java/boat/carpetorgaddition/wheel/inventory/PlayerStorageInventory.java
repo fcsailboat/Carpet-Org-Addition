@@ -3,11 +3,13 @@ package boat.carpetorgaddition.wheel.inventory;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.ItemIdentity;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.fabric.api.entity.FakePlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -15,6 +17,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jspecify.annotations.NullMarked;
 
@@ -264,6 +268,28 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
     }
 
     /**
+     * 将挖掘指定方块的不是即将损坏的合适工具移动至主手
+     */
+    public void switchToAppropriateTool(Level world, BlockPos blockPos) {
+        BlockState blockState = world.getBlockState(blockPos);
+        boolean replenishSuccess = this.replenish(itemStack -> {
+            if (this.player.isCreative()) {
+                return itemStack.getItem().canDestroyBlock(player.getMainHandItem(), blockState, world, blockPos, player);
+            }
+            // 不使用低耐久工具
+            if (InventoryUtils.isFragileWithMending(itemStack)) {
+                return false;
+            }
+            return itemStack.getDestroySpeed(blockState) > 1F;
+        });
+        if (replenishSuccess) {
+            return;
+        }
+        // 工具没有切换成功，使用其他物品替换手上工具以避免工具损坏
+        this.replenish(itemStack -> !InventoryUtils.isFragileWithMending(itemStack));
+    }
+
+    /**
      * 将指定物品栏移动到主手
      *
      * @return 是否移动成功
@@ -280,13 +306,13 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
         boolean pickItemFromShulker = CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value();
         ArrayList<Integer> shulkers = new ArrayList<>();
         // 当前手槽位
-        int headSlot = this.getHandSlotIndex(hand);
+        int handSlot = this.getHandSlotIndex(hand);
         for (int i = 0; i < this.getContainerSize(); i++) {
-            if (i == headSlot) {
+            if (i == handSlot) {
                 continue;
             }
             if (predicate.test(this.getItem(i))) {
-                this.swap(i, headSlot);
+                this.swap(i, handSlot);
                 return true;
             } else if (pickItemFromShulker) {
                 ItemStack shulker = this.getItem(i);
@@ -403,6 +429,23 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
                 return true;
             }
             if (pickItemFromShulker && InventoryUtils.contains(itemStack, predicate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasMaterial(ItemIdentity identity, int count, boolean offHand) {
+        int sum = 0;
+        ItemStack offhandItem = this.getPlayer().getOffhandItem();
+        for (ItemStack itemStack : this) {
+            if (offHand && itemStack == offhandItem) {
+                continue;
+            }
+            if (identity.is(itemStack)) {
+                sum += itemStack.getCount();
+            }
+            if (sum >= count) {
                 return true;
             }
         }

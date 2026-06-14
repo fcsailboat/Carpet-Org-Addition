@@ -46,6 +46,10 @@ public final class ItemIdentity {
         return components;
     }
 
+    public boolean is(ItemStack itemStack) {
+        return this.item == itemStack.getItem() && this.components.equals(itemStack.getComponentsPatch());
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

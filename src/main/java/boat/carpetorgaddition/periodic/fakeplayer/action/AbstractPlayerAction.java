@@ -7,6 +7,7 @@ import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Contract;
@@ -161,4 +162,19 @@ public abstract class AbstractPlayerAction {
 
     @Override
     public abstract int hashCode();
+
+    public static JsonObject toJson(BlockPos blockPos) {
+        JsonObject json = new JsonObject();
+        json.addProperty("x", blockPos.getX());
+        json.addProperty("y", blockPos.getY());
+        json.addProperty("z", blockPos.getZ());
+        return json;
+    }
+
+    public static BlockPos fromJson(JsonObject json) {
+        int x = json.get("x").getAsInt();
+        int y = json.get("y").getAsInt();
+        int z = json.get("z").getAsInt();
+        return new BlockPos(x, y, z);
+    }
 }

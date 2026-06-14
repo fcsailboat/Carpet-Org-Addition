@@ -4,13 +4,16 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.client.command.ClientCommandRegister;
 import boat.carpetorgaddition.client.render.PathfinderRenderComponent;
 import boat.carpetorgaddition.client.render.WorldComponentRenderer;
+import boat.carpetorgaddition.client.render.hud.LibrarianCommodityTooltip;
 import boat.carpetorgaddition.client.render.waypoint.NavigatorWaypoint;
 import boat.carpetorgaddition.client.render.waypoint.Waypoint;
 import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.debug.client.render.HudDebugRendererRegister;
 import boat.carpetorgaddition.network.s2c.*;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncSlot;
+import boat.carpetorgaddition.wheel.screen.OldVersionPlayerInventoryScreenClientSide;
 import boat.carpetorgaddition.wheel.screen.UnavailableSlotClientSide;
 import boat.carpetorgaddition.wheel.screen.WithButtonScreenClientSide;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -81,6 +84,13 @@ public class CarpetOrgAdditionClientRegister {
                 packet.carpet_Org_Addition$setWithButton();
             }
         });
+        ClientPlayNetworking.registerGlobalReceiver(OldPlayerInventoryScreenSyncS2CPacket.ID, (payload, context) -> {
+            AbstractContainerMenu screen = PlayerUtils.getCurrentScreen(context.player());
+            int containerId = screen.containerId;
+            if (containerId == payload.syncId() && screen instanceof OldVersionPlayerInventoryScreenClientSide clientSide) {
+                clientSide.carpet_Org_Addition$setOldPlayerInventoryScreen();
+            }
+        });
         // 背景精灵同步数据包
         ClientPlayNetworking.registerGlobalReceiver(BackgroundSpriteSyncS2CPacket.ID, (payload, context) -> {
             AbstractContainerMenu screen = context.player().containerMenu;
@@ -107,6 +117,9 @@ public class CarpetOrgAdditionClientRegister {
                 WorldComponentRenderer.add(WorldComponentRenderer.ENTITY_ID_KEY, id, new PathfinderRenderComponent(id, packet.getVec3List()));
             }
         });
+        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityResponseS2CPacket.ID, (payload, _) -> LibrarianCommodityTooltip.getInstance().setOffers(payload.entry()));
+        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityCacheInvalidationS2CPacket.ID, (_, _) -> LibrarianCommodityTooltip.getInstance().failure());
+        ClientPlayNetworking.registerGlobalReceiver(LibrarianCommodityFunctionS2CPacket.ID, (payload, _) -> LibrarianCommodityTooltip.getInstance().setEnable(payload.enable()));
     }
 
     /**
@@ -116,6 +129,7 @@ public class CarpetOrgAdditionClientRegister {
         // 注册路径点渲染器
         LevelRenderEvents.COLLECT_SUBMITS.register(context -> WaypointRenderer.getInstance().render(context));
         LevelRenderEvents.COLLECT_SUBMITS.register(WorldComponentRenderer::render);
+        LibrarianCommodityTooltip.init();
     }
 
     /**

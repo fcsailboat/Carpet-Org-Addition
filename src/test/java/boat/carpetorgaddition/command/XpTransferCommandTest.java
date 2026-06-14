@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.command;
 
-import boat.carpetorgaddition.wheel.ExperienceTransfer;
+import boat.carpetorgaddition.wheel.misc.ExperienceTransfer;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.*;
 

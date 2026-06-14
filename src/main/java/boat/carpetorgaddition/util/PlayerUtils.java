@@ -10,6 +10,7 @@ import carpet.api.settings.SettingsManager;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -23,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -48,6 +51,10 @@ public class PlayerUtils {
     public static void openScreenHandler(Player player, MenuConstructor baseFactory, Component name) {
         SimpleMenuProvider factory = new SimpleMenuProvider(baseFactory, name);
         player.openMenu(factory);
+    }
+
+    public static AbstractContainerMenu getCurrentScreen(Player player) {
+        return player.containerMenu;
     }
 
     /**
@@ -198,5 +205,21 @@ public class PlayerUtils {
             case OFF_HAND -> EntityPlayerActionPack.ActionType.USE;
         };
         actionPack.start(type, EntityPlayerActionPack.Action.once());
+    }
+
+    public static boolean isRealPlayer(ServerPlayer player) {
+        return switch (player) {
+            case EntityPlayerMPFake _, FakePlayer _ -> false;
+            case ServerPlayer _ -> true;
+        };
+    }
+
+    public static void useItemOn(ServerPlayer player, final BlockHitResult hitResult) {
+        useItemOn(player, ServerUtils.getWorld(player), InteractionHand.MAIN_HAND, hitResult);
+    }
+
+    public static void useItemOn(ServerPlayer player, Level world, final InteractionHand hand, final BlockHitResult hitResult) {
+        ItemStack itemStack = player.getItemInHand(hand);
+        player.gameMode.useItemOn(player, world, itemStack, hand, hitResult);
     }
 }

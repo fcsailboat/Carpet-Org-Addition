@@ -2,14 +2,17 @@ package boat.carpetorgaddition.mixin.command;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.KillMeCommand;
+import boat.carpetorgaddition.mixin.rule.LivingEntityMixin;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerSafeAfkInterface;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.ChatFormatting;
@@ -17,11 +20,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerEntityMixin implements FakePlayerSafeAfkInterface {
+public abstract class ServerPlayerEntityMixin extends LivingEntityMixin implements FakePlayerSafeAfkInterface {
     @Unique
     private final ServerPlayer self = (ServerPlayer) (Object) this;
 
@@ -44,6 +47,11 @@ public abstract class ServerPlayerEntityMixin implements FakePlayerSafeAfkInterf
         if (this.safeAfkThreshold > 0 && this.self instanceof EntityPlayerMPFake) {
             safeAfk(source, damage);
         }
+    }
+
+    @WrapMethod(method = "hurtServer")
+    private boolean hurtServer(ServerLevel level, DamageSource source, float damage, Operation<Boolean> original) {
+        return ScopedValue.where(this.useTotemOfUndying, new MutableBoolean(false)).call(() -> original.call(level, source, damage));
     }
 
     @WrapOperation(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;getDeathMessage()Lnet/minecraft/network/chat/Component;"))
@@ -103,43 +111,55 @@ public abstract class ServerPlayerEntityMixin implements FakePlayerSafeAfkInterf
     // 假玩家是否可以触发图腾
     @Unique
     private boolean canTriggerTotemOfUndying(DamageSource source) {
+        if (this.useTotemOfUndying.isBound() && this.useTotemOfUndying.get().booleanValue()) {
+            return true;
+        }
         // 无法触发不死图腾的伤害类型
         if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         }
-        switch (CarpetOrgAdditionSettings.BETTER_TOTEM_OF_UNDYING.value()) {
-            case VANILLA: {
-                // 主手或副手有不死图腾
-                if (self.getMainHandItem().is(Items.TOTEM_OF_UNDYING)) {
-                    return true;
-                }
-                if (self.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) {
-                    return true;
-                }
-                break;
+        return switch (CarpetOrgAdditionSettings.BETTER_TOTEM_OF_UNDYING.value()) {
+            case VANILLA -> this.hasTotemOfUndyingInHand();
+            case INVENTORY -> this.hasTotemOfUndyingInHandOrInventory();
+            case INVENTORY_WITH_SHULKER_BOX -> this.hasTotemOfUndyingInHandOrInventoryWithShulkerBox();
+        };
+    }
+
+    @Unique
+    private boolean hasTotemOfUndyingInHand() {
+        for (InteractionHand hand : InteractionHand.values()) {
+            // 主手或副手有不死图腾
+            if (InventoryUtils.isTotemItem(this.self.getItemInHand(hand))) {
+                return true;
             }
-            case INVENTORY_WITH_SHULKER_BOX: {
-                // 检查潜影盒中是否有不死图腾
-                Inventory inventory = self.getInventory();
-                for (int i = 0; i < inventory.getContainerSize(); i++) {
-                    ItemStack itemStack = inventory.getItem(i);
-                    if (InventoryUtils.contains(itemStack, stack -> stack.is(Items.TOTEM_OF_UNDYING))) {
-                        return true;
-                    }
-                }
+        }
+        return false;
+    }
+
+    @Unique
+    private boolean hasTotemOfUndyingInHandOrInventory() {
+        if (this.hasTotemOfUndyingInHand()) {
+            return true;
+        }
+        for (ItemStack itemStack : PlayerStorageInventory.of(this.self).getStorage()) {
+            if (InventoryUtils.isTotemItem(itemStack)) {
+                return true;
             }
-            case INVENTORY: {
-                // 物品栏中有不死图腾
-                Inventory inventory = self.getInventory();
-                for (int i = 0; i < inventory.getContainerSize(); i++) {
-                    if (inventory.getItem(i).is(Items.TOTEM_OF_UNDYING)) {
-                        return true;
-                    }
-                }
-                break;
+        }
+        return false;
+    }
+
+    @Unique
+    private boolean hasTotemOfUndyingInHandOrInventoryWithShulkerBox() {
+        if (this.hasTotemOfUndyingInHand()) {
+            return true;
+        }
+        for (ItemStack itemStack : PlayerStorageInventory.of(this.self).getStorage()) {
+            if (InventoryUtils.isTotemItem(itemStack)) {
+                return true;
+            } else if (InventoryUtils.isShulkerBoxItem(itemStack) && InventoryUtils.contains(itemStack, InventoryUtils::isTotemItem)) {
+                return true;
             }
-            default:
-                throw new IllegalStateException();
         }
         return false;
     }

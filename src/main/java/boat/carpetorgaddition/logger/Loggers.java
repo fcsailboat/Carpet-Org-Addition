@@ -2,6 +2,7 @@ package boat.carpetorgaddition.logger;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
+import boat.carpetorgaddition.network.s2c.LibrarianCommodityFunctionS2CPacket;
 import boat.carpetorgaddition.util.PlayerUtils;
 import carpet.logging.LoggerRegistry;
 
@@ -45,6 +46,16 @@ public class Loggers {
                     .setType(LoggerType.FUNCTION)
                     .setHidden(true)
                     .setUnsubscribeCallback(player -> PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of()))
+                    .build()
+    );
+    /**
+     * 图书管理员附魔书交易
+     */
+    public static final LoggerAccessor LIBRARIAN = register(
+            LoggerBuilder.of("librarian")
+                    .setType(LoggerType.FUNCTION)
+                    .setSubscribeCallback(player -> PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityFunctionS2CPacket(true)))
+                    .setUnsubscribeCallback(player -> PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityFunctionS2CPacket(false)))
                     .build()
     );
 
