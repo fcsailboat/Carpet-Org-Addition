@@ -54,7 +54,6 @@ public class Loggers {
     public static final LoggerAccessor LIBRARIAN = register(
             LoggerBuilder.of("librarian")
                     .setType(LoggerType.FUNCTION)
-                    .setHidden(true)
                     .setSubscribeCallback(player -> PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityFunctionS2CPacket(true)))
                     .setUnsubscribeCallback(player -> PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityFunctionS2CPacket(false)))
                     .build()

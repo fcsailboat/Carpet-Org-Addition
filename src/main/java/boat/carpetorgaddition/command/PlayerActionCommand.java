@@ -148,7 +148,6 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                 .then(Commands.argument("message", StringArgumentType.string())
                                         .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
                         .then(Commands.literal("librarian")
-                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
                                 .then(Commands.argument("jobSite", BlockPosArgument.blockPos())
                                         .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
                                                 .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
