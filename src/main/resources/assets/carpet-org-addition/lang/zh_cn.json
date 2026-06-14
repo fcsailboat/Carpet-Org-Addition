@@ -486,7 +486,7 @@
   "carpet-org-addition.command.playerManager.comment.set": "将%s玩家数据的注释设置为[%s]",
   "carpet-org-addition.command.playerManager.comment.remove": "移除了%s玩家数据的注释",
   "carpet-org-addition.command.playerManager.autologin.set": "已为%s设置自动登录",
-  "carpet-org-addition.command.playerManager.autologin.remove": "已为%s的取消设置自动登录",
+  "carpet-org-addition.command.playerManager.autologin.remove": "已取消%s的自动登录",
   "carpet-org-addition.command.playerManager.autologin.warn": "在未来版本中，autologin子命令将会被移除，请改用：\n%s",
   "carpet-org-addition.command.playerManager.spawn.fail": "尝试生成假玩家时出现意外问题",
   "carpet-org-addition.command.playerManager.spawn.player_exist": "玩家已存在",

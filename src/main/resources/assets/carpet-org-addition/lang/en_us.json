@@ -381,7 +381,7 @@
   "carpet-org-addition.command.playerManager.comment.set": "Set the annotation of player data for %s to [%s]",
   "carpet-org-addition.command.playerManager.comment.remove": "Removed comments on player data for %s",
   "carpet-org-addition.command.playerManager.autologin.set": "Automatic login has been set for %s",
-  "carpet-org-addition.command.playerManager.autologin.remove": "Cancel the automatic login setting for %s",
+  "carpet-org-addition.command.playerManager.autologin.remove": "Auto-login for %s cancelled",
   "carpet-org-addition.command.playerManager.autologin.warn": "In future versions, the \"autologin\" subcommand will be removed. Please use the following instead:\\n%s",
   "carpet-org-addition.command.playerManager.spawn.fail": "Failed to spawn fake player",
   "carpet-org-addition.command.playerManager.spawn.player_exist": "Player already exists",
