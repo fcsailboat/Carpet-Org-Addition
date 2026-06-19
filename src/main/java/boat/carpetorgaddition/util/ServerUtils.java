@@ -355,8 +355,8 @@ public class ServerUtils {
         return entityType.getDescription();
     }
 
-    public static Component getName(Enchantment enchantment) {
-        return enchantment.description();
+    public static Component getName(Holder<Enchantment> enchantment) {
+        return EnchantmentUtils.getName(enchantment);
     }
 
     public static Component getName(MobEffect statusEffect) {
@@ -367,6 +367,10 @@ public class ServerUtils {
         Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
         String key = Objects.requireNonNull(biomes.getKey(biome)).toLanguageKey("biome");
         return LocalizationKey.literal(key).translate();
+    }
+
+    public static Component getName(GameType gameType) {
+        return gameType.getLongDisplayName();
     }
 
     public static Component getName(GameRule<?> gameRule) {
@@ -390,7 +394,7 @@ public class ServerUtils {
         return getName(entityType).getString();
     }
 
-    public static String getNameAsString(Enchantment enchantment) {
+    public static String getNameAsString(Holder<Enchantment> enchantment) {
         return getName(enchantment).getString();
     }
 
@@ -479,8 +483,8 @@ public class ServerUtils {
         return gameType.getSerializedName();
     }
 
-    public static String getIdAsString(RegistryAccess registryAccess, Enchantment enchantment) {
-        return getId(registryAccess, enchantment).map(Identifier::toString).orElse(UNREGISTERED);
+    public static String getIdAsString(RegistryAccess registryAccess, Holder<Enchantment> enchantment) {
+        return getId(registryAccess, enchantment.value()).map(Identifier::toString).orElse(UNREGISTERED);
     }
 
     public static String getIdAsString(RegistryAccess registryAccess, MobEffect statusEffect) {
