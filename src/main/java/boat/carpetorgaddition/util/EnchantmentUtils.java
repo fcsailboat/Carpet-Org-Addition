@@ -10,6 +10,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -24,19 +25,6 @@ import net.minecraft.world.level.Level;
 import java.util.Optional;
 
 public class EnchantmentUtils {
-    /**
-     * @return 指定物品上是否有指定附魔
-     */
-    @Deprecated
-    public static boolean hasEnchantment(Level world, ResourceKey<Enchantment> key, ItemStack itemStack) {
-        Optional<Registry<Enchantment>> optional = world.registryAccess().lookup(Registries.ENCHANTMENT);
-        if (optional.isEmpty()) {
-            return false;
-        }
-        Registry<Enchantment> enchantments = optional.get();
-        return enchantments.get(key).map(holder -> getLevel(holder, itemStack) > 0).orElse(false);
-    }
-
     /**
      * @return 附魔是否与注册项对应
      */
@@ -91,14 +79,32 @@ public class EnchantmentUtils {
         return enchantment.value().getMaxLevel();
     }
 
+    public static boolean hasComponent(ItemStack itemStack, DataComponentType<?> type) {
+        ItemEnchantments enchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+            Holder<Enchantment> holder = entry.getKey();
+            if (holder.value().effects().has(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return 指定物品是否可以使用经验修复
      */
     public static boolean canRepairWithXp(ItemStack itemStack) {
-        ItemEnchantments component = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
-        for (Object2IntMap.Entry<Holder<Enchantment>> entry : component.entrySet()) {
-            Holder<Enchantment> registryEntry = entry.getKey();
-            if (registryEntry.value().effects().has(EnchantmentEffectComponents.REPAIR_WITH_XP)) {
+        return hasComponent(itemStack, EnchantmentEffectComponents.REPAIR_WITH_XP);
+    }
+
+    public static boolean hasSilkTouch(ItemStack itemStack) {
+        return hasEnchantment(itemStack, Enchantments.SILK_TOUCH);
+    }
+
+    public static boolean hasEnchantment(ItemStack itemStack, ResourceKey<Enchantment> enchantment) {
+        ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+            if (entry.getKey().is(enchantment)) {
                 return true;
             }
         }

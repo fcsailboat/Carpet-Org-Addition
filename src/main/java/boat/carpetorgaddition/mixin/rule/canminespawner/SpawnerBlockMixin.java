@@ -12,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -38,7 +37,7 @@ public abstract class SpawnerBlockMixin extends BaseEntityBlock {
     @Inject(method = "spawnAfterBreak", at = @At("HEAD"), cancellable = true)
     // 使用精准采集工具挖掘时不会掉落经验
     private void onStacksDropped(BlockState state, ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && EnchantmentUtils.hasEnchantment(level, Enchantments.SILK_TOUCH, tool)) {
+        if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && EnchantmentUtils.hasSilkTouch(tool)) {
             super.spawnAfterBreak(state, level, pos, tool, dropExperience);
             ci.cancel();
         }
@@ -47,7 +46,7 @@ public abstract class SpawnerBlockMixin extends BaseEntityBlock {
     @Override
     // 使用精准采集挖掘时掉落带NBT的物品
     public @NonNull BlockState playerWillDestroy(@NonNull Level world, @NonNull BlockPos pos, @NonNull BlockState state, Player player) {
-        boolean hasSilkTouch = EnchantmentUtils.hasEnchantment(world, Enchantments.SILK_TOUCH, player.getMainHandItem());
+        boolean hasSilkTouch = EnchantmentUtils.hasSilkTouch(player.getMainHandItem());
         if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && !player.isCreative() && hasSilkTouch) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (!world.isClientSide() && blockEntity instanceof SpawnerBlockEntity spawner) {
