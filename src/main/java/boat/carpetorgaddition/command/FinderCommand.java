@@ -33,6 +33,7 @@ import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -272,7 +273,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取执行命令的玩家
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取需要查找的附魔
-        Enchantment enchantment = ResourceArgument.getEnchantment(context, "enchantment").value();
+        Holder<Enchantment> enchantment = ResourceArgument.getEnchantment(context, "enchantment");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         EnchantedBookPredicate predicate = new EnchantedBookPredicate(server, enchantment);

@@ -1,9 +1,7 @@
 package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
-import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import boat.carpetorgaddition.wheel.text.TextJoiner;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -12,17 +10,14 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.level.Level;
 
@@ -32,13 +27,14 @@ public class EnchantmentUtils {
     /**
      * @return 指定物品上是否有指定附魔
      */
+    @Deprecated
     public static boolean hasEnchantment(Level world, ResourceKey<Enchantment> key, ItemStack itemStack) {
         Optional<Registry<Enchantment>> optional = world.registryAccess().lookup(Registries.ENCHANTMENT);
         if (optional.isEmpty()) {
             return false;
         }
-        Enchantment enchantment = optional.get().getValue(key);
-        return getLevel(world, enchantment, itemStack) > 0;
+        Registry<Enchantment> enchantments = optional.get();
+        return enchantments.get(key).map(holder -> getLevel(holder, itemStack) > 0).orElse(false);
     }
 
     /**
@@ -71,57 +67,12 @@ public class EnchantmentUtils {
         return key == Enchantments.SHARPNESS || key == Enchantments.SMITE || key == Enchantments.BANE_OF_ARTHROPODS || key == Enchantments.IMPALING || key == Enchantments.DENSITY || key == Enchantments.BREACH;
     }
 
-    public static int getLevel(Level world, Enchantment enchantment, ItemStack itemStack) {
-        RegistryAccess registryManager = world.registryAccess();
-        return getLevel(enchantment, itemStack, registryManager);
-    }
-
-    public static int getLevel(MinecraftServer server, Enchantment enchantment, ItemStack itemStack) {
-        RegistryAccess.Frozen registryManager = server.registryAccess();
-        return getLevel(enchantment, itemStack, registryManager);
-    }
-
     /**
      * @return 获取指定物品上指定附魔的等级
      */
-    private static int getLevel(Enchantment enchantment, ItemStack itemStack, RegistryAccess registryManager) {
-        Optional<Registry<Enchantment>> optional = registryManager.lookup(Registries.ENCHANTMENT);
-        if (optional.isEmpty()) {
-            return 0;
-        }
-        Holder<Enchantment> entry = optional.get().wrapAsHolder(enchantment);
-        if (itemStack.is(Items.ENCHANTED_BOOK)) {
-            ItemEnchantments component = itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
-            return component.getLevel(entry);
-        }
-        return EnchantmentHelper.getItemEnchantmentLevel(entry, itemStack);
-    }
-
-    /**
-     * @return 获取一个附魔的名字，不带等级
-     */
-    @Deprecated
-    public static Component getName(Enchantment enchantment) {
-        TextBuilder builder = TextBuilder.of(enchantment.description());
-        Holder<Enchantment> entry = Holder.direct(enchantment);
-        // 如果是诅咒附魔，设置为红色，否则，设置为灰色
-        ChatFormatting color = entry.is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.GRAY;
-        builder.setColor(color);
-        return builder.build();
-    }
-
-    /**
-     * @param level 附魔的等级
-     * @return 获取一个附魔的名字，带有等级
-     */
-    @Deprecated
-    public static Component getName(Enchantment enchantment, int level) {
-        TextJoiner joiner = new TextJoiner();
-        joiner.append(getName(enchantment));
-        if (level != 1 || enchantment.getMaxLevel() != 1) {
-            joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
-        }
-        return joiner.join();
+    public static int getLevel(Holder<Enchantment> enchantment, ItemStack itemStack) {
+        ItemEnchantments enchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
+        return enchantments.getLevel(enchantment);
     }
 
     public static Component getName(Holder<Enchantment> holder) {
@@ -133,14 +84,7 @@ public class EnchantmentUtils {
     }
 
     public static Component getName(Holder<Enchantment> holder, int level) {
-        TextJoiner joiner = new TextJoiner();
-        joiner.append(holder.value().description());
-        if (level != 1 || holder.value().getMaxLevel() != 1) {
-            joiner.append(CommonComponents.SPACE).append(LocalizationKey.literal("enchantment.level." + level).translate());
-        }
-        return TextBuilder.of(joiner.join())
-                .setColor(holder.is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.GRAY)
-                .build();
+        return Enchantment.getFullname(holder, level);
     }
 
     public static int getMaxLevel(Holder.Reference<Enchantment> enchantment) {

@@ -431,18 +431,16 @@ public class ServerUtils {
     }
 
     @SuppressWarnings("unused")
-    public static Optional<Identifier> getId(Level world, Enchantment enchantment) {
-        Holder<Enchantment> entry = Holder.direct(enchantment);
-        entry.unwrapKey().map(ResourceKey::identifier);
+    public static Optional<Identifier> getId(Level world, Holder<Enchantment> enchantment) {
         return getId(world.registryAccess(), enchantment);
     }
 
-    public static Optional<Identifier> getId(MinecraftServer server, Enchantment enchantment) {
+    public static Optional<Identifier> getId(MinecraftServer server, Holder<Enchantment> enchantment) {
         return getId(server.registryAccess(), enchantment);
     }
 
-    public static Optional<Identifier> getId(RegistryAccess registryAccess, Enchantment enchantment) {
-        return registryAccess.lookup(Registries.ENCHANTMENT).map(registry -> registry.getKey(enchantment));
+    public static Optional<Identifier> getId(RegistryAccess registryAccess, Holder<Enchantment> enchantment) {
+        return registryAccess.lookup(Registries.ENCHANTMENT).map(registry -> registry.getKey(enchantment.value()));
     }
 
     public static Optional<Identifier> getId(RegistryAccess registryAccess, MobEffect statusEffect) {
@@ -484,7 +482,7 @@ public class ServerUtils {
     }
 
     public static String getIdAsString(RegistryAccess registryAccess, Holder<Enchantment> enchantment) {
-        return getId(registryAccess, enchantment.value()).map(Identifier::toString).orElse(UNREGISTERED);
+        return getId(registryAccess, enchantment).map(Identifier::toString).orElse(UNREGISTERED);
     }
 
     public static String getIdAsString(RegistryAccess registryAccess, MobEffect statusEffect) {
