@@ -8,7 +8,7 @@ import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.periodic.task.search.BlockSearchTask;
 import boat.carpetorgaddition.periodic.task.search.ItemSearchTask;
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
+import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
 import boat.carpetorgaddition.periodic.task.search.TradeItemSearchTask;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -52,7 +52,7 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
             case OFFLINE_PLAYER_ITEM -> {
                 ObjectSearchTaskCodecs.OfflinePlayerItemSearchContext decode = ObjectSearchTaskCodecs.OFFLINE_PLAYER_SEARCH_CODEC.decode(packet.json());
                 ItemStackPredicate predicate = ItemStackPredicate.of(decode.list(), packet.name());
-                yield new OfflinePlayerSearchTask(source, predicate, player);
+                yield new OfflinePlayerInventorySearchTask(source, predicate, player);
             }
             case BLOCK -> {
                 ObjectSearchTaskCodecs.BlockSearchContext decode = ObjectSearchTaskCodecs.BLOCK_SEARCH_CODEC.decode(packet.json());

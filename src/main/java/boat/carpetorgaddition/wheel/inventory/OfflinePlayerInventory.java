@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
+import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.wheel.GameProfileCache;
 import com.google.gson.JsonParseException;
@@ -61,7 +61,7 @@ public class OfflinePlayerInventory extends AbstractCustomSizeInventory {
         if (playerDataExists(uuid, server)) {
             GameProfileCache cache = GameProfileCache.getInstance();
             Optional<NameAndId> optional = cache.getPlayerConfigEntry(uuid);
-            return Optional.of(optional.orElse(new NameAndId(new GameProfile(uuid, OfflinePlayerSearchTask.UNKNOWN))));
+            return Optional.of(optional.orElse(new NameAndId(new GameProfile(uuid, OfflinePlayerInventorySearchTask.UNKNOWN))));
         }
         return Optional.empty();
     }

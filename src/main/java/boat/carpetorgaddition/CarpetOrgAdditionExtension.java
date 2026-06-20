@@ -11,7 +11,7 @@ import boat.carpetorgaddition.network.s2c.PlayerTypeSyncS2CPacket;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.parcel.ParcelManager;
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
+import boat.carpetorgaddition.periodic.task.search.AbstractOfflinePlayerSearchTask;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
@@ -168,7 +168,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
         GameProfileCache.getInstance().save();
         PermissionManager.reset();
         GlobalConfigs.save();
-        OfflinePlayerSearchTask.clear();
+        AbstractOfflinePlayerSearchTask.clear();
     }
 
     // 设置模组翻译

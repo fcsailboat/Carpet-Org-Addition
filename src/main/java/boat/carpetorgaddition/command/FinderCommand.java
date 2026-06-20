@@ -180,7 +180,7 @@ public class FinderCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
         CommandSourceStack source = context.getSource();
-        ServerTask task = new OfflinePlayerSearchTask(source, predicate, player);
+        ServerTask task = new OfflinePlayerInventorySearchTask(source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
         return 1;
