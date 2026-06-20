@@ -3,3 +3,4 @@ accessible method net/minecraft/world/inventory/AbstractContainerMenu moveItemSt
 accessible method net/minecraft/world/entity/decoration/Mannequin setProfile (Lnet/minecraft/world/item/component/ResolvableProfile;)V
 accessible field net/minecraft/server/level/ServerLevel customSpawners Ljava/util/List;
 accessible method net/minecraft/world/entity/npc/wanderingtrader/WanderingTraderSpawner spawn (Lnet/minecraft/server/level/ServerLevel;)Z
+accessible method net/minecraft/world/level/block/ObserverBlock startSignal (Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/world/level/ScheduledTickAccess;Lnet/minecraft/core/BlockPos;)V
