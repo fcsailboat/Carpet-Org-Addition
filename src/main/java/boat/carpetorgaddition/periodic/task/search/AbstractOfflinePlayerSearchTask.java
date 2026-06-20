@@ -7,6 +7,7 @@ import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.util.IOUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.ProgressBar;
 import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.inventory.FabricPlayerAccessManager;
@@ -249,7 +250,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerTask {
      */
     private boolean backupAndUpdate(File unsafe, UUID uuid) {
         // 模拟玩家登录，更新玩家数据文件
-        Optional<NameAndId> optional = OfflinePlayerInventory.getPlayerConfigEntry(uuid, this.server);
+        Optional<NameAndId> optional = GameProfileCache.getInstance().resolvePlayerConfigEntry(this.server, uuid);
         if (optional.isEmpty()) {
             return false;
         }

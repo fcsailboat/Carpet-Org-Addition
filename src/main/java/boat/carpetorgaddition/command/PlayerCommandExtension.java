@@ -6,7 +6,7 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.inventory.OfflinePlayerInventory;
+import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryAccessor;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -150,7 +150,7 @@ public class PlayerCommandExtension {
 
         public WithCheckPlayerInventoryAccessor(MinecraftServer server, String name, ServerPlayer visitor) throws CommandSyntaxException {
             checkCanBeOpened(server.getPlayerList().getPlayer(name));
-            Optional<GameProfile> optional = OfflinePlayerInventory.getGameProfile(name, server);
+            Optional<GameProfile> optional = GameProfileCache.getInstance().resolveGameProfile(server, name);
             if (optional.isEmpty()) {
                 throw PlayerCommandExtension.createNoFileFoundException();
             }
@@ -159,7 +159,7 @@ public class PlayerCommandExtension {
 
         public WithCheckPlayerInventoryAccessor(MinecraftServer server, UUID uuid, ServerPlayer visitor) throws CommandSyntaxException {
             checkCanBeOpened(server.getPlayerList().getPlayer(uuid));
-            Optional<GameProfile> optional = OfflinePlayerInventory.getPlayerConfigEntry(uuid, server).map(entry -> new GameProfile(entry.id(), entry.name()));
+            Optional<GameProfile> optional = GameProfileCache.getInstance().resolvePlayerConfigEntry(server, uuid).map(entry -> new GameProfile(entry.id(), entry.name()));
             if (optional.isEmpty()) {
                 throw PlayerCommandExtension.createNoFileFoundException();
             }
