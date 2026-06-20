@@ -32,17 +32,23 @@ public class BlockBehaviourMixin {
             if (player.isShiftKeyDown()) {
                 return;
             }
+            /*
+             * 应该检测侦测器的方块状态吗？虽然已经激活的侦测器不应该再次右键激活，但这如果该侦测器
+             * 没有计划刻，例如通过粘贴投影原理图放置的激活的侦测器，则可以通过右键来添加计划刻
+             */
             if (itemStack.is(Items.FLINT_AND_STEEL)) {
                 itemStack.hurtAndBreak(1, player, hand);
                 level.playSound(player, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1, 1);
                 observer.startSignal(level, level, pos);
                 player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+                player.getCooldowns().addCooldown(itemStack, 3);
                 cir.setReturnValue(InteractionResult.SUCCESS);
             } else if (itemStack.is(Items.FIRE_CHARGE)) {
                 itemStack.consume(1, player);
                 level.playSound(player, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1, 1);
                 observer.startSignal(level, level, pos);
                 player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+                player.getCooldowns().addCooldown(itemStack, 3);
                 cir.setReturnValue(InteractionResult.SUCCESS);
             }
         }
