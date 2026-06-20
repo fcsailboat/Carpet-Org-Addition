@@ -75,6 +75,7 @@ public class FinderCommand extends AbstractServerCommand {
         super(dispatcher, access);
     }
 
+    // TODO 添加从离线玩家物品栏中查找经验的功能
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)

@@ -34,6 +34,7 @@ public abstract class ObserverBlockMixin extends DirectionalBlock {
     // 可激活侦测器，打火石右键激活
     @Override
     protected @NonNull InteractionResult useItemOn(@NonNull ItemStack stack, @NonNull BlockState state, @NonNull Level world, @NonNull BlockPos pos, @NonNull Player player, @NonNull InteractionHand hand, @NonNull BlockHitResult hit) {
+        // TODO 支持烈焰弹
         if (CarpetOrgAdditionSettings.CAN_ACTIVATES_OBSERVER.value()) {
             ItemStack itemStack = player.getItemInHand(hand);
             if (itemStack.is(Items.FLINT_AND_STEEL) && !player.isShiftKeyDown()) {
