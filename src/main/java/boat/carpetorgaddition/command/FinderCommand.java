@@ -75,9 +75,9 @@ public class FinderCommand extends AbstractServerCommand {
         super(dispatcher, access);
     }
 
-    // TODO 添加从离线玩家物品栏中查找经验的功能
     @Override
     public void register(String name) {
+        // TODO 取消超时，添加手动停止按钮
         this.dispatcher.register(Commands.literal(name)
                 .requires(source -> CarpetOrgAdditionSettings.COMMAND_FINDER.value().hasPermission(source))
                 .then(Commands.literal("block")
@@ -126,7 +126,13 @@ public class FinderCommand extends AbstractServerCommand {
                                 .and(PermissionManager.registerHiddenCommand("finder.worldEater", PermissionLevel.PASS)))
                         .then(Commands.argument("from", BlockPosArgument.blockPos())
                                 .then(Commands.argument("to", BlockPosArgument.blockPos())
-                                        .executes(this::mayAffectWorldEater)))));
+                                        .executes(this::mayAffectWorldEater))))
+                .then(Commands.literal("xp")
+                        // 需要解决如何从未知名称的玩家中提取经验的问题
+                        .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
+                        .then(Commands.literal("from")
+                                .then(Commands.literal("offline_player")
+                                        .executes(this::searchExperienceFromOfflinePlayer)))));
     }
 
     private SuggestionProvider<CommandSourceStack> suggestionDefaultDistance() {
@@ -286,6 +292,15 @@ public class FinderCommand extends AbstractServerCommand {
         this.checkBoxSize(traverser);
         TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate);
         // 向任务管理器添加任务
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        return 1;
+    }
+
+    private int searchExperienceFromOfflinePlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = CommandUtils.getSourcePlayer(source);
+        MinecraftServer server = ServerUtils.getServer(player);
+        OfflinePlayerExperienceSearchTask task = new OfflinePlayerExperienceSearchTask(source, player);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
         return 1;
     }

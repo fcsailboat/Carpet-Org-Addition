@@ -133,13 +133,13 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerTask {
         switch (this.taksState) {
             case START -> {
                 this.start();
-                this.taksState = OfflinePlayerInventorySearchTask.State.RUNTIME;
+                this.taksState = State.RUNTIME;
                 this.startTime = System.currentTimeMillis();
             }
             case RUNTIME -> {
                 LocalizationKey key = this.getLocalizationKey().then("progress");
                 if (this.taskCount.get() == 0) {
-                    this.taksState = OfflinePlayerInventorySearchTask.State.FEEDBACK;
+                    this.taksState = State.FEEDBACK;
                     if (this.progressBar != null) {
                         this.progressBar.setCompleted();
                     }
@@ -154,8 +154,10 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerTask {
                 }
             }
             case FEEDBACK -> {
-                this.sendFeedback();
-                this.taksState = OfflinePlayerInventorySearchTask.State.STOP;
+                boolean complete = this.sendFeedback();
+                if (complete) {
+                    this.taksState = State.STOP;
+                }
             }
             case STOP -> {
             }
@@ -164,7 +166,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerTask {
 
     protected abstract void sendProgress(LocalizationKey key, @NonNull ProgressBar progressBar);
 
-    protected abstract void sendFeedback();
+    protected abstract boolean sendFeedback();
 
     /**
      * 开始搜索物品
@@ -212,7 +214,26 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerTask {
         });
     }
 
-    protected abstract void search(UUID uuid, CompoundTag nbt);
+    protected void search(UUID uuid, CompoundTag nbt) {
+        // 获取玩家配置文件
+        GameProfileCache cache = GameProfileCache.getInstance();
+        Optional<NameAndId> optional = cache.getPlayerConfigEntry(uuid);
+        boolean unknownPlayer;
+        if (optional.isEmpty()) {
+            optional = Optional.of(new NameAndId(uuid, UNKNOWN));
+            unknownPlayer = true;
+        } else {
+            unknownPlayer = false;
+        }
+        NameAndId entry = optional.get();
+        // 不从在线玩家物品栏查找物品
+        if (this.server.getPlayerList().getPlayerByName(entry.name()) != null) {
+            return;
+        }
+        ScopedValue.where(CURRENT_UUID, uuid).run(() -> this.search(nbt, entry, unknownPlayer));
+    }
+
+    protected abstract void search(CompoundTag nbt, NameAndId entry, boolean unknownPlayer);
 
     /**
      * 读取玩家NBT数据，如果NBT版本低于当前游戏NBT版本，则先将数据备份再升级

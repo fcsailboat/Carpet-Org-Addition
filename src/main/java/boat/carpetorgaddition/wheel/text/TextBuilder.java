@@ -145,6 +145,10 @@ public class TextBuilder {
         return this;
     }
 
+    public TextBuilder setHover(Number number) {
+        return this.setHover(number.toString());
+    }
+
     /**
      * 设置单击文本后复制内容到剪贴板
      */

@@ -294,7 +294,6 @@ public class ServerUtils {
         return Objects.requireNonNull(server.getLevel(globalPos.dimension())).getBlockState(globalPos.pos());
     }
 
-    @Contract("_ -> !null")
     public static MinecraftServer getServer(ServerPlayer player) {
         return getWorld(player).getServer();
     }
@@ -538,5 +537,14 @@ public class ServerUtils {
     public static long getTime(MinecraftServer server) {
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         return level == null ? -1L : level.getGameTime();
+    }
+
+    public static boolean isRunning(MinecraftServer server) {
+        return server.isRunning();
+    }
+
+    public static boolean isStoping(MinecraftServer server) {
+        // server.stopped没有被volatile修饰，它可能不是线程安全的
+        return !server.isRunning();
     }
 }

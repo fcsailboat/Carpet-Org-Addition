@@ -9,7 +9,6 @@ import boat.carpetorgaddition.rule.value.OpenPlayerInventoryCommandOption;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
 import boat.carpetorgaddition.wheel.ProgressBar;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
@@ -41,7 +40,10 @@ import net.minecraft.world.level.storage.ValueInput;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -65,37 +67,15 @@ public class OfflinePlayerInventorySearchTask extends AbstractOfflinePlayerSearc
     }
 
     @Override
-    protected void search(UUID uuid, CompoundTag nbt) {
-        this.searchItem(uuid, nbt);
-    }
-
-    @Override
     protected void sendProgress(LocalizationKey key, @NonNull ProgressBar progressBar) {
         MessageUtils.sendMessageToHud(this.player, key.translate(this.predicate.getDisplayName(), progressBar.getDisplay()));
     }
 
-    // 查找物品
-    private void searchItem(UUID uuid, @NonNull CompoundTag nbt) {
-        // 获取玩家配置文件
-        GameProfileCache cache = GameProfileCache.getInstance();
-        Optional<NameAndId> optional = cache.getPlayerConfigEntry(uuid);
-        boolean unknownPlayer;
-        if (optional.isEmpty()) {
-            optional = Optional.of(new NameAndId(uuid, UNKNOWN));
-            unknownPlayer = true;
-        } else {
-            unknownPlayer = false;
-        }
-        NameAndId entry = optional.get();
-        // 不从在线玩家物品栏查找物品
-        if (this.server.getPlayerList().getPlayerByName(entry.name()) != null) {
-            return;
-        }
-        ScopedValue.where(CURRENT_UUID, uuid).run(() -> {
-            // 统计物品栏物品
-            statistics(this.getInventory(nbt), entry, unknownPlayer, PlayerInventoryType.INVENTORY);
-            statistics(this.getEnderChest(nbt), entry, unknownPlayer, PlayerInventoryType.ENDER_CHEST);
-        });
+    @Override
+    protected void search(@NonNull CompoundTag nbt, NameAndId entry, boolean unknownPlayer) {
+        // 统计物品栏物品
+        statistics(this.getInventory(nbt), entry, unknownPlayer, PlayerInventoryType.INVENTORY);
+        statistics(this.getEnderChest(nbt), entry, unknownPlayer, PlayerInventoryType.ENDER_CHEST);
     }
 
     /**
@@ -135,10 +115,10 @@ public class OfflinePlayerInventorySearchTask extends AbstractOfflinePlayerSearc
 
     // 发送命令反馈
     @Override
-    protected void sendFeedback() {
+    protected boolean sendFeedback() {
         if (this.results.isEmpty()) {
             MessageUtils.sendMessage(this.source, KEY.then("cannot_find").translate(this.predicate.getDisplayName()));
-            return;
+            return true;
         }
         int resultCount = this.results.size();
         this.results.sort((o1, o2) -> o2.statistics().getSum() - o1.statistics().getSum());
@@ -151,6 +131,7 @@ public class OfflinePlayerInventorySearchTask extends AbstractOfflinePlayerSearc
         MessageUtils.sendEmptyMessage(this.source);
         MessageUtils.sendMessage(this.source, builder.build());
         CommandUtils.handlingException(this.pagedCollection::print, source);
+        return true;
     }
 
     /**
