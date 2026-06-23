@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.task.ServerTask;
+import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.periodic.task.search.*;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -57,7 +58,7 @@ public class FinderCommand extends AbstractServerCommand {
     /**
      * 最大查找时间
      */
-    public static final long MAX_SEARCH_TIME = 20L * 1000L;
+    public static final long MAX_SEARCH_TIME = 20L * 100L;
     /**
      * 最大查找半径
      */
@@ -132,7 +133,10 @@ public class FinderCommand extends AbstractServerCommand {
                         .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
                         .then(Commands.literal("from")
                                 .then(Commands.literal("offline_player")
-                                        .executes(this::searchExperienceFromOfflinePlayer)))));
+                                        .executes(this::searchExperienceFromOfflinePlayer))))
+                // TODO 补全更新日志
+                .then(Commands.literal("stop")
+                        .executes(this::stop)));
     }
 
     private SuggestionProvider<CommandSourceStack> suggestionDefaultDistance() {
@@ -302,6 +306,19 @@ public class FinderCommand extends AbstractServerCommand {
         MinecraftServer server = ServerUtils.getServer(player);
         OfflinePlayerExperienceSearchTask task = new OfflinePlayerExperienceSearchTask(source, player);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        return 1;
+    }
+
+    private int stop(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = CommandUtils.getSourcePlayer(source);
+        MinecraftServer server = ServerUtils.getServer(player);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerTaskManager taskManager = coordinator.getServerTaskManager();
+        ServerSearchTask task = taskManager.stream(ServerSearchTask.class)
+                .findFirst()
+                .orElseThrow(() -> CommandUtils.createException(KEY.then("not_canceled").translate()));
+        task.cancel();
         return 1;
     }
 

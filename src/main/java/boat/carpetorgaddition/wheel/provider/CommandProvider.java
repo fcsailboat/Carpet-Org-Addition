@@ -213,6 +213,10 @@ public class CommandProvider {
         return "/%s %s stonecutting gui".formatted(getCommandName(PlayerActionCommand.class), PlayerUtils.getName(fakePlayer));
     }
 
+    public static String finderStop() {
+        return "/%s stop".formatted(getCommandName(FinderCommand.class));
+    }
+
     private static <T extends AbstractServerCommand> String getCommandName(Class<T> clazz) {
         return CommandRegister.getCommandInstance(clazz).getAvailableName();
     }

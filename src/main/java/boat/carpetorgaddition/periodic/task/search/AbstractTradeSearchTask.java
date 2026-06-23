@@ -3,7 +3,6 @@ package boat.carpetorgaddition.periodic.task.search;
 import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.exception.TaskExecutionException;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -20,7 +19,7 @@ import net.minecraft.world.level.Level;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class AbstractTradeSearchTask extends ServerTask {
+public abstract class AbstractTradeSearchTask extends ServerSearchTask {
     protected final Level world;
     protected final BlockPosTraverser blockPosTraverser;
     protected final BlockPos sourcePos;

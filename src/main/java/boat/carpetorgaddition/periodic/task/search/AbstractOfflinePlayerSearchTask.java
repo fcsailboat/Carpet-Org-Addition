@@ -3,7 +3,6 @@ package boat.carpetorgaddition.periodic.task.search;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.exception.FileOperationException;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.util.IOUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -44,7 +43,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractOfflinePlayerSearchTask extends ServerTask {
+public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
     /**
      * 因文件损坏等原因暂时无法读取数据的玩家的UUID
      */

@@ -64,14 +64,18 @@ public abstract class ServerTask {
      * 检查当前任务是否超时，如果超时，抛出异常
      */
     protected void checkTimeout() {
-        long time = this.getMaxExecutionTime();
-        if (time == -1L) {
-            return;
-        }
-        if (this.getElapsedTime() > time) {
+        if (this.isTimeout()) {
             // 任务超时
             this.throwTimeoutException();
         }
+    }
+
+    protected boolean isTimeout() {
+        long time = this.getMaxExecutionTime();
+        if (time == -1L) {
+            return false;
+        }
+        return this.getElapsedTime() > time;
     }
 
     protected void throwTimeoutException() {

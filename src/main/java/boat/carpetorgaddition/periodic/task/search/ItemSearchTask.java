@@ -5,7 +5,6 @@ import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.exception.TaskExecutionException;
 import boat.carpetorgaddition.mixin.accessor.AbstractHorseEntityAccessor;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
@@ -47,7 +46,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class ItemSearchTask extends ServerTask {
+public class ItemSearchTask extends ServerSearchTask {
     private final Level world;
     private final BlockEntityTraverser blockEntities;
     private Iterator<Entity> entitySearchIterator;
