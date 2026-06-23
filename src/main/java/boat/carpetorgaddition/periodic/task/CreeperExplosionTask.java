@@ -84,6 +84,11 @@ public class CreeperExplosionTask extends ServerTask {
     }
 
     @Override
+    public boolean constantSpeed() {
+        return false;
+    }
+
+    @Override
     public Object getIdentityKey() {
         return Map.entry(Objects.requireNonNullElse(this.source.getPlayer(), DUMMY), this.getClass());
     }
