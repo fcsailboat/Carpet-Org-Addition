@@ -285,6 +285,7 @@
   "carpet-org-addition.operation.self_or_fake_player": "只允许操作自己或假玩家",
   "carpet-org-addition.operation.offline_player_name": "%s（离线）",
   "carpet-org-addition.operation.wait_last": "等待上一个任务执行完毕",
+  "carpet-org-addition.operation.wait_player": "等待%s的任务执行完毕",
   "carpet-org-addition.operation.error.io": "发生IO错误",
   "carpet-org-addition.operation.timeout.task": "任务超时",
   "carpet-org-addition.operation.timeout.operation": "操作超时",

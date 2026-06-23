@@ -16,7 +16,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.level.Level;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 public abstract class AbstractTradeSearchTask extends ServerSearchTask {
@@ -165,19 +168,6 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
         }
         indexArray = stringJoiner.toString();
         return indexArray;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof AbstractTradeSearchTask that) {
-            return Objects.equals(source, that.source);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.source.getPlayer());
     }
 
     public enum FindState {

@@ -54,4 +54,9 @@ public class DrawParticleLineTask extends ServerTask {
     public boolean stopped() {
         return this.distance <= this.origin.lengthSqr() || this.origin.lengthSqr() >= MAX_DRAW_DISTANCE;
     }
+
+    @Override
+    public Object getIdentityKey() {
+        return this;
+    }
 }

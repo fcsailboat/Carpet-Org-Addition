@@ -148,12 +148,7 @@ public class BatchSpawnFakePlayerTask extends ServerTask {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj != null && (this == obj || this.getClass() == obj.getClass());
-    }
-
-    @Override
-    public int hashCode() {
-        return 1;
+    public Object getIdentityKey() {
+        return this.getClass();
     }
 }

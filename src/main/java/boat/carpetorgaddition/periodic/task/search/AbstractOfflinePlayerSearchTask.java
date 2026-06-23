@@ -418,16 +418,6 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
         return this.taksState == State.STOP;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        return this == o || this.getClass() == o.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-        return 1;
-    }
-
     public enum State {
         START,
         RUNTIME,

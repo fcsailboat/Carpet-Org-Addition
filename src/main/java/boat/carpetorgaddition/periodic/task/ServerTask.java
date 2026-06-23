@@ -60,6 +60,10 @@ public abstract class ServerTask {
         return true;
     }
 
+    public CommandSourceStack getSource() {
+        return this.source;
+    }
+
     /**
      * 检查当前任务是否超时，如果超时，抛出异常
      */
@@ -173,4 +177,6 @@ public abstract class ServerTask {
      */
     public void onStopped() {
     }
+
+    public abstract Object getIdentityKey();
 }

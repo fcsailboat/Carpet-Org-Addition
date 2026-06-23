@@ -159,7 +159,7 @@ public class FinderCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -179,7 +179,7 @@ public class FinderCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -192,7 +192,7 @@ public class FinderCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         ServerTask task = new OfflinePlayerInventorySearchTask(source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -211,7 +211,7 @@ public class FinderCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -232,7 +232,7 @@ public class FinderCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -251,7 +251,7 @@ public class FinderCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         BlockSearchTask task = new BlockSearchTask(ServerUtils.getWorld(player), player.blockPosition(), traverser, source, predicate);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -273,7 +273,7 @@ public class FinderCommand extends AbstractServerCommand {
         TradeItemSearchTask task = new TradeItemSearchTask(world, traverser, sourcePos, predicate, source);
         // 向任务管理器添加任务
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -296,7 +296,7 @@ public class FinderCommand extends AbstractServerCommand {
         this.checkBoxSize(traverser);
         TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate);
         // 向任务管理器添加任务
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -305,7 +305,7 @@ public class FinderCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getSourcePlayer(source);
         MinecraftServer server = ServerUtils.getServer(player);
         OfflinePlayerExperienceSearchTask task = new OfflinePlayerExperienceSearchTask(source, player);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 

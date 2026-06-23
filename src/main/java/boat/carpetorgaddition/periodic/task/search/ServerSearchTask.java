@@ -10,6 +10,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
 public abstract class ServerSearchTask extends ServerTask {
+    public static final Object IDENTITY_KEY = new Object();
+
     public ServerSearchTask(CommandSourceStack source) {
         super(source);
     }
@@ -37,5 +39,10 @@ public abstract class ServerSearchTask extends ServerTask {
         if (this.isCancelled()) {
             throw new TaskExecutionException(() -> MessageUtils.sendMessage(this.source, FinderCommand.KEY.then("cancelled").translate()));
         }
+    }
+
+    @Override
+    public final Object getIdentityKey() {
+        return IDENTITY_KEY;
     }
 }

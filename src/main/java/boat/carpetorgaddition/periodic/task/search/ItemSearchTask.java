@@ -42,7 +42,6 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -234,19 +233,6 @@ public class ItemSearchTask extends ServerSearchTask {
     @Override
     public boolean stopped() {
         return this.findState == FindState.END;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.source.getPlayer());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this.getClass() == obj.getClass()) {
-            return Objects.equals(this.source.getPlayer(), ((ItemSearchTask) obj).source.getPlayer());
-        }
-        return false;
     }
 
     @Override

@@ -16,12 +16,15 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
 
 public class CreeperExplosionTask extends ServerTask {
     // 苦力怕爆炸延迟
     private int countdown = 30;
     private final ServerPlayer player;
     private final Creeper creeper;
+    private static final Object DUMMY = new Object();
 
     public CreeperExplosionTask(CommandSourceStack source, ServerPlayer player) {
         super(source);
@@ -81,15 +84,7 @@ public class CreeperExplosionTask extends ServerTask {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this.getClass() == obj.getClass()) {
-            return this.player.equals(((CreeperExplosionTask) obj).player);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.player.hashCode();
+    public Object getIdentityKey() {
+        return Map.entry(Objects.requireNonNullElse(this.source.getPlayer(), DUMMY), this.getClass());
     }
 }

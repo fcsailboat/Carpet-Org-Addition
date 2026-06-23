@@ -192,14 +192,6 @@ public class BlockSearchTask extends ServerSearchTask {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this.getClass() == obj.getClass()) {
-            return Objects.equals(this.source.getPlayer(), ((BlockSearchTask) obj).source.getPlayer());
-        }
-        return false;
-    }
-
-    @Override
     public void cancel() {
         this.cancelled = true;
     }
@@ -207,11 +199,6 @@ public class BlockSearchTask extends ServerSearchTask {
     @Override
     public boolean isCancelled() {
         return this.cancelled;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.source.getPlayer());
     }
 
     @Override
