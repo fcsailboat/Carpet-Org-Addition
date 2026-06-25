@@ -43,12 +43,12 @@ public abstract class ServerSearchTask extends ServerTask {
         }
     }
 
-    public static Object createIdentityKey(ServerPlayer player) {
+    public static Object ofIdentityKey(ServerPlayer player) {
         return Map.entry(IDENTITY_KEY, player);
     }
 
     @Override
     public final Object getIdentityKey() {
-        return createIdentityKey(this.player);
+        return ofIdentityKey(this.player);
     }
 }

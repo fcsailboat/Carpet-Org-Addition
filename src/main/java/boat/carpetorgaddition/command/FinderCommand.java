@@ -313,8 +313,7 @@ public class FinderCommand extends AbstractServerCommand {
         MinecraftServer server = ServerUtils.getServer(player);
         ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
         ServerTaskManager taskManager = coordinator.getServerTaskManager();
-        // TODO 未检查玩家，可能可以取消其他玩家的任务
-        ServerSearchTask task = taskManager.getServerTask(ServerSearchTask.createIdentityKey(player), ServerSearchTask.class)
+        ServerSearchTask task = taskManager.getServerTask(ServerSearchTask.ofIdentityKey(player), ServerSearchTask.class)
                 .orElseThrow(() -> CommandUtils.createException(KEY.then("not_canceled").translate()));
         task.cancel();
         return 1;

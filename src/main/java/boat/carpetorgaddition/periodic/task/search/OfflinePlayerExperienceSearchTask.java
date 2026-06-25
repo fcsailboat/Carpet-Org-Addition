@@ -8,7 +8,6 @@ import boat.carpetorgaddition.network.event.CustomClickKeys;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ProgressBar;
 import boat.carpetorgaddition.wheel.misc.ExperienceTransfer;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
@@ -39,7 +38,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -66,31 +64,32 @@ public class OfflinePlayerExperienceSearchTask extends AbstractOfflinePlayerSear
             return true;
         }
         if (this.calculate == null) {
-            // TODO /finder添加手动停止时，同时补全中断条件
-            this.calculate = ExperienceTransfer.calculateUpgradeLevel(this.totals.get(), () -> ServerUtils.isStoping(this.server));
+            this.calculate = ExperienceTransfer.calculateUpgradeLevel(this.totals.get(), this::isCancelled);
         }
-        if (this.calculate.state() == Future.State.SUCCESS) {
-            Int2FloatMap.Entry entry = this.calculate.join();
-            this.results.sort(Comparator.comparing(o -> o.experienceValue));
-            this.pagedCollection.addContent(this.results);
-            MessageUtils.sendEmptyMessage(this.source);
-            String format = MathUtils.formatToMaxTwoDecimals(entry.getIntKey() + entry.getFloatValue());
-            Component sumLevel = TextBuilder.of(format)
-                    .setHover(this.totals.get())
-                    .setColor(ChatFormatting.GRAY)
-                    .build();
-            Component head = key.then("head").translate(this.results.size(), sumLevel);
-            MessageUtils.sendMessage(this.source, head);
-            CommandUtils.handlingException(this.pagedCollection::print, source);
-            return true;
-        } else if (this.calculate.isDone()) {
-            throw new TaskExecutionException(
+        return switch (this.calculate.state()) {
+            case RUNNING -> false;
+            case CANCELLED -> true;
+            case SUCCESS -> {
+                Int2FloatMap.Entry entry = this.calculate.join();
+                this.results.sort(Comparator.comparing(o -> o.experienceValue));
+                this.pagedCollection.addContent(this.results);
+                MessageUtils.sendEmptyMessage(this.source);
+                String format = MathUtils.formatToMaxTwoDecimals(entry.getIntKey() + entry.getFloatValue());
+                Component sumLevel = TextBuilder.of(format)
+                        .setHover(this.totals.get())
+                        .setColor(ChatFormatting.GRAY)
+                        .build();
+                Component head = key.then("head").translate(this.results.size(), sumLevel);
+                MessageUtils.sendMessage(this.source, head);
+                CommandUtils.handlingException(this.pagedCollection::print, source);
+                yield true;
+            }
+            case FAILED -> throw new TaskExecutionException(
                     () -> MessageUtils.sendErrorMessage(
                             player,
                             key.then("fail").then("incalculable").translate(),
                             calculate.exceptionNow()));
-        }
-        return false;
+        };
     }
 
     @Override
