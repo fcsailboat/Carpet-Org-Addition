@@ -71,25 +71,19 @@ public class BlockSearchTask extends ServerSearchTask {
         }
         this.checkCancelled();
         while (this.isTimeRemaining()) {
-            try {
-                switch (this.findState) {
-                    case SEARCH -> {
-                        this.searchBlock();
-                        MessageUtils.sendMessageToHudIfPlayer(this.source, () -> KEY
-                                .then("progress")
-                                .translate(this.predicate.getDisplayName(), this.progressBar.getDisplay())
-                        );
-                    }
-                    case SORT -> this.sort();
-                    case FEEDBACK -> this.sendFeedback();
-                    default -> {
-                        return;
-                    }
+            switch (this.findState) {
+                case SEARCH -> {
+                    this.searchBlock();
+                    MessageUtils.sendMessageToHudIfPlayer(this.source, () -> KEY
+                            .then("progress")
+                            .translate(this.predicate.getDisplayName(), this.progressBar.getDisplay())
+                    );
                 }
-            } catch (TaskExecutionException e) {
-                e.disposal();
-                this.findState = FindState.END;
-                return;
+                case SORT -> this.sort();
+                case FEEDBACK -> this.sendFeedback();
+                default -> {
+                    return;
+                }
             }
         }
     }

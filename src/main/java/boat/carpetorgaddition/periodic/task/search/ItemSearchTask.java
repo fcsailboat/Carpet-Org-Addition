@@ -78,20 +78,14 @@ public class ItemSearchTask extends ServerSearchTask {
         }
         this.checkCancelled();
         while (this.isTimeRemaining()) {
-            try {
-                switch (this.findState) {
-                    case BLOCK -> searchFromContainer();
-                    case ENTITY -> searchFromEntity();
-                    case SORT -> sort();
-                    case FEEDBACK -> feedback();
-                    default -> {
-                        return;
-                    }
+            switch (this.findState) {
+                case BLOCK -> searchFromContainer();
+                case ENTITY -> searchFromEntity();
+                case SORT -> sort();
+                case FEEDBACK -> feedback();
+                default -> {
+                    return;
                 }
-            } catch (TaskExecutionException e) {
-                e.disposal();
-                this.findState = FindState.END;
-                return;
             }
         }
     }

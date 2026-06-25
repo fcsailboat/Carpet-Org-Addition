@@ -53,7 +53,7 @@ public abstract class ServerTask {
                 return false;
             }
         } catch (TaskExecutionException e) {
-            e.disposal();
+            e.handle();
         } catch (RuntimeException e) {
             CarpetOrgAddition.LOGGER.error("{} encountered an unexpected error while executing the task", this.getClass().getSimpleName(), e);
         }

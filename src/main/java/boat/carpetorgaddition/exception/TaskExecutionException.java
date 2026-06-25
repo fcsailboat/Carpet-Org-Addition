@@ -13,7 +13,7 @@ public class TaskExecutionException extends RuntimeException {
     /**
      * 处理异常
      */
-    public void disposal() {
+    public void handle() {
         this.handler.run();
     }
 }

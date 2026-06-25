@@ -225,7 +225,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
         }
         // 获取玩家配置文件
         GameProfileCache cache = GameProfileCache.getInstance();
-        Optional<NameAndId> optional = cache.getPlayerConfigEntry(uuid);
+        Optional<NameAndId> optional = cache.getNameAndId(uuid);
         boolean unknownPlayer;
         if (optional.isEmpty()) {
             optional = Optional.of(new NameAndId(uuid, UNKNOWN));
@@ -280,7 +280,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
     private boolean backupAndUpdate(File unsafe, UUID uuid) {
         // 模拟玩家登录，更新玩家数据文件
         Optional<NameAndId> optional = GameProfileCache.getInstance()
-                .getPlayerConfigEntry(uuid)
+                .getNameAndId(uuid)
                 .filter(entry -> ServerUtils.isPlayerDataExists(server, entry));
         if (optional.isEmpty()) {
             return false;

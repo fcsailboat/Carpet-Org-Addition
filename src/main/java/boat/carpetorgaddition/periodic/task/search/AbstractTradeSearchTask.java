@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.periodic.task.search;
 
 import boat.carpetorgaddition.command.FinderCommand;
-import boat.carpetorgaddition.exception.TaskExecutionException;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
@@ -59,19 +58,13 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
         }
         this.checkCancelled();
         while (this.isTimeRemaining()) {
-            try {
-                switch (this.findState) {
-                    case SEARCH -> searchVillager();
-                    case SORT -> sort();
-                    case FEEDBACK -> feedback();
-                    default -> {
-                        return;
-                    }
+            switch (this.findState) {
+                case SEARCH -> searchVillager();
+                case SORT -> sort();
+                case FEEDBACK -> feedback();
+                default -> {
+                    return;
                 }
-            } catch (TaskExecutionException e) {
-                e.disposal();
-                this.findState = FindState.END;
-                return;
             }
         }
     }
