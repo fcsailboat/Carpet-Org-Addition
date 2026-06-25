@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -74,5 +75,16 @@ public class ServerTaskManager {
 
     public <T> Stream<T> stream(Class<T> classFilter) {
         return this.stream().filter(classFilter::isInstance).map(classFilter::cast);
+    }
+
+    public <T extends ServerTask> Optional<T> getServerTask(Object key, Class<T> type) {
+        ServerTask task = this.tasks.get(key);
+        if (task == null) {
+            return Optional.empty();
+        }
+        if (type.isInstance(task)) {
+            return Optional.of(type.cast(task));
+        }
+        return Optional.empty();
     }
 }

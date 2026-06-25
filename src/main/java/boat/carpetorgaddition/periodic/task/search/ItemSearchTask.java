@@ -56,6 +56,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private final ItemStackPredicate predicate;
     private final ArrayList<Result> results = new ArrayList<>();
     private final PagedCollection pagedCollection;
+    private boolean cancelled = false;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("item");
 
     public ItemSearchTask(Level world, ItemStackPredicate predicate, BlockEntityTraverser blockEntities, CommandSourceStack source) {
@@ -71,7 +72,10 @@ public class ItemSearchTask extends ServerSearchTask {
 
     @Override
     public void tick() {
-        this.checkTimeout();
+        if (this.isTimeout()) {
+            this.noticeCancelled();
+        }
+        this.checkCancelled();
         while (this.isTimeRemaining()) {
             try {
                 switch (this.findState) {
@@ -97,6 +101,7 @@ public class ItemSearchTask extends ServerSearchTask {
             this.blockEntitySearchIterator = blockEntities.iterator();
         }
         while (this.blockEntitySearchIterator.hasNext()) {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
@@ -121,6 +126,7 @@ public class ItemSearchTask extends ServerSearchTask {
             this.entitySearchIterator = this.world.getEntitiesOfClass(Entity.class, box).iterator();
         }
         while (this.entitySearchIterator.hasNext()) {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
@@ -198,6 +204,7 @@ public class ItemSearchTask extends ServerSearchTask {
 
     // 对结果进行排序
     private void sort() {
+        this.checkCancelled();
         if (this.results.isEmpty()) {
             // 在周围的容器中找不到指定物品，直接将状态设置为结束，然后结束方法
             MessageUtils.sendMessage(this.source, KEY.then("cannot_find").translate(predicate.getDisplayName()));
@@ -210,6 +217,7 @@ public class ItemSearchTask extends ServerSearchTask {
 
     // 发送命令反馈
     private void feedback() {
+        this.checkCancelled();
         Component itemCount;
         Optional<Item> optional = predicate.getConvert();
         if (optional.isPresent()) {
@@ -233,6 +241,16 @@ public class ItemSearchTask extends ServerSearchTask {
     @Override
     public boolean stopped() {
         return this.findState == FindState.END;
+    }
+
+    @Override
+    public void cancel() {
+        this.cancelled = true;
+    }
+
+    @Override
+    protected boolean isCancelled() {
+        return this.cancelled;
     }
 
     @Override

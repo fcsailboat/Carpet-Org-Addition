@@ -37,10 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
@@ -107,6 +104,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
      * 已经完成查找的人数
      */
     private final AtomicInteger completedCount = new AtomicInteger(0);
+    private volatile boolean cancelled = false;
     private static final long PROGRESS_BAR_WAIT_TIME = 1000L;
 
     static {
@@ -129,6 +127,10 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
 
     @Override
     protected void tick() {
+        if (this.isTimeout()) {
+            this.noticeCancelled();
+        }
+        this.checkCancelled();
         switch (this.taksState) {
             case START -> {
                 this.start();
@@ -172,6 +174,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
      */
     private void start() {
         for (File file : this.files) {
+            this.checkCancelled();
             if (file.getName().endsWith(".dat")) {
                 UUID uuid;
                 try {
@@ -193,16 +196,21 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
         this.taskCount.getAndIncrement();
         CPU_TASK_EXECUTOR.submit(() -> {
             try {
+                if (this.isCancelled()) {
+                    return;
+                }
                 if (INVALID_PLAYER_DATAS.contains(uuid)) {
                     return;
                 }
-                if (this.server.isRunning()) {
+                if (!this.isCancelled()) {
                     CompoundTag nbt = readNbt(unsafe, uuid);
                     if (nbt == null) {
                         return;
                     }
                     this.search(uuid, nbt);
                 }
+            } catch (CancellationException _) {
+                // 更新玩家数据被中断，可能是玩家执行了/finder stop命令或服务器关闭，忽略异常
             } catch (RuntimeException | IOException e) {
                 CarpetOrgAddition.LOGGER.error("Unable to read player data from file for file {}", unsafe.getName(), e);
                 addCorruptedPlayerUUID(uuid);
@@ -214,6 +222,9 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
     }
 
     protected void search(UUID uuid, CompoundTag nbt) {
+        if (this.isCancelled()) {
+            return;
+        }
         // 获取玩家配置文件
         GameProfileCache cache = GameProfileCache.getInstance();
         Optional<NameAndId> optional = cache.getPlayerConfigEntry(uuid);
@@ -248,7 +259,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
         // 使用<而不是==，因为存档可能降级
         if (this.isCorruptedPlayerData(uuid) || version < ServerUtils.getMinecraftDataVersion()) {
             // 升级或修复玩家数据
-            if (this.server.isRunning() && this.backupAndUpdate(unsafe, uuid)) {
+            if (!this.isCancelled() && this.backupAndUpdate(unsafe, uuid)) {
                 return readNbt(unsafe);
             }
             return null;
@@ -284,7 +295,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
             INVALID_PLAYER_DATAS.add(uuid);
             return false;
         }
-        FabricPlayerAccessor accessor = this.accessManager.getOrCreateBlocking(entry);
+        FabricPlayerAccessor accessor = this.accessManager.getOrCreateBlocking(entry, this::isCancelled);
         OfflinePlayerInventory inventory = new OfflinePlayerInventory(accessor);
         inventory.setShowLog(false);
         inventory.startOpen(this.player);
@@ -416,6 +427,16 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
     @Override
     protected boolean stopped() {
         return this.taksState == State.STOP;
+    }
+
+    @Override
+    public void cancel() {
+        this.cancelled = true;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return ServerUtils.isStoping(this.server) || this.cancelled;
     }
 
     public enum State {
