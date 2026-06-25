@@ -3,8 +3,8 @@ package boat.carpetorgaddition.wheel;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
 import boat.carpetorgaddition.util.IOUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.JsonArray;
@@ -15,7 +15,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.NameAndId;
-import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.jspecify.annotations.NonNull;
 
@@ -26,8 +25,6 @@ import java.io.InputStream;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -155,45 +152,20 @@ public class GameProfileCache {
     }
 
     /**
-     * 根据玩家名称获取玩家档案
+     * 根据玩家名称获取玩家档案<br>
+     * 优先从已缓存的玩家档案中查找，如果未命中，则创建离线玩家UUID，若该玩家UUID所对应的玩家数据文件存在，则计入缓存
      */
     public Optional<GameProfile> resolveGameProfile(MinecraftServer server, String username) {
-        try {
-            Optional<GameProfile> optional = this.getGameProfile(username);
-            if (optional.isPresent()) {
-                return optional;
-            }
+        return this.getGameProfile(username).or(() -> {
             // 获取玩家的离线UUID
             UUID uuid = UUIDUtil.createOfflinePlayerUUID(username);
-            if (this.isPlayerDataExists(server, uuid)) {
+            if (ServerUtils.isPlayerDataExists(server, uuid)) {
                 GameProfile gameProfile = new GameProfile(uuid, username);
                 this.put(gameProfile);
                 return Optional.of(gameProfile);
             }
-            // TODO 已不再使用usercache.json，异常未更新
-        } catch (JsonParseException | NullPointerException e) {
-            // 译：读取usercache.json时出现意外问题，正在使用离线玩家UUID
-            CarpetOrgAddition.LOGGER.warn("An unexpected issue occurred while reading usercache.json, using offline player UUID", e);
-        }
-        return Optional.empty();
-    }
-
-    @Deprecated
-    public Optional<NameAndId> resolvePlayerConfigEntry(MinecraftServer server, UUID uuid) {
-        if (this.isPlayerDataExists(server, uuid)) {
-            Optional<NameAndId> optional = this.getPlayerConfigEntry(uuid);
-            return Optional.of(optional.orElseGet(() -> new NameAndId(new GameProfile(uuid, OfflinePlayerInventorySearchTask.UNKNOWN))));
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * @return 玩家数据是否存在
-     */
-    private boolean isPlayerDataExists(MinecraftServer server, UUID uuid) {
-        String filename = uuid + ".dat";
-        Path path = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(filename);
-        return Files.exists(path);
+            return Optional.empty();
+        });
     }
 
     /**

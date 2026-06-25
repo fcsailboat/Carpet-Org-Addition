@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
@@ -36,11 +37,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -534,17 +538,43 @@ public class ServerUtils {
         server.getPlayerList().getPlayers().forEach(consumer);
     }
 
+    /**
+     * @return 获取当前游戏刻
+     */
     public static long getTime(MinecraftServer server) {
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         return level == null ? -1L : level.getGameTime();
     }
 
+    /**
+     * @return 服务器是否正在运行
+     */
     public static boolean isRunning(MinecraftServer server) {
         return server.isRunning();
     }
 
+    /**
+     * @return 服务器是否停止运行
+     */
     public static boolean isStoping(MinecraftServer server) {
         // server.stopped没有被volatile修饰，它可能不是线程安全的
         return !server.isRunning();
+    }
+
+    /**
+     * @return 玩家数据是否存在
+     */
+    public static boolean isPlayerDataExists(MinecraftServer server, UUID uuid) {
+        String filename = uuid + ".dat";
+        Path path = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(filename);
+        return Files.exists(path);
+    }
+
+    public static boolean isPlayerDataExists(MinecraftServer server, GameProfile gameProfile) {
+        return isPlayerDataExists(server, gameProfile.id());
+    }
+
+    public static boolean isPlayerDataExists(MinecraftServer server, NameAndId nameAndId) {
+        return isPlayerDataExists(server, nameAndId.id());
     }
 }
