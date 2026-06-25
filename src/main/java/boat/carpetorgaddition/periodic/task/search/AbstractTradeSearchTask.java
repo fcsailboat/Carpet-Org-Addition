@@ -38,6 +38,7 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
      * 交易选择的总数量
      */
     protected int tradeCount;
+    private boolean cancelled = false;
     public static final LocalizationKey TRADE = FinderCommand.KEY.then("trade");
 
     public AbstractTradeSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source) {
@@ -52,7 +53,10 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
 
     @Override
     public void tick() {
-        this.checkTimeout();
+        if (this.isTimeout()) {
+            this.noticeCancelled();
+        }
+        this.checkCancelled();
         while (this.isTimeRemaining()) {
             try {
                 switch (this.findState) {
@@ -77,6 +81,7 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
             this.iterator = this.world.getEntitiesOfClass(AbstractVillager.class, this.blockPosTraverser.toBox()).iterator();
         }
         while (this.iterator.hasNext()) {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
@@ -100,11 +105,13 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
 
     // 对结果进行排序
     private void sort() {
+        this.checkCancelled();
         this.results.sort((o1, o2) -> o1.compare(o1, o2));
         this.findState = FindState.FEEDBACK;
     }
 
     private void feedback() {
+        this.checkCancelled();
         ArrayList<Object> list = new ArrayList<>();
         // 村民数量
         list.add(this.villagerCount);
@@ -145,6 +152,16 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
     @Override
     protected long getMaxTimeSlice() {
         return FinderCommand.TIME_SLICE;
+    }
+
+    @Override
+    public void cancel() {
+        this.cancelled = true;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return this.cancelled;
     }
 
     public interface Result extends Comparator<Result>, Supplier<Component> {

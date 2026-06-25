@@ -28,12 +28,9 @@ public abstract class ServerSearchTask extends ServerTask {
         this.notice = true;
     }
 
-    public void cancel() {
-    }
+    public abstract void cancel();
 
-    protected boolean isCancelled() {
-        return false;
-    }
+    protected abstract boolean isCancelled();
 
     protected void checkCancelled() {
         if (this.isCancelled()) {
