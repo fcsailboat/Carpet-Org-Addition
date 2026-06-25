@@ -13,6 +13,7 @@ import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.level.Level;
 
@@ -41,8 +42,8 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
     private boolean cancelled = false;
     public static final LocalizationKey TRADE = FinderCommand.KEY.then("trade");
 
-    public AbstractTradeSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source) {
-        super(source);
+    public AbstractTradeSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source, ServerPlayer player) {
+        super(source, player);
         this.world = world;
         this.blockPosTraverser = blockPosTraverser;
         this.sourcePos = sourcePos;

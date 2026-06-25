@@ -78,7 +78,6 @@ public class FinderCommand extends AbstractServerCommand {
 
     @Override
     public void register(String name) {
-        // TODO 取消超时，添加手动停止按钮
         this.dispatcher.register(Commands.literal(name)
                 .requires(source -> CarpetOrgAdditionSettings.COMMAND_FINDER.value().hasPermission(source))
                 .then(Commands.literal("block")
@@ -134,7 +133,6 @@ public class FinderCommand extends AbstractServerCommand {
                         .then(Commands.literal("from")
                                 .then(Commands.literal("offline_player")
                                         .executes(this::searchExperienceFromOfflinePlayer))))
-                // TODO 补全更新日志
                 .then(Commands.literal("stop")
                         .executes(this::stop)));
     }
@@ -157,7 +155,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockEntityTraverser traverser = new BlockEntityTraverser(world, sourceBlockPos, range);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
-        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source);
+        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source, player);
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
@@ -177,7 +175,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockEntityTraverser traverser = new BlockEntityTraverser(world, from, to);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
-        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source);
+        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source, player);
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
@@ -209,7 +207,7 @@ public class FinderCommand extends AbstractServerCommand {
         this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         CommandSourceStack source = context.getSource();
-        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate);
+        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
@@ -230,7 +228,7 @@ public class FinderCommand extends AbstractServerCommand {
         this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofWorldEater();
         CommandSourceStack source = context.getSource();
-        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate);
+        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
@@ -249,7 +247,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         // 添加查找任务
         CommandSourceStack source = context.getSource();
-        BlockSearchTask task = new BlockSearchTask(ServerUtils.getWorld(player), player.blockPosition(), traverser, source, predicate);
+        BlockSearchTask task = new BlockSearchTask(ServerUtils.getWorld(player), player.blockPosition(), traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
@@ -270,7 +268,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, range);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
-        TradeItemSearchTask task = new TradeItemSearchTask(world, traverser, sourcePos, predicate, source);
+        TradeItemSearchTask task = new TradeItemSearchTask(world, traverser, sourcePos, predicate, source, player);
         // 向任务管理器添加任务
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
@@ -294,7 +292,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 查找范围
         BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, range);
         this.checkBoxSize(traverser);
-        TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate);
+        TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate, player);
         // 向任务管理器添加任务
         ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task, player);
         return 1;
@@ -316,7 +314,7 @@ public class FinderCommand extends AbstractServerCommand {
         ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
         ServerTaskManager taskManager = coordinator.getServerTaskManager();
         // TODO 未检查玩家，可能可以取消其他玩家的任务
-        ServerSearchTask task = taskManager.getServerTask(ServerSearchTask.IDENTITY_KEY, ServerSearchTask.class)
+        ServerSearchTask task = taskManager.getServerTask(ServerSearchTask.createIdentityKey(player), ServerSearchTask.class)
                 .orElseThrow(() -> CommandUtils.createException(KEY.then("not_canceled").translate()));
         task.cancel();
         return 1;

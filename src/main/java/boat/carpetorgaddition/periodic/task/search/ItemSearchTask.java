@@ -23,6 +23,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
@@ -59,8 +60,8 @@ public class ItemSearchTask extends ServerSearchTask {
     private boolean cancelled = false;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("item");
 
-    public ItemSearchTask(Level world, ItemStackPredicate predicate, BlockEntityTraverser blockEntities, CommandSourceStack source) {
-        super(source);
+    public ItemSearchTask(Level world, ItemStackPredicate predicate, BlockEntityTraverser blockEntities, CommandSourceStack source, ServerPlayer player) {
+        super(source, player);
         this.world = world;
         this.blockEntities = blockEntities;
         this.findState = FindState.BLOCK;

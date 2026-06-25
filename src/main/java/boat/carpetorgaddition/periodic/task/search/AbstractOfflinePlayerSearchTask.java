@@ -81,7 +81,6 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
      * 总的玩家数量
      */
     protected int total = 0;
-    protected final ServerPlayer player;
     protected final MinecraftServer server;
     private final File[] files;
     protected State taksState = State.START;
@@ -112,8 +111,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
     }
 
     public AbstractOfflinePlayerSearchTask(CommandSourceStack source, ServerPlayer player) {
-        super(source);
-        this.player = player;
+        super(source, player);
         this.server = ServerUtils.getServer(this.player);
         this.files = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).toFile().listFiles();
         if (this.files == null) {

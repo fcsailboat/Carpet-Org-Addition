@@ -18,6 +18,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 
 import java.util.*;
@@ -51,8 +52,8 @@ public class BlockSearchTask extends ServerSearchTask {
     private boolean cancelled = false;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("block");
 
-    public BlockSearchTask(ServerLevel world, BlockPos sourcePos, BlockPosTraverser traverser, CommandSourceStack source, BlockStatePredicate predicate) {
-        super(source);
+    public BlockSearchTask(ServerLevel world, BlockPos sourcePos, BlockPosTraverser traverser, CommandSourceStack source, BlockStatePredicate predicate, ServerPlayer player) {
+        super(source, player);
         this.world = world;
         this.sourcePos = sourcePos;
         this.traverser = traverser.clamp(world);

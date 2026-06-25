@@ -8,12 +8,17 @@ import boat.carpetorgaddition.wheel.provider.CommandProvider;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+
+import java.util.Map;
 
 public abstract class ServerSearchTask extends ServerTask {
-    public static final Object IDENTITY_KEY = new Object();
+    private static final Object IDENTITY_KEY = new Object();
+    protected final ServerPlayer player;
 
-    public ServerSearchTask(CommandSourceStack source) {
+    public ServerSearchTask(CommandSourceStack source, ServerPlayer player) {
         super(source);
+        this.player = player;
     }
 
     private boolean notice = false;
@@ -38,8 +43,12 @@ public abstract class ServerSearchTask extends ServerTask {
         }
     }
 
+    public static Object createIdentityKey(ServerPlayer player) {
+        return Map.entry(IDENTITY_KEY, player);
+    }
+
     @Override
     public final Object getIdentityKey() {
-        return IDENTITY_KEY;
+        return createIdentityKey(this.player);
     }
 }
