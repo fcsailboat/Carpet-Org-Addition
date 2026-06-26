@@ -132,9 +132,5 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
                 default -> OTHER_CLICK;
             };
         }
-
-        public boolean isLeftOrOther() {
-            return this == LEFT_CLICK || this == OTHER_CLICK;
-        }
     }
 }
