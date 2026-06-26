@@ -207,6 +207,22 @@ public class PlayerUtils {
         actionPack.start(type, EntityPlayerActionPack.Action.once());
     }
 
+    public static void attack(ServerPlayer player) {
+        click(player, InteractionHand.MAIN_HAND);
+    }
+
+    public static void use(ServerPlayer player) {
+        click(player, InteractionHand.OFF_HAND);
+    }
+
+    public static boolean isSneaking(ServerPlayer player) {
+        return player.isShiftKeyDown();
+    }
+
+    public static void setSneaking(ServerPlayer player, boolean sneaking) {
+        player.setShiftKeyDown(sneaking);
+    }
+
     public static boolean isRealPlayer(ServerPlayer player) {
         return switch (player) {
             case EntityPlayerMPFake _, FakePlayer _ -> false;

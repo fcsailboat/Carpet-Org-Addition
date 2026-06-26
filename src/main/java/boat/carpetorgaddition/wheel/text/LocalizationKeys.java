@@ -182,10 +182,16 @@ public final class LocalizationKeys {
             public static class Attack {
                 public static final LocalizationKey INTERVAL = ATTACK.then("interval");
                 public static final LocalizationKey CONTINUOUS = ATTACK.then("continuous");
+                public static final LocalizationKey CONTINUOUS_RIGHT = CONTINUOUS.then("right");
             }
 
             public static class Use {
                 public static final LocalizationKey CONTINUOUS = USE.then("continuous");
+                public static final LocalizationKey CONTINUOUS_RIGHT = CONTINUOUS.then("right");
+            }
+
+            public static class Hotbar {
+                public static final LocalizationKey RIGHT = HOTBAR.then("right");
             }
         }
     }

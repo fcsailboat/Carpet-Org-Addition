@@ -38,7 +38,7 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
         ClickType clickType = ClickType.of(buttonNum);
         if (container instanceof ButtonInventory buttonInventory) {
             int index = buttonInventory == this.inventory.getHotbar() ? slotIndex - 9 : 0;
-            buttonInventory.onClickd(clickType, index, this.inventory.getActionPack());
+            buttonInventory.onClicked(clickType, index, this.inventory.getActionPack());
             return;
         }
         super.clicked(slotIndex, buttonNum, containerInput, player);
