@@ -81,6 +81,7 @@
     "rule.blockdropsdirectlyenterinventory.ServerPlayerInteractionManagerMixin",
     "rule.blockdropsdirectlyenterinventory.ServerWorldMixin",
     "rule.canminespawner.BlockItemMixin",
+    "rule.canminespawner.BlockMixin",
     "rule.canminespawner.SpawnerBlockMixin",
     "rule.carpet.EntityPlayerMPFakeMixin",
     "rule.cceupdatesuppression.BlockPlacementDispenserBehaviorMixin",
