@@ -47,10 +47,7 @@ public class ParticleLineCommand {
         CommandSourceStack source = context.getSource();
         if (isUuid) {
             String uuid = StringArgumentType.getString(context, "uuid");
-            Entity entity = ServerUtils.getEntityFromUUID(source.getServer(), CommandUtils.parseUuidFromString(uuid));
-            if (entity == null) {
-                throw EntityArgument.NO_ENTITIES_FOUND.create();
-            }
+            Entity entity = ServerUtils.getEntity(source.getServer(), CommandUtils.parseUuidFromString(uuid)).orElseThrow(EntityArgument.NO_ENTITIES_FOUND::create);
             to = new Vec3(entity.getX(), entity.getY(0.618), entity.getZ());
         } else {
             to = Vec3Argument.getVec3(context, "to");

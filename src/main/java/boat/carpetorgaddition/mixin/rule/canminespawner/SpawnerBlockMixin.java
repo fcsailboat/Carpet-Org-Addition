@@ -4,7 +4,6 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -51,13 +50,12 @@ public abstract class SpawnerBlockMixin extends BaseEntityBlock {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (!world.isClientSide() && blockEntity instanceof SpawnerBlockEntity spawner) {
                 ItemStack itemStack = new ItemStack(Items.SPAWNER);
-                MinecraftServer server = ServerUtils.getServer(player);
-                if (server != null) {
+                ServerUtils.getServer(player).ifPresent(server -> {
                     TagValueOutput view = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, server.registryAccess());
                     BaseSpawner logic = spawner.getSpawner();
                     logic.save(view);
                     BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), view);
-                }
+                });
                 ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
                 itemEntity.setDefaultPickUpDelay();
                 world.addFreshEntity(itemEntity);

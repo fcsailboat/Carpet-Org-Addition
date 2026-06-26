@@ -17,7 +17,6 @@ import com.google.gson.JsonObject;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -285,16 +284,9 @@ public class TradeAction extends AbstractPlayerAction {
         if (ServerUtils.getWorld(merchant).hasChunk(chunkPos.x(), chunkPos.z())) {
             // 检查村民是否存在于任何一个维度，如果不存在，可以交易
             UUID uuid = merchant.getUUID();
-            MinecraftServer server = ServerUtils.getServer(merchant);
-            if (server == null) {
-                return true;
-            }
-            for (ServerLevel world : server.getAllLevels()) {
-                if (world.getEntity(uuid) == null) {
-                    continue;
-                }
-                return true;
-            }
+            return ServerUtils.getServer(merchant)
+                    .flatMap(server -> ServerUtils.getEntity(server, uuid))
+                    .isPresent();
         }
         return false;
     }

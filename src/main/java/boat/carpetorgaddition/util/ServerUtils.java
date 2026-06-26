@@ -97,6 +97,7 @@ public class ServerUtils {
         return Optional.ofNullable(server.getPlayerList().getPlayerByName(name));
     }
 
+    @Deprecated
     public static Optional<ServerPlayer> getPlayer(MinecraftServer server, GameProfile gameProfile) {
         return getPlayer(server, gameProfile.name());
     }
@@ -151,21 +152,6 @@ public class ServerUtils {
      */
     public static String toWorldPosString(Level world, BlockPos blockPos) {
         return getIdAsString(world) + "[" + toPosString(blockPos) + "]";
-    }
-
-    /**
-     * 从服务器寻找一个指定UUID的实体
-     */
-    @Nullable
-    public static Entity getEntityFromUUID(MinecraftServer server, UUID uuid) {
-        for (ServerLevel world : server.getAllLevels()) {
-            Entity entity = world.getEntity(uuid);
-            if (entity == null) {
-                continue;
-            }
-            return entity;
-        }
-        return null;
     }
 
     /**
@@ -302,9 +288,8 @@ public class ServerUtils {
         return getWorld(player).getServer();
     }
 
-    @Nullable
-    public static MinecraftServer getServer(Entity entity) {
-        return getWorld(entity).getServer();
+    public static Optional<MinecraftServer> getServer(Entity entity) {
+        return Optional.ofNullable(getWorld(entity).getServer());
     }
 
     public static MinecraftServer getServer(CommandSourceStack source) {
@@ -570,10 +555,12 @@ public class ServerUtils {
         return Files.exists(path);
     }
 
+    @Deprecated
     public static boolean isPlayerDataExists(MinecraftServer server, GameProfile gameProfile) {
         return isPlayerDataExists(server, gameProfile.id());
     }
 
+    @Deprecated
     public static boolean isPlayerDataExists(MinecraftServer server, NameAndId nameAndId) {
         return isPlayerDataExists(server, nameAndId.id());
     }
