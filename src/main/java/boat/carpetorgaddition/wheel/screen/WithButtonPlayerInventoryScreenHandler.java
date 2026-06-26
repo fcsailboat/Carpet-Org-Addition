@@ -5,7 +5,6 @@ import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory.ButtonInventory;
-import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory.StopButtonInventory;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -36,12 +35,10 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
     @Override
     public void clicked(int slotIndex, int buttonNum, ContainerInput containerInput, Player player) {
         Container container = this.inventory.getSubInventory(slotIndex);
-        if (buttonNum == FakePlayerUtils.PICKUP_RIGHT_CLICK && container instanceof StopButtonInventory) {
-            this.inventory.sort();
-            return;
-        }
+        ClickType clickType = ClickType.of(buttonNum);
         if (container instanceof ButtonInventory buttonInventory) {
-            buttonInventory.onClickd(buttonInventory == this.inventory.getHotbar() ? slotIndex - 9 : 0, this.inventory.getActionPack());
+            int index = buttonInventory == this.inventory.getHotbar() ? slotIndex - 9 : 0;
+            buttonInventory.onClickd(clickType, index, this.inventory.getActionPack());
             return;
         }
         super.clicked(slotIndex, buttonNum, containerInput, player);
@@ -121,5 +118,23 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
     @Override
     public Map<Integer, Identifier> getBackgroundSprite() {
         return BACKGROUND_SPRITE_MAP;
+    }
+
+    public enum ClickType {
+        LEFT_CLICK,
+        RIGHT_CLICK,
+        OTHER_CLICK;
+
+        private static ClickType of(int buttonId) {
+            return switch (buttonId) {
+                case FakePlayerUtils.PICKUP_LEFT_CLICK -> LEFT_CLICK;
+                case FakePlayerUtils.PICKUP_RIGHT_CLICK -> RIGHT_CLICK;
+                default -> OTHER_CLICK;
+            };
+        }
+
+        public boolean isLeftOrOther() {
+            return this == LEFT_CLICK || this == OTHER_CLICK;
+        }
     }
 }
