@@ -337,7 +337,7 @@
   "carpet-org-addition.button.prev_page": "上一页",
   "carpet-org-addition.button.next_page": "下一页",
   "carpet-org-addition.button.action.stop.left": "单击以停止所有动作",
-  "carpet-org-addition.button.action.stop.right": "右键单击以整理物品栏",
+  "carpet-org-addition.button.action.stop.right": "右键单击：整理物品栏",
   "carpet-org-addition.button.action.attack.interval": "间隔%s游戏刻攻击：%s",
   "carpet-org-addition.button.action.attack.continuous": "按住左键：%s",
   "carpet-org-addition.button.action.attack.continuous.right": "右键单击：仅左键一次",
