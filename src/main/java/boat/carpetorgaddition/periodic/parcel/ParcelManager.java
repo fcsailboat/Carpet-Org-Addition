@@ -42,7 +42,7 @@ public class ParcelManager {
 
     private void init() {
         // 从文件读取快递信息
-        for (File file : this.worldFormat.listFiles(WorldFormat.NBT_EXTENSIONS)) {
+        for (File file : this.worldFormat.listFiles().stream().filter(WorldFormat.NBT_EXTENSIONS).toList()) {
             String name = IOUtils.getFileNameWithoutExtension(file);
             OptionalInt optional = MathUtils.tryParseInt(name);
             if (optional.isEmpty()) {

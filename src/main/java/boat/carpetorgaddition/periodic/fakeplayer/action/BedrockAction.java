@@ -586,7 +586,7 @@ public class BedrockAction extends AbstractPlayerAction {
         BlockState blockState = world.getBlockState(up);
         if (blockState.is(Blocks.PISTON) && blockState.getValue(PistonBaseBlock.EXTENDED)) {
             // 先切换工具，再计算剩余挖掘时间
-            switchTool(blockState, world, up, this.getFakePlayer());
+            this.inventory.switchToAppropriateTool(world, up);
             // 计算剩余挖掘时间
             int currentTime = this.excavator.computingRemainingMiningTime(up);
             if (currentTime == 1) {
@@ -772,36 +772,10 @@ public class BedrockAction extends AbstractPlayerAction {
         this.hasAction = true;
         EntityPlayerMPFake player = this.excavator.getPlayer();
         Level world = ServerUtils.getWorld(player);
-        BlockState blockState = world.getBlockState(blockPos);
         if (switchTool) {
-            switchTool(blockState, world, blockPos, player);
+            this.inventory.switchToAppropriateTool(world, blockPos);
         }
         return this.excavator.mining(blockPos, Direction.DOWN, false);
-    }
-
-    /**
-     * @deprecated 改用{@link PlayerStorageInventory#switchToAppropriateTool(Level, BlockPos)}
-     */
-    @Deprecated
-    private void switchTool(BlockState blockState, Level world, BlockPos blockPos, EntityPlayerMPFake player) {
-        boolean replenishSuccess = this.inventory.replenish(itemStack -> {
-            if (this.getFakePlayer().isCreative()) {
-                return itemStack.getItem().canDestroyBlock(player.getMainHandItem(), blockState, world, blockPos, player);
-            }
-            if (itemStack.isEmpty()) {
-                return false;
-            }
-            // 不使用低耐久工具
-            if (isDamaged(itemStack)) {
-                return false;
-            }
-            return itemStack.getDestroySpeed(blockState) > 1F;
-        });
-        if (replenishSuccess) {
-            return;
-        }
-        // 工具没有切换成功，使用其他物品替换手上工具以避免工具损坏
-        this.inventory.replenish(itemStack -> !isDamaged(itemStack));
     }
 
     /**

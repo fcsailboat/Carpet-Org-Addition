@@ -153,7 +153,7 @@ public class BlockExcavator {
         }
         BlockState blockState = world.getBlockState(blockPos);
         float delta = blockState.getDestroyProgress(this.player, world, blockPos);
-        return (int) Math.ceil((1F - this.currentBreakingProgress) / delta);
+        return Math.max((int) Math.ceil((1F - this.currentBreakingProgress) / delta), 1);
     }
 
     private void breakingAction(Action action, BlockPos blockPos, Direction direction) {

@@ -118,17 +118,6 @@ public class WorldFormat {
         return Stream.of(files).sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
     }
 
-    @Deprecated
-    @Unmodifiable
-    public List<File> listFiles(Predicate<File> filter) {
-        File[] files = this.directory.listFiles();
-        if (files == null) {
-            return List.of();
-        }
-        // 一些操作系统下文件排序可能不是按字母排序
-        return Stream.of(files).filter(filter).sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
-    }
-
     /**
      * 创建指向当前目录下子目录的新对象
      */
