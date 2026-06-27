@@ -3,9 +3,11 @@ package boat.carpetorgaddition.wheel.screen;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory.ButtonInventory;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +20,9 @@ import java.util.Map;
 @NullMarked
 public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements BackgroundSpriteSyncServer {
     private final WithButtonPlayerInventory inventory;
+    private long lastClickTime = -1L;
+    private boolean clicked = false;
+    private final MinecraftServer server;
     private static final Map<Integer, Identifier> BACKGROUND_SPRITE_MAP = Map.of(
             1, InventoryMenu.EMPTY_ARMOR_SLOT_HELMET,
             2, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
@@ -30,6 +35,7 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
         WithButtonPlayerInventory inventory = PlayerComponentCoordinator.getCoordinator(interviewee).getWithButtonPlayerInventory();
         super(MenuType.GENERIC_9x6, containerId, visitor.getInventory(), inventory, 6);
         this.inventory = inventory;
+        this.server = ServerUtils.getServer(interviewee);
     }
 
     @Override
@@ -37,11 +43,28 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
         Container container = this.inventory.getSubInventory(slotIndex);
         ClickType clickType = ClickType.of(buttonNum);
         if (container instanceof ButtonInventory buttonInventory) {
+            if (ServerUtils.getTime(this.server) != this.lastClickTime) {
+                this.lastClickTime = ServerUtils.getTime(this.server);
+                this.clicked = false;
+            } else {
+                if (this.clicked) {
+                    return;
+                }
+                this.stopAllAction();
+                this.clicked = true;
+                return;
+            }
             int index = buttonInventory == this.inventory.getHotbar() ? slotIndex - 9 : 0;
             buttonInventory.onClicked(clickType, index, this.inventory.getActionPack());
             return;
         }
         super.clicked(slotIndex, buttonNum, containerInput, player);
+    }
+
+    private void stopAllAction() {
+        if (this.inventory.getSubInventory(0) instanceof WithButtonPlayerInventory.StopButtonInventory stopButton) {
+            stopButton.onClicked(ClickType.LEFT_CLICK, 0, this.inventory.getActionPack());
+        }
     }
 
     /**
