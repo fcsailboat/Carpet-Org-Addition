@@ -151,7 +151,7 @@ public class PlayerCommandExtension {
             checkCanBeOpened(server.getPlayerList().getPlayer(name));
             GameProfile gameProfile = GameProfileCache.getInstance()
                     .resolveGameProfile(server, name)
-                    .filter(profile -> ServerUtils.isPlayerDataExists(server, profile))
+                    .filter(profile -> ServerUtils.isPlayerDataExists(server, profile.id()))
                     .orElseThrow(PlayerCommandExtension::createNoFileFoundException);
             super(server, gameProfile, visitor);
         }
@@ -160,7 +160,7 @@ public class PlayerCommandExtension {
             checkCanBeOpened(server.getPlayerList().getPlayer(uuid));
             GameProfile gameProfile = GameProfileCache.getInstance()
                     .getGameProfile(uuid)
-                    .filter(profile -> ServerUtils.isPlayerDataExists(server, profile))
+                    .filter(profile -> ServerUtils.isPlayerDataExists(server, profile.id()))
                     .orElseThrow(PlayerCommandExtension::createNoFileFoundException);
             super(server, gameProfile, visitor);
         }

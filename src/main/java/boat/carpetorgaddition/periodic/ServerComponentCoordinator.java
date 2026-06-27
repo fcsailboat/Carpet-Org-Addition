@@ -54,7 +54,7 @@ public class ServerComponentCoordinator {
         this.ruleConfig = new RuleConfig(server);
         this.dialogProvider = new DialogProvider(server);
         this.fakePlayerResidents = new FakePlayerResidents(server);
-        librarianVillagerPoiCache = new LibrarianVillagerPoiCache(server);
+        this.librarianVillagerPoiCache = new LibrarianVillagerPoiCache();
     }
 
     /**

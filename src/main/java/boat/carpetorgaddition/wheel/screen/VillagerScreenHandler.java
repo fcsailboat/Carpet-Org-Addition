@@ -48,19 +48,12 @@ public class VillagerScreenHandler extends AbstractContainerMenu implements Unav
         }
     }
 
-    // 快速移动物品的方法，代码直接从其他类中复制过来再改一下
-    // 虽然这里对快速移动的方法进行了重写，但是在客户端仍然会调用Generic3x3ContainerScreenHandler类中的快速移动方法（需要验证）
     @Override
     public @NonNull ItemStack quickMoveStack(@NonNull Player player, int slotIndex) {
-        // 创建一个空物品堆栈对象
         ItemStack itemStack = ItemStack.EMPTY;
-        // 获取当前GUI中指定索引的槽位对象
         Slot slot = this.slots.get(slotIndex);
-        // 判断这个槽位上是否有物品
         if (slot.hasItem()) {
-            // 获取这个槽位上的物品堆栈对象
             ItemStack slotItemStack = slot.getItem();
-            // 将当前槽位上物品堆栈对象的副本赋值给空物品对象
             itemStack = slotItemStack.copy();
             // 判断当前点击的槽位是否是上方GUI的槽位而不是下方玩家物品栏的槽位
             // insertItem()方法的返回值是物品堆栈的堆叠数是否减少了
@@ -85,22 +78,17 @@ public class VillagerScreenHandler extends AbstractContainerMenu implements Unav
                         }
                     }
                 }
-                // 如果当前槽位上的物品为空（不一定是EMPTY，也可能是空气，或者堆叠数<=0），就设置物品槽位改槽位上的物品为EMPTY
                 if (slotItemStack.isEmpty()) {
                     slot.setByPlayer(ItemStack.EMPTY);
                 } else {
-                    // 没有读懂markDirty()方法的含义
                     slot.setChanged();
                 }
-                // 如果当前槽位的堆叠数与移动物品前创建的物品堆栈副本的堆叠数相同，就返回空物品堆栈
-                // 但是为什么要有这次判断没有看懂，不过也懒得深入研究了
                 if (slotItemStack.getCount() == itemStack.getCount()) {
                     return ItemStack.EMPTY;
                 }
                 slot.onTake(player, slotItemStack);
             }
         }
-        // 方法的返回值是干什么用的？
         return itemStack;
     }
 

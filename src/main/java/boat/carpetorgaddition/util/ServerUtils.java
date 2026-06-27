@@ -20,7 +20,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.NameAndId;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
@@ -553,15 +552,5 @@ public class ServerUtils {
         String filename = uuid + ".dat";
         Path path = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(filename);
         return Files.exists(path);
-    }
-
-    @Deprecated
-    public static boolean isPlayerDataExists(MinecraftServer server, GameProfile gameProfile) {
-        return isPlayerDataExists(server, gameProfile.id());
-    }
-
-    @Deprecated
-    public static boolean isPlayerDataExists(MinecraftServer server, NameAndId nameAndId) {
-        return isPlayerDataExists(server, nameAndId.id());
     }
 }

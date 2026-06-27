@@ -281,7 +281,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
         // 模拟玩家登录，更新玩家数据文件
         Optional<NameAndId> optional = GameProfileCache.getInstance()
                 .getNameAndId(uuid)
-                .filter(entry -> ServerUtils.isPlayerDataExists(server, entry));
+                .filter(entry -> ServerUtils.isPlayerDataExists(server, entry.id()));
         if (optional.isEmpty()) {
             return false;
         }
