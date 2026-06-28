@@ -95,7 +95,7 @@ public class MailCommand extends AbstractServerCommand {
             if (player == null) {
                 return SharedSuggestionProvider.suggest(List.of(), builder);
             }
-            ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+            ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             ParcelManager manager = coordinator.getParcelManager();
             // 获取所有发送给自己的快递（或所有自己发送的快递）
             List<String> list = manager.stream()
@@ -115,7 +115,7 @@ public class MailCommand extends AbstractServerCommand {
             if (player == null) {
                 return SharedSuggestionProvider.suggest(List.of(), builder);
             }
-            ParcelManager manager = ServerComponentCoordinator.getCoordinator(server).getParcelManager();
+            ParcelManager manager = ServerComponentCoordinator.of(server).getParcelManager();
             // 获取所有发送的快递
             List<String> list = manager.stream()
                     .map(parcel -> Integer.toString(parcel.getId()))
@@ -130,7 +130,7 @@ public class MailCommand extends AbstractServerCommand {
         ServerPlayer sourcePlayer = CommandUtils.getSourcePlayer(context);
         GameProfile gameProfile = CommandUtils.getGameProfile(context, "player");
         Optional<ServerPlayer> optional = ServerUtils.getPlayer(server, gameProfile.name());
-        ParcelManager manager = ServerComponentCoordinator.getCoordinator(server).getParcelManager();
+        ParcelManager manager = ServerComponentCoordinator.of(server).getParcelManager();
         Parcel parcel;
         if (optional.isEmpty()) {
             parcel = new Parcel(server, sourcePlayer, gameProfile, manager.generateNumber());
@@ -219,7 +219,7 @@ public class MailCommand extends AbstractServerCommand {
     private int override(CommandContext<CommandSourceStack> context) {
         if (CarpetOrgAddition.isDebugMode()) {
             MinecraftServer server = ServerUtils.getServer(context.getSource());
-            ParcelManager manager = ServerComponentCoordinator.getCoordinator(server).getParcelManager();
+            ParcelManager manager = ServerComponentCoordinator.of(server).getParcelManager();
             manager.stream().forEach(parcel -> {
                 try {
                     parcel.save();
@@ -237,7 +237,7 @@ public class MailCommand extends AbstractServerCommand {
         final ServerPlayer player = CommandUtils.getSourcePlayer(context);
         CommandSourceStack source = context.getSource();
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         ParcelManager manager = coordinator.getParcelManager();
         List<Parcel> list = manager.stream().toList();
         if (list.isEmpty()) {
@@ -291,7 +291,7 @@ public class MailCommand extends AbstractServerCommand {
     // 获取快递
     private Parcel getParcel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = ServerUtils.getServer(context.getSource());
-        ParcelManager manager = ServerComponentCoordinator.getCoordinator(server).getParcelManager();
+        ParcelManager manager = ServerComponentCoordinator.of(server).getParcelManager();
         // 获取快递单号
         int id = IntegerArgumentType.getInteger(context, "id");
         // 查找指定单号的快递

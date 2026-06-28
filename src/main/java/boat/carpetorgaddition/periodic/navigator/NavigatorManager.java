@@ -80,7 +80,7 @@ public class NavigatorManager {
     }
 
     public void setNavigatorFromOldPlayer(ServerPlayer oldPlayer) {
-        NavigatorManager manager = PlayerComponentCoordinator.getCoordinator(oldPlayer).getNavigatorManager();
+        NavigatorManager manager = PlayerComponentCoordinator.of(oldPlayer).getNavigatorManager();
         Navigator navigator = manager.getNavigator();
         this.navigator = navigator == null ? null : navigator.copy(this.player);
     }

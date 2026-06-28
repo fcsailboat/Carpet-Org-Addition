@@ -67,7 +67,7 @@ public class ItemSearchTask extends ServerSearchTask {
         this.findState = FindState.BLOCK;
         this.predicate = predicate;
         MinecraftServer server = source.getServer();
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(server).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 

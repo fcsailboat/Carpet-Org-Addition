@@ -228,7 +228,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
 
     public FakePlayerSpawner getSpawner(MinecraftServer server) {
         CommandSourceStack source = server.createCommandSourceStack();
-        ServerTaskManager taskManager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         return FakePlayerSpawner.of(server, this.name)
                 .setPosition(this.playerPos)
                 .setYaw(this.yaw)

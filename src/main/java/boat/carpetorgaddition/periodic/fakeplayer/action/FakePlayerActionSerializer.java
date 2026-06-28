@@ -19,7 +19,7 @@ public class FakePlayerActionSerializer {
     }
 
     public FakePlayerActionSerializer(EntityPlayerMPFake fakePlayer) {
-        FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.getCoordinator(fakePlayer);
+        FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         this.action = actionManager.getAction();
     }
@@ -52,7 +52,7 @@ public class FakePlayerActionSerializer {
         } else if (!this.action.equalFakePlayer(fakePlayer)) {
             throw new IllegalArgumentException();
         }
-        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(fakePlayer);
+        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.setAction(this.action);
     }

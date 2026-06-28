@@ -96,7 +96,7 @@ public class ParcelManager {
                 return MailCommand.KEY.then("prompt_collect").translate(parcel.getCount(), parcel.getDisplayName(), clickRun);
             });
         }
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(this.server).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(this.server).getPageManager();
         CommandSourceStack source = player.createCommandSourceStack();
         PagedCollection collection = pageManager.newPagedCollection(source);
         collection.addContent(messages);

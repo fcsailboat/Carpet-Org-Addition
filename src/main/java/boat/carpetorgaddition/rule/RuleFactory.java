@@ -165,7 +165,7 @@ public final class RuleFactory {
                 @Override
                 public T getCustomRuleValue(ServerPlayer player) {
                     MinecraftServer server = ServerUtils.getServer(player);
-                    ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+                    ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
                     CustomRuleValueManager ruleValueManager = coordinator.getCustomRuleValueManager();
                     boolean enabled = ruleValueManager.isEnabled(player, this);
                     return customRuleValue.apply(enabled);

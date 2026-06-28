@@ -268,7 +268,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private SuggestionProvider<CommandSourceStack> cancelSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
-            ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+            ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
             Stream<String> stream = manager.stream(PlayerScheduleTask.class).map(PlayerScheduleTask::getPlayerName);
             return SharedSuggestionProvider.suggest(stream, builder);
         };
@@ -278,7 +278,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private SuggestionProvider<CommandSourceStack> playerSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
-            ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+            ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             Stream<String> stream = coordinator.getPlayerSerializationManager()
                     .listAll()
                     .stream()
@@ -291,7 +291,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private SuggestionProvider<CommandSourceStack> allGroupSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
-            ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+            ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
             Stream<String> stream = manager.listGrouped()
                     .keySet()
@@ -307,7 +307,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private SuggestionProvider<CommandSourceStack> groupSuggests(boolean add) {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
-            ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+            ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
             String name = StringArgumentType.getString(context, "name");
             Stream<String> stream = manager.listGrouped().keySet().stream();
@@ -326,7 +326,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private SuggestionProvider<CommandSourceStack> reLoginTaskSuggests() {
         return (context, builder) -> {
             MinecraftServer server = context.getSource().getServer();
-            ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+            ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
             // 所有正在周期性上下线的玩家
             List<String> taskList = manager.stream(ReLoginTask.class).map(ReLoginTask::getPlayerName).toList();
             // 所有在线玩家
@@ -346,7 +346,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         return (context, builder) -> {
             CommandSourceStack source = context.getSource();
             MinecraftServer server = ServerUtils.getServer(source);
-            ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+            ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             FakePlayerResidents players = coordinator.getSavedFakePlayer();
             Stream<String> stream = players.listFileTime().stream().map(StringArgumentType::escapeIfRequired);
             return SharedSuggestionProvider.suggest(stream, builder);
@@ -356,7 +356,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int listGroup(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         String group = StringArgumentType.getString(context, "group");
         MinecraftServer server = context.getSource().getServer();
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
         List<FakePlayerSerializer> serializers = manager.listGroup(group);
         // 不存在的组
@@ -384,7 +384,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     private int listUngrouped(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
         List<FakePlayerSerializer> ungrouped = manager.listUngrouped();
         LocalizationKey key = GROUP.then("name");
@@ -403,7 +403,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     private int listAll(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
         List<Supplier<Component>> list = manager.listAll().stream().map(FakePlayerSerializer::line).toList();
         PagedCollection collection = coordinator.getPageManager().newPagedCollection(context.getSource());
@@ -446,7 +446,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int spawnGroupPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         String group = StringArgumentType.getString(context, "group");
         MinecraftServer server = context.getSource().getServer();
-        PlayerSerializationManager manager = ServerComponentCoordinator.getCoordinator(server).getPlayerSerializationManager();
+        PlayerSerializationManager manager = ServerComponentCoordinator.of(server).getPlayerSerializationManager();
         List<FakePlayerSerializer> list = manager.listGroup(group);
         // 不存在的组
         if (list.isEmpty()) {
@@ -463,7 +463,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int killGroupPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         String group = StringArgumentType.getString(context, "group");
         MinecraftServer server = context.getSource().getServer();
-        PlayerSerializationManager manager = ServerComponentCoordinator.getCoordinator(server).getPlayerSerializationManager();
+        PlayerSerializationManager manager = ServerComponentCoordinator.of(server).getPlayerSerializationManager();
         List<FakePlayerSerializer> list = manager.listGroup(group);
         // 不存在的组
         if (list.isEmpty()) {
@@ -486,7 +486,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
      */
     private int reload(CommandContext<CommandSourceStack> context) {
         MinecraftServer server = context.getSource().getServer();
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
         manager.init();
         MessageUtils.sendMessage(context, KEY.then("reload").translate());
@@ -659,7 +659,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             // 只有一个组，直接展示玩家
             Map.Entry<String, List<FakePlayerSerializer>> entry = map.entrySet().iterator().next();
             List<Supplier<Component>> list = entry.getValue().stream().map(FakePlayerSerializer::line).toList();
-            PageManager pageManager = ServerComponentCoordinator.getCoordinator(server).getPageManager();
+            PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
             PagedCollection collection = pageManager.newPagedCollection(context.getSource());
             collection.addContent(list);
             MessageUtils.sendEmptyMessage(context);
@@ -709,7 +709,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             MessageUtils.sendMessage(context, key.then("no_player").translate());
             return 0;
         }
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(server).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
         PagedCollection collection = pageManager.newPagedCollection(context.getSource());
         collection.addContent(list);
         MessageUtils.sendEmptyMessage(context);
@@ -866,7 +866,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int respawnResident(CommandContext<CommandSourceStack> context, @Nullable String time) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         FakePlayerResidents players = coordinator.getSavedFakePlayer();
         Set<FakePlayerSerializer> set = players.get(time);
         if (set.isEmpty()) {
@@ -925,7 +925,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             String name = StringArgumentType.getString(context, "name");
             int interval = IntegerArgumentType.getInteger(context, "interval");
             MinecraftServer server = context.getSource().getServer();
-            ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+            ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
             // 如果任务存在，修改任务，否则添加任务
             Optional<ReLoginTask> optional = manager.stream(ReLoginTask.class)
                     .filter(task -> Objects.equals(task.getPlayerName(), name))
@@ -966,7 +966,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         MinecraftServer server = source.getServer();
         // 异常由服务器命令源进行处理
         CommandSourceStack serverSource = server.createCommandSourceStack();
-        ServerTaskManager taskManager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         return batchSpawn(context, at, fakePlayer -> {
             DelayedTask task = new DelayedTask(source, 30, () -> PlayerUtils.silenceLogout(fakePlayer));
             CommandUtils.handlingException(() -> taskManager.addTask(task), serverSource);
@@ -987,7 +987,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         }
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
-        ServerTaskManager taskManager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         Vec3 vec3d = at ? Vec3Argument.getVec3(context, "at") : source.getPosition();
         Optional<ServerPlayer> optional = CommandUtils.getSourcePlayerNullable(source);
         Function<String, FakePlayerSpawner> function;
@@ -1050,7 +1050,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         String prefix = StringArgumentType.getString(context, "prefix");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
-        ServerTaskManager taskManager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         List<Runnable> list = this.batchPlayerList(prefix, start, end).stream()
                 .map(name -> ServerUtils.getPlayer(server, name))
                 .filter(Optional::isPresent)
@@ -1128,7 +1128,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         // 获取目标假玩家名
         String name = StringArgumentType.getString(context, "name");
         MinecraftServer server = ServerUtils.getServer(context.getSource());
-        ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         Optional<ReLoginTask> optional = manager.stream(ReLoginTask.class)
                 .filter(task -> Objects.equals(task.getPlayerName(), name))
                 .findFirst();
@@ -1143,7 +1143,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int addDelayedLoginTask(CommandContext<CommandSourceStack> context, TimeUnit unit) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
-        ServerTaskManager taskManager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         String name = StringArgumentType.getString(context, "name");
         Optional<DelayedLoginTask> optional = taskManager.stream(DelayedLoginTask.class)
                 .filter(task -> Objects.equals(name, task.getPlayerName()))
@@ -1183,7 +1183,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         // 获取假玩家延时下线游戏刻数
         long tick = unit.getDelayed(context);
         Component time = TextBuilder.of(TextProvider.tickToTime(tick)).setHover(TextProvider.tickToRealTime(tick)).build();
-        ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         Optional<DelayedLogoutTask> optional = manager.stream(DelayedLogoutTask.class)
                 .filter(task -> fakePlayer.equals(task.getFakePlayer()))
                 .findFirst();
@@ -1204,7 +1204,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     // 取消任务
     private int cancelScheduleTask(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = ServerUtils.getServer(context.getSource());
-        ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         String name = StringArgumentType.getString(context, "name");
         // 获取符合条件的任务列表
         List<PlayerScheduleTask> list = manager.stream(PlayerScheduleTask.class)
@@ -1220,7 +1220,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     // 列出所有任务
     private int listScheduleTask(CommandContext<CommandSourceStack> context) {
         MinecraftServer server = ServerUtils.getServer(context.getSource());
-        ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         List<PlayerScheduleTask> list = manager.stream(PlayerScheduleTask.class).toList();
         if (list.isEmpty()) {
             MessageUtils.sendMessage(context, SCHEDULE.then("list").then("empty").translate());
@@ -1231,7 +1231,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private PlayerSerializationManager getSerializationManager(MinecraftServer server) {
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         return coordinator.getPlayerSerializationManager();
     }
 

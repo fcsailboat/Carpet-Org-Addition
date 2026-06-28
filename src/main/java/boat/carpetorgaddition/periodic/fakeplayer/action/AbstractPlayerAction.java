@@ -101,7 +101,7 @@ public abstract class AbstractPlayerAction {
         if (this.fakePlayer == null) {
             return;
         }
-        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(this.fakePlayer);
+        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(this.fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.setAction(new StopAction(this.fakePlayer));
     }

@@ -49,7 +49,7 @@ public class PlayerInventoryAccessor {
         this.gameProfile = gameProfile;
         ServerPlayer interviewee = server.getPlayerList().getPlayer(gameProfile.id());
         if (interviewee == null) {
-            FabricPlayerAccessManager accessManager = ServerComponentCoordinator.getCoordinator(server).getAccessManager();
+            FabricPlayerAccessManager accessManager = ServerComponentCoordinator.of(server).getAccessManager();
             FabricPlayerAccessor accessor = accessManager.getOrCreate(gameProfile);
             Component name = LocalizationKeys.Operation.OFFLINE_PLAYER_NAME.translate(gameProfile.name());
             this.displayName = new TextJoiner()

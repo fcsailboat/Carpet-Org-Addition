@@ -20,6 +20,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.ValueInput;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,27 +34,32 @@ import java.util.OptionalInt;
 public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     @Unique
     private final ServerPlayer self = (ServerPlayer) (Object) this;
+    @Nullable
     @Unique
-    private PlayerComponentCoordinator manager;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(CallbackInfo ci) {
-        this.manager = PlayerComponentCoordinator.of(self);
-    }
+    private PlayerComponentCoordinator coordinator;
 
     @Override
     public PlayerComponentCoordinator carpet_Org_Addition$getPlayerPeriodicTaskManager() {
-        return this.manager;
+        return this.coordinator;
+    }
+
+    @Override
+    public void carpet_Org_Addition$setPlayerComponentCoordinator(PlayerComponentCoordinator coordinator) {
+        this.coordinator = coordinator;
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void tick(CallbackInfo ci) {
-        this.manager.tick();
+        if (this.coordinator != null) {
+            this.coordinator.tick();
+        }
     }
 
     @Inject(method = "restoreFrom", at = @At("HEAD"))
     private void copyFrom(ServerPlayer oldPlayer, boolean restoreAll, CallbackInfo ci) {
-        this.manager.copyFrom(oldPlayer);
+        if (this.coordinator != null) {
+            this.coordinator.copyFrom(oldPlayer);
+        }
     }
 
     @Inject(method = "openMenu", at = @At(value = "RETURN", ordinal = 2))
@@ -77,7 +83,8 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     @WrapOperation(method = "readAdditionalSaveData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;readPlayerMode(Lnet/minecraft/world/level/storage/ValueInput;Ljava/lang/String;)Lnet/minecraft/world/level/GameType;", ordinal = 0))
     private GameType setNbtGameMode(ValueInput playerInput, String modeTag, Operation<GameType> original) {
         GameType result = original.call(playerInput, modeTag);
-        this.manager.setNbtGameMode(result);
+        PlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(this.self);
+        coordinator.setNbtGameMode(result);
         return result;
     }
 }

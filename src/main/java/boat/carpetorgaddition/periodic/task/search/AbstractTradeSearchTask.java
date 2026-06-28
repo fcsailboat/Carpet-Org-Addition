@@ -47,7 +47,7 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
         this.blockPosTraverser = blockPosTraverser;
         this.sourcePos = sourcePos;
         this.findState = FindState.SEARCH;
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(ServerUtils.getServer(source)).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(ServerUtils.getServer(source)).getPageManager();
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 

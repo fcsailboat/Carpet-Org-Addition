@@ -1138,7 +1138,7 @@ public class BedrockAction extends AbstractPlayerAction {
     protected void onAssignPlayer() {
         this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this::getMovingTarget);
         this.inventory = PlayerStorageInventory.of(this.getFakePlayer());
-        this.excavator = PlayerComponentCoordinator.getCoordinator(this.getFakePlayer()).getBlockExcavator();
+        this.excavator = PlayerComponentCoordinator.of(this.getFakePlayer()).getBlockExcavator();
     }
 
     @Override

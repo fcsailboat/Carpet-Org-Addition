@@ -60,7 +60,7 @@ public class BlockSearchTask extends ServerSearchTask {
         this.progressBar = new ProgressBar(this.traverser.size());
         this.predicate = predicate;
         this.findState = FindState.SEARCH;
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(source.getServer()).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(source.getServer()).getPageManager();
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 

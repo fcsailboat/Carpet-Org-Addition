@@ -40,7 +40,7 @@ public class SendParcelScreenHandler extends ChestMenu {
         super(MenuType.GENERIC_9x3, syncId, playerInventory, inventory, 3);
         this.inventory = inventory;
         this.server = ServerUtils.getServer(sourcePlayer);
-        this.parcelManager = ServerComponentCoordinator.getCoordinator(this.server).getParcelManager();
+        this.parcelManager = ServerComponentCoordinator.of(this.server).getParcelManager();
         this.sourcePlayer = sourcePlayer;
         this.recipient = recipient;
     }

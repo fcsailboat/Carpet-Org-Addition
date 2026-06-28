@@ -23,7 +23,7 @@ public class PlayerComponentCoordinator {
      */
     private boolean versionMismatchNotified = false;
 
-    PlayerComponentCoordinator(ServerPlayer player) {
+    protected PlayerComponentCoordinator(ServerPlayer player) {
         this.player = player;
         this.server = ServerUtils.getServer(player);
         this.navigatorManager = new NavigatorManager(player);
@@ -31,11 +31,20 @@ public class PlayerComponentCoordinator {
     }
 
     public static PlayerComponentCoordinator of(ServerPlayer player) {
-        return switch (player) {
-            case EntityPlayerMPFake fakePlayer -> new FakePlayerComponentCoordinator(fakePlayer);
-            case ServerPlayer _ -> new PlayerComponentCoordinator(player);
-            case null -> throw new NullPointerException("player may not be null");
-        };
+        PeriodicTaskManagerInterface anInterface = (PeriodicTaskManagerInterface) player;
+        PlayerComponentCoordinator coordinator = anInterface.carpet_Org_Addition$getPlayerPeriodicTaskManager();
+        if (coordinator == null) {
+            coordinator = switch (player) {
+                case EntityPlayerMPFake fakePlayer -> new FakePlayerComponentCoordinator(fakePlayer);
+                case ServerPlayer _ -> new PlayerComponentCoordinator(player);
+            };
+            anInterface.carpet_Org_Addition$setPlayerComponentCoordinator(coordinator);
+        }
+        return coordinator;
+    }
+
+    public static FakePlayerComponentCoordinator of(EntityPlayerMPFake fakePlayer) {
+        return (FakePlayerComponentCoordinator) of((ServerPlayer) fakePlayer);
     }
 
     public void tick() {
@@ -49,14 +58,6 @@ public class PlayerComponentCoordinator {
 
     public WithButtonPlayerInventory getWithButtonPlayerInventory() {
         return this.withButtonPlayerInventory;
-    }
-
-    public static PlayerComponentCoordinator getCoordinator(ServerPlayer player) {
-        return ((PeriodicTaskManagerInterface) player).carpet_Org_Addition$getPlayerPeriodicTaskManager();
-    }
-
-    public static FakePlayerComponentCoordinator getCoordinator(EntityPlayerMPFake fakePlayer) {
-        return (FakePlayerComponentCoordinator) getCoordinator((ServerPlayer) fakePlayer);
     }
 
     /**

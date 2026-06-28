@@ -729,7 +729,7 @@ public class CarpetOrgAdditionSettings {
                         }
                         List<Navigator> list = source.getServer().getPlayerList().getPlayers()
                                 .stream()
-                                .map(PlayerComponentCoordinator::getCoordinator)
+                                .map(PlayerComponentCoordinator::of)
                                 .map(PlayerComponentCoordinator::getNavigatorManager)
                                 .map(NavigatorManager::getNavigator)
                                 .filter(Objects::nonNull)

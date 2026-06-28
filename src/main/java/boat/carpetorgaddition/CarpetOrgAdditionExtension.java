@@ -75,7 +75,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
         clearKnockback(player);
         // 提示玩家接收快递
         MinecraftServer server = ServerUtils.getServer(player);
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         ParcelManager parcelManager = coordinator.getParcelManager();
         parcelManager.promptToCollect(player);
         // 加载假玩家安全挂机
@@ -112,7 +112,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
      * 如果{@code server.properties}中，{@code force-gamemode}为{@code true}，则将被{@code /spectator}命令设置为旁观模式的玩家传送回原位置
      */
     private void teleportSpectatorPlayer(ServerPlayer player, MinecraftServer server) {
-        PlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(player);
+        PlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(player);
         if (coordinator.getNbtGameMode() == GameType.SPECTATOR) {
             GameType forcedGameMode = server.getForcedGameType();
             if (forcedGameMode == null) {
@@ -130,7 +130,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     @Override
     public void onPlayerLoggedOut(ServerPlayer player) {
         MinecraftServer server = ServerUtils.getServer(player);
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         if (player instanceof EntityPlayerMPFake fakePlayer) {
             coordinator.getSavedFakePlayer().remove(fakePlayer);
             server.getPlayerList().getPlayers().stream()
@@ -159,7 +159,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
 
     @Override
     public void onServerLoadedWorlds(MinecraftServer server) {
-        ServerComponentCoordinator.getCoordinator(server).onServerStarted();
+        ServerComponentCoordinator.of(server).onServerStarted();
         PermissionManager.load(server);
     }
 

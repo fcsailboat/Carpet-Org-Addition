@@ -32,7 +32,7 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
     public void receive(ObjectSearchTaskC2SPacket packet, ServerPlayNetworking.Context context) {
         ServerPlayer player = context.player();
         MinecraftServer server = ServerUtils.getServer(player);
-        ServerTaskManager taskManager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         ServerLevel world = ServerUtils.getWorld(player);
         CommandSourceStack source = player.createCommandSourceStack();
         BlockPos blockPos = player.blockPosition();

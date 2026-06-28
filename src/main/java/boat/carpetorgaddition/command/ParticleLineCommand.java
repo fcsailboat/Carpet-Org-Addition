@@ -62,7 +62,7 @@ public class ParticleLineCommand {
             return 0;
         }
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         // 新建绘制粒子线任务
         manager.addTask(new DrawParticleLineTask(source, ServerUtils.getWorld(player), mainParticle, from, to));
         // 发送箭头

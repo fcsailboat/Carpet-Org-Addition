@@ -118,9 +118,9 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
             throw new IllegalStateException("Unable to read \"playerdata\" folder");
         }
         this.worldFormat = new WorldFormat(this.server, "backups", "playerdata");
-        PageManager manager = ServerComponentCoordinator.getCoordinator(this.server).getPageManager();
+        PageManager manager = ServerComponentCoordinator.of(this.server).getPageManager();
         this.pagedCollection = manager.newPagedCollection(this.source);
-        this.accessManager = ServerComponentCoordinator.getCoordinator(server).getAccessManager();
+        this.accessManager = ServerComponentCoordinator.of(server).getAccessManager();
     }
 
     @Override

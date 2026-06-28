@@ -136,7 +136,7 @@ public class LocationsCommand extends AbstractServerCommand {
             MessageUtils.sendMessage(context, key.translate());
             return 0;
         }
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(server).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
         PagedCollection collection = pageManager.newPagedCollection(context.getSource());
         ArrayList<Supplier<Component>> messages = new ArrayList<>();
         int count = 0;

@@ -50,7 +50,7 @@ public class PlayerManagerMixin {
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
     private void closePlayerInventory(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
         MinecraftServer server = ServerUtils.getServer(player);
-        ServerComponentCoordinator coordinator = ServerComponentCoordinator.getCoordinator(server);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         FabricPlayerAccessManager accessManager = coordinator.getAccessManager();
         if (accessManager.hasViewers()) {
             NameAndId entry = player.nameAndId();
@@ -67,7 +67,7 @@ public class PlayerManagerMixin {
     @WrapWithCondition(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
     private boolean remove(PlayerList instance, Packet<?> packet, @Local(argsOnly = true, name = "player") ServerPlayer player) {
         // 如果当前玩家正在进行重复上下线任务，则不向客户端发送玩家退出的数据包，避免玩家列表闪烁
-        return ServerComponentCoordinator.getCoordinator(this.server)
+        return ServerComponentCoordinator.of(this.server)
                 .getServerTaskManager()
                 .stream(ReLoginTask.class)
                 .noneMatch(reLoginTask -> reLoginTask.getUuid().equals(player.getUUID()));
