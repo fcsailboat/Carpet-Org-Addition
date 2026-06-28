@@ -3,6 +3,7 @@ package boat.carpetorgaddition.wheel;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
+import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
 import boat.carpetorgaddition.util.IOUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import com.google.common.collect.BiMap;
@@ -185,8 +186,16 @@ public class GameProfileCache {
         return optional.map(name -> new GameProfile(uuid, name));
     }
 
+    public Optional<GameProfile> getGameProfileOrUnknown(UUID uuid) {
+        return this.getGameProfile(uuid).or(() -> Optional.of(new GameProfile(uuid, OfflinePlayerInventorySearchTask.UNKNOWN)));
+    }
+
     public Optional<NameAndId> getNameAndId(UUID uuid) {
         return this.getGameProfile(uuid).map(NameAndId::new);
+    }
+
+    public Optional<NameAndId> getNameAndIdOrUnknown(UUID uuid) {
+        return this.getGameProfileOrUnknown(uuid).map(NameAndId::new);
     }
 
     /**

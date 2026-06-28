@@ -159,7 +159,7 @@ public class PlayerCommandExtension {
         public WithCheckPlayerInventoryAccessor(MinecraftServer server, UUID uuid, ServerPlayer visitor) throws CommandSyntaxException {
             checkCanBeOpened(server.getPlayerList().getPlayer(uuid));
             GameProfile gameProfile = GameProfileCache.getInstance()
-                    .getGameProfile(uuid)
+                    .getGameProfileOrUnknown(uuid)
                     .filter(profile -> ServerUtils.isPlayerDataExists(server, profile.id()))
                     .orElseThrow(PlayerCommandExtension::createNoFileFoundException);
             super(server, gameProfile, visitor);
