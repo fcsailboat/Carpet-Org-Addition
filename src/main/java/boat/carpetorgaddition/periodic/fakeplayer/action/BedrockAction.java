@@ -2,6 +2,7 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.PlayerActionCommand;
+import boat.carpetorgaddition.debug.DebugSettings;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
@@ -113,7 +114,7 @@ public class BedrockAction extends AbstractPlayerAction {
     /**
      * 定时回收材料的时间间隔（3分钟）
      */
-    private static final int MATERIAL_RECYCLING_TIME = 3600;
+    private static final int MATERIAL_RECYCLING_TIME = 2400;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("bedrock");
 
     private BedrockAction(EntityPlayerMPFake fakePlayer, BlockPosTraverser traverser, BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) {
@@ -274,7 +275,7 @@ public class BedrockAction extends AbstractPlayerAction {
         if (optional.isPresent() && this.canInteract(optional.get())) {
             // 基岩在交互距离内，但因位置特殊而无法破除的基岩
             // 重新选择目标位置，并将当前目标位置标记为无效位置
-            this.selectRandomBedrock(world);
+            this.selectBedrock(world);
             this.invalidBedrock.set(optional.get(), 200);
             return;
         }
@@ -285,6 +286,22 @@ public class BedrockAction extends AbstractPlayerAction {
             }
             this.bedrockTarget = blockPos;
             return;
+        }
+        this.selectBedrock(world);
+    }
+
+    private void selectBedrock(Level world) {
+        if (DebugSettings.tempDebugSwitch.get()) {
+            BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(this.getFakePlayer()), 20);
+            for (BlockPos blockPos : traverser) {
+                if (world.getBlockState(blockPos).is(Blocks.BEDROCK) && this.traverser.contains(blockPos)) {
+                    if (this.invalidBedrock.getCount(blockPos) > 0) {
+                        continue;
+                    }
+                    this.bedrockTarget = blockPos;
+                    return;
+                }
+            }
         }
         this.selectRandomBedrock(world);
     }
