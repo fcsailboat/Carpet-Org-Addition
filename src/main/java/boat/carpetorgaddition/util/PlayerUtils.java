@@ -243,6 +243,7 @@ public class PlayerUtils {
         player.gameMode.useItemOn(player, world, itemStack, hand, hitResult);
     }
 
+    @SuppressWarnings("unused")
     public static double getBlockInteractionRange(ServerPlayer player) {
         return player.blockInteractionRange();
     }

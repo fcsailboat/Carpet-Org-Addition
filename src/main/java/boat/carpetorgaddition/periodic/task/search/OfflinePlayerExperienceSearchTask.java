@@ -79,6 +79,7 @@ public class OfflinePlayerExperienceSearchTask extends AbstractOfflinePlayerSear
                         .setHover(this.totals.get())
                         .setColor(ChatFormatting.GRAY)
                         .build();
+                // TODO 消息头缺少悬停提示
                 Component head = key.then("head").translate(this.results.size(), sumLevel);
                 MessageUtils.sendMessage(this.source, head);
                 CommandUtils.handlingException(this.pagedCollection::print, source);
