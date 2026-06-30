@@ -22,6 +22,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -157,8 +158,13 @@ public class BedrockAction extends AbstractPlayerAction {
             if (this.recycleTimer < -1) {
                 throw new IllegalStateException("The remaining time for material recycling should not be %s".formatted(this.recycleTimer));
             }
-            if (this.getPhase() != PlayerWorkPhase.EAT && this.deflectGhastFireball()) {
-                return;
+            if (this.getPhase() != PlayerWorkPhase.EAT) {
+                if (this.deflectGhastFireball()) {
+                    return;
+                }
+                if (this.fireExtinguishing()) {
+                    return;
+                }
             }
             switch (this.getPhase()) {
                 case WORK -> work();
@@ -186,6 +192,22 @@ public class BedrockAction extends AbstractPlayerAction {
             PlayerUtils.attack(fakePlayer);
         }
         return !fireballs.isEmpty();
+    }
+
+    /**
+     * 灭火
+     */
+    private boolean fireExtinguishing() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(fakePlayer), 1);
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
+        for (BlockPos blockPos : traverser) {
+            BlockState blockState = world.getBlockState(blockPos);
+            if (blockState.is(Blocks.FIRE)) {
+                return !this.excavator.mining(blockPos);
+            }
+        }
+        return false;
     }
 
     private void work() {

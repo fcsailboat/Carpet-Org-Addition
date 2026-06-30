@@ -43,6 +43,14 @@ public class BlockExcavator {
         }
     }
 
+    public boolean mining(BlockPos blockPos) {
+        return mining(blockPos, false);
+    }
+
+    public boolean mining(BlockPos blockPos, boolean breakingCooldown) {
+        return mining(blockPos, Direction.DOWN, breakingCooldown);
+    }
+
     public boolean mining(BlockPos blockPos, Direction direction) {
         return mining(blockPos, direction, true);
     }
