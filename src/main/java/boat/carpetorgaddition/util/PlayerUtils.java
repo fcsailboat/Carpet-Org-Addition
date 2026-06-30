@@ -17,15 +17,19 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.dialog.Dialog;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -237,5 +241,28 @@ public class PlayerUtils {
     public static void useItemOn(ServerPlayer player, Level world, final InteractionHand hand, final BlockHitResult hitResult) {
         ItemStack itemStack = player.getItemInHand(hand);
         player.gameMode.useItemOn(player, world, itemStack, hand, hitResult);
+    }
+
+    public static double getBlockInteractionRange(ServerPlayer player) {
+        return player.blockInteractionRange();
+    }
+
+    public static double getEntityInteractionRange(ServerPlayer player) {
+        return player.entityInteractionRange();
+    }
+
+    public static List<Entity> listWithinEntityInteractionRange(ServerPlayer player) {
+        ServerLevel world = ServerUtils.getWorld(player);
+        Vec3 pos = ServerUtils.getEyePos(player);
+        double range = getEntityInteractionRange(player);
+        AABB aabb = new AABB(
+                pos.x() - range,
+                pos.y() - range,
+                pos.z() - range,
+                pos.x() + range,
+                pos.y() + range,
+                pos.z() + range
+        );
+        return world.getEntities(player, aabb);
     }
 }

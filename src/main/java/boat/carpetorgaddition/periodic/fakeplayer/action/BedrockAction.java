@@ -30,6 +30,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -156,6 +157,9 @@ public class BedrockAction extends AbstractPlayerAction {
             if (this.recycleTimer < -1) {
                 throw new IllegalStateException("The remaining time for material recycling should not be %s".formatted(this.recycleTimer));
             }
+            if (this.getPhase() != PlayerWorkPhase.EAT && this.deflectGhastFireball()) {
+                return;
+            }
             switch (this.getPhase()) {
                 case WORK -> work();
                 case EAT -> eat();
@@ -164,6 +168,24 @@ public class BedrockAction extends AbstractPlayerAction {
         } else {
             this.work();
         }
+    }
+
+    /**
+     * 弹开恶魂火球
+     */
+    private boolean deflectGhastFireball() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        List<LargeFireball> fireballs = PlayerUtils.listWithinEntityInteractionRange(fakePlayer)
+                .stream()
+                .filter(entity -> entity instanceof LargeFireball)
+                .map(entity -> (LargeFireball) entity)
+                .filter(fireball -> fireball.getOwner() != fakePlayer)
+                .toList();
+        for (LargeFireball fireball : fireballs) {
+            ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(fireball));
+            PlayerUtils.attack(fakePlayer);
+        }
+        return !fireballs.isEmpty();
     }
 
     private void work() {

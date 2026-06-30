@@ -81,6 +81,7 @@ public class FinderCommand extends AbstractServerCommand {
         this.dispatcher.register(Commands.literal(name)
                 .requires(source -> CarpetOrgAdditionSettings.COMMAND_FINDER.value().hasPermission(source))
                 .then(Commands.literal("block")
+                        // TODO 选区范围的查找，高度似乎不包含边缘值
                         .requires(PermissionManager.register(FINDER_BLOCK, PermissionLevel.PASS))
                         .then(Commands.argument("blockState", BlockPredicateArgument.blockPredicate(this.access))
                                 .executes(context -> blockFinder(context, 64))
