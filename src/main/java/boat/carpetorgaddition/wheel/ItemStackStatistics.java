@@ -66,7 +66,7 @@ public class ItemStackStatistics {
         // 收纳袋物品
         BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
         if (bundleContents != null) {
-            this.statistics(bundleContents.itemCopyStream().toList(), count);
+            this.statistics(bundleContents.itemCopies().toList(), count);
         }
     }
 

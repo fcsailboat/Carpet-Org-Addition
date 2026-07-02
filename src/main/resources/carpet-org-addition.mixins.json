@@ -127,7 +127,6 @@
     "util.ServerPlayerEntityMixin",
     "util.ServerPlayNetworkHandlerMixin",
     "util.UserCacheMixin",
-    "util.YggdrasilGameProfileRepositoryMixin",
     "util.carpet.EntityPlayerMPFakeMixin",
     "util.carpet.LoggerRegistryMixin",
     "util.carpet.RuleHelperMixin",
