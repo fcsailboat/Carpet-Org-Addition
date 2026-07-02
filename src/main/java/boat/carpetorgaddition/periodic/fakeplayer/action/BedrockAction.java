@@ -2,7 +2,6 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.PlayerActionCommand;
-import boat.carpetorgaddition.debug.DebugSettings;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
@@ -291,16 +290,14 @@ public class BedrockAction extends AbstractPlayerAction {
     }
 
     private void selectBedrock(Level world) {
-        if (DebugSettings.tempDebugSwitch.get()) {
-            BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(this.getFakePlayer()), 20);
-            for (BlockPos blockPos : traverser) {
-                if (world.getBlockState(blockPos).is(Blocks.BEDROCK) && this.traverser.contains(blockPos)) {
-                    if (this.invalidBedrock.getCount(blockPos) > 0) {
-                        continue;
-                    }
-                    this.bedrockTarget = blockPos;
-                    return;
+        BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(this.getFakePlayer()), 20);
+        for (BlockPos blockPos : traverser) {
+            if (world.getBlockState(blockPos).is(Blocks.BEDROCK) && this.traverser.contains(blockPos)) {
+                if (this.invalidBedrock.getCount(blockPos) > 0) {
+                    continue;
                 }
+                this.bedrockTarget = blockPos;
+                return;
             }
         }
         this.selectRandomBedrock(world);

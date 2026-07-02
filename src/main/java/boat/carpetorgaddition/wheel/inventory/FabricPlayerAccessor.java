@@ -31,6 +31,7 @@ public class FabricPlayerAccessor {
      */
     private final Set<ServerPlayer> viewers = new HashSet<>();
     private final NameAndId entry;
+    public static final ScopedValue<Boolean> INIT_FABRIC_PLAYER = ScopedValue.newInstance();
 
     public FabricPlayerAccessor(MinecraftServer server, NameAndId entry, FabricPlayerAccessManager accessManager) {
         this.server = server;
@@ -54,7 +55,10 @@ public class FabricPlayerAccessor {
             ServerPlayer.SavedPosition pos = optional
                     .flatMap(nbt -> nbt.read(ServerPlayer.SavedPosition.MAP_CODEC))
                     .orElse(ServerPlayer.SavedPosition.EMPTY);
-            optional.ifPresent(this.fabricPlayer::load);
+            optional.ifPresent(input -> {
+                this.fabricPlayer.load(input);
+                ScopedValue.where(INIT_FABRIC_PLAYER, true).run(() -> this.fabricPlayer.loadAndSpawnParentVehicle(input));
+            });
             ServerLevel world = server.getLevel(pos.dimension().orElse(Level.OVERWORLD));
             if (world != null) {
                 // 设置玩家所在维度

@@ -88,6 +88,7 @@ public class GlobalConfigs {
             if (this.configFile.isFile()) {
                 JsonObject json;
                 try {
+                    // TODO 可能抛出json解析异常
                     json = IOUtils.loadJson(this.configFile);
                 } catch (IOException e) {
                     json = this.initJsonObject();

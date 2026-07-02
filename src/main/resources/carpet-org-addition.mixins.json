@@ -123,6 +123,7 @@
     "util.MinecraftServerMixin",
     "util.PlayerManagerMixin",
     "util.ScreenHandlerMixin",
+    "util.ServerLevelMixin",
     "util.ServerPlayerEntityMixin",
     "util.ServerPlayNetworkHandlerMixin",
     "util.UserCacheMixin",
@@ -130,7 +131,8 @@
     "util.carpet.EntityPlayerMPFakeMixin",
     "util.carpet.LoggerRegistryMixin",
     "util.carpet.RuleHelperMixin",
-    "util.carpet.SettingsManagerMixin"
+    "util.carpet.SettingsManagerMixin",
+    "util.fabricapi.FakePlayerMixin"
   ],
   "client": [
     "debug.accessor.ScreenAccessor",
