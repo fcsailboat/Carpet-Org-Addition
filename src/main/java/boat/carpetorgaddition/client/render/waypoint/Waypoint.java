@@ -1,39 +1,39 @@
 package boat.carpetorgaddition.client.render.waypoint;
 
-import boat.carpetorgaddition.client.render.WorldRenderComponent;
+import boat.carpetorgaddition.client.util.ClientRednerUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
+import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import it.unimi.dsi.fastutil.floats.Float2FloatMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public abstract class Waypoint implements WorldRenderComponent {
+public abstract class Waypoint {
     /**
      * 路径点图标
      */
-    private final Identifier icon;
+    private final TextureAtlasSprite sprite;
+    private final MapDecorationType icon;
     /**
      * 路径点已经显示的时间
      */
@@ -60,42 +60,34 @@ public abstract class Waypoint implements WorldRenderComponent {
      * 路径点消失时间
      */
     private static final long VANISHING_TIME = 4L;
-    public static final Identifier HIGHLIGHT = Identifier.withDefaultNamespace("textures/map/decorations/red_x.png");
-    public static final Identifier NAVIGATOR = Identifier.withDefaultNamespace("textures/map/decorations/target_x.png");
-    private static final RenderPipeline HIGHLIGHT_WAYPOINT_RENDER_PIPELINE = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
-                    .withLocation(ServerUtils.ofIdentifier("highlight_waypoint"))
-                    .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
-                    .build()
-    );
-    private final RenderType renderType;
+    public static final MapDecorationType HIGHLIGHT = MapDecorationTypes.RED_X.value();
+    public static final MapDecorationType NAVIGATOR = MapDecorationTypes.TARGET_X.value();
 
-    public Waypoint(@NonNull ResourceKey<Level> registryKey, @NonNull Vec3 target, Identifier icon, long duration, boolean persistent) {
+    public Waypoint(@NonNull ResourceKey<Level> registryKey, @NonNull Vec3 target, MapDecorationType icon, long duration, boolean persistent) {
         this.registryKey = registryKey;
         this.target = target;
         this.lastTarget = target;
         this.icon = icon;
         this.remaining = duration;
         this.persistent = persistent;
-        RenderSetup setup = RenderSetup.builder(HIGHLIGHT_WAYPOINT_RENDER_PIPELINE)
-                .withTexture("Sampler0", icon)
-                .createRenderSetup();
-        this.renderType = RenderType.create("waypoint", setup);
+        TextureAtlas atlas = ClientUtils.getClient().getAtlasManager().getAtlasOrThrow(AtlasIds.MAP_DECORATIONS);
+        this.sprite = atlas.getSprite(icon.assetId());
     }
 
-    public Waypoint(Level world, Vec3 target, Identifier icon, long duration, boolean persistent) {
+    public Waypoint(Level world, Vec3 target, MapDecorationType icon, long duration, boolean persistent) {
         this(world.dimension(), target, icon, duration, persistent);
     }
 
-    @Override
-    public void render(LevelRenderContext context) {
-        PoseStack poseStack = context.poseStack();
-        Camera camera = ClientUtils.getCamera();
+    public void render(GuiGraphicsExtractor graphics, Matrix4fc modelView, Matrix4f projection) {
         if (this.isStopped()) {
             return;
         }
         Vec3 revised = this.getRevisedPos();
         if (revised == null) {
+            return;
+        }
+        Float2FloatMap.Entry entry = ClientRednerUtils.worldToScreenPoint(revised, modelView, projection);
+        if (entry == null) {
             return;
         }
         float tickDelta = ClientUtils.getTickCounter().getGameTimeDeltaPartialTick(false);
@@ -104,11 +96,15 @@ public abstract class Waypoint implements WorldRenderComponent {
         }
         this.lastTickDelta = this.tickDelta;
         this.tickDelta = tickDelta;
-        // 获取摄像机位置
-        Vec3 cameraPos = camera.position();
-        // 玩家距离目标的位置
-        Vec3 offset = revised.subtract(cameraPos);
-        // 获取客户端渲染距离
+        int width = ClientUtils.getWindowWidth();
+        int height = ClientUtils.getWindowHeight();
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(ClientUtils.getScreenWidth() / (float) width, ClientUtils.getScreenHeight() / (float) height);
+        graphics.pose().translate(entry.getFloatKey(), entry.getFloatValue());
+        graphics.pose().scale((float) width / ClientUtils.getScreenWidth(), (float) height / ClientUtils.getScreenHeight());
+        int widthHeight = 16;
+        Camera camera = ClientUtils.getCamera();
+        Vec3 offset = revised.subtract(camera.position());
         int renderDistance = ClientUtils.getGameOptions().renderDistance().get() * 16;
         // 修正路径点渲染位置
         Vec3 correction = new Vec3(offset.x(), offset.y(), offset.z());
@@ -116,44 +112,47 @@ public abstract class Waypoint implements WorldRenderComponent {
             // 将路径点位置限制在渲染距离内
             correction = correction.normalize().scale(renderDistance);
         }
-        poseStack.pushPose();
-        this.transform(poseStack, camera, correction);
-        this.drawIcon(context);
-        // 如果准星正在指向路径点，显示文本
-        if (this.isWatching(camera, revised)) {
-            drawText(context, poseStack, offset);
+        double adjustSize = correction.length();
+        graphics.pose().scale(this.getScale(adjustSize) * 0.8F);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(-widthHeight / 2F, -widthHeight / 2F);
+        int alpha = (int) (this.getRenderAlpha() * 255);
+        int rgba = MathUtils.rgba(CommonColors.WHITE, alpha);
+        int argb = MathUtils.rgbaToArgb(rgba);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, 0, 0, widthHeight, widthHeight, argb);
+        graphics.pose().popMatrix();
+        if (this.isWatching(width, height, entry)) {
+            renderText(graphics, offset);
         }
-        poseStack.popPose();
+        graphics.pose().popMatrix();
     }
 
-    private void drawIcon(LevelRenderContext context) {
-        float alpha = this.getRenderAlpha();
-        VertexConsumer consumer = context.bufferSource().getBuffer(this.renderType);
-        PoseStack.Pose pose = context.poseStack().last();
-        consumer.addVertex(pose, -1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 0F);
-        consumer.addVertex(pose, -1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(0F, 1F);
-        consumer.addVertex(pose, 1F, 1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 1F);
-        consumer.addVertex(pose, 1F, -1F, 0F).setColor(1F, 1F, 1F, alpha).setUv(1F, 0F);
+    private void renderText(GuiGraphicsExtractor graphics, Vec3 offset) {
+        Font textRenderer = ClientUtils.getTextRenderer();
+        // 计算距离
+        double distance = offset.length();
+        String formatted = distance >= 1000 ? "%.1fkm".formatted(distance / 1000) : "%.1fm".formatted(distance);
+        TextBuilder builder = TextBuilder.of(formatted);
+        // 如果玩家与路径点不在同一纬度，设置距离文本为斜体
+        if (!this.registryKey.equals(ClientUtils.getWorld().dimension())) {
+            builder.setItalic();
+        }
+        graphics.pose().pushMatrix();
+        Component component = builder.build();
+        int width = textRenderer.width(component);
+        graphics.pose().translate(0F, 10F);
+        graphics.pose().scale(1.2F);
+        float backgroundOpacity = ClientUtils.getGameOptions().getBackgroundOpacity(0.25F);
+        int opacity = (int) (backgroundOpacity * 255.0F) << 24;
+        if (opacity != 0) {
+            graphics.fill(-width / 2, 0, width / 2, textRenderer.lineHeight, ARGB.multiply(opacity, CommonColors.WHITE));
+        }
+        graphics.text(textRenderer, component, -width / 2, 0, CommonColors.WHITE);
+        graphics.pose().popMatrix();
     }
 
     protected float getRenderAlpha() {
         return 1F;
-    }
-
-    /**
-     * 变换矩阵
-     */
-    protected void transform(PoseStack matrixStack, Camera camera, Vec3 correction) {
-        // 将路径点平移到方块位置
-        matrixStack.translate(correction.x(), correction.y(), correction.z());
-        float scale = this.getScale(correction.length());
-        // 路径点大小
-        matrixStack.scale(scale, scale, scale);
-        // 翻转路径点
-        matrixStack.mulPose(new Quaternionf(-1, 0, 0, 0));
-        // 让路径点始终对准玩家
-        matrixStack.mulPose(new Quaternionf().rotateY((float) ((Math.PI / 180.0) * (camera.yRot() - 180F))));
-        matrixStack.mulPose(new Quaternionf().rotateX((float) ((Math.PI / 180.0) * (-camera.xRot()))));
     }
 
     protected void tick() {
@@ -197,10 +196,8 @@ public abstract class Waypoint implements WorldRenderComponent {
         if (this.isStopped()) {
             return 0F;
         }
-        // 修正路径点大小，使大小不会随着距离的改变而改变
-        float scale = (float) distance / 30F;
-        // 再次修正路径点大小，使随着距离的拉远路径点尺寸略微减小
-        scale = Math.max(scale * (1F - (((float) distance / 40F) * 0.1F)), scale * 0.75F);
+        // 修正路径点大小，使随着距离的拉远路径点尺寸略微减小
+        float scale = Math.max((1F - (((float) distance / 40F) * 0.1F)), 0.75F);
         // 播放出场动画
         if (this.remaining < 0) {
             return this.fade(VANISHING_TIME + (this.remaining - this.tickDelta) + 1, scale);
@@ -231,52 +228,11 @@ public abstract class Waypoint implements WorldRenderComponent {
 
     /**
      * @return 光标是否指向路径点
-     * @see EnderMan#isBeingStaredBy(Player)
      */
-    @SuppressWarnings("JavadocReference")
-    private boolean isWatching(Camera camera, Vec3 target) {
-        float f = camera.xRot() * (float) (Math.PI / 180.0);
-        float g = -camera.yRot() * (float) (Math.PI / 180.0);
-        float h = Mth.cos(g);
-        float i = Mth.sin(g);
-        float j = Mth.cos(f);
-        float k = Mth.sin(f);
-        Vec3 vec3d = new Vec3(i * j, -k, h * j).normalize();
-        Vec3 vec3d2 = new Vec3(target.x() - camera.position().x(), target.y() - camera.position().y(), target.z() - camera.position().z());
-        double d = vec3d2.length();
-        vec3d2 = vec3d2.normalize();
-        double e = vec3d.dot(vec3d2);
-        return e > 0.999 - (0.025 / d);
-    }
-
-    /**
-     * 绘制距离文本
-     */
-    private void drawText(LevelRenderContext context, PoseStack poseStack, Vec3 offset) {
-        Font textRenderer = ClientUtils.getTextRenderer();
-        // 计算距离
-        double distance = offset.length();
-        String formatted = distance >= 1000 ? "%.1fkm".formatted(distance / 1000) : "%.1fm".formatted(distance);
-        TextBuilder builder = TextBuilder.of(formatted);
-        // 如果玩家与路径点不在同一纬度，设置距离文本为斜体
-        if (!this.registryKey.equals(ClientUtils.getWorld().dimension())) {
-            builder.setItalic();
-        }
-        // 文本宽度
-        int width = textRenderer.width(formatted);
-        float x = (-width) / 2F;
-        float y = 8F;
-        // 背景不透明度
-        float backgroundOpacity = ClientUtils.getGameOptions().getBackgroundOpacity(0.25F);
-        int opacity = (int) (backgroundOpacity * 255.0F) << 24;
-        poseStack.pushPose();
-        // 缩小文字
-        poseStack.scale(0.15F, 0.15F, 0.15F);
-        // 渲染文字
-        textRenderer.drawInBatch(builder.build(), x, y, CommonColors.WHITE, false,
-                poseStack.last().pose(), context.bufferSource(),
-                Font.DisplayMode.SEE_THROUGH, opacity, 1);
-        poseStack.popPose();
+    private boolean isWatching(int width, int height, Float2FloatMap.Entry entry) {
+        double x = width / 2.0 - entry.getFloatKey();
+        double y = height / 2.0 - entry.getFloatValue();
+        return Math.sqrt(x * x + y * y) < 150.0;
     }
 
     /**
@@ -301,12 +257,11 @@ public abstract class Waypoint implements WorldRenderComponent {
     /**
      * @return 是否已经渲染完成，包括消失动画
      */
-    @Override
     public boolean isStopped() {
         return -(this.remaining - 1) > VANISHING_TIME;
     }
 
-    public Identifier getIcon() {
+    public MapDecorationType getMapDecorationType() {
         return this.icon;
     }
 
@@ -337,12 +292,12 @@ public abstract class Waypoint implements WorldRenderComponent {
             return false;
         }
         Waypoint that = (Waypoint) o;
-        return Objects.equals(icon, that.icon) && Objects.equals(registryKey, that.registryKey) && Objects.equals(target, that.target);
+        return Objects.equals(sprite, that.sprite) && Objects.equals(registryKey, that.registryKey) && Objects.equals(target, that.target);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(icon, target);
+        return Objects.hash(sprite, target);
     }
 
     public void requestServerToStop() {

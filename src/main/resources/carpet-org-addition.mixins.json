@@ -139,6 +139,7 @@
     "network.ChestMenuMixin",
     "network.ScreenHandlerMixin",
     "network.SlotMixin",
+    "render.client.GameRendererMixin",
     "rule.client.carpet.SettingsManagerMixin",
     "rule.disableanvilexpensive.client.AnvilScreenMixin",
     "rule.quickshulker.CreativeScreenHandlerMixin"

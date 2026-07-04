@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.client.util;
 
+import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.Font;
@@ -171,5 +172,25 @@ public class ClientUtils {
 
     public static RegistryAccess getRegistryAccess() {
         return getPlayer().connection.registryAccess();
+    }
+
+    public static Window getWindow() {
+        return getClient().getWindow();
+    }
+
+    public static int getWindowWidth() {
+        return getWindow().getWidth();
+    }
+
+    public static int getWindowHeight() {
+        return getWindow().getHeight();
+    }
+
+    public static int getScreenWidth() {
+        return getWindow().getGuiScaledWidth();
+    }
+
+    public static int getScreenHeight() {
+        return getWindow().getGuiScaledHeight();
     }
 }
