@@ -86,16 +86,16 @@ public abstract class Waypoint {
         if (revised == null) {
             return;
         }
-        Float2FloatMap.Entry entry = ClientRednerUtils.worldToScreenPoint(revised, modelView, projection);
-        if (entry == null) {
-            return;
-        }
         float tickDelta = ClientUtils.getTickCounter().getGameTimeDeltaPartialTick(false);
         if (this.tickDelta > tickDelta) {
             this.tick();
         }
         this.lastTickDelta = this.tickDelta;
         this.tickDelta = tickDelta;
+        Float2FloatMap.Entry entry = ClientRednerUtils.worldToScreenPoint(revised, modelView, projection);
+        if (entry == null) {
+            return;
+        }
         int width = ClientUtils.getWindowWidth();
         int height = ClientUtils.getWindowHeight();
         graphics.pose().pushMatrix();
