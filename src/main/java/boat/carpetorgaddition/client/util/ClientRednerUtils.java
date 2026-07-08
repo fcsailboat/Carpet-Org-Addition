@@ -9,10 +9,17 @@ import org.joml.Vector4f;
 public class ClientRednerUtils {
     public static Float2FloatMap.Entry worldToScreenPoint(Vec3 worldPos, Matrix4fc modelView, Matrix4f projection) {
         Vec3 cameraPos = ClientUtils.getCamera().position();
-        float offsetX = (float) (worldPos.x - cameraPos.x);
-        float offsetY = (float) (worldPos.y - cameraPos.y);
-        float offsetZ = (float) (worldPos.z - cameraPos.z);
-        Vector4f origin = new Vector4f(offsetX, offsetY, offsetZ, 1.0F);
+        double offsetX = (worldPos.x - cameraPos.x);
+        double offsetY = (worldPos.y - cameraPos.y);
+        double offsetZ = (worldPos.z - cameraPos.z);
+        double distance = worldPos.distanceTo(cameraPos);
+        if (distance > 1000.0) {
+            double scale = 1000.0 / distance;
+            offsetX = offsetX * scale;
+            offsetY = offsetY * scale;
+            offsetZ = offsetZ * scale;
+        }
+        Vector4f origin = new Vector4f((float) offsetX, (float) offsetY, (float) offsetZ, 1.0F);
         origin.mul(modelView);
         origin.mul(projection);
         if (origin.w <= 0.0F) {
