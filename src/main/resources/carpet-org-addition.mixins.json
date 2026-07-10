@@ -108,7 +108,7 @@
     "rule.quickshulker.ItemMixin",
     "rule.quickshulker.ScreenHandlerMixin",
     "rule.quickshulker.ServerPlayerInteractionManagerMixin",
-    "rule.respawnblocksexplode.BedBlockMixin",
+    "rule.respawnblocksexplode.AbstractBedBlockMixin",
     "rule.respawnblocksexplode.RespawnAnchorBlockMixin",
     "rule.shulkerboxstackable.HopperBlockEntityMixin",
     "rule.shulkerboxstackable.ItemInstanceMixin",
