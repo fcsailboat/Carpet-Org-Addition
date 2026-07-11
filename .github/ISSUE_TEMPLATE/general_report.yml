@@ -1,6 +1,10 @@
 name: Bug或功能请求 / Bug or feature request
 description: 报告一个bug或提交一个功能请求。 / Report a bug or submit a feature request.
 body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 添加描述
   - type: checkboxes
     id: no-ai
     attributes:
