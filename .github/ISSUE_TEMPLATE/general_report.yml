@@ -1,10 +1,9 @@
----
 name: Bug或功能请求 / Bug or feature request
 about: 报告一个bug或提交一个功能请求 / Report a bug or submit a feature request
 title: ''
 labels: ''
 assignees: ''
-
----
-
-
+body:
+    options:
+        - label: 我提交的issue中不包含任何AI生成的内容。
+          required: true
