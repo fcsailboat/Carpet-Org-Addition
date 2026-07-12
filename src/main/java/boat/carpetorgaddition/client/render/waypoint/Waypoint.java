@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.client.render.waypoint;
 
-import boat.carpetorgaddition.client.util.ClientRednerUtils;
+import boat.carpetorgaddition.client.util.ClientRenderUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -92,7 +92,7 @@ public abstract class Waypoint {
         }
         this.lastTickDelta = this.tickDelta;
         this.tickDelta = tickDelta;
-        Float2FloatMap.Entry entry = ClientRednerUtils.worldToScreenPoint(revised, modelView, projection);
+        Float2FloatMap.Entry entry = ClientRenderUtils.worldToScreenPoint(revised, modelView, projection);
         if (entry == null) {
             return;
         }

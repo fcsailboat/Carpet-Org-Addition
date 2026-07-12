@@ -6,7 +6,7 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 
-public class ClientRednerUtils {
+public class ClientRenderUtils {
     public static Float2FloatMap.Entry worldToScreenPoint(Vec3 worldPos, Matrix4fc modelView, Matrix4f projection) {
         Vec3 cameraPos = ClientUtils.getCamera().position();
         double offsetX = (worldPos.x - cameraPos.x);
