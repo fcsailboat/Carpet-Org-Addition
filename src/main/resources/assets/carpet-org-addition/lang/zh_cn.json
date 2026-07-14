@@ -376,6 +376,7 @@
   "carpet-org-addition.command.finder.xp.offline_player.progress": "正在从离线玩家中查找经验：%s",
   "carpet-org-addition.command.finder.xp.offline_player.cannot_find": "未在离线玩家中找到经验",
   "carpet-org-addition.command.finder.xp.offline_player.head": "在%s个离线玩家中找到了%s级经验：",
+  "carpet-org-addition.command.finder.xp.offline_player.prompt": "如果未在召唤出来的玩家身上获取到经验，\n请检查玩家UUID与命令反馈中的UUID是否一致",
   "carpet-org-addition.command.finder.xp.offline_player.each": "在%s中找到了%s级经验",
   "carpet-org-addition.command.finder.xp.offline_player.fail.incalculable": "无法计算总经验",
   "carpet-org-addition.command.finder.trade.item.cannot_find": "在周围找不到出售%s的%s",

@@ -271,6 +271,7 @@
   "carpet-org-addition.command.finder.xp.offline_player.progress": "Searching for experience from offline players: %s",
   "carpet-org-addition.command.finder.xp.offline_player.cannot_find": "No experience found in offline players",
   "carpet-org-addition.command.finder.xp.offline_player.head": "Found %2$s-level experience in %1$s offline players:",
+  "carpet-org-addition.command.finder.xp.offline_player.prompt": "If the experience is not obtained from the summoned player,\nplease check if the player's UUID matches the UUID in the command feedback",
   "carpet-org-addition.command.finder.xp.offline_player.each": "Found %2$s-level experience in %1$s",
   "carpet-org-addition.command.finder.xp.offline_player.fail.incalculable": "Cannot calculate total experience",
   "carpet-org-addition.command.finder.trade.item.cannot_find": "Could not find a %2$s selling %1$s nearby",
