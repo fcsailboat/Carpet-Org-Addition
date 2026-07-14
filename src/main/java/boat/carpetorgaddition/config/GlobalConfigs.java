@@ -88,9 +88,12 @@ public class GlobalConfigs {
             if (this.configFile.isFile()) {
                 JsonObject json;
                 try {
-                    // TODO 可能抛出json解析异常
                     json = IOUtils.loadJson(this.configFile);
-                } catch (IOException e) {
+                } catch (IOException | RuntimeException e) {
+                    if (e instanceof RuntimeException) {
+                        IOUtils.backupFile(this.configFile);
+                    }
+                    CarpetOrgAddition.LOGGER.warn("Config file is corrupted or invalid, initializing with defaults", e);
                     json = this.initJsonObject();
                 }
                 this.cachedJson = json;
