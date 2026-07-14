@@ -39,8 +39,9 @@ public final class LocalizationKey {
         return TextBuilder.of(this.translate(args));
     }
 
-    public CommandSyntaxException toSyntaxException(Objects... args) {
-        return CommandUtils.createException(this.translate((Object[]) args));
+    @Deprecated(forRemoval = true)
+    public CommandSyntaxException toSyntaxException(Object... args) {
+        return CommandUtils.createException(this.translate(args));
     }
 
     @NullUnmarked

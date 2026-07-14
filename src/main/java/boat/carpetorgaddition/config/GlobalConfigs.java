@@ -100,7 +100,7 @@ public class GlobalConfigs {
             } else {
                 this.cachedJson = this.initJsonObject();
             }
-            this.register();
+            this.loadGlobalConfigs();
         }
 
         private JsonObject initJsonObject() {
@@ -110,7 +110,7 @@ public class GlobalConfigs {
             return json;
         }
 
-        private void register() {
+        private void loadGlobalConfigs() {
             for (ConfigEntry<?> config : this.configs) {
                 this.load(config);
             }
