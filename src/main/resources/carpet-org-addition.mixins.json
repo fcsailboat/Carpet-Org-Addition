@@ -128,7 +128,6 @@
     "util.ServerLevelMixin",
     "util.ServerPlayerEntityMixin",
     "util.ServerPlayNetworkHandlerMixin",
-    "util.SimpleCriterionTriggerMixin",
     "util.UserCacheMixin",
     "util.YggdrasilGameProfileRepositoryMixin",
     "util.carpet.EntityPlayerMPFakeMixin",
