@@ -36,11 +36,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -93,6 +96,7 @@ public class ServerUtils {
         return Optional.ofNullable(server.getPlayerList().getPlayerByName(name));
     }
 
+    @Deprecated
     public static Optional<ServerPlayer> getPlayer(MinecraftServer server, GameProfile gameProfile) {
         return getPlayer(server, gameProfile.name());
     }
@@ -147,21 +151,6 @@ public class ServerUtils {
      */
     public static String toWorldPosString(Level world, BlockPos blockPos) {
         return getIdAsString(world) + "[" + toPosString(blockPos) + "]";
-    }
-
-    /**
-     * 从服务器寻找一个指定UUID的实体
-     */
-    @Nullable
-    public static Entity getEntityFromUUID(MinecraftServer server, UUID uuid) {
-        for (ServerLevel world : server.getAllLevels()) {
-            Entity entity = world.getEntity(uuid);
-            if (entity == null) {
-                continue;
-            }
-            return entity;
-        }
-        return null;
     }
 
     /**
@@ -294,14 +283,12 @@ public class ServerUtils {
         return Objects.requireNonNull(server.getLevel(globalPos.dimension())).getBlockState(globalPos.pos());
     }
 
-    @Contract("_ -> !null")
     public static MinecraftServer getServer(ServerPlayer player) {
         return getWorld(player).getServer();
     }
 
-    @Nullable
-    public static MinecraftServer getServer(Entity entity) {
-        return getWorld(entity).getServer();
+    public static Optional<MinecraftServer> getServer(Entity entity) {
+        return Optional.ofNullable(getWorld(entity).getServer());
     }
 
     public static MinecraftServer getServer(CommandSourceStack source) {
@@ -363,8 +350,8 @@ public class ServerUtils {
         return entityType.getDescription();
     }
 
-    public static Component getName(Enchantment enchantment) {
-        return enchantment.description();
+    public static Component getName(Holder<Enchantment> enchantment) {
+        return EnchantmentUtils.getName(enchantment);
     }
 
     public static Component getName(MobEffect statusEffect) {
@@ -375,6 +362,10 @@ public class ServerUtils {
         Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
         String key = Objects.requireNonNull(biomes.getKey(biome)).toLanguageKey("biome");
         return LocalizationKey.literal(key).translate();
+    }
+
+    public static Component getName(GameType gameType) {
+        return gameType.getLongDisplayName();
     }
 
     public static Component getName(GameRule<?> gameRule) {
@@ -398,7 +389,7 @@ public class ServerUtils {
         return getName(entityType).getString();
     }
 
-    public static String getNameAsString(Enchantment enchantment) {
+    public static String getNameAsString(Holder<Enchantment> enchantment) {
         return getName(enchantment).getString();
     }
 
@@ -435,18 +426,16 @@ public class ServerUtils {
     }
 
     @SuppressWarnings("unused")
-    public static Optional<Identifier> getId(Level world, Enchantment enchantment) {
-        Holder<Enchantment> entry = Holder.direct(enchantment);
-        entry.unwrapKey().map(ResourceKey::identifier);
+    public static Optional<Identifier> getId(Level world, Holder<Enchantment> enchantment) {
         return getId(world.registryAccess(), enchantment);
     }
 
-    public static Optional<Identifier> getId(MinecraftServer server, Enchantment enchantment) {
+    public static Optional<Identifier> getId(MinecraftServer server, Holder<Enchantment> enchantment) {
         return getId(server.registryAccess(), enchantment);
     }
 
-    public static Optional<Identifier> getId(RegistryAccess registryAccess, Enchantment enchantment) {
-        return registryAccess.lookup(Registries.ENCHANTMENT).map(registry -> registry.getKey(enchantment));
+    public static Optional<Identifier> getId(RegistryAccess registryAccess, Holder<Enchantment> enchantment) {
+        return registryAccess.lookup(Registries.ENCHANTMENT).map(registry -> registry.getKey(enchantment.value()));
     }
 
     public static Optional<Identifier> getId(RegistryAccess registryAccess, MobEffect statusEffect) {
@@ -487,7 +476,7 @@ public class ServerUtils {
         return gameType.getSerializedName();
     }
 
-    public static String getIdAsString(RegistryAccess registryAccess, Enchantment enchantment) {
+    public static String getIdAsString(RegistryAccess registryAccess, Holder<Enchantment> enchantment) {
         return getId(registryAccess, enchantment).map(Identifier::toString).orElse(UNREGISTERED);
     }
 
@@ -541,8 +530,35 @@ public class ServerUtils {
         server.getPlayerList().getPlayers().forEach(consumer);
     }
 
+    /**
+     * @return 获取当前游戏刻
+     */
     public static long getTime(MinecraftServer server) {
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         return level == null ? -1L : level.getGameTime();
+    }
+
+    /**
+     * @return 服务器是否正在运行
+     */
+    public static boolean isRunning(MinecraftServer server) {
+        return server.isRunning();
+    }
+
+    /**
+     * @return 服务器是否停止运行
+     */
+    public static boolean isStoping(MinecraftServer server) {
+        // server.stopped没有被volatile修饰，它可能不是线程安全的
+        return !server.isRunning();
+    }
+
+    /**
+     * @return 玩家数据是否存在
+     */
+    public static boolean isPlayerDataExists(MinecraftServer server, UUID uuid) {
+        String filename = uuid + ".dat";
+        Path path = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(filename);
+        return Files.exists(path);
     }
 }

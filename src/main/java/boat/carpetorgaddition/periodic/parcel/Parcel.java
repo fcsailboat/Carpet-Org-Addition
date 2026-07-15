@@ -44,7 +44,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-import static boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask.UNKNOWN;
+import static boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask.UNKNOWN;
 
 /**
  * 快递

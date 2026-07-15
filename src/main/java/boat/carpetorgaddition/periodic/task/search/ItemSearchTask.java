@@ -5,7 +5,6 @@ import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.exception.TaskExecutionException;
 import boat.carpetorgaddition.mixin.accessor.AbstractHorseEntityAccessor;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
@@ -24,6 +23,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
@@ -43,11 +43,10 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class ItemSearchTask extends ServerTask {
+public class ItemSearchTask extends ServerSearchTask {
     private final Level world;
     private final BlockEntityTraverser blockEntities;
     private Iterator<Entity> entitySearchIterator;
@@ -58,37 +57,35 @@ public class ItemSearchTask extends ServerTask {
     private final ItemStackPredicate predicate;
     private final ArrayList<Result> results = new ArrayList<>();
     private final PagedCollection pagedCollection;
+    private boolean cancelled = false;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("item");
 
-    public ItemSearchTask(Level world, ItemStackPredicate predicate, BlockEntityTraverser blockEntities, CommandSourceStack source) {
-        super(source);
+    public ItemSearchTask(Level world, ItemStackPredicate predicate, BlockEntityTraverser blockEntities, CommandSourceStack source, ServerPlayer player) {
+        super(source, player);
         this.world = world;
         this.blockEntities = blockEntities;
         this.findState = FindState.BLOCK;
         this.predicate = predicate;
         MinecraftServer server = source.getServer();
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(server).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 
     @Override
     public void tick() {
-        this.checkTimeout();
+        if (this.isTimeout()) {
+            this.noticeCancelled();
+        }
+        this.checkCancelled();
         while (this.isTimeRemaining()) {
-            try {
-                switch (this.findState) {
-                    case BLOCK -> searchFromContainer();
-                    case ENTITY -> searchFromEntity();
-                    case SORT -> sort();
-                    case FEEDBACK -> feedback();
-                    default -> {
-                        return;
-                    }
+            switch (this.findState) {
+                case BLOCK -> searchFromContainer();
+                case ENTITY -> searchFromEntity();
+                case SORT -> sort();
+                case FEEDBACK -> feedback();
+                default -> {
+                    return;
                 }
-            } catch (TaskExecutionException e) {
-                e.disposal();
-                this.findState = FindState.END;
-                return;
             }
         }
     }
@@ -99,6 +96,7 @@ public class ItemSearchTask extends ServerTask {
             this.blockEntitySearchIterator = blockEntities.iterator();
         }
         while (this.blockEntitySearchIterator.hasNext()) {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
@@ -123,6 +121,7 @@ public class ItemSearchTask extends ServerTask {
             this.entitySearchIterator = this.world.getEntitiesOfClass(Entity.class, box).iterator();
         }
         while (this.entitySearchIterator.hasNext()) {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
@@ -200,6 +199,7 @@ public class ItemSearchTask extends ServerTask {
 
     // 对结果进行排序
     private void sort() {
+        this.checkCancelled();
         if (this.results.isEmpty()) {
             // 在周围的容器中找不到指定物品，直接将状态设置为结束，然后结束方法
             MessageUtils.sendMessage(this.source, KEY.then("cannot_find").translate(predicate.getDisplayName()));
@@ -212,6 +212,7 @@ public class ItemSearchTask extends ServerTask {
 
     // 发送命令反馈
     private void feedback() {
+        this.checkCancelled();
         Component itemCount;
         Optional<Item> optional = predicate.getConvert();
         if (optional.isPresent()) {
@@ -238,16 +239,13 @@ public class ItemSearchTask extends ServerTask {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(this.source.getPlayer());
+    public void cancel() {
+        this.cancelled = true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this.getClass() == obj.getClass()) {
-            return Objects.equals(this.source.getPlayer(), ((ItemSearchTask) obj).source.getPlayer());
-        }
-        return false;
+    protected boolean isCancelled() {
+        return this.cancelled;
     }
 
     @Override

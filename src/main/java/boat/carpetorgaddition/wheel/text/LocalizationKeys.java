@@ -26,6 +26,7 @@ public final class LocalizationKeys {
         public static final LocalizationKey UNABLE_TO_PARSE_STRING_TO_UUID = OPERATION.then("unable_to_parse_string_to_uuid");
         public static final LocalizationKey INSUFFICIENT_PERMISSIONS = OPERATION.then("insufficient_permissions");
         public static final LocalizationKey WAIT_LAST = OPERATION.then("wait_last");
+        public static final LocalizationKey WAIT_PLAYER = OPERATION.then("wait_player");
         private static final LocalizationKey ERROR = OPERATION.then("error");
         private static final LocalizationKey TIMEOUT = OPERATION.then("timeout");
         private static final LocalizationKey PAGE = OPERATION.then("page");
@@ -181,10 +182,16 @@ public final class LocalizationKeys {
             public static class Attack {
                 public static final LocalizationKey INTERVAL = ATTACK.then("interval");
                 public static final LocalizationKey CONTINUOUS = ATTACK.then("continuous");
+                public static final LocalizationKey CONTINUOUS_RIGHT = CONTINUOUS.then("right");
             }
 
             public static class Use {
                 public static final LocalizationKey CONTINUOUS = USE.then("continuous");
+                public static final LocalizationKey CONTINUOUS_RIGHT = CONTINUOUS.then("right");
+            }
+
+            public static class Hotbar {
+                public static final LocalizationKey RIGHT = HOTBAR.then("right");
             }
         }
     }

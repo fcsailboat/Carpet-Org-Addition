@@ -43,6 +43,14 @@ public class BlockExcavator {
         }
     }
 
+    public boolean mining(BlockPos blockPos) {
+        return mining(blockPos, false);
+    }
+
+    public boolean mining(BlockPos blockPos, boolean breakingCooldown) {
+        return mining(blockPos, Direction.DOWN, breakingCooldown);
+    }
+
     public boolean mining(BlockPos blockPos, Direction direction) {
         return mining(blockPos, direction, true);
     }
@@ -153,7 +161,7 @@ public class BlockExcavator {
         }
         BlockState blockState = world.getBlockState(blockPos);
         float delta = blockState.getDestroyProgress(this.player, world, blockPos);
-        return (int) Math.ceil((1F - this.currentBreakingProgress) / delta);
+        return Math.max((int) Math.ceil((1F - this.currentBreakingProgress) / delta), 1);
     }
 
     private void breakingAction(Action action, BlockPos blockPos, Direction direction) {

@@ -22,17 +22,12 @@ public abstract class PlayerScheduleTask extends ServerTask {
     public abstract void sendEachMessage(CommandSourceStack source);
 
     @Override
-    public boolean equals(Object obj) {
-        return this.getClass() == obj.getClass() && this.getPlayerName().equals(((PlayerScheduleTask) obj).getPlayerName());
+    public Object getIdentityKey() {
+        return this.getPlayerName();
     }
 
     @Override
     public boolean constantSpeed() {
         return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getPlayerName().hashCode();
     }
 }

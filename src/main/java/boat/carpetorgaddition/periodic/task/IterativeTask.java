@@ -38,4 +38,9 @@ public class IterativeTask extends ServerTask {
     protected boolean stopped() {
         return !this.iterator.hasNext();
     }
+
+    @Override
+    public Object getIdentityKey() {
+        return this;
+    }
 }

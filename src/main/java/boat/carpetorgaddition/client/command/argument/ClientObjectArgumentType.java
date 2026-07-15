@@ -3,9 +3,7 @@ package boat.carpetorgaddition.client.command.argument;
 import boat.carpetorgaddition.client.util.ClientCommandUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -15,10 +13,12 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T>> {
     private static final List<String> PATTERNS = Arrays.stream(MatchPattern.values()).map(MatchPattern::toString).toList();
@@ -59,6 +60,10 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         return context.getArgument(name, List.class);
     }
 
+    public static Map<String, ClientObjectArgumentType<?>> getDictionaryTypes() {
+        return DictionaryHolder.DICTIONARY_TYPES;
+    }
+
     @Override
     public List<T> parse(StringReader reader) throws CommandSyntaxException {
         int cursor = reader.getCursor();
@@ -69,7 +74,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         if (!name.isEmpty()) {
             for (T t : stream().toList()) {
                 // 获取所有与字符串对应的对象
-                if (pattern.match(name.toLowerCase(Locale.ROOT), objectToString(t).toLowerCase(Locale.ROOT))) {
+                if (pattern.match(name.toLowerCase(Locale.ROOT), this.getNameAsString(t).toLowerCase(Locale.ROOT))) {
                     list.add(t);
                 }
             }
@@ -106,9 +111,27 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * @return 对象的翻译后名称
      */
-    protected abstract String objectToString(T t);
+    public String getNameAsString(T t) {
+        return getName(t).getString();
+    }
 
-    protected abstract Map.Entry<String, String> entry(T t);
+    public Map.Entry<String, String> entry(T t) {
+        return Map.entry(this.getNameAsString(t), this.getIdAsString(t));
+    }
+
+    public abstract String getIdAsString(T t);
+
+    public String getObjectIdAsString(Object obj) {
+        return getIdAsString(this.type().cast(obj));
+    }
+
+    public abstract Component getName(T t);
+
+    public Component getObjectName(Object obj) {
+        return this.getName(this.type().cast(obj));
+    }
+
+    protected abstract Class<T> type();
 
     /**
      * 列出命令建议
@@ -188,18 +211,23 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected String objectToString(Item item) {
-            return ServerUtils.getName(item).getString();
+        public Component getName(Item item) {
+            return ServerUtils.getName(item);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(Item item) {
-            return Map.entry(ServerUtils.getNameAsString(item), ServerUtils.getIdAsString(item));
+        public String getIdAsString(Item item) {
+            return ServerUtils.getIdAsString(item);
         }
 
         @Override
         protected Stream<Item> stream() {
             return BuiltInRegistries.ITEM.stream();
+        }
+
+        @Override
+        protected Class<Item> type() {
+            return Item.class;
         }
     }
 
@@ -212,139 +240,164 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
 
         @Override
-        protected String objectToString(Block block) {
-            return block.getName().getString();
+        public Component getName(Block block) {
+            return ServerUtils.getName(block);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(Block block) {
-            return Map.entry(ServerUtils.getNameAsString(block), ServerUtils.getIdAsString(block));
+        public String getIdAsString(Block block) {
+            return ServerUtils.getIdAsString(block);
         }
 
         @Override
         protected Stream<Block> stream() {
             return BuiltInRegistries.BLOCK.stream();
         }
+
+        @Override
+        protected Class<Block> type() {
+            return Block.class;
+        }
     }
 
     /**
      * 实体参数
      */
-    public static class ClientEntityArgumentType extends ClientObjectArgumentType<EntityType<?>> {
+    private static class ClientEntityArgumentType extends ClientObjectArgumentType<EntityType<?>> {
         @Override
-        protected String objectToString(EntityType<?> entityType) {
-            return entityType.getDescription().getString();
+        public Component getName(EntityType<?> entityType) {
+            return ServerUtils.getName(entityType);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(EntityType<?> entityType) {
-            return Map.entry(ServerUtils.getNameAsString(entityType), ServerUtils.getIdAsString(entityType));
+        public String getIdAsString(EntityType<?> entityType) {
+            return ServerUtils.getIdAsString(entityType);
         }
 
         @Override
         protected Stream<EntityType<?>> stream() {
             return ClientUtils.getRegistryAccess().lookupOrThrow(Registries.ENTITY_TYPE).stream();
         }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected Class<EntityType<?>> type() {
+            return (Class<EntityType<?>>) (Class<?>) EntityType.class;
+        }
     }
 
     /**
      * 魔咒参数
      */
-    public static class ClientEnchantmentArgumentType extends ClientObjectArgumentType<Enchantment> {
+    private static class ClientEnchantmentArgumentType extends ClientObjectArgumentType<Holder<Enchantment>> {
         @Override
-        protected String objectToString(Enchantment enchantment) {
-            return EnchantmentUtils.getName(enchantment).getString();
+        public Component getName(Holder<Enchantment> holder) {
+            return ServerUtils.getName(holder);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(Enchantment enchantment) {
+        public String getIdAsString(Holder<Enchantment> holder) {
+            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), holder);
+        }
+
+        @Override
+        protected Stream<Holder<Enchantment>> stream() {
             RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
-            return Map.entry(ServerUtils.getNameAsString(enchantment), ServerUtils.getIdAsString(registryAccess, enchantment));
+            Registry<Enchantment> registry = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
+            return StreamSupport.stream(registry.asHolderIdMap().spliterator(), false);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        protected Stream<Enchantment> stream() {
-            Registry<Enchantment> registry = ClientUtils.getRegistryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-            return registry.stream();
+        protected Class<Holder<Enchantment>> type() {
+            return (Class<Holder<Enchantment>>) (Class<?>) Holder.class;
         }
     }
 
     /**
      * 状态效果参数
      */
-    public static class ClientStatusEffectArgumentType extends ClientObjectArgumentType<MobEffect> {
+    private static class ClientStatusEffectArgumentType extends ClientObjectArgumentType<MobEffect> {
         @Override
-        protected String objectToString(MobEffect statusEffect) {
-            return statusEffect.getDisplayName().getString();
+        public Component getName(MobEffect mobEffect) {
+            return ServerUtils.getName(mobEffect);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(MobEffect statusEffect) {
-            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
-            return Map.entry(ServerUtils.getNameAsString(statusEffect), ServerUtils.getIdAsString(registryAccess, statusEffect));
+        public String getIdAsString(MobEffect mobEffect) {
+            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), mobEffect);
         }
 
         @Override
         protected Stream<MobEffect> stream() {
             return ClientUtils.getRegistryAccess().lookupOrThrow(Registries.MOB_EFFECT).stream();
         }
+
+        @Override
+        protected Class<MobEffect> type() {
+            return MobEffect.class;
+        }
     }
 
-    public static class ClientBiomeArgumentType extends ClientObjectArgumentType<Biome> {
+    private static class ClientBiomeArgumentType extends ClientObjectArgumentType<Biome> {
         @Override
-        protected String objectToString(Biome biome) {
-            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
-            Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
-            String key = Objects.requireNonNull(biomes.getKey(biome)).toLanguageKey("biome");
-            return LocalizationKey.literal(key).translate().getString();
+        public Component getName(Biome biome) {
+            return ServerUtils.getName(ClientUtils.getRegistryAccess(), biome);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(Biome biome) {
-            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
-            return Map.entry(ServerUtils.getNameAsString(registryAccess, biome), ServerUtils.getIdAsString(registryAccess, biome));
+        public String getIdAsString(Biome biome) {
+            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), biome);
         }
 
         @Override
         protected Stream<Biome> stream() {
             return ClientUtils.getRegistryAccess().lookupOrThrow(Registries.BIOME).stream();
         }
+
+        @Override
+        protected Class<Biome> type() {
+            return Biome.class;
+        }
     }
 
     /**
      * 游戏模式参数
      */
-    public static class ClientGameModeArgumentType extends ClientObjectArgumentType<GameType> {
+    private static class ClientGameModeArgumentType extends ClientObjectArgumentType<GameType> {
         @Override
-        protected String objectToString(GameType gameMode) {
-            return gameMode.getLongDisplayName().getString();
+        public Component getName(GameType gameType) {
+            return ServerUtils.getName(gameType);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(GameType gameType) {
-            return Map.entry(ServerUtils.getNameAsString(gameType), ServerUtils.getIdAsString(gameType));
+        public String getIdAsString(GameType gameType) {
+            return ServerUtils.getIdAsString(gameType);
         }
 
         @Override
         protected Stream<GameType> stream() {
             return Stream.of(GameType.values());
         }
+
+        @Override
+        protected Class<GameType> type() {
+            return GameType.class;
+        }
     }
 
     /**
      * 游戏规则参数
      */
-    public static class ClientGameRuleArgumentType extends ClientObjectArgumentType<GameRule<?>> {
+    private static class ClientGameRuleArgumentType extends ClientObjectArgumentType<GameRule<?>> {
         @Override
-        protected String objectToString(GameRule<?> gameRule) {
-            String key = gameRule.getDescriptionId();
-            return LocalizationKey.literal(key).translate().getString();
+        public Component getName(GameRule<?> gameRule) {
+            return ServerUtils.getName(gameRule);
         }
 
         @Override
-        protected Map.Entry<String, String> entry(GameRule<?> gameRule) {
-            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
-            return Map.entry(ServerUtils.getNameAsString(gameRule), ServerUtils.getIdAsString(registryAccess, gameRule));
+        public String getIdAsString(GameRule<?> gameRule) {
+            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), gameRule);
         }
 
         @Override
@@ -355,6 +408,27 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
             }
             Registry<GameRule<?>> gameRules = optional.get();
             return gameRules.stream();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected Class<GameRule<?>> type() {
+            return (Class<GameRule<?>>) (Class<?>) GameRule.class;
+        }
+    }
+
+    private static class DictionaryHolder {
+        static final Map<String, ClientObjectArgumentType<?>> DICTIONARY_TYPES = new HashMap<>();
+
+        static {
+            DICTIONARY_TYPES.put("item", new ClientItemArgumentType(false));
+            DICTIONARY_TYPES.put("block", new ClientBlockArgumentType(false));
+            DICTIONARY_TYPES.put("entity", new ClientEntityArgumentType());
+            DICTIONARY_TYPES.put("enchant", new ClientEnchantmentArgumentType());
+            DICTIONARY_TYPES.put("effect", new ClientStatusEffectArgumentType());
+            DICTIONARY_TYPES.put("biome", new ClientBiomeArgumentType());
+            DICTIONARY_TYPES.put("gamemode", new ClientGameModeArgumentType());
+            DICTIONARY_TYPES.put("gamerule", new ClientGameRuleArgumentType());
         }
     }
 

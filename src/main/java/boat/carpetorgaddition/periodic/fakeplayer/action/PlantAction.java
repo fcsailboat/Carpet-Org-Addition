@@ -4,7 +4,6 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
-import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -252,7 +251,7 @@ public class PlantAction extends AbstractPlayerAction {
                 }
             } else {
                 // 竹子已生长到最大高度，破坏竹子
-                return useToolBreakBlock(bambooPos.above());
+                return useToolBreakBlock(world, bambooPos.above());
             }
         }
         return true;
@@ -303,10 +302,9 @@ public class PlantAction extends AbstractPlayerAction {
      *
      * @return 是否完成挖掘
      */
-    @Deprecated
-    private boolean useToolBreakBlock(BlockPos cropPos) {
+    private boolean useToolBreakBlock(Level world, BlockPos cropPos) {
         // 如果有工具，拿在主手，剑可以瞬间破坏竹子，它也是工具物品
-        this.inventory.replenish(InventoryUtils::isToolItem);
+        this.inventory.switchToAppropriateTool(world, cropPos);
         return breakBlock(cropPos);
     }
 
@@ -339,7 +337,7 @@ public class PlantAction extends AbstractPlayerAction {
     protected void onAssignPlayer() {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         this.inventory = PlayerStorageInventory.of(fakePlayer);
-        this.excavator = PlayerComponentCoordinator.getCoordinator(fakePlayer).getBlockExcavator();
+        this.excavator = PlayerComponentCoordinator.of(fakePlayer).getBlockExcavator();
     }
 
     @Override

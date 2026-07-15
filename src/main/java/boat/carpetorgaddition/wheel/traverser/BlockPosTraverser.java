@@ -18,6 +18,17 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
         super(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+    public BlockPosTraverser(BlockPos blockPos, int range) {
+        this(
+                blockPos.getX() - range,
+                blockPos.getY() - range,
+                blockPos.getZ() - range,
+                blockPos.getX() + range,
+                blockPos.getY() + range,
+                blockPos.getZ() + range
+        );
+    }
+
     public BlockPosTraverser(Level world, BlockPos sourcePos, int range) {
         super(world, sourcePos, range);
     }

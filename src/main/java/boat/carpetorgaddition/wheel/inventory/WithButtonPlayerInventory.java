@@ -4,6 +4,7 @@ import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccess
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
+import boat.carpetorgaddition.wheel.screen.WithButtonPlayerInventoryScreenHandler.ClickType;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import carpet.helpers.EntityPlayerActionPack;
@@ -23,10 +24,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
@@ -35,10 +39,6 @@ public class WithButtonPlayerInventory implements Container {
      * 玩家正在操作的物品栏
      */
     private final CombinedInventory inventory;
-    /**
-     * 用于整理玩家物品栏，盔甲槽和手上的物品不会参与整理
-     */
-    private final SortInventory sortInventory;
     private final ButtonInventory intervalAttack;
     private final ButtonInventory continuousAttack;
     private final ButtonInventory continuousUse;
@@ -68,6 +68,10 @@ public class WithButtonPlayerInventory implements Container {
      * 所有按钮的索引
      */
     public static final IntList BUTTON_INDEX_LIST = IntList.of(0, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
+    private static final List<Consumer<ServerPlayer>> HOTBAR_RIGHT_CLICK_ACTION = List.of(
+            player -> PlayerUtils.setSneaking(player, !PlayerUtils.isSneaking(player)),
+            PlayerUtils::closeScreen
+    );
 
     static {
         CompoundTag tag = new CompoundTag();
@@ -85,8 +89,10 @@ public class WithButtonPlayerInventory implements Container {
 
     public WithButtonPlayerInventory(ServerPlayer player) {
         this.player = player;
+        PlayerDecomposedContainer decomposer = PlayerStorageInventory.of(player);
+        SortableInventory sortable = new SortableInventory(List.of(decomposer.getStorage(), decomposer.getHotbar()), player, () -> 27 + player.getInventory().getSelectedSlot());
         this.actionPack = PlayerUtils.getActionPack(this.player);
-        ButtonInventory stopAll = new StopButtonInventory(_ -> {
+        ButtonInventory stopAll = new StopButtonInventory(player, _ -> {
             ItemStack itemStack = OFF_STACK.copy();
             Component first = LocalizationKeys.Button.Action.Stop.LEFT.builder()
                     .setItalic(false)
@@ -99,65 +105,70 @@ public class WithButtonPlayerInventory implements Container {
             itemStack.set(DataComponents.CUSTOM_NAME, first);
             itemStack.set(DataComponents.LORE, new ItemLore(List.of(second)));
             return Map.entry(itemStack, itemStack);
-        }, (_, pack) -> pack.stopAll());
-        this.intervalAttack = new ButtonInventory(
-                _ -> {
-                    ItemStack on = ON_STACK.copy();
-                    ItemStack off = OFF_STACK.copy();
-                    LocalizationKey key = LocalizationKeys.Button.Action.Attack.INTERVAL;
-                    on.set(DataComponents.CUSTOM_NAME, key.builder(ATTACK_INTERVAL, ON_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
-                    off.set(DataComponents.CUSTOM_NAME, key.builder(ATTACK_INTERVAL, OFF_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
-                    return Map.entry(on, off);
-                },
-                Map.entry(
-                        (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.interval(ATTACK_INTERVAL)),
-                        (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.once())
-                )
-        );
-        this.continuousAttack = new ButtonInventory(
-                _ -> {
-                    ItemStack on = ON_STACK.copy();
-                    ItemStack off = OFF_STACK.copy();
-                    LocalizationKey key = LocalizationKeys.Button.Action.Attack.CONTINUOUS;
-                    on.set(DataComponents.CUSTOM_NAME, key.builder(ON_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
-                    off.set(DataComponents.CUSTOM_NAME, key.builder(OFF_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
-                    return Map.entry(on, off);
-                },
-                Map.entry(
-                        (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.continuous()),
-                        (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.once())
-                )
-        );
-        this.continuousUse = new ButtonInventory(
-                _ -> {
-                    ItemStack on = ON_STACK.copy();
-                    ItemStack off = OFF_STACK.copy();
-                    LocalizationKey key = LocalizationKeys.Button.Action.Use.CONTINUOUS;
-                    on.set(DataComponents.CUSTOM_NAME, key.builder(ON_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
-                    off.set(DataComponents.CUSTOM_NAME, key.builder(OFF_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
-                    return Map.entry(on, off);
-                },
-                Map.entry(
-                        (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.USE, EntityPlayerActionPack.Action.continuous()),
-                        (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.USE, EntityPlayerActionPack.Action.once())
-                )
-        );
-        this.hotbar = new HotbarButtonInventory(index -> {
-            ItemStack off = OFF_STACK.copy();
-            off.setCount(index + 1);
-            off.set(DataComponents.CUSTOM_NAME, LocalizationKeys.Button.HOTBAR.builder(index + 1).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+        }, (_, pack) -> pack.stopAll(), sortable::sort);
+        this.intervalAttack = new ButtonInventory(player, _ -> {
             ItemStack on = ON_STACK.copy();
-            on.setCount(index + 1);
-            on.set(DataComponents.CUSTOM_NAME, LocalizationKeys.Button.HOTBAR.builder(index + 1).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            ItemStack off = OFF_STACK.copy();
+            LocalizationKey key = LocalizationKeys.Button.Action.Attack.INTERVAL;
+            on.set(DataComponents.CUSTOM_NAME, key.builder(ATTACK_INTERVAL, ON_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            off.set(DataComponents.CUSTOM_NAME, key.builder(ATTACK_INTERVAL, OFF_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
             return Map.entry(on, off);
-        }, (index, pack) -> pack.setSlot(index + 1));
+        }, Map.entry(
+                (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.interval(ATTACK_INTERVAL)),
+                (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.once())
+        ), null);
+        this.continuousAttack = new ButtonInventory(player, _ -> {
+            ItemStack on = ON_STACK.copy();
+            ItemStack off = OFF_STACK.copy();
+            Component second = LocalizationKeys.Button.Action.Attack.CONTINUOUS_RIGHT.builder().setGrayItalic().build();
+            ItemLore itemLore = new ItemLore(List.of(second));
+            LocalizationKey key = LocalizationKeys.Button.Action.Attack.CONTINUOUS;
+            on.set(DataComponents.CUSTOM_NAME, key.builder(ON_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            off.set(DataComponents.CUSTOM_NAME, key.builder(OFF_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            on.set(DataComponents.LORE, itemLore);
+            off.set(DataComponents.LORE, itemLore);
+            return Map.entry(on, off);
+        }, Map.entry(
+                (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.continuous()),
+                (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.once())
+        ), () -> PlayerUtils.attack(player));
+        this.continuousUse = new ButtonInventory(player, _ -> {
+            ItemStack on = ON_STACK.copy();
+            ItemStack off = OFF_STACK.copy();
+            LocalizationKey key = LocalizationKeys.Button.Action.Use.CONTINUOUS;
+            Component second = LocalizationKeys.Button.Action.Use.CONTINUOUS_RIGHT.builder().setGrayItalic().build();
+            ItemLore itemLore = new ItemLore(List.of(second));
+            on.set(DataComponents.CUSTOM_NAME, key.builder(ON_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            off.set(DataComponents.CUSTOM_NAME, key.builder(OFF_TEXT).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            on.set(DataComponents.LORE, itemLore);
+            off.set(DataComponents.LORE, itemLore);
+            return Map.entry(on, off);
+        }, Map.entry(
+                (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.USE, EntityPlayerActionPack.Action.continuous()),
+                (_, pack) -> pack.start(EntityPlayerActionPack.ActionType.USE, EntityPlayerActionPack.Action.once())
+        ), () -> PlayerUtils.use(player));
+        this.hotbar = new HotbarButtonInventory(player, index -> {
+            ItemStack off = OFF_STACK.copy();
+            int ordinal = index + 1;
+            off.setCount(ordinal);
+            off.set(DataComponents.CUSTOM_NAME, LocalizationKeys.Button.HOTBAR.builder(ordinal).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            ItemStack on = ON_STACK.copy();
+            on.setCount(ordinal);
+            on.set(DataComponents.CUSTOM_NAME, LocalizationKeys.Button.HOTBAR.builder(ordinal).setItalic(false).setColor(ChatFormatting.WHITE).setBold().build());
+            if (HOTBAR_RIGHT_CLICK_ACTION.size() > index) {
+                Component second = LocalizationKeys.Button.Action.Hotbar.RIGHT.then(String.valueOf(ordinal)).builder().setGrayItalic().build();
+                ItemLore itemLore = new ItemLore(List.of(second));
+                on.set(DataComponents.LORE, itemLore);
+                off.set(DataComponents.LORE, itemLore);
+            }
+            return Map.entry(on, off);
+        }, (index, pack) -> pack.setSlot(index + 1), index -> HOTBAR_RIGHT_CLICK_ACTION.get(index).accept(player));
         stopAll.addMutualExclusion(this.intervalAttack);
         stopAll.addMutualExclusion(this.continuousAttack);
         stopAll.addMutualExclusion(this.continuousUse);
         this.intervalAttack.addMutualExclusion(this.continuousAttack);
         this.continuousAttack.addMutualExclusion(this.intervalAttack);
         ArrayList<Container> list = new ArrayList<>();
-        PlayerDecomposedContainer decomposer = PlayerStorageInventory.of(player);
         list.add(stopAll);
         list.add(decomposer.getArmor());
         list.add(this.intervalAttack);
@@ -168,7 +179,6 @@ public class WithButtonPlayerInventory implements Container {
         list.add(decomposer.getStorage());
         list.add(decomposer.getHotbar());
         this.inventory = new CombinedInventory(list);
-        this.sortInventory = new SortInventory(List.of(decomposer.getStorage(), decomposer.getHotbar()), player, () -> 27 + player.getInventory().getSelectedSlot());
         this.updateButton();
     }
 
@@ -195,10 +205,6 @@ public class WithButtonPlayerInventory implements Container {
 
     public void tick() {
         this.updateButton();
-    }
-
-    public void sort() {
-        this.sortInventory.sort();
     }
 
     @Override
@@ -261,14 +267,18 @@ public class WithButtonPlayerInventory implements Container {
         return this.actionPack;
     }
 
-    public static class SortInventory extends CombinedInventory implements SortableContainer {
+    public ServerPlayer getPlayer() {
+        return this.player;
+    }
+
+    public static class SortableInventory extends CombinedInventory implements SortableContainer {
         private final ServerPlayer player;
         private final IntSupplier mainHandSlotIndex;
 
         /**
          * @param mainHandSlotIndex 主手槽位的索引，用于在整理物品时忽略主手物品
          */
-        public SortInventory(List<Container> containers, ServerPlayer player, IntSupplier mainHandSlotIndex) {
+        public SortableInventory(List<Container> containers, ServerPlayer player, IntSupplier mainHandSlotIndex) {
             super(containers);
             this.player = player;
             this.mainHandSlotIndex = mainHandSlotIndex;
@@ -289,26 +299,33 @@ public class WithButtonPlayerInventory implements Container {
 
     public static class ButtonInventory extends SimpleContainer {
         protected final Map.Entry<IntObjectBiConsumer<EntityPlayerActionPack>, IntObjectBiConsumer<EntityPlayerActionPack>> consumer;
+        protected final ServerPlayer player;
         private final List<ItemStack> buttonOn;
         private final List<ItemStack> buttonOff;
+        @Nullable
+        private final IntConsumer rightClickEvent;
         protected final List<ButtonInventory> mutualExclusion = new ArrayList<>();
 
-        protected ButtonInventory(int size, IntFunction<Map.Entry<ItemStack, ItemStack>> function, IntObjectBiConsumer<EntityPlayerActionPack> consumer) {
+        protected ButtonInventory(int size, ServerPlayer player, IntFunction<Map.Entry<ItemStack, ItemStack>> function, IntObjectBiConsumer<EntityPlayerActionPack> consumer, IntConsumer rightClickEvent) {
             Map.Entry<IntObjectBiConsumer<EntityPlayerActionPack>, IntObjectBiConsumer<EntityPlayerActionPack>> entry = Map.entry(consumer, consumer);
-            this(size, function, entry);
+            this(size, player, function, entry, rightClickEvent);
         }
 
         public ButtonInventory(
+                ServerPlayer player,
                 IntFunction<Map.Entry<ItemStack, ItemStack>> function,
-                Map.Entry<IntObjectBiConsumer<EntityPlayerActionPack>, IntObjectBiConsumer<EntityPlayerActionPack>> consumer
+                Map.Entry<IntObjectBiConsumer<EntityPlayerActionPack>, IntObjectBiConsumer<EntityPlayerActionPack>> consumer,
+                @Nullable Runnable rightClickEvent
         ) {
-            this(1, function, consumer);
+            this(1, player, function, consumer, rightClickEvent == null ? null : _ -> rightClickEvent.run());
         }
 
-        protected ButtonInventory(
+        private ButtonInventory(
                 int size,
+                ServerPlayer player,
                 IntFunction<Map.Entry<ItemStack, ItemStack>> function,
-                Map.Entry<IntObjectBiConsumer<EntityPlayerActionPack>, IntObjectBiConsumer<EntityPlayerActionPack>> consumer
+                Map.Entry<IntObjectBiConsumer<EntityPlayerActionPack>, IntObjectBiConsumer<EntityPlayerActionPack>> consumer,
+                @Nullable IntConsumer rightClickEvent
         ) {
             ArrayList<ItemStack> on = new ArrayList<>(size);
             ArrayList<ItemStack> off = new ArrayList<>(size);
@@ -317,13 +334,30 @@ public class WithButtonPlayerInventory implements Container {
                 on.add(entry.getKey());
                 off.add(entry.getValue());
             }
+            this.player = player;
             this.buttonOn = List.copyOf(on);
             this.buttonOff = List.copyOf(off);
             super(off.toArray(ItemStack[]::new));
             this.consumer = consumer;
+            this.rightClickEvent = rightClickEvent;
         }
 
-        public void onClickd(int index, EntityPlayerActionPack actionPack) {
+        public final void onClicked(ClickType clickType, int index, EntityPlayerActionPack actionPack) {
+            if (this.rightClicked(clickType, index)) {
+                return;
+            }
+            this.onClicked(index, actionPack);
+        }
+
+        protected boolean rightClicked(ClickType clickType, int index) {
+            if (clickType == ClickType.RIGHT_CLICK && this.rightClickEvent != null) {
+                this.rightClickEvent.accept(index);
+                return true;
+            }
+            return false;
+        }
+
+        protected void onClicked(int index, EntityPlayerActionPack actionPack) {
             ItemStack current = this.getItem(index);
             if (current == this.buttonOff.get(index)) {
                 this.consumer.getKey().accept(index, actionPack);
@@ -347,12 +381,12 @@ public class WithButtonPlayerInventory implements Container {
     }
 
     public static class StopButtonInventory extends ButtonInventory {
-        public StopButtonInventory(IntFunction<Map.Entry<ItemStack, ItemStack>> function, IntObjectBiConsumer<EntityPlayerActionPack> consumer) {
-            super(1, function, consumer);
+        public StopButtonInventory(ServerPlayer player, IntFunction<Map.Entry<ItemStack, ItemStack>> function, IntObjectBiConsumer<EntityPlayerActionPack> consumer, Runnable rightClickEvent) {
+            super(1, player, function, consumer, _ -> rightClickEvent.run());
         }
 
         @Override
-        public void onClickd(int index, EntityPlayerActionPack actionPack) {
+        public void onClicked(int index, EntityPlayerActionPack actionPack) {
             this.consumer.getKey().accept(index, actionPack);
             for (ButtonInventory inventory : this.mutualExclusion) {
                 inventory.setState(0, false);
@@ -361,12 +395,17 @@ public class WithButtonPlayerInventory implements Container {
     }
 
     public static class HotbarButtonInventory extends ButtonInventory {
-        public HotbarButtonInventory(IntFunction<Map.Entry<ItemStack, ItemStack>> function, IntObjectBiConsumer<EntityPlayerActionPack> consumer) {
-            super(9, function, consumer);
+        public HotbarButtonInventory(ServerPlayer player, IntFunction<Map.Entry<ItemStack, ItemStack>> function, IntObjectBiConsumer<EntityPlayerActionPack> consumer, IntConsumer rightClickEvent) {
+            super(9, player, function, consumer, rightClickEvent);
         }
 
         @Override
-        public void onClickd(int index, EntityPlayerActionPack actionPack) {
+        protected boolean rightClicked(ClickType clickType, int index) {
+            return HOTBAR_RIGHT_CLICK_ACTION.size() > index && super.rightClicked(clickType, index);
+        }
+
+        @Override
+        public void onClicked(int index, EntityPlayerActionPack actionPack) {
             this.setState(index, true);
             this.consumer.getValue().accept(index, actionPack);
         }

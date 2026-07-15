@@ -4,7 +4,6 @@ import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.exception.ForceReturnException;
 import boat.carpetorgaddition.exception.TaskExecutionException;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
@@ -19,12 +18,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 
 import java.util.*;
 import java.util.function.Supplier;
 
-public class BlockSearchTask extends ServerTask {
+public class BlockSearchTask extends ServerSearchTask {
     protected final ServerLevel world;
     private final BlockPosTraverser traverser;
     protected final BlockPos sourcePos;
@@ -46,43 +46,44 @@ public class BlockSearchTask extends ServerTask {
      * 已遍历过的方块数量
      */
     private int progress = 0;
+    /**
+     * 当前任务是否需要停止
+     */
+    private boolean cancelled = false;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("block");
 
-    public BlockSearchTask(ServerLevel world, BlockPos sourcePos, BlockPosTraverser traverser, CommandSourceStack source, BlockStatePredicate predicate) {
-        super(source);
+    public BlockSearchTask(ServerLevel world, BlockPos sourcePos, BlockPosTraverser traverser, CommandSourceStack source, BlockStatePredicate predicate, ServerPlayer player) {
+        super(source, player);
         this.world = world;
         this.sourcePos = sourcePos;
         this.traverser = traverser.clamp(world);
         this.progressBar = new ProgressBar(this.traverser.size());
         this.predicate = predicate;
         this.findState = FindState.SEARCH;
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(source.getServer()).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(source.getServer()).getPageManager();
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 
     @Override
     public void tick() {
-        this.checkTimeout();
+        if (this.isTimeout()) {
+            this.noticeCancelled();
+        }
+        this.checkCancelled();
         while (this.isTimeRemaining()) {
-            try {
-                switch (this.findState) {
-                    case SEARCH -> {
-                        this.searchBlock();
-                        MessageUtils.sendMessageToHudIfPlayer(this.source, () -> KEY
-                                .then("progress")
-                                .translate(this.predicate.getDisplayName(), this.progressBar.getDisplay())
-                        );
-                    }
-                    case SORT -> this.sort();
-                    case FEEDBACK -> this.sendFeedback();
-                    default -> {
-                        return;
-                    }
+            switch (this.findState) {
+                case SEARCH -> {
+                    this.searchBlock();
+                    MessageUtils.sendMessageToHudIfPlayer(this.source, () -> KEY
+                            .then("progress")
+                            .translate(this.predicate.getDisplayName(), this.progressBar.getDisplay())
+                    );
                 }
-            } catch (TaskExecutionException e) {
-                e.disposal();
-                this.findState = FindState.END;
-                return;
+                case SORT -> this.sort();
+                case FEEDBACK -> this.sendFeedback();
+                default -> {
+                    return;
+                }
             }
         }
     }
@@ -93,6 +94,7 @@ public class BlockSearchTask extends ServerTask {
             this.iterator = this.traverser.iterator();
         }
         while (this.iterator.hasNext()) {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
@@ -115,6 +117,7 @@ public class BlockSearchTask extends ServerTask {
     private void iterate(BlockPos begin) {
         HashMap<Block, Set<BlockPos>> group = new HashMap<>();
         BlockPos.breadthFirstTraversal(begin, Integer.MAX_VALUE, Integer.MAX_VALUE, MathUtils::allDirection, blockPos -> {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 throw ForceReturnException.INSTANCE;
             }
@@ -184,16 +187,13 @@ public class BlockSearchTask extends ServerTask {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this.getClass() == obj.getClass()) {
-            return Objects.equals(this.source.getPlayer(), ((BlockSearchTask) obj).source.getPlayer());
-        }
-        return false;
+    public void cancel() {
+        this.cancelled = true;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(this.source.getPlayer());
+    public boolean isCancelled() {
+        return this.cancelled;
     }
 
     @Override

@@ -117,7 +117,7 @@ public class EntityPlayerMPFakeMixin {
 
     @Inject(method = "kill(Lnet/minecraft/network/chat/Component;)V", at = @At("HEAD"))
     private void kill(Component reason, CallbackInfo ci) {
-        FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.getCoordinator(this.self);
+        FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.of(this.self);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.getAction().onFakePlayerLogout();
         actionManager.stop();

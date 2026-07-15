@@ -60,7 +60,7 @@ public class WorldFormat {
             return;
         }
         // 如果这个文件夹不存在并且没有创建成功，将信息写入日志
-        CarpetOrgAddition.LOGGER.error("{}文件夹创建失败", this.directory);
+        CarpetOrgAddition.LOGGER.error("Failed to create directory {}", this.directory);
     }
 
     private WorldFormat(WorldFormat worldFormat, String child) {
@@ -116,16 +116,6 @@ public class WorldFormat {
         }
         // 一些操作系统下文件排序可能不是按字母排序
         return Stream.of(files).sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
-    }
-
-    @Unmodifiable
-    public List<File> listFiles(Predicate<File> filter) {
-        File[] files = this.directory.listFiles();
-        if (files == null) {
-            return List.of();
-        }
-        // 一些操作系统下文件排序可能不是按字母排序
-        return Stream.of(files).filter(filter).sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
     }
 
     /**

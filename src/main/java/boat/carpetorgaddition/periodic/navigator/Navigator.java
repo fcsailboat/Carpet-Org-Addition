@@ -29,7 +29,7 @@ public abstract class Navigator {
     public Navigator(ServerPlayer player) {
         this.player = player;
         this.server = ServerUtils.getServer(player);
-        this.manager = PlayerComponentCoordinator.getCoordinator(this.player).getNavigatorManager();
+        this.manager = PlayerComponentCoordinator.of(this.player).getNavigatorManager();
     }
 
     /**

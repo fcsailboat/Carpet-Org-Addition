@@ -6,7 +6,7 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.inventory.OfflinePlayerInventory;
+import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryAccessor;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -30,7 +30,6 @@ import net.minecraft.world.item.component.ResolvableProfile;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerCommandExtension {
@@ -150,20 +149,20 @@ public class PlayerCommandExtension {
 
         public WithCheckPlayerInventoryAccessor(MinecraftServer server, String name, ServerPlayer visitor) throws CommandSyntaxException {
             checkCanBeOpened(server.getPlayerList().getPlayer(name));
-            Optional<GameProfile> optional = OfflinePlayerInventory.getGameProfile(name, server);
-            if (optional.isEmpty()) {
-                throw PlayerCommandExtension.createNoFileFoundException();
-            }
-            super(server, optional.get(), visitor);
+            GameProfile gameProfile = GameProfileCache.getInstance()
+                    .resolveGameProfile(server, name)
+                    .filter(profile -> ServerUtils.isPlayerDataExists(server, profile.id()))
+                    .orElseThrow(PlayerCommandExtension::createNoFileFoundException);
+            super(server, gameProfile, visitor);
         }
 
         public WithCheckPlayerInventoryAccessor(MinecraftServer server, UUID uuid, ServerPlayer visitor) throws CommandSyntaxException {
             checkCanBeOpened(server.getPlayerList().getPlayer(uuid));
-            Optional<GameProfile> optional = OfflinePlayerInventory.getPlayerConfigEntry(uuid, server).map(entry -> new GameProfile(entry.id(), entry.name()));
-            if (optional.isEmpty()) {
-                throw PlayerCommandExtension.createNoFileFoundException();
-            }
-            super(server, optional.get(), visitor);
+            GameProfile gameProfile = GameProfileCache.getInstance()
+                    .getGameProfileOrUnknown(uuid)
+                    .filter(profile -> ServerUtils.isPlayerDataExists(server, profile.id()))
+                    .orElseThrow(PlayerCommandExtension::createNoFileFoundException);
+            super(server, gameProfile, visitor);
         }
 
         private static void checkCanBeOpened(@Nullable ServerPlayer player) throws CommandSyntaxException {

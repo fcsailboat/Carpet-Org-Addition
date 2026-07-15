@@ -454,6 +454,10 @@ public class MathUtils {
         return rgba(red(rgb << 8), green(rgb << 8), blue(rgb << 8), alpha);
     }
 
+    public static int rgbaToArgb(int rgba) {
+        return Integer.rotateRight(rgba, 8);
+    }
+
     public static int red(int rgba) {
         return rgba >> 24 & 0xFF;
     }

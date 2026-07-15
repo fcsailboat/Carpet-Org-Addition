@@ -22,6 +22,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -111,7 +113,7 @@ public class BedrockAction extends AbstractPlayerAction {
     /**
      * 定时回收材料的时间间隔（3分钟）
      */
-    private static final int MATERIAL_RECYCLING_TIME = 3600;
+    private static final int MATERIAL_RECYCLING_TIME = 2400;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("bedrock");
 
     private BedrockAction(EntityPlayerMPFake fakePlayer, BlockPosTraverser traverser, BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) {
@@ -156,6 +158,14 @@ public class BedrockAction extends AbstractPlayerAction {
             if (this.recycleTimer < -1) {
                 throw new IllegalStateException("The remaining time for material recycling should not be %s".formatted(this.recycleTimer));
             }
+            if (this.getPhase() != PlayerWorkPhase.EAT) {
+                if (this.deflectGhastFireball()) {
+                    return;
+                }
+                if (this.fireExtinguishing()) {
+                    return;
+                }
+            }
             switch (this.getPhase()) {
                 case WORK -> work();
                 case EAT -> eat();
@@ -164,6 +174,40 @@ public class BedrockAction extends AbstractPlayerAction {
         } else {
             this.work();
         }
+    }
+
+    /**
+     * 弹开恶魂火球
+     */
+    private boolean deflectGhastFireball() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        List<LargeFireball> fireballs = PlayerUtils.listWithinEntityInteractionRange(fakePlayer)
+                .stream()
+                .filter(entity -> entity instanceof LargeFireball)
+                .map(entity -> (LargeFireball) entity)
+                .filter(fireball -> fireball.getOwner() != fakePlayer)
+                .toList();
+        for (LargeFireball fireball : fireballs) {
+            ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(fireball));
+            PlayerUtils.attack(fakePlayer);
+        }
+        return !fireballs.isEmpty();
+    }
+
+    /**
+     * 灭火
+     */
+    private boolean fireExtinguishing() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(fakePlayer), 1);
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
+        for (BlockPos blockPos : traverser) {
+            BlockState blockState = world.getBlockState(blockPos);
+            if (blockState.is(Blocks.FIRE)) {
+                return !this.excavator.mining(blockPos);
+            }
+        }
+        return false;
     }
 
     private void work() {
@@ -230,7 +274,7 @@ public class BedrockAction extends AbstractPlayerAction {
         if (optional.isPresent() && this.canInteract(optional.get())) {
             // 基岩在交互距离内，但因位置特殊而无法破除的基岩
             // 重新选择目标位置，并将当前目标位置标记为无效位置
-            this.selectRandomBedrock(world);
+            this.selectBedrock(world);
             this.invalidBedrock.set(optional.get(), 200);
             return;
         }
@@ -241,6 +285,20 @@ public class BedrockAction extends AbstractPlayerAction {
             }
             this.bedrockTarget = blockPos;
             return;
+        }
+        this.selectBedrock(world);
+    }
+
+    private void selectBedrock(Level world) {
+        BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(this.getFakePlayer()), 20);
+        for (BlockPos blockPos : traverser) {
+            if (world.getBlockState(blockPos).is(Blocks.BEDROCK) && this.traverser.contains(blockPos)) {
+                if (this.invalidBedrock.getCount(blockPos) > 0) {
+                    continue;
+                }
+                this.bedrockTarget = blockPos;
+                return;
+            }
         }
         this.selectRandomBedrock(world);
     }
@@ -586,7 +644,7 @@ public class BedrockAction extends AbstractPlayerAction {
         BlockState blockState = world.getBlockState(up);
         if (blockState.is(Blocks.PISTON) && blockState.getValue(PistonBaseBlock.EXTENDED)) {
             // 先切换工具，再计算剩余挖掘时间
-            switchTool(blockState, world, up, this.getFakePlayer());
+            this.inventory.switchToAppropriateTool(world, up);
             // 计算剩余挖掘时间
             int currentTime = this.excavator.computingRemainingMiningTime(up);
             if (currentTime == 1) {
@@ -772,36 +830,10 @@ public class BedrockAction extends AbstractPlayerAction {
         this.hasAction = true;
         EntityPlayerMPFake player = this.excavator.getPlayer();
         Level world = ServerUtils.getWorld(player);
-        BlockState blockState = world.getBlockState(blockPos);
         if (switchTool) {
-            switchTool(blockState, world, blockPos, player);
+            this.inventory.switchToAppropriateTool(world, blockPos);
         }
         return this.excavator.mining(blockPos, Direction.DOWN, false);
-    }
-
-    /**
-     * @deprecated 改用{@link PlayerStorageInventory#switchToAppropriateTool(Level, BlockPos)}
-     */
-    @Deprecated
-    private void switchTool(BlockState blockState, Level world, BlockPos blockPos, EntityPlayerMPFake player) {
-        boolean replenishSuccess = this.inventory.replenish(itemStack -> {
-            if (this.getFakePlayer().isCreative()) {
-                return itemStack.getItem().canDestroyBlock(player.getMainHandItem(), blockState, world, blockPos, player);
-            }
-            if (itemStack.isEmpty()) {
-                return false;
-            }
-            // 不使用低耐久工具
-            if (isDamaged(itemStack)) {
-                return false;
-            }
-            return itemStack.getDestroySpeed(blockState) > 1F;
-        });
-        if (replenishSuccess) {
-            return;
-        }
-        // 工具没有切换成功，使用其他物品替换手上工具以避免工具损坏
-        this.inventory.replenish(itemStack -> !isDamaged(itemStack));
     }
 
     /**
@@ -1164,7 +1196,7 @@ public class BedrockAction extends AbstractPlayerAction {
     protected void onAssignPlayer() {
         this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this::getMovingTarget);
         this.inventory = PlayerStorageInventory.of(this.getFakePlayer());
-        this.excavator = PlayerComponentCoordinator.getCoordinator(this.getFakePlayer()).getBlockExcavator();
+        this.excavator = PlayerComponentCoordinator.of(this.getFakePlayer()).getBlockExcavator();
     }
 
     @Override

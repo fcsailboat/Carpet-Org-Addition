@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -23,11 +22,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class LibrarianVillagerPoiCache {
-    private final MinecraftServer server;
     private final Map<ResourceKey<Level>, Map<BlockPos, Villager>> caches = new HashMap<>();
 
-    public LibrarianVillagerPoiCache(MinecraftServer server) {
-        this.server = server;
+    public LibrarianVillagerPoiCache() {
     }
 
     /**

@@ -19,7 +19,7 @@ import org.jspecify.annotations.NullMarked;
 public class ServerComponentCoordinator {
     static {
         // 注册服务器保存事件
-        ServerLifecycleEvents.AFTER_SAVE.register((server, _, _) -> getCoordinator(server).onServerSave());
+        ServerLifecycleEvents.AFTER_SAVE.register((server, _, _) -> ServerComponentCoordinator.of(server).onServerSave());
     }
 
     private final MinecraftServer server;
@@ -44,7 +44,7 @@ public class ServerComponentCoordinator {
     private final LibrarianVillagerPoiCache librarianVillagerPoiCache;
     public static final ScopedValue<MinecraftServer> SERVER_INSTANCE = ScopedValue.newInstance();
 
-    public ServerComponentCoordinator(MinecraftServer server) {
+    private ServerComponentCoordinator(MinecraftServer server) {
         this.server = server;
         this.parcelManager = new ParcelManager(server);
         this.pageManager = new PageManager(server);
@@ -54,7 +54,17 @@ public class ServerComponentCoordinator {
         this.ruleConfig = new RuleConfig(server);
         this.dialogProvider = new DialogProvider(server);
         this.fakePlayerResidents = new FakePlayerResidents(server);
-        librarianVillagerPoiCache = new LibrarianVillagerPoiCache(server);
+        this.librarianVillagerPoiCache = new LibrarianVillagerPoiCache();
+    }
+
+    public static ServerComponentCoordinator of(MinecraftServer server) {
+        PeriodicTaskManagerInterface anInterface = (PeriodicTaskManagerInterface) server;
+        ServerComponentCoordinator coordinator = anInterface.carpet_Org_Addition$getServerComponentCoordinator();
+        if (coordinator == null) {
+            coordinator = new ServerComponentCoordinator(server);
+            anInterface.carpet_Org_Addition$setServerComponentCoordinator(coordinator);
+        }
+        return coordinator;
     }
 
     /**
@@ -119,9 +129,5 @@ public class ServerComponentCoordinator {
         this.customRuleValueManager.onServerSave();
         this.playerSerializationManager.onServerSave();
         this.fakePlayerResidents.onServerSave();
-    }
-
-    public static ServerComponentCoordinator getCoordinator(MinecraftServer server) {
-        return ((PeriodicTaskManagerInterface) server).carpet_Org_Addition$getServerPeriodicTaskManager();
     }
 }

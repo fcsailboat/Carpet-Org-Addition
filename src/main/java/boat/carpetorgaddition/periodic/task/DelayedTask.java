@@ -29,4 +29,9 @@ public class DelayedTask extends ServerTask {
     protected boolean stopped() {
         return this.complete;
     }
+
+    @Override
+    public Object getIdentityKey() {
+        return this;
+    }
 }

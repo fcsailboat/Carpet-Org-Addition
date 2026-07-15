@@ -36,7 +36,7 @@ public class CustomClickEvents {
         NbtReader reader = context.getReader();
         Identifier id = reader.getIdentifierOrThrow("id");
         MinecraftServer server = context.getServer();
-        DialogProvider provider = ServerComponentCoordinator.getCoordinator(server).getDialogProvider();
+        DialogProvider provider = ServerComponentCoordinator.of(server).getDialogProvider();
         Dialog dialog = provider.getDialog(id);
         PlayerUtils.openDialog(context.getPlayer(), dialog);
     });
@@ -90,7 +90,7 @@ public class CustomClickEvents {
         NbtReader reader = context.getReader();
         int id = reader.getIntOrThrow(CustomClickKeys.ID);
         int page = reader.getIntOrThrow(CustomClickKeys.PAGE_NUMBER);
-        PageManager manager = ServerComponentCoordinator.getCoordinator(context.getServer()).getPageManager();
+        PageManager manager = ServerComponentCoordinator.of(context.getServer()).getPageManager();
         Optional<PagedCollection> optional = manager.get(id);
         if (optional.isPresent()) {
             PagedCollection collection = optional.get();

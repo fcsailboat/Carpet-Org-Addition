@@ -7,6 +7,7 @@ import org.jspecify.annotations.NonNull;
 /**
  * 用来给一些功能添加注释
  */
+@Deprecated
 public class MetaComment {
     @NonNull
     private String comment = "";

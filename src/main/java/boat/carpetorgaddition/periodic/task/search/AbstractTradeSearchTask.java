@@ -1,9 +1,7 @@
 package boat.carpetorgaddition.periodic.task.search;
 
 import boat.carpetorgaddition.command.FinderCommand;
-import boat.carpetorgaddition.exception.TaskExecutionException;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -14,13 +12,17 @@ import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.level.Level;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-public abstract class AbstractTradeSearchTask extends ServerTask {
+public abstract class AbstractTradeSearchTask extends ServerSearchTask {
     protected final Level world;
     protected final BlockPosTraverser blockPosTraverser;
     protected final BlockPos sourcePos;
@@ -36,35 +38,33 @@ public abstract class AbstractTradeSearchTask extends ServerTask {
      * 交易选择的总数量
      */
     protected int tradeCount;
+    private boolean cancelled = false;
     public static final LocalizationKey TRADE = FinderCommand.KEY.then("trade");
 
-    public AbstractTradeSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source) {
-        super(source);
+    public AbstractTradeSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source, ServerPlayer player) {
+        super(source, player);
         this.world = world;
         this.blockPosTraverser = blockPosTraverser;
         this.sourcePos = sourcePos;
         this.findState = FindState.SEARCH;
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(ServerUtils.getServer(source)).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(ServerUtils.getServer(source)).getPageManager();
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 
     @Override
     public void tick() {
-        this.checkTimeout();
+        if (this.isTimeout()) {
+            this.noticeCancelled();
+        }
+        this.checkCancelled();
         while (this.isTimeRemaining()) {
-            try {
-                switch (this.findState) {
-                    case SEARCH -> searchVillager();
-                    case SORT -> sort();
-                    case FEEDBACK -> feedback();
-                    default -> {
-                        return;
-                    }
+            switch (this.findState) {
+                case SEARCH -> searchVillager();
+                case SORT -> sort();
+                case FEEDBACK -> feedback();
+                default -> {
+                    return;
                 }
-            } catch (TaskExecutionException e) {
-                e.disposal();
-                this.findState = FindState.END;
-                return;
             }
         }
     }
@@ -75,6 +75,7 @@ public abstract class AbstractTradeSearchTask extends ServerTask {
             this.iterator = this.world.getEntitiesOfClass(AbstractVillager.class, this.blockPosTraverser.toBox()).iterator();
         }
         while (this.iterator.hasNext()) {
+            this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
@@ -98,11 +99,13 @@ public abstract class AbstractTradeSearchTask extends ServerTask {
 
     // 对结果进行排序
     private void sort() {
+        this.checkCancelled();
         this.results.sort((o1, o2) -> o1.compare(o1, o2));
         this.findState = FindState.FEEDBACK;
     }
 
     private void feedback() {
+        this.checkCancelled();
         ArrayList<Object> list = new ArrayList<>();
         // 村民数量
         list.add(this.villagerCount);
@@ -145,6 +148,16 @@ public abstract class AbstractTradeSearchTask extends ServerTask {
         return FinderCommand.TIME_SLICE;
     }
 
+    @Override
+    public void cancel() {
+        this.cancelled = true;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return this.cancelled;
+    }
+
     public interface Result extends Comparator<Result>, Supplier<Component> {
         BlockPos villagerPos();
     }
@@ -166,19 +179,6 @@ public abstract class AbstractTradeSearchTask extends ServerTask {
         }
         indexArray = stringJoiner.toString();
         return indexArray;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof AbstractTradeSearchTask that) {
-            return Objects.equals(source, that.source);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.source.getPlayer());
     }
 
     public enum FindState {

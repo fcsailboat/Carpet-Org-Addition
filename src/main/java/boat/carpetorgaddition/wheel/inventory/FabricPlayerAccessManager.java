@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.wheel.inventory;
 
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
+import boat.carpetorgaddition.periodic.task.search.AbstractOfflinePlayerSearchTask;
+import boat.carpetorgaddition.util.ServerUtils;
 import com.google.common.collect.Queues;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
@@ -10,12 +11,14 @@ import net.minecraft.server.players.NameAndId;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class FabricPlayerAccessManager {
@@ -56,21 +59,24 @@ public class FabricPlayerAccessManager {
         return this.accessors.computeIfAbsent(entry, profile -> new FabricPlayerAccessor(this.server, profile, this));
     }
 
-    public FabricPlayerAccessor getOrCreateBlocking(NameAndId gameProfile) {
-        boolean upgrading = OfflinePlayerSearchTask.UPGRADING.orElse(false);
+    public FabricPlayerAccessor getOrCreateBlocking(NameAndId gameProfile, BooleanSupplier interrupt) {
+        boolean upgrading = AbstractOfflinePlayerSearchTask.UPGRADING.orElse(false);
         return this.accessors.computeIfAbsent(gameProfile, _ -> {
             // 在多个线程调用构造方法存在并发问题
             Supplier<FabricPlayerAccessor> supplier = () ->
-                    ScopedValue.where(OfflinePlayerSearchTask.UPGRADING, upgrading).call(
+                    ScopedValue.where(AbstractOfflinePlayerSearchTask.UPGRADING, upgrading).call(
                             () -> new FabricPlayerAccessor(this.server, gameProfile, this)
                     );
-            FabricPlayerAccessorEntry entry = new FabricPlayerAccessorEntry(supplier);
+            FabricPlayerAccessorEntry entry = new FabricPlayerAccessorEntry(supplier, interrupt);
             this.queue.add(entry);
             Lock lock = entry.getLock();
             Condition condition = entry.getCondition();
             try {
                 lock.lock();
                 while (true) {
+                    if (interrupt.getAsBoolean()) {
+                        throw new CancellationException();
+                    }
                     RuntimeException exception = entry.getException();
                     if (exception != null) {
                         throw new IllegalStateException(exception);
@@ -81,7 +87,7 @@ public class FabricPlayerAccessManager {
                     }
                     //noinspection ResultOfMethodCallIgnored
                     condition.await(AWAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-                    if (this.server.isRunning()) {
+                    if (ServerUtils.isRunning(this.server)) {
                         FabricPlayerAccessor second = entry.getAccessor();
                         if (second != null) {
                             return second;
@@ -112,7 +118,7 @@ public class FabricPlayerAccessManager {
                 return;
             }
             FabricPlayerAccessorEntry entry = this.queue.poll();
-            if (entry == null) {
+            if (entry == null || entry.isInterrupt()) {
                 return;
             }
             Lock lock = entry.getLock();
@@ -163,13 +169,15 @@ public class FabricPlayerAccessManager {
 
     public static class FabricPlayerAccessorEntry {
         private final Supplier<FabricPlayerAccessor> supplier;
+        private final BooleanSupplier interrupt;
         private final AtomicReference<FabricPlayerAccessor> accessor;
         private final AtomicReference<RuntimeException> exception;
         private final Lock lock = new ReentrantLock();
         private final Condition condition = this.lock.newCondition();
 
-        private FabricPlayerAccessorEntry(Supplier<FabricPlayerAccessor> supplier) {
+        private FabricPlayerAccessorEntry(Supplier<FabricPlayerAccessor> supplier, BooleanSupplier interrupt) {
             this.supplier = supplier;
+            this.interrupt = interrupt;
             this.accessor = new AtomicReference<>();
             this.exception = new AtomicReference<>();
         }
@@ -196,6 +204,10 @@ public class FabricPlayerAccessManager {
 
         private Condition getCondition() {
             return this.condition;
+        }
+
+        public boolean isInterrupt() {
+            return this.interrupt.getAsBoolean();
         }
     }
 }
