@@ -308,7 +308,7 @@ public class BedrockAction extends AbstractPlayerAction {
      */
     private void selectRandomBedrock(Level world) {
         if (this.pathfinder.isInvalid()) {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < Math.min(this.traverser.size(), 100L); i++) {
                 BlockPos blockPos = this.traverser.randomBlockPos();
                 if (world.getBlockState(blockPos).is(Blocks.BEDROCK)) {
                     this.bedrockTarget = blockPos;
