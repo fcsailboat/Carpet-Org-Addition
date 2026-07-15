@@ -558,7 +558,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         BlockPos blockPos = BlockPosArgument.getBlockPos(context, "jobSite");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
-        long startTime = ServerUtils.getTime(server);
+        long startTime = ServerUtils.getCurrentGameTick(server);
         LibrarianTradeFindAction action = new LibrarianTradeFindAction(fakePlayer, blockPos, holder, level, price, startTime);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();

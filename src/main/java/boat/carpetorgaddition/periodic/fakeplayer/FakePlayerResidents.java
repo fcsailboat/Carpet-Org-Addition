@@ -143,7 +143,7 @@ public class FakePlayerResidents {
         }
         serializers.forEach(serializer -> players.add(serializer.getName(), serializer.toJson()));
         json.add("players", players);
-        String time = ServerUtils.currentTimeFormat();
+        String time = ServerUtils.getCurrentSystemTimeFormat();
         String fileName = getFileName(time);
         if (this.file == null) {
             this.file = this.worldFormat.file(fileName);

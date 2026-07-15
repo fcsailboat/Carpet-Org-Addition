@@ -510,10 +510,6 @@ public class ServerUtils {
         }
     }
 
-    public static String currentTimeFormat() {
-        return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
-    }
-
     public static Identifier ofIdentifier(String id) {
         return Identifier.fromNamespaceAndPath(CarpetOrgAdditionConstants.MOD_ID, id);
     }
@@ -522,10 +518,14 @@ public class ServerUtils {
         server.getPlayerList().getPlayers().forEach(consumer);
     }
 
+    public static String getCurrentSystemTimeFormat() {
+        return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
+    }
+
     /**
      * @return 获取当前游戏刻
      */
-    public static long getTime(MinecraftServer server) {
+    public static long getCurrentGameTick(MinecraftServer server) {
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         return level == null ? -1L : level.getGameTime();
     }
