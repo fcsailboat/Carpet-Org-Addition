@@ -58,8 +58,8 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
     /**
      * @return 选区内方块的总数
      */
-    public int size() {
-        return this.length() * this.width() * this.height();
+    public long size() {
+        return (long) this.length() * this.width() * this.height();
     }
 
     /**

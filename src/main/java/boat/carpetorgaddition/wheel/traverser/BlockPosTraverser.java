@@ -57,17 +57,16 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
             /**
              * 当前迭代次数
              */
-            private int iterations = 0;
+            private long iterations = 0;
             /**
              * 最大迭代次数
              */
-            private final int maxIterations = BlockPosTraverser.this.size();
+            private final long maxIterations = BlockPosTraverser.this.size();
             private final int startX = minX;
             private final int startY = minY;
             private final int startZ = minZ;
             private final int finalX = maxX;
             private final int finalY = maxY;
-            private final int finalZ = maxZ;
             // 迭代器当前遍历到的位置
             private int currentX = startX;
             private int currentY = startY;
@@ -85,6 +84,7 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
                     // 超出选区抛出异常
                     throw new NoSuchElementException();
                 }
+                BlockPos blockPos = new BlockPos(this.currentX, this.currentY, this.currentZ);
                 this.iterations++;
                 this.currentX++;
                 // X轴遍历到了最后，X重置，Y递增，Z轴不变
@@ -94,13 +94,9 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
                     if (this.currentY > this.finalY) {
                         this.currentY = this.startY;
                         this.currentZ++;
-                        if (this.currentZ > this.finalZ) {
-                            // Z轴也遍历到了最后，直接将最大坐标返回
-                            return getMaxBlockPos();
-                        }
                     }
                 }
-                return new BlockPos(this.currentX, this.currentY, this.currentZ);
+                return blockPos;
             }
         };
     }

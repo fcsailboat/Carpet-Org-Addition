@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.wheel.traverser;
 
 import boat.carpetorgaddition.util.MathUtils;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2LongArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import net.minecraft.core.BlockPos;
 import org.jspecify.annotations.NonNull;
 
@@ -12,8 +12,8 @@ import java.util.Objects;
 public class CylinderBlockPosTraverser extends BlockPosTraverser {
     private final BlockPos center;
     private final int radius;
-    private int size = -1;
-    private static final Int2ObjectMap<Integer> SIZE_CACHE = new Int2ObjectArrayMap<>();
+    private long size = -1;
+    private static final Int2LongMap SIZE_CACHE = new Int2LongArrayMap();
 
     public CylinderBlockPosTraverser(BlockPos center, int radius, int height) {
         super(
@@ -34,25 +34,24 @@ public class CylinderBlockPosTraverser extends BlockPosTraverser {
     }
 
     @Override
-    public int size() {
-        if (this.size == -1) {
-            if (super.size() == 0) {
-                this.size = 0;
+    public long size() {
+        if (this.size == -1L) {
+            if (super.size() == 0L) {
+                this.size = 0L;
             } else {
-                Integer cache = SIZE_CACHE.get(this.radius);
-                if (cache == null) {
+                if (SIZE_CACHE.containsKey(this.radius)) {
+                    this.size = SIZE_CACHE.get(this.radius) * this.height();
+                } else {
                     // 最大最小高度相同，即高度为1的区域
                     BlockPosTraverser traverser = new BlockPosTraverser(this.minX, this.minY, this.minZ, this.maxX, this.minY, this.maxZ);
-                    int size = 0;
+                    long size = 0L;
                     for (BlockPos blockPos : traverser) {
                         if (this.contains(blockPos)) {
                             size++;
                         }
                     }
-                    SIZE_CACHE.put(this.radius, Integer.valueOf(size));
+                    SIZE_CACHE.put(this.radius, size);
                     this.size = size * this.height();
-                } else {
-                    this.size = cache * this.height();
                 }
             }
         }
