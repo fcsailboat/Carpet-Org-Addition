@@ -17,7 +17,6 @@ public interface ValueValidator<T> {
      *
      * @param newValue 规则的新值
      * @return 如果值有效，返回true，否则返回false
-     * @apiNote 与此方法重载方法一样不得抛出异常
      */
     boolean validate(T newValue);
 
