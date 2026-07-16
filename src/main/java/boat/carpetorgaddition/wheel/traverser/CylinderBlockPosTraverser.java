@@ -1,12 +1,14 @@
 package boat.carpetorgaddition.wheel.traverser;
 
 import boat.carpetorgaddition.util.MathUtils;
+import boat.carpetorgaddition.wheel.HorizontalBlockPos;
 import it.unimi.dsi.fastutil.ints.Int2LongArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import net.minecraft.core.BlockPos;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class CylinderBlockPosTraverser extends BlockPosTraverser {
@@ -30,7 +32,7 @@ public class CylinderBlockPosTraverser extends BlockPosTraverser {
 
     @Override
     public boolean contains(BlockPos blockPos) {
-        return super.contains(blockPos) && MathUtils.getCalculateBlockIntegerDistance(this.center, blockPos) <= this.radius;
+        return super.contains(blockPos) && MathUtils.calculateBlockIntegerDistance(this.center, blockPos) <= this.radius;
     }
 
     @Override
@@ -56,6 +58,44 @@ public class CylinderBlockPosTraverser extends BlockPosTraverser {
             }
         }
         return this.size;
+    }
+
+    @Override
+    public Iterable<HorizontalBlockPos> horizontalBlockPositions() {
+        return new Iterable<>() {
+            @Override
+            public @NonNull Iterator<HorizontalBlockPos> iterator() {
+                return new Iterator<>() {
+                    private final Iterator<HorizontalBlockPos> iterator = CylinderBlockPosTraverser.super.horizontalBlockPositions().iterator();
+                    private HorizontalBlockPos next = null;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (this.next == null) {
+                            while (this.iterator.hasNext()) {
+                                HorizontalBlockPos next = this.iterator.next();
+                                if (contains(next.toBlockPos(minY))) {
+                                    this.next = next;
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public HorizontalBlockPos next() {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        HorizontalBlockPos next = this.next;
+                        this.next = null;
+                        return next;
+                    }
+                };
+            }
+        };
     }
 
     @Override

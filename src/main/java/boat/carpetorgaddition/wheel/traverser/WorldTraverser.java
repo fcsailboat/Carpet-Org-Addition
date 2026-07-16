@@ -3,6 +3,7 @@ package boat.carpetorgaddition.wheel.traverser;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
@@ -98,6 +99,17 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
         int y = blockPos.getY();
         int z = blockPos.getZ();
         return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY && z >= this.minZ && z <= this.maxZ;
+    }
+
+    /**
+     * @return 选区是否包含区块或与区块重叠
+     */
+    public boolean intersects(ChunkPos chunkPos) {
+        int chunkMinX = chunkPos.getBlockX(0);
+        int chunkMinZ = chunkPos.getBlockZ(0);
+        int chunkMaxX = chunkPos.getBlockX(15);
+        int chunkMaxZ = chunkPos.getBlockZ(15);
+        return chunkMinX <= this.maxX && chunkMaxX >= this.minX && chunkMinZ <= this.maxZ && chunkMaxZ >= this.minZ;
     }
 
     /**

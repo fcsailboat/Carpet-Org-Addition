@@ -1,7 +1,10 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
+import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccessor;
 import boat.carpetorgaddition.util.MathUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -211,6 +214,13 @@ public class AStarPathfinder implements FakePlayerPathfinder {
 
     private EntityPlayerMPFake getFakePlayer() {
         return this.supplier.get();
+    }
+
+    @Override
+    public boolean isMoving() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        EntityPlayerActionPack actionPack = PlayerUtils.getActionPack(fakePlayer);
+        return ((EntityPlayerActionPackAccessor) actionPack).getForward() != 0F;
     }
 
     public enum Relationship {

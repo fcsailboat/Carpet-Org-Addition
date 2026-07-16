@@ -2,6 +2,7 @@ package boat.carpetorgaddition.periodic.fakeplayer;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.logger.Loggers;
+import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccessor;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
@@ -325,6 +326,13 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
 
     private EntityPlayerMPFake getFakePlayer() {
         return this.fakePlayerSupplier.get();
+    }
+
+    @Override
+    public boolean isMoving() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        EntityPlayerActionPack actionPack = PlayerUtils.getActionPack(fakePlayer);
+        return ((EntityPlayerActionPackAccessor) actionPack).getForward() != 0F;
     }
 
     /**

@@ -28,6 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -328,6 +329,10 @@ public class ServerUtils {
 
     public static BlockPos getBlockPos(Entity entity) {
         return entity.blockPosition();
+    }
+
+    public static ChunkPos getChunkPos(Entity entity) {
+        return entity.chunkPosition();
     }
 
     public static Component getName(Item item) {

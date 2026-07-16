@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.wheel.traverser;
 
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.HorizontalBlockPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -45,6 +46,45 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
         int minY = Math.max(this.minY, ServerUtils.getMinArchitectureAltitude(world));
         int maxY = Math.min(this.maxY, ServerUtils.getMaxArchitectureAltitude(world));
         return new BlockPosTraverser(this.minX, minY, this.minZ, this.maxX, maxY, this.maxZ);
+    }
+
+    public int getMinY() {
+        return this.minY;
+    }
+
+    public int getMaxY() {
+        return this.maxY;
+    }
+
+    public Iterable<HorizontalBlockPos> horizontalBlockPositions() {
+        return new Iterable<>() {
+            @Override
+            public @NonNull Iterator<HorizontalBlockPos> iterator() {
+                return new Iterator<>() {
+                    private int currentX = minX;
+                    private int currentZ = minZ;
+
+                    @Override
+                    public boolean hasNext() {
+                        return this.currentX <= maxX && this.currentZ <= maxZ;
+                    }
+
+                    @Override
+                    public HorizontalBlockPos next() {
+                        if (!this.hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        HorizontalBlockPos horizontalBlockPos = new HorizontalBlockPos(this.currentX, this.currentZ);
+                        this.currentX++;
+                        if (this.currentX > maxX) {
+                            this.currentX = minX;
+                            this.currentZ++;
+                        }
+                        return horizontalBlockPos;
+                    }
+                };
+            }
+        };
     }
 
     /**

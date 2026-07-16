@@ -7,6 +7,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerPathfinder;
 import boat.carpetorgaddition.util.*;
+import boat.carpetorgaddition.wheel.HorizontalBlockPos;
 import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
@@ -17,6 +18,8 @@ import boat.carpetorgaddition.wheel.traverser.CylinderBlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.EntityTraverser;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -36,6 +39,7 @@ import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
@@ -56,9 +60,23 @@ import java.util.function.Predicate;
 
 public class BedrockAction extends AbstractPlayerAction {
     private final LinkedHashSet<BedrockBreakingContext> contexts = new LinkedHashSet<>();
+    private Iterator<HorizontalBlockPos> horizontalBlockPosIterator;
     private final HashSet<BlockPos> lavas = new HashSet<>();
     private final BlockPosTraverser traverser;
     private final BedrockRegionType regionType;
+    /**
+     * 选区的最高Y
+     */
+    private final int maxY;
+    /**
+     * 选区的最低Y
+     */
+    private final int minY;
+    /**
+     * 选区内所有区块，以及每个区块中所有的基岩坐标<br>
+     * 为节省内存，基岩坐标不存储高度
+     */
+    private final HashMap<ChunkPos, LongSet> bedrockPosCache = new HashMap<>();
     private PlayerStorageInventory inventory;
     private BlockExcavator excavator;
     @NonNull
@@ -93,7 +111,7 @@ public class BedrockAction extends AbstractPlayerAction {
     /**
      * 正在移动到近处的基岩
      */
-    private boolean isMovingToNearbyBedrock = false;
+    private boolean movingToNearbyBedrock = false;
     /**
      * 当前游戏刻玩家是否执行了破基岩的动作，例如放置活塞，点击拉杆等
      */
@@ -111,7 +129,7 @@ public class BedrockAction extends AbstractPlayerAction {
      */
     private final ArrayList<ItemEntity> itemEntities = new ArrayList<>();
     /**
-     * 定时回收材料的时间间隔（3分钟）
+     * 定时回收材料的时间间隔（2分钟）
      */
     private static final int MATERIAL_RECYCLING_TIME = 2400;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("bedrock");
@@ -122,6 +140,9 @@ public class BedrockAction extends AbstractPlayerAction {
         this.regionType = regionType;
         this.ai = ai;
         this.recycleTimer = timedMaterialRecycling ? MATERIAL_RECYCLING_TIME : -1;
+        this.horizontalBlockPosIterator = this.traverser.horizontalBlockPositions().iterator();
+        this.maxY = traverser.getMaxY();
+        this.minY = traverser.getMinY();
     }
 
     public BedrockAction(EntityPlayerMPFake fakePlayer, BlockPos from, BlockPos to, boolean ai, boolean timedMaterialRecycling) {
@@ -135,6 +156,11 @@ public class BedrockAction extends AbstractPlayerAction {
     @Override
     protected void tick() {
         if (this.ai) {
+            if (this.horizontalBlockPosIterator != null) {
+                ServerLevel world = ServerUtils.getWorld(this.getFakePlayer());
+                this.scanBedrock(world);
+                return;
+            }
             this.pathfinder.tick();
             // 周围有下落的方块，暂停寻路，防止被砸死
             if (this.hasFallingSand(3)) {
@@ -174,6 +200,26 @@ public class BedrockAction extends AbstractPlayerAction {
         } else {
             this.work();
         }
+    }
+
+    private void scanBedrock(Level world) {
+        long l = System.currentTimeMillis();
+        while (this.horizontalBlockPosIterator.hasNext()) {
+            if (System.currentTimeMillis() - l > 30L) {
+                return;
+            }
+            HorizontalBlockPos horizontal = this.horizontalBlockPosIterator.next();
+            for (int y = this.minY; y <= this.maxY; y++) {
+                BlockPos blockPos = horizontal.toBlockPos(y);
+                if (world.getBlockState(blockPos).is(Blocks.BEDROCK)) {
+                    ChunkPos chunkPos = ChunkPos.containing(blockPos);
+                    LongSet longs = this.bedrockPosCache.computeIfAbsent(chunkPos, _ -> new LongOpenHashSet());
+                    longs.add(horizontal.toLong());
+                    break;
+                }
+            }
+        }
+        this.horizontalBlockPosIterator = null;
     }
 
     /**
@@ -269,7 +315,7 @@ public class BedrockAction extends AbstractPlayerAction {
             }
             return;
         }
-        this.isMovingToNearbyBedrock = false;
+        this.movingToNearbyBedrock = false;
         Optional<BlockPos> optional = this.getMovingTarget();
         if (optional.isPresent() && this.canInteract(optional.get())) {
             // 基岩在交互距离内，但因位置特殊而无法破除的基岩
@@ -280,7 +326,7 @@ public class BedrockAction extends AbstractPlayerAction {
         }
         for (BedrockBreakingContext context : this.contexts) {
             BlockPos blockPos = context.getBedrockPos();
-            if (this.invalidBedrock.getCount(blockPos) > 0) {
+            if (this.isInvalidBedrock(blockPos)) {
                 continue;
             }
             this.bedrockTarget = blockPos;
@@ -289,33 +335,95 @@ public class BedrockAction extends AbstractPlayerAction {
         this.selectBedrock(world);
     }
 
-    private void selectBedrock(Level world) {
-        BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(this.getFakePlayer()), 20);
-        for (BlockPos blockPos : traverser) {
-            if (world.getBlockState(blockPos).is(Blocks.BEDROCK) && this.traverser.contains(blockPos)) {
-                if (this.invalidBedrock.getCount(blockPos) > 0) {
+    private boolean isInvalidBedrock(BlockPos blockPos) {
+        return this.invalidBedrock.getCount(blockPos) > 0;
+    }
+
+    @Nullable
+    private BlockPos findRecentBedrock(Level world) {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        BlockPos playerBlockPos = ServerUtils.getBlockPos(fakePlayer);
+        List<ChunkPos> chunks = MathUtils.surrounding(ServerUtils.getChunkPos(fakePlayer), 2);
+        BlockPos recent = null;
+        for (ChunkPos chunkPos : chunks) {
+            if (this.bedrockPosCache.containsKey(chunkPos)) {
+                LongSet longs = this.bedrockPosCache.get(chunkPos);
+                if (longs.isEmpty()) {
+                    this.bedrockPosCache.remove(chunkPos, longs);
                     continue;
                 }
-                this.bedrockTarget = blockPos;
-                return;
+                recent = findRecentBedrock(world, longs, recent, playerBlockPos);
             }
         }
-        this.selectRandomBedrock(world);
+        return recent;
+    }
+
+    @Nullable
+    private BlockPos findRecentBedrock(Level world, LongSet longs, BlockPos recent, BlockPos playerBlockPos) {
+        List<HorizontalBlockPos> horizontals = longs.longStream().mapToObj(HorizontalBlockPos::new).toList();
+        for (HorizontalBlockPos horizontal : horizontals) {
+            boolean hasBedrock = false;
+            for (int y = this.maxY; y >= this.minY; y--) {
+                BlockPos blockPos = horizontal.toBlockPos(y);
+                if (world.getBlockState(blockPos).is(Blocks.BEDROCK)) {
+                    hasBedrock = true;
+                    if (this.isInvalidBedrock(blockPos)) {
+                        continue;
+                    }
+                    if (recent == null || (MathUtils.calculateManhattanDistance(blockPos, playerBlockPos) < MathUtils.calculateManhattanDistance(recent, playerBlockPos))) {
+                        recent = blockPos;
+                    }
+                    break;
+                }
+            }
+            if (hasBedrock) {
+                continue;
+            }
+            longs.remove(horizontal.toLong());
+        }
+        return recent;
+    }
+
+    private void selectBedrock(Level world) {
+        if (this.pathfinder.isInvalid()) {
+            if (this.bedrockPosCache.isEmpty()) {
+                return;
+            }
+            BlockPos recentBedrock = this.findRecentBedrock(world);
+            if (this.bedrockPosCache.isEmpty()) {
+                return;
+            }
+            if (recentBedrock != null) {
+                this.bedrockTarget = recentBedrock;
+            } else {
+                this.selectRandomBedrock(world);
+            }
+        }
     }
 
     /**
      * 随机选择基岩位置
      */
     private void selectRandomBedrock(Level world) {
-        if (this.pathfinder.isInvalid()) {
-            for (int i = 0; i < Math.min(this.traverser.size(), 100L); i++) {
-                BlockPos blockPos = this.traverser.randomBlockPos();
-                if (world.getBlockState(blockPos).is(Blocks.BEDROCK)) {
-                    this.bedrockTarget = blockPos;
-                    return;
+        Map.Entry<ChunkPos, LongSet> entry = MathUtils.getRandomElement(this.bedrockPosCache);
+        LongSet longs = entry.getValue();
+        if (longs.isEmpty()) {
+            this.bedrockPosCache.remove(entry.getKey(), longs);
+            return;
+        }
+        long pos = MathUtils.getRandomElement(longs);
+        HorizontalBlockPos horizontal = new HorizontalBlockPos(pos);
+        for (int y = this.maxY; y >= this.minY; y--) {
+            BlockPos blockPos = horizontal.toBlockPos(y);
+            if (world.getBlockState(blockPos).is(Blocks.BEDROCK)) {
+                if (this.isInvalidBedrock(blockPos)) {
+                    continue;
                 }
+                this.bedrockTarget = blockPos;
+                return;
             }
         }
+        longs.remove(pos);
     }
 
     /**
@@ -330,8 +438,8 @@ public class BedrockAction extends AbstractPlayerAction {
             return false;
         }
         if (this.contexts.contains(this.currentContext)) {
-            if (!this.isMovingToNearbyBedrock) {
-                this.isMovingToNearbyBedrock = true;
+            if (!this.movingToNearbyBedrock) {
+                this.movingToNearbyBedrock = true;
                 this.bedrockTarget = this.currentContext.getBedrockPos();
             }
             return this.tickWork(this.currentContext);
@@ -970,10 +1078,11 @@ public class BedrockAction extends AbstractPlayerAction {
         boolean finished = this.pathfinder.isFinished();
         if (finished) {
             // 玩家可能在到达目标位置的前一瞬间捡起物品，导致在路径在走完之前被更新并不会执行到这里，但这不是问题
-            dropGarbageAndCollectMaterial();
+            this.dropGarbageAndCollectMaterial();
         }
         // 目标掉落物的位置不可到达
-        if ((this.pathfinder.isInvalid() || this.pathfinder.isInaccessible()) && !this.itemEntities.isEmpty()) {
+        boolean tooFar = this.recentItemEntity != null && this.recentItemEntity.distanceTo(this.getFakePlayer()) > 25;
+        if ((this.pathfinder.isInvalid() || (this.pathfinder.isInaccessible() && tooFar)) && !this.itemEntities.isEmpty()) {
             this.itemEntities.remove(this.recentItemEntity);
             this.pathfinder.pause(1);
             this.materialCollectionComplete = true;
@@ -1231,7 +1340,7 @@ public class BedrockAction extends AbstractPlayerAction {
                     return Optional.empty();
                 }
                 BlockState blockState = world.getBlockState(this.bedrockTarget);
-                if (blockState.is(Blocks.BEDROCK) || this.isMovingToNearbyBedrock) {
+                if (blockState.is(Blocks.BEDROCK) || this.movingToNearbyBedrock) {
                     return Optional.of(this.bedrockTarget);
                 }
                 return Optional.empty();
