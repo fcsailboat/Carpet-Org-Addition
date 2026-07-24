@@ -522,13 +522,17 @@ public class InventoryUtils {
      * @return 物品是否即将损坏且具有经验修补附魔
      */
     public static boolean isFragileWithMending(ItemStack itemStack) {
-        return isFragile(itemStack) && EnchantmentUtils.canRepairWithXp(itemStack);
+        return isFragileWithMending(itemStack, 10);
     }
 
-    public static boolean isFragile(ItemStack itemStack) {
+    public static boolean isFragileWithMending(ItemStack itemStack, int threshold) {
+        return isFragile(itemStack, threshold) && EnchantmentUtils.canRepairWithXp(itemStack);
+    }
+
+    public static boolean isFragile(ItemStack itemStack, int threshold) {
         if (itemStack.isEmpty()) {
             return false;
         }
-        return itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10;
+        return itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= threshold;
     }
 }

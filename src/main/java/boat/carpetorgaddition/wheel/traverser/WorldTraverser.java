@@ -104,6 +104,7 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
     /**
      * @return 选区是否包含区块或与区块重叠
      */
+    @SuppressWarnings("unused")
     public boolean intersects(ChunkPos chunkPos) {
         int chunkMinX = chunkPos.getBlockX(0);
         int chunkMinZ = chunkPos.getBlockZ(0);

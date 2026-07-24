@@ -87,5 +87,6 @@ public interface FakePlayerPathfinder {
     /**
      * @return 玩家是否正在移动
      */
+    @SuppressWarnings("unused")
     boolean isMoving();
 }

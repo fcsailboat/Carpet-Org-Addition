@@ -335,6 +335,18 @@ public class ServerUtils {
         return entity.chunkPosition();
     }
 
+    public static BlockPos toOverworldBlockPos(BlockPos blockPos) {
+        int x = blockPos.getX() * 8;
+        int z = blockPos.getZ() * 8;
+        return new BlockPos(x, blockPos.getY(), z);
+    }
+
+    public static BlockPos toTheNetherBlockPos(BlockPos blockPos) {
+        int x = (int) Math.round(blockPos.getX() / 8.0);
+        int z = (int) Math.round(blockPos.getZ() / 8.0);
+        return new BlockPos(x, blockPos.getY(), z);
+    }
+
     public static Component getName(Item item) {
         return item.components().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
     }
