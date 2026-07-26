@@ -457,6 +457,8 @@
   "carpet-org-addition.command.playerAction.plant.info": "%s正在种植",
   "carpet-org-addition.command.playerAction.bedrock": "破基岩",
   "carpet-org-addition.command.playerAction.bedrock.share": "请勿向其他人传播自动破基岩功能",
+  "carpet-org-addition.command.playerAction.bedrock.no_action.first": "%s已持续%s分钟无破基岩行为",
+  "carpet-org-addition.command.playerAction.bedrock.no_action.second": "再等待%s分钟，超时将自动退出游戏",
   "carpet-org-addition.command.playerAction.bedrock.info": "%s正在破基岩",
   "carpet-org-addition.command.playerAction.bedrock.info.cuboid.range": "范围：从%s到%s",
   "carpet-org-addition.command.playerAction.bedrock.info.cylinder.center": "中心：%s",

@@ -535,6 +535,10 @@ public class ServerUtils {
         server.getPlayerList().getPlayers().forEach(consumer);
     }
 
+    public static void forEachRealPlayer(MinecraftServer server, Consumer<ServerPlayer> consumer) {
+        server.getPlayerList().getPlayers().stream().filter(PlayerUtils::isRealPlayer).forEach(consumer);
+    }
+
     public static String getCurrentSystemTimeFormat() {
         return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
     }

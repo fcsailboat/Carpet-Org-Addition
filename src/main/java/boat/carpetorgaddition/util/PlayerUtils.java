@@ -158,14 +158,14 @@ public class PlayerUtils {
     /**
      * 在不显示退出消息的情况下退出
      */
-    public static void silenceLogout(EntityPlayerMPFake fakePlayer) {
-        ScopedValue.where(FakePlayerSpawner.SILENCE, true).run(() -> kill(fakePlayer));
+    public static void exitGameSilently(EntityPlayerMPFake fakePlayer) {
+        ScopedValue.where(FakePlayerSpawner.SILENCE, true).run(() -> exitGame(fakePlayer));
     }
 
     /**
      * 让一名假玩家退出游戏
      */
-    public static void kill(EntityPlayerMPFake fakePlayer) {
+    public static void exitGame(EntityPlayerMPFake fakePlayer) {
         fakePlayer.kill(ServerUtils.getWorld(fakePlayer));
     }
 
@@ -179,6 +179,9 @@ public class PlayerUtils {
         ServerPlayNetworking.send(player, payload);
     }
 
+    /**
+     * 关闭当前屏幕界面
+     */
     public static void closeScreen(ServerPlayer player) {
         player.closeContainer();
     }
