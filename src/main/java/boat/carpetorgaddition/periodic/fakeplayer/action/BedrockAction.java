@@ -84,6 +84,7 @@ public class BedrockAction extends AbstractPlayerAction {
     private BlockExcavator excavator;
     @NonNull
     private FakePlayerPathfinder pathfinder = FakePlayerPathfinder.EMPTY;
+    private Vec3 initialPosition;
     /**
      * 玩家是否有AI，是否可以自动寻路，自动进食
      */
@@ -144,6 +145,10 @@ public class BedrockAction extends AbstractPlayerAction {
      */
     private static final long MAX_NON_ACTION_MINUTE_TIME = 5L;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("bedrock");
+    /**
+     * 是否允许假玩家在卡入不可移动区域时传送
+     */
+    private static final boolean ALLOW_TELEPORT = true;
 
     private BedrockAction(EntityPlayerMPFake fakePlayer, BlockPosTraverser traverser, BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) {
         super(fakePlayer);
@@ -204,43 +209,52 @@ public class BedrockAction extends AbstractPlayerAction {
                 }
             }
             switch (this.getPhase()) {
-                case WORK -> {
-                    if (this.hasAction) {
-                        this.nonActionHours = 0L;
-                    } else {
-                        this.nonActionHours++;
-                    }
-                    if (this.nonActionHours > 0 && this.nonActionHours % 1200L == 0) {
-                        LocalizationKey key = KEY.then("no_action");
-                        long minute = this.nonActionHours / 1200L;
-                        long remaining = MAX_NON_ACTION_MINUTE_TIME - minute;
-                        Component first = key.then("first")
-                                .builder(this.getFakePlayer().getDisplayName(), minute)
-                                .setGrayItalic()
-                                .build();
-                        MinecraftServer server = this.getServer();
-                        MessageUtils.sendEmptyMessage(server);
-                        MessageUtils.sendMessage(server, first);
-                        if (remaining == 0L) {
-                            PlayerUtils.exitGame(this.getFakePlayer());
-                            return;
-                        } else {
-                            Component second = key.then("second")
-                                    .builder(remaining)
-                                    .setGrayItalic()
-                                    .build();
-                            MessageUtils.sendMessage(server, second);
-                            ServerUtils.forEachPlayer(server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
-                        }
-                    }
-                    work();
-                }
+                case WORK -> performBedrockBreakingCycle();
                 case EAT -> eat();
-                case COLLECT -> collectingMaterials();
+                case COLLECT -> recycle();
             }
         } else {
-            this.work();
+            this.executeWorkTick();
         }
+    }
+
+    private void performBedrockBreakingCycle() {
+        if (this.hasAction) {
+            this.nonActionHours = 0L;
+        } else {
+            this.nonActionHours++;
+        }
+        if (this.nonActionHours > 0 && this.nonActionHours % 1200L == 0) {
+            long minute = this.nonActionHours / 1200L;
+            EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+            if (ALLOW_TELEPORT && minute <= 2) {
+                ServerLevel world = ServerUtils.getWorld(fakePlayer);
+                ServerUtils.playSound(world, ServerUtils.getEyePos(fakePlayer), SoundEvents.PLAYER_TELEPORT, fakePlayer.getSoundSource());
+                ServerUtils.teleport(fakePlayer, world, this.initialPosition);
+                return;
+            }
+            long remaining = MAX_NON_ACTION_MINUTE_TIME - minute;
+            LocalizationKey key = KEY.then("no_action");
+            Component first = key.then("first")
+                    .builder(fakePlayer.getDisplayName(), minute)
+                    .setGrayItalic()
+                    .build();
+            MinecraftServer server = this.getServer();
+            MessageUtils.sendEmptyMessage(server);
+            MessageUtils.sendMessage(server, first);
+            if (remaining == 0L) {
+                PlayerUtils.exitGame(fakePlayer);
+                return;
+            } else {
+                Component second = key.then("second")
+                        .builder(remaining)
+                        .setGrayItalic()
+                        .build();
+                MessageUtils.sendMessage(server, second);
+                ServerUtils.forEachPlayer(server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
+            }
+        }
+        this.executeWorkTick();
     }
 
     private void scanBedrock(Level world) {
@@ -297,7 +311,7 @@ public class BedrockAction extends AbstractPlayerAction {
         return false;
     }
 
-    private void work() {
+    private void executeWorkTick() {
         this.hasAction = false;
         if (this.materialCollectionComplete) {
             this.materialCollectionComplete = false;
@@ -307,7 +321,7 @@ public class BedrockAction extends AbstractPlayerAction {
         for (BlockPos blockPos : this.invalidBedrock) {
             this.invalidBedrock.decrement(blockPos);
         }
-        if (this.tickCurrentWork()) {
+        if (this.processCurrentContext()) {
             return;
         }
         Level world = ServerUtils.getWorld(this.getFakePlayer());
@@ -337,7 +351,7 @@ public class BedrockAction extends AbstractPlayerAction {
             if (context == this.currentContext) {
                 continue;
             }
-            if (tickWork(context)) {
+            if (processContextSteps(context)) {
                 return;
             }
         }
@@ -474,7 +488,7 @@ public class BedrockAction extends AbstractPlayerAction {
         return this.getFakePlayer().isWithinBlockInteractionRange(blockPos, 0.0);
     }
 
-    private boolean tickCurrentWork() {
+    private boolean processCurrentContext() {
         if (this.currentContext == null) {
             return false;
         }
@@ -483,13 +497,13 @@ public class BedrockAction extends AbstractPlayerAction {
                 this.movingToNearbyBedrock = true;
                 this.bedrockTarget = this.currentContext.getBedrockPos();
             }
-            return this.tickWork(this.currentContext);
+            return this.processContextSteps(this.currentContext);
         }
         this.currentContext = null;
         return false;
     }
 
-    private boolean tickWork(BedrockBreakingContext context) {
+    private boolean processContextSteps(BedrockBreakingContext context) {
         int loopCount = 0;
         loop:
         while (true) {
@@ -497,7 +511,7 @@ public class BedrockAction extends AbstractPlayerAction {
             if (loopCount > 10) {
                 throw new InfiniteLoopException();
             }
-            StepResult stepResult = start(context);
+            StepResult stepResult = this.executeContextState(context);
             switch (stepResult) {
                 case COMPLETION -> {
                     break loop;
@@ -513,7 +527,7 @@ public class BedrockAction extends AbstractPlayerAction {
         return false;
     }
 
-    private StepResult start(BedrockBreakingContext context) {
+    private StepResult executeContextState(BedrockBreakingContext context) {
         BlockPos bedrockPos = context.getBedrockPos();
         switch (context.getState()) {
             case PLACE_THE_PISTON_FACING_UP -> {
@@ -641,7 +655,7 @@ public class BedrockAction extends AbstractPlayerAction {
             // 上方方块是下方活塞伸出的活塞头
             return StepResult.CONTINUE;
         }
-        // 活塞上方的方块不会影响活塞退出
+        // 活塞上方的方块不会影响活塞推出
         if (blockState.isAir() || blockState.getPistonPushReaction() == PushReaction.DESTROY) {
             if (isPiston) {
                 return StepResult.CONTINUE;
@@ -1119,7 +1133,7 @@ public class BedrockAction extends AbstractPlayerAction {
     /**
      * 收集材料
      */
-    private void collectingMaterials() {
+    private void recycle() {
         boolean finished = this.pathfinder.isFinished();
         if (finished) {
             // 玩家可能在到达目标位置的前一瞬间捡起物品，导致在路径在走完之前被更新并不会执行到这里，但这不是问题
@@ -1343,6 +1357,7 @@ public class BedrockAction extends AbstractPlayerAction {
         this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this::getMovingTarget);
         this.inventory = PlayerStorageInventory.of(this.getFakePlayer());
         this.excavator = PlayerComponentCoordinator.of(this.getFakePlayer()).getBlockExcavator();
+        this.initialPosition = ServerUtils.getFootPos(this.getFakePlayer());
     }
 
     @Override
@@ -1350,6 +1365,7 @@ public class BedrockAction extends AbstractPlayerAction {
         this.pathfinder = FakePlayerPathfinder.EMPTY;
         this.inventory = null;
         this.excavator = null;
+        this.initialPosition = null;
     }
 
     @Override

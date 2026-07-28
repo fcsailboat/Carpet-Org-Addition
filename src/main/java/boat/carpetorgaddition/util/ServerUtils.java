@@ -161,6 +161,10 @@ public class ServerUtils {
         world.playSound(null, blockPos, soundEvent, soundCategory, 1F, 1F);
     }
 
+    public static void playSound(Level world, Vec3 vec3, SoundEvent event, SoundSource source) {
+        world.playSound(null, vec3.x(), vec3.y(), vec3.z(), event, source);
+    }
+
     /**
      * 在指定玩家位置播放一个音效
      *
@@ -219,6 +223,10 @@ public class ServerUtils {
         if (target.level() instanceof ServerLevel world) {
             teleport(source, world, target.getX(), target.getY(), target.getZ(), target.getYRot(), target.getXRot());
         }
+    }
+
+    public static void teleport(Entity entity, ServerLevel world, Vec3 pos) {
+        teleport(entity, world, pos.x(), pos.y(), pos.z(), entity.getYRot(), entity.getXRot());
     }
 
     /**

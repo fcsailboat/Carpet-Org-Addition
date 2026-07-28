@@ -86,6 +86,7 @@ public class PlayerCommandExtension {
         ServerPlayer fakePlayer = getPlayer(context);
         // 断言指定玩家为假玩家
         CommandUtils.requireFakePlayer(fakePlayer);
+        // TODO 更改声音事件
         // 在假玩家位置播放潜影贝传送音效
         ServerUtils.getWorld(fakePlayer).playSound(null, fakePlayer.getX(), fakePlayer.getY(), fakePlayer.getZ(),
                 SoundEvents.SHULKER_TELEPORT, fakePlayer.getSoundSource(), 1.0f, 1.0f);
