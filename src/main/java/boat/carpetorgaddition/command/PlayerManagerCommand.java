@@ -644,7 +644,6 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         }
     }
 
-    // TODO 删除玩家后，list子命令仍能列出已删除的玩家
     // 列出每一个玩家
     private int list(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();

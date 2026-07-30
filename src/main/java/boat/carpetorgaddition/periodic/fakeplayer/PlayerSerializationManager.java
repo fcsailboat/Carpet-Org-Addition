@@ -185,6 +185,10 @@ public class PlayerSerializationManager {
 
     public boolean remove(FakePlayerSerializer serializer) {
         boolean remove = this.serializers.remove(serializer);
+        for (Map.Entry<@Nullable String, Set<FakePlayerSerializer>> entry : this.groups.entrySet()) {
+            entry.getValue().remove(serializer);
+        }
+        this.groups.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         return remove && serializer.remove();
     }
 
