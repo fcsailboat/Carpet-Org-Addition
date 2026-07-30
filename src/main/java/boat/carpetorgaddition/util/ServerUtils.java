@@ -235,19 +235,26 @@ public class ServerUtils {
         teleport(entity, world, pos.x(), pos.y(), pos.z(), entity.getYRot(), entity.getXRot());
     }
 
+    /**
+     * 将一个实体传送到目标维度的指定位置并显示粒子和播放音效
+     */
+    public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos) {
+        teleport(entity, world, pos);
+        world.broadcastEntityEvent(entity, EntityEvent.TELEPORT);
+        SoundEvent soundEvent = switch (entity) {
+            case Player _ -> SoundEvents.PLAYER_TELEPORT;
+            case Fox _ -> SoundEvents.FOX_TELEPORT;
+            case Shulker _ -> SoundEvents.SHULKER_TELEPORT;
+            case EnderMan _ -> SoundEvents.ENDERMAN_TELEPORT;
+            default -> SoundEvents.CHORUS_FRUIT_TELEPORT;
+        };
+        playSound(world, pos, soundEvent, entity.getSoundSource());
+        entity.resetFallDistance();
+    }
+
     public static void teleportWithEffect(Entity entity, Vec3 pos) {
         if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
-            teleport(entity, world, pos);
-            world.broadcastEntityEvent(entity, EntityEvent.TELEPORT);
-            SoundEvent soundEvent = switch (entity) {
-                case Player _ -> SoundEvents.PLAYER_TELEPORT;
-                case Fox _ -> SoundEvents.FOX_TELEPORT;
-                case Shulker _ -> SoundEvents.SHULKER_TELEPORT;
-                case EnderMan _ -> SoundEvents.ENDERMAN_TELEPORT;
-                default -> SoundEvents.CHORUS_FRUIT_TELEPORT;
-            };
-            playSound(world, pos, soundEvent, entity.getSoundSource());
-            entity.resetFallDistance();
+            teleportWithEffect(entity, world, pos);
         }
     }
 
