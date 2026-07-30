@@ -21,10 +21,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -227,6 +233,22 @@ public class ServerUtils {
 
     public static void teleport(Entity entity, ServerLevel world, Vec3 pos) {
         teleport(entity, world, pos.x(), pos.y(), pos.z(), entity.getYRot(), entity.getXRot());
+    }
+
+    public static void teleportWithEffect(Entity entity, Vec3 pos) {
+        if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
+            teleport(entity, world, pos);
+            world.broadcastEntityEvent(entity, EntityEvent.TELEPORT);
+            SoundEvent soundEvent = switch (entity) {
+                case Player _ -> SoundEvents.PLAYER_TELEPORT;
+                case Fox _ -> SoundEvents.FOX_TELEPORT;
+                case Shulker _ -> SoundEvents.SHULKER_TELEPORT;
+                case EnderMan _ -> SoundEvents.ENDERMAN_TELEPORT;
+                default -> SoundEvents.CHORUS_FRUIT_TELEPORT;
+            };
+            playSound(world, pos, soundEvent, entity.getSoundSource());
+            entity.resetFallDistance();
+        }
     }
 
     /**
