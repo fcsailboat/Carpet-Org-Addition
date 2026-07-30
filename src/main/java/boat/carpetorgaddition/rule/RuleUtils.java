@@ -178,10 +178,11 @@ public class RuleUtils {
                && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isNonOrEmptyContainer(itemStack, false));
     }
 
-    public static boolean isToolNoBreak(ItemStack itemStack, Player player) {
+    public static boolean isToolNoBreak(ItemStack itemStack, @Nullable Player player) {
         if (CarpetOrgAdditionSettings.NO_TOOL_BREAK.value()) {
             return CarpetOrgAdditionSettings.USE_TOOL_ITEM_NO_BREAK.orElse(false) || (
-                    InventoryUtils.isFragileWithMending(itemStack, 1) && !player.hasInfiniteMaterials()
+                    InventoryUtils.isFragileWithMending(itemStack, 1)
+                    && (player == null || !player.hasInfiniteMaterials())
             );
         }
         return false;

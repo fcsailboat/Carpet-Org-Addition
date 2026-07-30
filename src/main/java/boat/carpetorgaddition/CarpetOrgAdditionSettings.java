@@ -1067,15 +1067,17 @@ public class CarpetOrgAdditionSettings {
                     .build()
     );
 
-    /*
-     TODO
-      攻击实体
-      矛冲刺连续攻击
-      盾牌格挡
-      盔甲防护
-    */
     /**
-     * 禁止工具损毁
+     * 禁止工具损毁<br>
+     * <p>
+     * 不支持以下场景：
+     * <ul>
+     * <li>矛冲刺连续攻击</li>
+     * <li>盾牌格挡</li>
+     * <li>盔甲防护</li>
+     * </ul>
+     * </p>
+     * 攻击实体时，可以禁止工具损毁，但玩家的攻击伤害属性可能不会立即更新
      */
     public static final RuleAccessor<Boolean> NO_TOOL_BREAK = register(
             RuleFactory.of("noToolBreak", false)
