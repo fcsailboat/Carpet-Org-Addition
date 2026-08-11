@@ -8,7 +8,7 @@ import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.periodic.task.search.BlockSearchTask;
 import boat.carpetorgaddition.periodic.task.search.ItemSearchTask;
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
+import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
 import boat.carpetorgaddition.periodic.task.search.TradeItemSearchTask;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -32,7 +32,7 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
     public void receive(ObjectSearchTaskC2SPacket packet, ServerPlayNetworking.Context context) {
         ServerPlayer player = context.player();
         MinecraftServer server = ServerUtils.getServer(player);
-        ServerTaskManager taskManager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         ServerLevel world = ServerUtils.getWorld(player);
         CommandSourceStack source = player.createCommandSourceStack();
         BlockPos blockPos = player.blockPosition();
@@ -47,24 +47,24 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
                 ObjectSearchTaskCodecs.ItemSearchContext decode = ObjectSearchTaskCodecs.ITEM_SEARCH_CODEC.decode(packet.json());
                 ItemStackPredicate predicate = ItemStackPredicate.of(decode.list(), packet.name());
                 BlockEntityTraverser traverser = new BlockEntityTraverser(world, blockPos, decode.range());
-                yield new ItemSearchTask(world, predicate, traverser, source);
+                yield new ItemSearchTask(world, predicate, traverser, source, player);
             }
             case OFFLINE_PLAYER_ITEM -> {
                 ObjectSearchTaskCodecs.OfflinePlayerItemSearchContext decode = ObjectSearchTaskCodecs.OFFLINE_PLAYER_SEARCH_CODEC.decode(packet.json());
                 ItemStackPredicate predicate = ItemStackPredicate.of(decode.list(), packet.name());
-                yield new OfflinePlayerSearchTask(source, predicate, player);
+                yield new OfflinePlayerInventorySearchTask(source, predicate, player);
             }
             case BLOCK -> {
                 ObjectSearchTaskCodecs.BlockSearchContext decode = ObjectSearchTaskCodecs.BLOCK_SEARCH_CODEC.decode(packet.json());
                 BlockPosTraverser traverser = new BlockPosTraverser(world, blockPos, decode.range());
                 BlockStatePredicate predicate = BlockStatePredicate.ofBlocks(decode.list(), packet.name());
-                yield new BlockSearchTask(world, blockPos, traverser, source, predicate);
+                yield new BlockSearchTask(world, blockPos, traverser, source, predicate, player);
             }
             case TRADE_ITEM -> {
                 ObjectSearchTaskCodecs.TradeItemSearchContext decode = ObjectSearchTaskCodecs.TRADE_ITEM_SEARCH_CODEC.decode(packet.json());
                 BlockPosTraverser traverser = new BlockPosTraverser(world, blockPos, decode.range());
                 ItemStackPredicate predicate = ItemStackPredicate.of(decode.list(), packet.name());
-                yield new TradeItemSearchTask(world, traverser, blockPos, predicate, source);
+                yield new TradeItemSearchTask(world, traverser, blockPos, predicate, source, player);
             }
             default -> null;
         };

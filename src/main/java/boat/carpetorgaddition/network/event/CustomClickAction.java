@@ -48,7 +48,7 @@ public class CustomClickAction {
                     // 关闭当前对话框（等待服务器响应屏幕）
                     player.closeContainer();
                 }
-                PlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(player);
+                PlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(player);
                 if (coordinator.isVersionMismatchNotified()) {
                     return;
                 }
@@ -66,7 +66,7 @@ public class CustomClickAction {
             switch (context.getActionSource()) {
                 case CHAT -> MessageUtils.sendVanillaErrorMessage(context.getSource(), e);
                 case DIALOG -> {
-                    DialogProvider provider = ServerComponentCoordinator.getCoordinator(context.getServer()).getDialogProvider();
+                    DialogProvider provider = ServerComponentCoordinator.of(context.getServer()).getDialogProvider();
                     Dialog dialog = provider.createErrorNoticeDialog(e);
                     PlayerUtils.openDialog(context.getPlayer(), dialog);
                 }

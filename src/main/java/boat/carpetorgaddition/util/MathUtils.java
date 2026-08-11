@@ -3,6 +3,7 @@ package boat.carpetorgaddition.util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector3f;
@@ -72,7 +73,7 @@ public class MathUtils {
      * @param toBlockPos   第二个方块的坐标
      * @return 两个方块之间四舍五入的整数水平距离
      */
-    public static int getCalculateBlockIntegerDistance(BlockPos fromBlockPos, BlockPos toBlockPos) {
+    public static int calculateBlockIntegerDistance(BlockPos fromBlockPos, BlockPos toBlockPos) {
         double x = fromBlockPos.getX() - toBlockPos.getX();
         double z = fromBlockPos.getZ() - toBlockPos.getZ();
         return (int) Math.round(Math.sqrt(x * x + z * z));
@@ -366,6 +367,23 @@ public class MathUtils {
         return list.get(RANDOM.nextInt(len));
     }
 
+    public static <K, V> Map.Entry<K, V> getRandomElement(Map<K, V> map) {
+        if (map.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        Set<Map.Entry<K, V>> entries = map.entrySet();
+        return getRandomElement(entries);
+    }
+
+    public static <E> E getRandomElement(Set<E> set) {
+        int step = RANDOM.nextInt(set.size());
+        Iterator<E> it = set.iterator();
+        for (int i = 0; i < step; i++) {
+            it.next();
+        }
+        return it.next();
+    }
+
     /**
      * 等差数列求和
      *
@@ -436,6 +454,19 @@ public class MathUtils {
     }
 
     /**
+     * 获取区块周围一定距离内的所有区块，包含中心区块
+     */
+    public static List<ChunkPos> surrounding(ChunkPos chunkPos, int distance) {
+        ArrayList<ChunkPos> list = new ArrayList<>();
+        for (int x = chunkPos.x() - distance; x <= chunkPos.x() + distance; x++) {
+            for (int z = chunkPos.z() - distance; z <= chunkPos.z() + distance; z++) {
+                list.add(new ChunkPos(x, z));
+            }
+        }
+        return list;
+    }
+
+    /**
      * 尝试将字符串解析为整数
      */
     public static OptionalInt tryParseInt(String str) {
@@ -452,6 +483,10 @@ public class MathUtils {
 
     public static int rgba(int rgb, int alpha) {
         return rgba(red(rgb << 8), green(rgb << 8), blue(rgb << 8), alpha);
+    }
+
+    public static int rgbaToArgb(int rgba) {
+        return Integer.rotateRight(rgba, 8);
     }
 
     public static int red(int rgba) {

@@ -3,10 +3,12 @@ package boat.carpetorgaddition.client.render.waypoint;
 import boat.carpetorgaddition.client.util.ClientCommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 public class NavigatorWaypoint extends Waypoint {
     /**
@@ -19,15 +21,15 @@ public class NavigatorWaypoint extends Waypoint {
     }
 
     @Override
-    public void render(LevelRenderContext context) {
+    public void render(GuiGraphicsExtractor graphics, Matrix4fc modelView, Matrix4f projection) {
         // 计算帧间时间增量
         double delta = this.tickDelta - this.lastTickDelta;
-        if (delta < 0) {
+        if (delta < 0.0) {
             // 处理时间回绕
             delta = delta - Math.floor(delta);
         }
         this.progress += delta;
-        super.render(context);
+        super.render(graphics, modelView, projection);
     }
 
     @Override

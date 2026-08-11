@@ -2,7 +2,6 @@ package boat.carpetorgaddition.wheel.text;
 
 import boat.carpetorgaddition.network.event.ActionSource;
 import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.wheel.MetaComment;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
 import boat.carpetorgaddition.wheel.provider.TextProvider;
 import com.mojang.authlib.GameProfile;
@@ -122,13 +121,6 @@ public class TextBuilder {
         return this;
     }
 
-    public TextBuilder setHover(MetaComment comment) {
-        if (comment.hasContent()) {
-            this.setHover(comment.getText());
-        }
-        return this;
-    }
-
     public TextBuilder setHover(Throwable e) {
         String error = CommandUtils.getExceptionString(e);
         return this.setHover(create(error));
@@ -143,6 +135,10 @@ public class TextBuilder {
             this.text.withStyle(style -> style.withHoverEvent(new HoverEvent.ShowItem(ItemStackTemplate.fromNonEmptyStack(itemStack))));
         }
         return this;
+    }
+
+    public TextBuilder setHover(Number number) {
+        return this.setHover(number.toString());
     }
 
     /**

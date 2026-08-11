@@ -45,7 +45,7 @@ public class StonecutterSetRecipeScreenHandler extends StonecutterMenu implement
         // 获取按钮索引
         int button = this.getSelectedRecipeIndex();
         if (button != -1) {
-            FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(this.fakePlayer);
+            FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(this.fakePlayer);
             FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
             // 设置玩家动作
             actionManager.setAction(new StonecuttingAction(this.fakePlayer, new ItemStackPredicate(itemStack.getItem()), button));

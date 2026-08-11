@@ -85,7 +85,7 @@ public class OrangeCommand extends AbstractServerCommand {
     private int openDialog(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         MinecraftServer server = context.getSource().getServer();
-        DialogProvider provider = ServerComponentCoordinator.getCoordinator(server).getDialogProvider();
+        DialogProvider provider = ServerComponentCoordinator.of(server).getDialogProvider();
         Dialog dialog = provider.getDialog(DialogProvider.START);
         PlayerUtils.openDialog(player, dialog);
         return 1;
@@ -133,7 +133,7 @@ public class OrangeCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getArgumentPlayer(context);
         if (CommandUtils.isSelfOrFakePlayer(player, context)) {
             MinecraftServer server = ServerUtils.getServer(player);
-            CustomRuleValueManager customRuleValueManager = ServerComponentCoordinator.getCoordinator(server).getCustomRuleValueManager();
+            CustomRuleValueManager customRuleValueManager = ServerComponentCoordinator.of(server).getCustomRuleValueManager();
             String ruleString = StringArgumentType.getString(context, "rule");
             Optional<CustomRuleEntry> optional = CustomRuleValueManager.get(ruleString);
             if (optional.isEmpty()) {
@@ -165,7 +165,7 @@ public class OrangeCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getArgumentPlayer(context);
         if (CommandUtils.isSelfOrFakePlayer(player, context)) {
             MinecraftServer server = ServerUtils.getServer(player);
-            CustomRuleValueManager valueManager = ServerComponentCoordinator.getCoordinator(server).getCustomRuleValueManager();
+            CustomRuleValueManager valueManager = ServerComponentCoordinator.of(server).getCustomRuleValueManager();
             String ruleString = StringArgumentType.getString(context, "rule");
             Optional<CustomRuleEntry> optional = CustomRuleValueManager.get(ruleString);
             if (optional.isEmpty()) {

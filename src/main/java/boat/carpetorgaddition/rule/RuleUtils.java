@@ -23,6 +23,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
@@ -175,5 +176,15 @@ public class RuleUtils {
                && CarpetOrgAdditionSettings.SHULKER_BOX_STACKABLE.value()
                && InventoryUtils.isShulkerBoxItem(itemStack)
                && (NON_EMPTY_SHULKER_BOX_STACKABLE || InventoryUtils.isNonOrEmptyContainer(itemStack, false));
+    }
+
+    public static boolean isToolNoBreak(ItemStack itemStack, @Nullable Player player) {
+        if (CarpetOrgAdditionSettings.NO_TOOL_BREAK.value()) {
+            return CarpetOrgAdditionSettings.USE_TOOL_ITEM_NO_BREAK.orElse(false) || (
+                    InventoryUtils.isFragileWithMending(itemStack, 1)
+                    && (player == null || !player.hasInfiniteMaterials())
+            );
+        }
+        return false;
     }
 }

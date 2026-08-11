@@ -9,15 +9,12 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 
 public class XpTransferCommandTest {
-    // 包私有级成员变量
-    static final int MAX_TRANSFER_LEVEL = 21863;
-
     @Disabled
     @RepeatedTest(124)
     public void testTransferAll(@NonNull RepetitionInfo info) {
         int level = (int) Math.pow(info.getCurrentRepetition(), 4);
         System.out.println("等级：" + level);
-        MockPlayer player = new MockPlayer(level);
+        ExperienceTransfer.MockPlayer player = new ExperienceTransfer.MockPlayer(level);
         BigInteger before = ExperienceTransfer.calculateTotalExperience(player.getExperienceLevel(), player.getPoint());
         System.out.println("转移前：" + before);
         player.clearExperience();
@@ -95,7 +92,7 @@ public class XpTransferCommandTest {
         Assertions.assertThrows(ArithmeticException.class, () -> ExperienceTransfer.calculateUpgradeExperience(0, 238609313));
     }
 
-    private void transfer(MockPlayer player, BigInteger experience) {
+    private void transfer(ExperienceTransfer.MockPlayer player, BigInteger experience) {
         BigInteger maxValue = BigInteger.valueOf(Integer.MAX_VALUE);
         if (experience.compareTo(BigInteger.valueOf(10000000000L)) > 0) {
             experience = new BigDecimal(experience).multiply(new BigDecimal("0.9999999")).toBigInteger();

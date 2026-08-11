@@ -8,7 +8,6 @@ import boat.carpetorgaddition.util.ServerUtils;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.ai.behavior.AssignProfessionFromJobSite;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -41,21 +40,15 @@ public class AssignProfessionFromJobSiteMixin {
 
     @Unique
     private static void notifyTheClientCacheInvalidation(Villager instance, VillagerData data) {
-        if (Loggers.LIBRARIAN.isEnable()) {
-            if (data.profession().is(VillagerProfession.LIBRARIAN)) {
-                MinecraftServer server = ServerUtils.getServer(instance);
-                if (server == null) {
-                    return;
+        if (Loggers.LIBRARIAN.isEnable() && data.profession().is(VillagerProfession.LIBRARIAN)) {
+            ServerUtils.getServer(instance).ifPresent(server -> ServerUtils.forEachPlayer(server, player -> {
+                if (Loggers.LIBRARIAN.isSubscribed(player)) {
+                    instance.getBrain()
+                            .getMemory(MemoryModuleType.JOB_SITE)
+                            .filter(globalPos -> globalPos.equals(LibrarianCommodityPacketHandler.PREVIOUS_QUERY_BLOCK_POS.get(player)))
+                            .ifPresent(_ -> PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityCacheInvalidationS2CPacket()));
                 }
-                ServerUtils.forEachPlayer(server, player -> {
-                    if (Loggers.LIBRARIAN.isSubscribed(player)) {
-                        instance.getBrain()
-                                .getMemory(MemoryModuleType.JOB_SITE)
-                                .filter(globalPos -> globalPos.equals(LibrarianCommodityPacketHandler.PREVIOUS_QUERY_BLOCK_POS.get(player)))
-                                .ifPresent(_ -> PlayerUtils.sendNetworkPacket(player, new LibrarianCommodityCacheInvalidationS2CPacket()));
-                    }
-                });
-            }
+            }));
         }
     }
 }

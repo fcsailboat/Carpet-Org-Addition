@@ -3,7 +3,9 @@ package boat.carpetorgaddition.wheel;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
+import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
 import boat.carpetorgaddition.util.IOUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.JsonArray;
@@ -11,6 +13,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.NameAndId;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.jspecify.annotations.NonNull;
@@ -149,6 +153,23 @@ public class GameProfileCache {
     }
 
     /**
+     * 根据玩家名称获取玩家档案<br>
+     * 优先从已缓存的玩家档案中查找，如果未命中，则创建离线玩家UUID，若该玩家UUID所对应的玩家数据文件存在，则计入缓存
+     */
+    public Optional<GameProfile> resolveGameProfile(MinecraftServer server, String username) {
+        return this.getGameProfile(username).or(() -> {
+            // 获取玩家的离线UUID
+            UUID uuid = UUIDUtil.createOfflinePlayerUUID(username);
+            if (ServerUtils.isPlayerDataExists(server, uuid)) {
+                GameProfile gameProfile = new GameProfile(uuid, username);
+                this.put(gameProfile);
+                return Optional.of(gameProfile);
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
      * 根据UUID获取对应的玩家名
      */
     public Optional<String> get(UUID uuid) {
@@ -165,8 +186,16 @@ public class GameProfileCache {
         return optional.map(name -> new GameProfile(uuid, name));
     }
 
-    public Optional<NameAndId> getPlayerConfigEntry(UUID uuid) {
+    public Optional<GameProfile> getGameProfileOrUnknown(UUID uuid) {
+        return this.getGameProfile(uuid).or(() -> Optional.of(new GameProfile(uuid, OfflinePlayerInventorySearchTask.UNKNOWN)));
+    }
+
+    public Optional<NameAndId> getNameAndId(UUID uuid) {
         return this.getGameProfile(uuid).map(NameAndId::new);
+    }
+
+    public Optional<NameAndId> getNameAndIdOrUnknown(UUID uuid) {
+        return this.getGameProfileOrUnknown(uuid).map(NameAndId::new);
     }
 
     /**

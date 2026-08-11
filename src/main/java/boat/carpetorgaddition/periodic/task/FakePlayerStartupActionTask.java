@@ -4,6 +4,8 @@ import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerStartupAction;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.commands.CommandSourceStack;
 
+import java.util.Map;
+
 public class FakePlayerStartupActionTask extends ServerTask {
     private final EntityPlayerMPFake fakePlayer;
     private final FakePlayerStartupAction action;
@@ -30,16 +32,7 @@ public class FakePlayerStartupActionTask extends ServerTask {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this.getClass() == obj.getClass()) {
-            FakePlayerStartupActionTask that = (FakePlayerStartupActionTask) obj;
-            return this.fakePlayer.equals(that.fakePlayer) && this.action == that.action;
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.action.hashCode();
+    public Object getIdentityKey() {
+        return Map.entry(this.fakePlayer, this.action);
     }
 }

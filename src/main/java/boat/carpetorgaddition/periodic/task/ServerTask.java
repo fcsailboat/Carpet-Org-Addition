@@ -53,25 +53,33 @@ public abstract class ServerTask {
                 return false;
             }
         } catch (TaskExecutionException e) {
-            e.disposal();
+            e.handle();
         } catch (RuntimeException e) {
             CarpetOrgAddition.LOGGER.error("{} encountered an unexpected error while executing the task", this.getClass().getSimpleName(), e);
         }
         return true;
     }
 
+    public CommandSourceStack getSource() {
+        return this.source;
+    }
+
     /**
      * 检查当前任务是否超时，如果超时，抛出异常
      */
     protected void checkTimeout() {
-        long time = this.getMaxExecutionTime();
-        if (time == -1L) {
-            return;
-        }
-        if (this.getElapsedTime() > time) {
+        if (this.isTimeout()) {
             // 任务超时
             this.throwTimeoutException();
         }
+    }
+
+    protected boolean isTimeout() {
+        long time = this.getMaxExecutionTime();
+        if (time == -1L) {
+            return false;
+        }
+        return this.getElapsedTime() > time;
     }
 
     protected void throwTimeoutException() {
@@ -169,4 +177,6 @@ public abstract class ServerTask {
      */
     public void onStopped() {
     }
+
+    public abstract Object getIdentityKey();
 }

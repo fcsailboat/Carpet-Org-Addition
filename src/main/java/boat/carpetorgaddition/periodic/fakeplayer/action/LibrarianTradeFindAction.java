@@ -101,7 +101,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         ServerLevel world = ServerUtils.getWorld(fakePlayer);
         if (this.diggingBlock) {
-            BlockExcavator blockExcavator = PlayerComponentCoordinator.getCoordinator(fakePlayer).getBlockExcavator();
+            BlockExcavator blockExcavator = PlayerComponentCoordinator.of(fakePlayer).getBlockExcavator();
             this.inventory.switchToAppropriateTool(world, this.lecternPos);
             ServerUtils.lookAt(fakePlayer, Vec3.atBottomCenterOf(this.lecternPos));
             if (blockExcavator.mining(this.lecternPos, Direction.DOWN)) {
@@ -196,7 +196,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                 .setHover(new TextJoiner()
                         .newline(key
                                 .then("time_taken")
-                                .translate(TextProvider.tickToTime(ServerUtils.getTime(server) - this.startTime)))
+                                .translate(TextProvider.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)))
                         .newline(key
                                 .then("refresh_count")
                                 .translate(this.refreshCount))
@@ -295,7 +295,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
 
     @Override
     protected void onAssignPlayer() {
-        this.caches = ServerComponentCoordinator.getCoordinator(ServerUtils.getServer(this.getFakePlayer())).getLibrarianVillagerPoiCache();
+        this.caches = ServerComponentCoordinator.of(ServerUtils.getServer(this.getFakePlayer())).getLibrarianVillagerPoiCache();
         this.inventory = PlayerStorageInventory.of(this.getFakePlayer());
     }
 

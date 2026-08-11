@@ -4,7 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 
 /**
- * 生成环境错误
+ * 生产环境错误
  *
  * @apiNote 继承了 {@link Error} 而不是{@link Exception}，因为这在非开发环境不应该出现
  */

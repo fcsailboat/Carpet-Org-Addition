@@ -1,8 +1,6 @@
 package boat.carpetorgaddition.wheel.text;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
-import boat.carpetorgaddition.util.CommandUtils;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.NullUnmarked;
@@ -37,10 +35,6 @@ public final class LocalizationKey {
 
     public TextBuilder builder(Object... args) {
         return TextBuilder.of(this.translate(args));
-    }
-
-    public CommandSyntaxException toSyntaxException(Objects... args) {
-        return CommandUtils.createException(this.translate((Object[]) args));
     }
 
     @NullUnmarked

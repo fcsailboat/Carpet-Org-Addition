@@ -83,4 +83,10 @@ public interface FakePlayerPathfinder {
      * @return 目标位置是否是不可到达的
      */
     boolean isInaccessible();
+
+    /**
+     * @return 玩家是否正在移动
+     */
+    @SuppressWarnings("unused")
+    boolean isMoving();
 }

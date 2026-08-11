@@ -68,7 +68,7 @@ public abstract class SettingsManagerMixin {
                 cir.setReturnValue(0);
                 return;
             }
-            RuleConfig ruleConfig = ServerComponentCoordinator.getCoordinator(this.server).getRuleConfig();
+            RuleConfig ruleConfig = ServerComponentCoordinator.of(this.server).getRuleConfig();
             // 保存规则到配置文件
             ruleConfig.put(rule, stringValue);
             TextBuilder builder = LocalizationKey
@@ -87,7 +87,7 @@ public abstract class SettingsManagerMixin {
                 cir.setReturnValue(0);
                 return;
             }
-            RuleConfig ruleConfig = ServerComponentCoordinator.getCoordinator(this.server).getRuleConfig();
+            RuleConfig ruleConfig = ServerComponentCoordinator.of(this.server).getRuleConfig();
             ruleConfig.remove(rule);
             // 将规则设置为默认值
             RuleHelper.resetToDefault(rule, source);
@@ -103,7 +103,7 @@ public abstract class SettingsManagerMixin {
     @WrapOperation(method = "loadConfigurationFromConf", at = @At(value = "INVOKE", target = "Ljava/util/Map;keySet()Ljava/util/Set;"))
     private Set<String> migrate(Map<String, String> map, Operation<Set<String>> original) {
         if (thisManager == CarpetOrgAdditionExtension.getSettingManager()) {
-            RuleConfig ruleConfig = ServerComponentCoordinator.getCoordinator(this.server).getRuleConfig();
+            RuleConfig ruleConfig = ServerComponentCoordinator.of(this.server).getRuleConfig();
             if (ruleConfig.isMigrated()) {
                 ruleConfig.load();
                 return original.call(map);
@@ -133,7 +133,7 @@ public abstract class SettingsManagerMixin {
     @WrapOperation(method = "readSettingsFromConf", at = @At(value = "INVOKE", target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z"))
     private boolean readSettingsFromConf(Map<String, String> instance, Object o, Operation<Boolean> original) {
         if (thisManager == CarpetOrgAdditionExtension.getSettingManager()) {
-            RuleConfig ruleConfig = ServerComponentCoordinator.getCoordinator(this.server).getRuleConfig();
+            RuleConfig ruleConfig = ServerComponentCoordinator.of(this.server).getRuleConfig();
             if (ruleConfig.isMigrated()) {
                 return original.call(instance, o);
             }

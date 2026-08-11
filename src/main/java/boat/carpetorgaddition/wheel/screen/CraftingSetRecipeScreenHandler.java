@@ -52,7 +52,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingMenu implements Unav
         for (int i = 0; i < craftSlots.getContainerSize(); i++) {
             items[i] = craftSlots.getItem(i).getItem();
         }
-        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(this.fakePlayer);
+        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(this.fakePlayer);
         // 设置假玩家合成动作
         setCraftAction(items, coordinator.getFakePlayerActionManager());
         // 关闭GUI后，使用父类的方法让物品回到玩家背包

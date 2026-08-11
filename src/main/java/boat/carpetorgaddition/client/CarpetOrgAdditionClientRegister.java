@@ -12,12 +12,14 @@ import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.debug.client.render.HudDebugRendererRegister;
 import boat.carpetorgaddition.network.s2c.*;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncSlot;
 import boat.carpetorgaddition.wheel.screen.OldVersionPlayerInventoryScreenClientSide;
 import boat.carpetorgaddition.wheel.screen.UnavailableSlotClientSide;
 import boat.carpetorgaddition.wheel.screen.WithButtonScreenClientSide;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -127,7 +129,7 @@ public class CarpetOrgAdditionClientRegister {
      */
     private static void registerRenderer() {
         // 注册路径点渲染器
-        LevelRenderEvents.COLLECT_SUBMITS.register(context -> WaypointRenderer.getInstance().render(context));
+        HudElementRegistry.addFirst(ServerUtils.ofIdentifier("waypoint"), (graphics, deltaTracker) -> WaypointRenderer.getInstance().extractRenderState(graphics, deltaTracker));
         LevelRenderEvents.COLLECT_SUBMITS.register(WorldComponentRenderer::render);
         LibrarianCommodityTooltip.init();
     }

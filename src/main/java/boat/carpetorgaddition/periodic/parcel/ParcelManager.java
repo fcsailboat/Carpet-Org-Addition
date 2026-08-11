@@ -42,7 +42,7 @@ public class ParcelManager {
 
     private void init() {
         // 从文件读取快递信息
-        for (File file : this.worldFormat.listFiles(WorldFormat.NBT_EXTENSIONS)) {
+        for (File file : this.worldFormat.listFiles().stream().filter(WorldFormat.NBT_EXTENSIONS).toList()) {
             String name = IOUtils.getFileNameWithoutExtension(file);
             OptionalInt optional = MathUtils.tryParseInt(name);
             if (optional.isEmpty()) {
@@ -96,7 +96,7 @@ public class ParcelManager {
                 return MailCommand.KEY.then("prompt_collect").translate(parcel.getCount(), parcel.getDisplayName(), clickRun);
             });
         }
-        PageManager pageManager = ServerComponentCoordinator.getCoordinator(this.server).getPageManager();
+        PageManager pageManager = ServerComponentCoordinator.of(this.server).getPageManager();
         CommandSourceStack source = player.createCommandSourceStack();
         PagedCollection collection = pageManager.newPagedCollection(source);
         collection.addContent(messages);

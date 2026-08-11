@@ -37,6 +37,10 @@ public class CarpetOrgAdditionSettings {
      * 是否正在使用引雷三叉戟
      */
     public static final ScopedValue<Boolean> USE_CHANNELING_TRIDENT = ScopedValue.newInstance();
+    /**
+     * 是否正在使用工具物品
+     */
+    public static final ScopedValue<Boolean> USE_TOOL_ITEM_NO_BREAK = ScopedValue.newInstance();
     private static final Set<RuleContext<?>> RULES = new LinkedHashSet<>();
     public static final String ORG = "Org";
     public static final String HIDDEN = "Hidden";
@@ -729,7 +733,7 @@ public class CarpetOrgAdditionSettings {
                         }
                         List<Navigator> list = source.getServer().getPlayerList().getPlayers()
                                 .stream()
-                                .map(PlayerComponentCoordinator::getCoordinator)
+                                .map(PlayerComponentCoordinator::of)
                                 .map(PlayerComponentCoordinator::getNavigatorManager)
                                 .map(NavigatorManager::getNavigator)
                                 .filter(Objects::nonNull)
@@ -1058,6 +1062,25 @@ public class CarpetOrgAdditionSettings {
      */
     public static final RuleAccessor<Boolean> FAKE_PLAYER_AUTO_RESTOCK = register(
             RuleFactory.of("fakePlayerAutoRestock", false)
+                    .addCategories(RuleCategory.SURVIVAL)
+                    .setHidden()
+                    .build()
+    );
+
+    /**
+     * 禁止工具损毁<br>
+     * <p>
+     * 不支持以下场景：
+     * <ul>
+     * <li>矛冲刺连续攻击</li>
+     * <li>盾牌格挡</li>
+     * <li>盔甲防护</li>
+     * </ul>
+     * </p>
+     * 攻击实体时，可以禁止工具损毁，但玩家的攻击伤害属性可能不会立即更新
+     */
+    public static final RuleAccessor<Boolean> NO_TOOL_BREAK = register(
+            RuleFactory.of("noToolBreak", false)
                     .addCategories(RuleCategory.SURVIVAL)
                     .setHidden()
                     .build()

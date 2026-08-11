@@ -30,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(WanderingTraderSpawner.class)
@@ -58,15 +59,15 @@ public abstract class WanderingTraderManagerMixin {
         LoggerAccessor accessor = Loggers.WANDERING_TRADER;
         if (accessor.isEnable() && WanderingTraderSpawnData.spawnCountdownNonNull()) {
             // 获取流浪商人所在的服务器
-            MinecraftServer server = ServerUtils.getServer(trader);
-            if (server == null) {
+            Optional<MinecraftServer> optional = ServerUtils.getServer(trader);
+            if (optional.isEmpty()) {
                 return;
             }
             Set<Map.Entry<String, String>> entries = accessor.getSubscribedOnlinePlayers().entrySet();
             // 普通消息
             Component blockPos = TextProvider.blockPos(trader.blockPosition(), ChatFormatting.GREEN);
             for (Map.Entry<String, String> entry : entries) {
-                ServerPlayer player = server.getPlayerList().getPlayerByName(entry.getKey());
+                ServerPlayer player = optional.get().getPlayerList().getPlayerByName(entry.getKey());
                 if (player == null) {
                     continue;
                 }

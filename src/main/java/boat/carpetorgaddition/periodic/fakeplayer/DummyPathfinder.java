@@ -69,4 +69,9 @@ public final class DummyPathfinder implements FakePlayerPathfinder {
     public boolean isInaccessible() {
         return true;
     }
+
+    @Override
+    public boolean isMoving() {
+        return false;
+    }
 }

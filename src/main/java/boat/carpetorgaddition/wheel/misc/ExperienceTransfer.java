@@ -3,11 +3,14 @@ package boat.carpetorgaddition.wheel.misc;
 import boat.carpetorgaddition.exception.OperationTimeoutException;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
+import it.unimi.dsi.fastutil.ints.Int2FloatMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.concurrent.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -19,11 +22,23 @@ public record ExperienceTransfer(ServerPlayer player) {
     /**
      * 通过添加经验值能合法提升的最高经验等级
      */
-    private static final int MAX_EFFECTIVE_LEVEL = 238609312;
+    public static final int MAX_EFFECTIVE_LEVEL = 238609312;
     /**
      * 经验转移的最大时间
      */
     private static final long TIMEOUT_MILLIS = 5000L;
+    private static final ThreadPoolExecutor EXPERIENCE_CALCULATE = new ThreadPoolExecutor(
+            10,
+            10,
+            1,
+            TimeUnit.MINUTES,
+            new LinkedBlockingQueue<>(),
+            runnable -> Thread.ofPlatform().daemon().name("Experience Calculate").unstarted(runnable)
+    );
+
+    static {
+        EXPERIENCE_CALCULATE.allowCoreThreadTimeOut(true);
+    }
 
     /**
      * @return 获取玩家的经验值数
@@ -260,6 +275,28 @@ public record ExperienceTransfer(ServerPlayer player) {
         return BigDecimal.valueOf(sum).toBigInteger();
     }
 
+    public static CompletableFuture<Int2FloatMap.Entry> calculateUpgradeLevel(BigInteger totalPoints, BooleanSupplier interrupt) {
+        if (totalPoints.signum() < 0) {
+            throw new IllegalArgumentException("totalPoints must not be negative, was: " + totalPoints);
+        }
+        if (totalPoints.signum() == 0) {
+            return CompletableFuture.completedFuture(Int2FloatMap.entry(0, 0F));
+        }
+        return CompletableFuture.supplyAsync(() -> {
+            MockPlayer mock = new MockPlayer();
+            BigInteger total = totalPoints;
+            while (total.compareTo(MAX_INTEGER_VALUE) >= 0) {
+                if (Thread.currentThread().isInterrupted() || interrupt.getAsBoolean()) {
+                    throw new CancellationException("Experience calculation interrupted");
+                }
+                total = total.subtract(MAX_INTEGER_VALUE);
+                mock.addExperience(Integer.MAX_VALUE);
+            }
+            mock.addExperience(total.intValueExact());
+            return Int2FloatMap.entry(mock.getExperienceLevel(), mock.getExperienceProgress());
+        }, EXPERIENCE_CALCULATE);
+    }
+
     /**
      * 计算每个区间的经验总和
      *
@@ -292,6 +329,73 @@ public record ExperienceTransfer(ServerPlayer player) {
 
         public Number getExisting() {
             return existing;
+        }
+    }
+
+    public static class MockPlayer {
+        private int experienceLevel;
+        private int totalExperience;
+        private float experienceProgress;
+
+        public MockPlayer() {
+        }
+
+        public MockPlayer(int level) {
+            this.addExperienceLevels(level);
+        }
+
+        public void addExperienceLevels(int levels) {
+            this.experienceLevel += levels;
+            if (this.experienceLevel < 0) {
+                this.experienceLevel = 0;
+                this.experienceProgress = 0.0F;
+                this.totalExperience = 0;
+            }
+        }
+
+        public int getNextLevelExperience() {
+            if (this.experienceLevel >= 30) {
+                return 112 + (this.experienceLevel - 30) * 9;
+            } else {
+                return this.experienceLevel >= 15 ? 37 + (this.experienceLevel - 15) * 5 : 7 + this.experienceLevel * 2;
+            }
+        }
+
+        public void addExperience(int experience) {
+            this.experienceProgress = this.experienceProgress + (float) experience / (float) this.getNextLevelExperience();
+            this.totalExperience = Mth.clamp(this.totalExperience + experience, 0, Integer.MAX_VALUE);
+            while (this.experienceProgress < 0.0F) {
+                float f = this.experienceProgress * (float) this.getNextLevelExperience();
+                if (this.experienceLevel > 0) {
+                    this.addExperienceLevels(-1);
+                    this.experienceProgress = 1.0F + f / (float) this.getNextLevelExperience();
+                } else {
+                    this.addExperienceLevels(-1);
+                    this.experienceProgress = 0.0F;
+                }
+            }
+            while (this.experienceProgress >= 1.0F) {
+                this.experienceProgress = (this.experienceProgress - 1.0F) * (float) this.getNextLevelExperience();
+                this.addExperienceLevels(1);
+                this.experienceProgress = this.experienceProgress / (float) this.getNextLevelExperience();
+            }
+        }
+
+        public int getPoint() {
+            return Mth.floor(this.experienceProgress * (float) this.getNextLevelExperience());
+        }
+
+        public void clearExperience() {
+            this.experienceLevel = 0;
+            this.experienceProgress = 0;
+        }
+
+        public int getExperienceLevel() {
+            return experienceLevel;
+        }
+
+        public float getExperienceProgress() {
+            return this.experienceProgress;
         }
     }
 }

@@ -36,7 +36,7 @@ public class CreeperCommand extends AbstractServerCommand {
         ServerPlayer targetPlayer = CommandUtils.getArgumentPlayer(context);
         CommandSourceStack source = context.getSource();
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerTaskManager manager = ServerComponentCoordinator.getCoordinator(server).getServerTaskManager();
+        ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         // 添加苦力怕爆炸任务
         manager.addTask(new CreeperExplosionTask(source, targetPlayer));
         ServerPlayer sourcePlayer = source.getPlayer();

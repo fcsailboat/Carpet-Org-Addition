@@ -3,9 +3,11 @@ package boat.carpetorgaddition.client.render.waypoint;
 import boat.carpetorgaddition.client.CarpetOrgAdditionClient;
 import boat.carpetorgaddition.client.util.ClientKeyBindingUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 public class HighlightWaypoint extends Waypoint {
     /**
@@ -22,11 +24,11 @@ public class HighlightWaypoint extends Waypoint {
     }
 
     @Override
-    public void render(LevelRenderContext context) {
+    public void render(GuiGraphicsExtractor graphics, Matrix4fc modelView, Matrix4f projection) {
         if (ClientKeyBindingUtils.isPressed(CarpetOrgAdditionClient.CLEAR_WAYPOINT) && ClientUtils.getCurrentScreen() == null) {
             this.stop();
         }
-        super.render(context);
+        super.render(graphics, modelView, projection);
     }
 
     @Override

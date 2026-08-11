@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.task.ServerTask;
+import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.periodic.task.search.*;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -33,6 +34,7 @@ import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -124,7 +126,15 @@ public class FinderCommand extends AbstractServerCommand {
                                 .and(PermissionManager.registerHiddenCommand("finder.worldEater", PermissionLevel.PASS)))
                         .then(Commands.argument("from", BlockPosArgument.blockPos())
                                 .then(Commands.argument("to", BlockPosArgument.blockPos())
-                                        .executes(this::mayAffectWorldEater)))));
+                                        .executes(this::mayAffectWorldEater))))
+                .then(Commands.literal("xp")
+                        // 需要解决如何从未知名称的玩家中提取经验的问题
+                        .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
+                        .then(Commands.literal("from")
+                                .then(Commands.literal("offline_player")
+                                        .executes(this::searchExperienceFromOfflinePlayer))))
+                .then(Commands.literal("stop")
+                        .executes(this::stop)));
     }
 
     private SuggestionProvider<CommandSourceStack> suggestionDefaultDistance() {
@@ -145,9 +155,9 @@ public class FinderCommand extends AbstractServerCommand {
         BlockEntityTraverser traverser = new BlockEntityTraverser(world, sourceBlockPos, range);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
-        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source);
+        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source, player);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -165,9 +175,9 @@ public class FinderCommand extends AbstractServerCommand {
         BlockEntityTraverser traverser = new BlockEntityTraverser(world, from, to);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
-        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source);
+        ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source, player);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -178,9 +188,9 @@ public class FinderCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
         CommandSourceStack source = context.getSource();
-        ServerTask task = new OfflinePlayerSearchTask(source, predicate, player);
+        ServerTask task = new OfflinePlayerInventorySearchTask(source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -197,9 +207,9 @@ public class FinderCommand extends AbstractServerCommand {
         this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         CommandSourceStack source = context.getSource();
-        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate);
+        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -218,9 +228,9 @@ public class FinderCommand extends AbstractServerCommand {
         this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofWorldEater();
         CommandSourceStack source = context.getSource();
-        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate);
+        BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -237,9 +247,9 @@ public class FinderCommand extends AbstractServerCommand {
         BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         // 添加查找任务
         CommandSourceStack source = context.getSource();
-        BlockSearchTask task = new BlockSearchTask(ServerUtils.getWorld(player), player.blockPosition(), traverser, source, predicate);
+        BlockSearchTask task = new BlockSearchTask(ServerUtils.getWorld(player), player.blockPosition(), traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -258,10 +268,10 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, range);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
-        TradeItemSearchTask task = new TradeItemSearchTask(world, traverser, sourcePos, predicate, source);
+        TradeItemSearchTask task = new TradeItemSearchTask(world, traverser, sourcePos, predicate, source, player);
         // 向任务管理器添加任务
         MinecraftServer server = ServerUtils.getServer(source);
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;
     }
 
@@ -272,7 +282,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取执行命令的玩家
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取需要查找的附魔
-        Enchantment enchantment = ResourceArgument.getEnchantment(context, "enchantment").value();
+        Holder<Enchantment> enchantment = ResourceArgument.getEnchantment(context, "enchantment");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         EnchantedBookPredicate predicate = new EnchantedBookPredicate(server, enchantment);
@@ -282,9 +292,30 @@ public class FinderCommand extends AbstractServerCommand {
         // 查找范围
         BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, range);
         this.checkBoxSize(traverser);
-        TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate);
+        TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate, player);
         // 向任务管理器添加任务
-        ServerComponentCoordinator.getCoordinator(server).getServerTaskManager().addTask(task);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
+        return 1;
+    }
+
+    private int searchExperienceFromOfflinePlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = CommandUtils.getSourcePlayer(source);
+        MinecraftServer server = ServerUtils.getServer(player);
+        OfflinePlayerExperienceSearchTask task = new OfflinePlayerExperienceSearchTask(source, player);
+        ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
+        return 1;
+    }
+
+    private int stop(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = CommandUtils.getSourcePlayer(source);
+        MinecraftServer server = ServerUtils.getServer(player);
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
+        ServerTaskManager taskManager = coordinator.getServerTaskManager();
+        ServerSearchTask task = taskManager.getServerTask(ServerSearchTask.ofIdentityKey(player), ServerSearchTask.class)
+                .orElseThrow(() -> CommandUtils.createException(KEY.then("not_canceled").translate()));
+        task.cancel();
         return 1;
     }
 

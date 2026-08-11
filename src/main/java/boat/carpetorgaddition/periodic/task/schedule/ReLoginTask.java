@@ -24,6 +24,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Contract;
 
+import java.util.UUID;
+
 public class ReLoginTask extends PlayerScheduleTask {
     // 假玩家名
     private final FakePlayerSerializer serializer;
@@ -38,6 +40,7 @@ public class ReLoginTask extends PlayerScheduleTask {
     // 假玩家重新上线的倒计时
     private int canSpawn = 2;
     private final FakePlayerSpawner spawner;
+    private final UUID uuid;
     public static final LocalizationKey KEY = PlayerManagerCommand.SCHEDULE.then("relogin");
 
     public ReLoginTask(EntityPlayerMPFake fakePlayer, int interval, MinecraftServer server, CommandSourceStack source) {
@@ -48,6 +51,7 @@ public class ReLoginTask extends PlayerScheduleTask {
         this.server = server;
         this.source = source;
         this.spawner = this.serializer.getSpawner(this.server).setSilence(true).setPosition(null);
+        this.uuid = fakePlayer.getUUID();
     }
 
     @Override
@@ -143,6 +147,10 @@ public class ReLoginTask extends PlayerScheduleTask {
     @Contract(pure = true)
     public String getPlayerName() {
         return this.serializer.getName();
+    }
+
+    public UUID getUuid() {
+        return this.uuid;
     }
 
     @Override

@@ -57,7 +57,7 @@ public class FakePlayerActionManager {
 
     // 从另一个玩家浅拷贝此动作管理器
     public void setActionFromOldPlayer(EntityPlayerMPFake oldPlayer) {
-        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.getCoordinator(oldPlayer);
+        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(oldPlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         this.setAction(actionManager.getAction());
         this.action.setFakePlayer(this.fakePlayer);

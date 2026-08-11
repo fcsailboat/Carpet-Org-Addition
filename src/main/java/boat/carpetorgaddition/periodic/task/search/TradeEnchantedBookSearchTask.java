@@ -11,6 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -25,8 +26,8 @@ public class TradeEnchantedBookSearchTask extends AbstractTradeSearchTask {
     private final EnchantedBookPredicate predicate;
     private static final LocalizationKey KEY = TRADE.then("enchanted_book");
 
-    public TradeEnchantedBookSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source, EnchantedBookPredicate predicate) {
-        super(world, blockPosTraverser, sourcePos, source);
+    public TradeEnchantedBookSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source, EnchantedBookPredicate predicate, ServerPlayer player) {
+        super(world, blockPosTraverser, sourcePos, source, player);
         this.predicate = predicate;
     }
 

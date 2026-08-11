@@ -3,10 +3,11 @@ package boat.carpetorgaddition.wheel.screen;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory.ButtonInventory;
-import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory.StopButtonInventory;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -19,6 +20,9 @@ import java.util.Map;
 @NullMarked
 public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements BackgroundSpriteSyncServer {
     private final WithButtonPlayerInventory inventory;
+    private long lastClickTime = -1L;
+    private boolean clicked = false;
+    private final MinecraftServer server;
     private static final Map<Integer, Identifier> BACKGROUND_SPRITE_MAP = Map.of(
             1, InventoryMenu.EMPTY_ARMOR_SLOT_HELMET,
             2, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
@@ -28,23 +32,39 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
     );
 
     public WithButtonPlayerInventoryScreenHandler(int containerId, ServerPlayer interviewee, ServerPlayer visitor) {
-        WithButtonPlayerInventory inventory = PlayerComponentCoordinator.getCoordinator(interviewee).getWithButtonPlayerInventory();
+        WithButtonPlayerInventory inventory = PlayerComponentCoordinator.of(interviewee).getWithButtonPlayerInventory();
         super(MenuType.GENERIC_9x6, containerId, visitor.getInventory(), inventory, 6);
         this.inventory = inventory;
+        this.server = ServerUtils.getServer(interviewee);
     }
 
     @Override
     public void clicked(int slotIndex, int buttonNum, ContainerInput containerInput, Player player) {
         Container container = this.inventory.getSubInventory(slotIndex);
-        if (buttonNum == FakePlayerUtils.PICKUP_RIGHT_CLICK && container instanceof StopButtonInventory) {
-            this.inventory.sort();
-            return;
-        }
+        ClickType clickType = ClickType.of(buttonNum);
         if (container instanceof ButtonInventory buttonInventory) {
-            buttonInventory.onClickd(buttonInventory == this.inventory.getHotbar() ? slotIndex - 9 : 0, this.inventory.getActionPack());
+            if (ServerUtils.getCurrentGameTick(this.server) != this.lastClickTime) {
+                this.lastClickTime = ServerUtils.getCurrentGameTick(this.server);
+                this.clicked = false;
+            } else {
+                if (this.clicked) {
+                    return;
+                }
+                this.stopAllAction();
+                this.clicked = true;
+                return;
+            }
+            int index = buttonInventory == this.inventory.getHotbar() ? slotIndex - 9 : 0;
+            buttonInventory.onClicked(clickType, index, this.inventory.getActionPack());
             return;
         }
         super.clicked(slotIndex, buttonNum, containerInput, player);
+    }
+
+    private void stopAllAction() {
+        if (this.inventory.getSubInventory(0) instanceof WithButtonPlayerInventory.StopButtonInventory stopButton) {
+            stopButton.onClicked(ClickType.LEFT_CLICK, 0, this.inventory.getActionPack());
+        }
     }
 
     /**
@@ -121,5 +141,19 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
     @Override
     public Map<Integer, Identifier> getBackgroundSprite() {
         return BACKGROUND_SPRITE_MAP;
+    }
+
+    public enum ClickType {
+        LEFT_CLICK,
+        RIGHT_CLICK,
+        OTHER_CLICK;
+
+        private static ClickType of(int buttonId) {
+            return switch (buttonId) {
+                case FakePlayerUtils.PICKUP_LEFT_CLICK -> LEFT_CLICK;
+                case FakePlayerUtils.PICKUP_RIGHT_CLICK -> RIGHT_CLICK;
+                default -> OTHER_CLICK;
+            };
+        }
     }
 }

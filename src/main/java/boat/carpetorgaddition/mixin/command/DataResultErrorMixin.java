@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.mixin.command;
 
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerSearchTask;
+import boat.carpetorgaddition.periodic.task.search.AbstractOfflinePlayerSearchTask;
+import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,9 +18,9 @@ public class DataResultErrorMixin<R> {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void init(Supplier<String> messageSupplier, Optional<R> partialValue, Lifecycle lifecycle, CallbackInfo ci) {
-        if (OfflinePlayerSearchTask.CURRENT_UUID.isBound()) {
-            UUID uuid = OfflinePlayerSearchTask.CURRENT_UUID.get();
-            OfflinePlayerSearchTask.addCorruptedPlayerUUID(uuid);
+        if (OfflinePlayerInventorySearchTask.CURRENT_UUID.isBound()) {
+            UUID uuid = OfflinePlayerInventorySearchTask.CURRENT_UUID.get();
+            AbstractOfflinePlayerSearchTask.addCorruptedPlayerUUID(uuid);
         }
     }
 }

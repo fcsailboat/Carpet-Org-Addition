@@ -3,6 +3,7 @@ package boat.carpetorgaddition.wheel.predicate;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -13,12 +14,10 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import java.util.function.Predicate;
 
 public class EnchantedBookPredicate implements Predicate<ItemStack> {
-    private final MinecraftServer server;
-    private final Enchantment enchantment;
+    private final Holder<Enchantment> enchantment;
     private final String id;
 
-    public EnchantedBookPredicate(MinecraftServer server, Enchantment enchantment) {
-        this.server = server;
+    public EnchantedBookPredicate(MinecraftServer server, Holder<Enchantment> enchantment) {
         this.enchantment = enchantment;
         this.id = ServerUtils.getId(server, this.enchantment)
                 .map(Identifier::toString)
@@ -31,7 +30,7 @@ public class EnchantedBookPredicate implements Predicate<ItemStack> {
     }
 
     public int getLevel(ItemStack itemStack) {
-        int level = EnchantmentUtils.getLevel(this.server, this.enchantment, itemStack);
+        int level = EnchantmentUtils.getLevel(this.enchantment, itemStack);
         if (level > 0) {
             return level;
         }
