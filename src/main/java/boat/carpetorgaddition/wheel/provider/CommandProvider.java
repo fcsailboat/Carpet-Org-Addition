@@ -20,42 +20,33 @@ public class CommandProvider {
     /**
      * 接收一件快递
      */
-    public static String collectParcel(int id, boolean force) {
+    public static String collectParcel(int id) {
         StringJoiner joiner = new StringJoiner(" ", "/", "");
         joiner.add(getCommandName(MailCommand.class))
                 .add("collect")
                 .add(String.valueOf(id));
-        if (force) {
-            joiner.add("true");
-        }
         return joiner.toString();
     }
 
     /**
      * 撤回一件快递
      */
-    public static String recallParcel(int id, boolean force) {
+    public static String recallParcel(int id) {
         StringJoiner joiner = new StringJoiner(" ", "/", "");
         joiner.add(getCommandName(MailCommand.class))
                 .add("recall")
                 .add(String.valueOf(id));
-        if (force) {
-            joiner.add("true");
-        }
         return joiner.toString();
     }
 
     /**
      * 拦截一件快递
      */
-    public static String interceptParcel(int id, boolean force) {
+    public static String interceptParcel(int id) {
         StringJoiner joiner = new StringJoiner(" ", "/", "");
         joiner.add(getCommandName(MailCommand.class))
                 .add("intercept")
                 .add(String.valueOf(id));
-        if (force) {
-            joiner.add("true");
-        }
         return joiner.toString();
     }
 
