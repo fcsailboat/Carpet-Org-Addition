@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.client.render;
 
-import boat.carpetorgaddition.util.MathUtils;
+import boat.carpetorgaddition.wheel.ColorValue;
 import net.minecraft.ChatFormatting;
 
 public interface RgbaSettable {
@@ -11,7 +11,7 @@ public interface RgbaSettable {
         if (color == null) {
             this.setRgba(-1);
         } else {
-            this.setRgba(MathUtils.rgba(color, 255));
+            this.setRgba(ColorValue.fromRgba(color, 255).toRgba());
         }
     }
 }

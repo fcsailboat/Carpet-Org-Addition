@@ -2,8 +2,8 @@ package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.client.util.ClientRenderUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
-import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.ColorValue;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import it.unimi.dsi.fastutil.floats.Float2FloatMap;
 import net.minecraft.client.Camera;
@@ -117,8 +117,8 @@ public abstract class Waypoint {
         graphics.pose().pushMatrix();
         graphics.pose().translate(-widthHeight / 2F, -widthHeight / 2F);
         int alpha = (int) (this.getRenderAlpha() * 255);
-        int rgba = MathUtils.rgba(CommonColors.WHITE, alpha);
-        int argb = MathUtils.rgbaToArgb(rgba);
+        ColorValue color = ColorValue.fromRgba(CommonColors.WHITE, alpha);
+        int argb = color.toArgb();
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, 0, 0, widthHeight, widthHeight, argb);
         graphics.pose().popMatrix();
         if (this.isWatching(width, height, entry)) {
