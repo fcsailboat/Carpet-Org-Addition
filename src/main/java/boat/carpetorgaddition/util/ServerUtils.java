@@ -21,13 +21,20 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -160,6 +167,10 @@ public class ServerUtils {
         world.playSound(null, blockPos, soundEvent, soundCategory, 1F, 1F);
     }
 
+    public static void playSound(Level world, Vec3 vec3, SoundEvent event, SoundSource source) {
+        world.playSound(null, vec3.x(), vec3.y(), vec3.z(), event, source);
+    }
+
     /**
      * 在指定玩家位置播放一个音效
      *
@@ -217,6 +228,33 @@ public class ServerUtils {
         // 不要在客户端传送实体
         if (target.level() instanceof ServerLevel world) {
             teleport(source, world, target.getX(), target.getY(), target.getZ(), target.getYRot(), target.getXRot());
+        }
+    }
+
+    public static void teleport(Entity entity, ServerLevel world, Vec3 pos) {
+        teleport(entity, world, pos.x(), pos.y(), pos.z(), entity.getYRot(), entity.getXRot());
+    }
+
+    /**
+     * 将一个实体传送到目标维度的指定位置并显示粒子和播放音效
+     */
+    public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos) {
+        teleport(entity, world, pos);
+        world.broadcastEntityEvent(entity, EntityEvent.TELEPORT);
+        SoundEvent soundEvent = switch (entity) {
+            case Player _ -> SoundEvents.PLAYER_TELEPORT;
+            case Fox _ -> SoundEvents.FOX_TELEPORT;
+            case Shulker _ -> SoundEvents.SHULKER_TELEPORT;
+            case EnderMan _ -> SoundEvents.ENDERMAN_TELEPORT;
+            default -> SoundEvents.CHORUS_FRUIT_TELEPORT;
+        };
+        playSound(world, pos, soundEvent, entity.getSoundSource());
+        entity.resetFallDistance();
+    }
+
+    public static void teleportWithEffect(Entity entity, Vec3 pos) {
+        if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
+            teleportWithEffect(entity, world, pos);
         }
     }
 
@@ -336,6 +374,22 @@ public class ServerUtils {
 
     public static Vec3 getBlockBottomCenter(BlockPos blockPos) {
         return new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
+    }
+
+    public static ChunkPos getChunkPos(Entity entity) {
+        return entity.chunkPosition();
+    }
+
+    public static BlockPos toOverworldBlockPos(BlockPos blockPos) {
+        int x = blockPos.getX() * 8;
+        int z = blockPos.getZ() * 8;
+        return new BlockPos(x, blockPos.getY(), z);
+    }
+
+    public static BlockPos toTheNetherBlockPos(BlockPos blockPos) {
+        int x = (int) Math.round(blockPos.getX() / 8.0);
+        int z = (int) Math.round(blockPos.getZ() / 8.0);
+        return new BlockPos(x, blockPos.getY(), z);
     }
 
     public static Component getName(Item item) {
@@ -518,10 +572,6 @@ public class ServerUtils {
         }
     }
 
-    public static String currentTimeFormat() {
-        return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
-    }
-
     public static Identifier ofIdentifier(String id) {
         return Identifier.fromNamespaceAndPath(CarpetOrgAdditionConstants.MOD_ID, id);
     }
@@ -530,10 +580,18 @@ public class ServerUtils {
         server.getPlayerList().getPlayers().forEach(consumer);
     }
 
+    public static void forEachRealPlayer(MinecraftServer server, Consumer<ServerPlayer> consumer) {
+        server.getPlayerList().getPlayers().stream().filter(PlayerUtils::isRealPlayer).forEach(consumer);
+    }
+
+    public static String getCurrentSystemTimeFormat() {
+        return LocalDateTime.now().format(FileNameDateFormatter.FORMATTER);
+    }
+
     /**
      * @return 获取当前游戏刻
      */
-    public static long getTime(MinecraftServer server) {
+    public static long getCurrentGameTick(MinecraftServer server) {
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         return level == null ? -1L : level.getGameTime();
     }

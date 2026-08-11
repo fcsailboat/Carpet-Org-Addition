@@ -11,6 +11,9 @@ public interface EntityPlayerActionPackAccessor {
     @Accessor(remap = false)
     Map<EntityPlayerActionPack.ActionType, EntityPlayerActionPack.Action> getActions();
 
+    @Accessor(value = "forward", remap = false)
+    float getForward();
+
     @Mixin(EntityPlayerActionPack.Action.class)
     interface ActionAccessor {
         @Accessor(value = "isContinuous", remap = false)

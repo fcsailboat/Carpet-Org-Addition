@@ -33,7 +33,7 @@ public class Waypoint {
     private BlockPos anotherBlockPos;
     private final Level world;
     @NonNull
-    private MetaComment comment = new MetaComment();
+    private String comment = "";
     private final String creator;
     private final MinecraftServer server;
     private final String name;
@@ -66,7 +66,7 @@ public class Waypoint {
         // 路径点的创建者
         json.addProperty("creator", this.creator);
         // 路径点的注释
-        json.addProperty("comment", this.comment.getComment());
+        json.addProperty("comment", this.comment);
         // 路径点的另一个路径点坐标
         JsonObject anotherPos = new JsonObject();
         if (this.anotherBlockPos != null) {
@@ -163,7 +163,7 @@ public class Waypoint {
         if (this.comment.isEmpty()) {
             return builder.build();
         }
-        builder.setHover(this.comment.getText());
+        builder.setHover(this.comment);
         return builder.build();
     }
 
@@ -172,7 +172,7 @@ public class Waypoint {
     }
 
     public void setComment(String comment) {
-        this.comment = comment == null || comment.isEmpty() ? new MetaComment() : new MetaComment(comment);
+        this.comment = comment == null || comment.isBlank() ? "" : comment;
     }
 
     public void setBlockPos(BlockPos blockPos) {

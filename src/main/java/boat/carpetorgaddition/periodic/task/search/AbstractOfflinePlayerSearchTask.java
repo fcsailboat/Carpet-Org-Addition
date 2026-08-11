@@ -416,8 +416,10 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
     private WorldFormat getBackupFileDirectory() {
         if (this.backupFileDirectory == null) {
             synchronized (this.backupInitLock) {
-                String time = LocalDateTime.now().format(FORMATTER) + "_" + ServerUtils.getMinecraftDataVersion();
-                this.backupFileDirectory = this.worldFormat.resolve(time);
+                if (this.backupFileDirectory == null) {
+                    String time = LocalDateTime.now().format(FORMATTER) + "_" + ServerUtils.getMinecraftDataVersion();
+                    this.backupFileDirectory = this.worldFormat.resolve(time);
+                }
             }
         }
         return this.backupFileDirectory;

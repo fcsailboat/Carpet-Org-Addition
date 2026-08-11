@@ -476,7 +476,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 .map(Optional::get)
                 .filter(player -> player instanceof EntityPlayerMPFake)
                 .map(player -> (EntityPlayerMPFake) player).toList();
-        players.forEach(PlayerUtils::silenceLogout);
+        players.forEach(PlayerUtils::exitGameSilently);
         sendPlayerLeaveMessage(server, players.size());
         return players.size();
     }
@@ -833,7 +833,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     private int killPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        PlayerUtils.kill(fakePlayer);
+        PlayerUtils.exitGame(fakePlayer);
         return 1;
     }
 
@@ -905,7 +905,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             if (Commands.LEVEL_OWNERS.check(source.permissions())) {
                 return;
             }
-            throw key.then("permission").toSyntaxException();
+            throw CommandUtils.createException(key.then("permission").translate());
         }
         String name = StringArgumentType.getString(context, "name");
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
@@ -968,7 +968,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         CommandSourceStack serverSource = server.createCommandSourceStack();
         ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         return batchSpawn(context, at, fakePlayer -> {
-            DelayedTask task = new DelayedTask(source, 30, () -> PlayerUtils.silenceLogout(fakePlayer));
+            DelayedTask task = new DelayedTask(source, 30, () -> PlayerUtils.exitGameSilently(fakePlayer));
             CommandUtils.handlingException(() -> taskManager.addTask(task), serverSource);
         });
     }
@@ -1057,7 +1057,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 .map(Optional::get)
                 .filter(player -> player instanceof EntityPlayerMPFake)
                 .map(player -> (EntityPlayerMPFake) player)
-                .map(fakePlayer -> (Runnable) () -> PlayerUtils.silenceLogout(fakePlayer))
+                .map(fakePlayer -> (Runnable) () -> PlayerUtils.exitGameSilently(fakePlayer))
                 .toList();
         if (list.isEmpty()) {
             return 0;

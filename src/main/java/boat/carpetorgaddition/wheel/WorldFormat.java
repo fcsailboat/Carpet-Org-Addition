@@ -60,7 +60,7 @@ public class WorldFormat {
             return;
         }
         // 如果这个文件夹不存在并且没有创建成功，将信息写入日志
-        CarpetOrgAddition.LOGGER.error("Failed to create directory {}", this.directory);
+        CarpetOrgAddition.LOGGER.warn("Failed to create directory {}", this.directory);
     }
 
     private WorldFormat(WorldFormat worldFormat, String child) {
@@ -80,7 +80,7 @@ public class WorldFormat {
         if (fileName.contains(".")) {
             return new File(this.directory, fileName);
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("File name must contain an extension: " + fileName);
     }
 
     /**

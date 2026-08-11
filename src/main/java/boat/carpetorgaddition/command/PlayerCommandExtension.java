@@ -19,11 +19,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.Mannequin;
 import net.minecraft.world.item.component.ResolvableProfile;
@@ -80,23 +78,18 @@ public class PlayerCommandExtension {
         return CommandUtils.createException(INVENTORY.then("no_file_found").translate());
     }
 
-    // 传送假玩家
+    /**
+     * 传送假玩家
+     */
     private static int fakePlayerTeleport(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         ServerPlayer fakePlayer = getPlayer(context);
         // 断言指定玩家为假玩家
         CommandUtils.requireFakePlayer(fakePlayer);
-        // 在假玩家位置播放潜影贝传送音效
-        ServerUtils.getWorld(fakePlayer).playSound(null, fakePlayer.getX(), fakePlayer.getY(), fakePlayer.getZ(),
-                SoundEvents.SHULKER_TELEPORT, fakePlayer.getSoundSource(), 1.0f, 1.0f);
         // 传送玩家
-        ServerUtils.teleport(fakePlayer, player);
-        // 获取假玩家名和命令执行玩家名
-        Component fakePlayerName = fakePlayer.getDisplayName();
-        Component playerName = player.getDisplayName();
-        // 在聊天栏显示命令反馈
+        ServerUtils.teleportWithEffect(fakePlayer, ServerUtils.getWorld(player), ServerUtils.getFootPos(player));
         LocalizationKey key = LocalizationKey.literal("commands.teleport.success.entity.single");
-        MessageUtils.sendMessage(context.getSource(), key.translate(fakePlayerName, playerName));
+        MessageUtils.sendMessage(context.getSource(), key.translate(fakePlayer.getDisplayName(), player.getDisplayName()));
         return 1;
     }
 

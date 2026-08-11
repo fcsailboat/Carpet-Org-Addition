@@ -196,7 +196,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                 .setHover(new TextJoiner()
                         .newline(key
                                 .then("time_taken")
-                                .translate(TextProvider.tickToTime(ServerUtils.getTime(server) - this.startTime)))
+                                .translate(TextProvider.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)))
                         .newline(key
                                 .then("refresh_count")
                                 .translate(this.refreshCount))

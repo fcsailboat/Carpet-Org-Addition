@@ -45,18 +45,15 @@ public class FakePlayerResidents {
                 .filter(file -> file.getName().startsWith(RESIDENT + "_"))
                 .max((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName()))
                 .flatMap(file -> {
-                    JsonObject json;
                     try {
-                        json = IOUtils.loadJson(file);
-                    } catch (IOException e) {
-                        return Optional.empty();
-                    }
-                    try {
+                        JsonObject json = IOUtils.loadJson(file);
                         return Optional.of(this.listSerializer(json));
-                    } catch (RuntimeException e) {
+                    } catch (IOException | RuntimeException e) {
+                        CarpetOrgAddition.LOGGER.warn("Failed to load fake player resident data from file: {}", file.getAbsolutePath(), e);
                         return Optional.empty();
                     }
-                }).orElse(List.of());
+                })
+                .orElse(List.of());
         this.previous = new HashSet<>(list);
     }
 
@@ -70,26 +67,15 @@ public class FakePlayerResidents {
 
     public Set<FakePlayerSerializer> get(@Nullable String time) {
         if (time == null) {
-            if (this.previous == null) {
-                return Set.of();
-            }
-            try {
-                return this.previous;
-            } catch (RuntimeException e) {
-                return Set.of();
-            }
+            return Objects.requireNonNullElseGet(this.previous, Set::of);
         }
         File file = this.worldFormat.file(this.getFileName(time));
         if (file.isFile()) {
-            JsonObject json;
             try {
-                json = IOUtils.loadJson(file);
-            } catch (IOException e) {
-                return Set.of();
-            }
-            try {
+                JsonObject json = IOUtils.loadJson(file);
                 return new HashSet<>(this.listSerializer(json));
-            } catch (RuntimeException e) {
+            } catch (IOException | RuntimeException e) {
+                CarpetOrgAddition.LOGGER.warn("Failed to load fake player resident data from file: {}", file.getAbsolutePath(), e);
                 return Set.of();
             }
         }
@@ -97,7 +83,9 @@ public class FakePlayerResidents {
     }
 
     private List<FakePlayerSerializer> listSerializer(JsonObject json) {
-        return json.getAsJsonObject("players").entrySet().stream()
+        return json.getAsJsonObject("players")
+                .entrySet()
+                .stream()
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().getAsJsonObject()))
                 .map(entry -> new FakePlayerSerializer(entry.getValue(), entry.getKey(), null))
                 .toList();
@@ -143,7 +131,7 @@ public class FakePlayerResidents {
         }
         serializers.forEach(serializer -> players.add(serializer.getName(), serializer.toJson()));
         json.add("players", players);
-        String time = ServerUtils.currentTimeFormat();
+        String time = ServerUtils.getCurrentSystemTimeFormat();
         String fileName = getFileName(time);
         if (this.file == null) {
             this.file = this.worldFormat.file(fileName);

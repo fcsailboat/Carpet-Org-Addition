@@ -43,8 +43,8 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
         Container container = this.inventory.getSubInventory(slotIndex);
         ClickType clickType = ClickType.of(buttonNum);
         if (container instanceof ButtonInventory buttonInventory) {
-            if (ServerUtils.getTime(this.server) != this.lastClickTime) {
-                this.lastClickTime = ServerUtils.getTime(this.server);
+            if (ServerUtils.getCurrentGameTick(this.server) != this.lastClickTime) {
+                this.lastClickTime = ServerUtils.getCurrentGameTick(this.server);
                 this.clicked = false;
             } else {
                 if (this.clicked) {

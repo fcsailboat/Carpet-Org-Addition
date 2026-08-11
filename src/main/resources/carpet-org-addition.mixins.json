@@ -105,6 +105,13 @@
     "rule.forceopencontainer.ChestBlockMixin",
     "rule.forceopencontainer.EnderChestBlockMixin",
     "rule.forceopencontainer.ShulkerBoxBlockMixin",
+    "rule.notoolbreak.BlockBehaviourMixin",
+    "rule.notoolbreak.InventoryMixin",
+    "rule.notoolbreak.ItemStackMixin",
+    "rule.notoolbreak.LivingEntityMixin",
+    "rule.notoolbreak.PlayerMixin",
+    "rule.notoolbreak.ServerPlayerGameModeMixin",
+    "rule.notoolbreak.UseOnContextMixin",
     "rule.openplayerinventory.PlayerMixin",
     "rule.quickshulker.ItemMixin",
     "rule.quickshulker.ScreenHandlerMixin",
@@ -144,6 +151,7 @@
     "render.client.GameRendererMixin",
     "rule.client.carpet.SettingsManagerMixin",
     "rule.disableanvilexpensive.client.AnvilScreenMixin",
+    "rule.notoolbreak.MultiPlayerGameModeMixin",
     "rule.quickshulker.CreativeScreenHandlerMixin"
   ],
   "injectors": {

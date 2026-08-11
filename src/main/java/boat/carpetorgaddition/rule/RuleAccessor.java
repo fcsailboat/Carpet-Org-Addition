@@ -6,12 +6,13 @@ import carpet.api.settings.CarpetRule;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.function.Supplier;
 
+@NullMarked
 public final class RuleAccessor<T> {
     private final Supplier<T> value;
     private final BuiltRule<T> rule;
@@ -30,7 +31,7 @@ public final class RuleAccessor<T> {
         return this.value.get();
     }
 
-    public T value(@NonNull ServerPlayer player) {
+    public T value(ServerPlayer player) {
         if (this.control != null && this.control.allowCustomSwitch()) {
             return this.control.getCustomRuleValue(player);
         }

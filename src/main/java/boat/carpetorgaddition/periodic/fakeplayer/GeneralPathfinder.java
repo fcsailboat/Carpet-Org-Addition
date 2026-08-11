@@ -2,6 +2,7 @@ package boat.carpetorgaddition.periodic.fakeplayer;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.logger.Loggers;
+import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccessor;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
@@ -121,7 +122,8 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         boolean onGround = this.getFakePlayer().onGround();
         if (onGround) {
             if (this.directTravelTime <= 0) {
-                this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.FEET, current);
+                Vec3 target = new Vec3(current.x(), Math.min(current.y(), this.getFakePlayer().getY()), current.z());
+                this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.FEET, target);
             }
         } else if (this.getFakePlayer().getDeltaMovement().y() < 0) {
             // 玩家跳跃时，也会执行到这里
@@ -324,6 +326,13 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
 
     private EntityPlayerMPFake getFakePlayer() {
         return this.fakePlayerSupplier.get();
+    }
+
+    @Override
+    public boolean isMoving() {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        EntityPlayerActionPack actionPack = PlayerUtils.getActionPack(fakePlayer);
+        return ((EntityPlayerActionPackAccessor) actionPack).getForward() != 0F;
     }
 
     /**
