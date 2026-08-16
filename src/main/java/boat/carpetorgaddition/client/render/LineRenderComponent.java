@@ -10,11 +10,11 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
-public class LineRenderComponent implements WorldRenderComponent, RgbaSettable, WidthSettable {
+public class LineRenderComponent implements WorldRenderComponent, RgbaSettable {
     private final Vec3 from;
     private final Vec3 to;
     private final ColorValue color = ColorValue.of();
-    private float width = 1F;
+    private static final float WIDTH = 1F;
 
     public LineRenderComponent(Vec3 from, Vec3 to) {
         this.from = from;
@@ -32,11 +32,11 @@ public class LineRenderComponent implements WorldRenderComponent, RgbaSettable, 
             buffer.addVertex(poseStack, MathUtils.move(this.from, cameraPos, 0.001F).toVector3f())
                     .setColor(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), this.color.getAlpha())
                     .setNormal(poseStack, normal)
-                    .setLineWidth(this.width);
+                    .setLineWidth(WIDTH);
             buffer.addVertex(poseStack, MathUtils.move(this.to, cameraPos, 0.001F).toVector3f())
                     .setColor(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), this.color.getAlpha())
                     .setNormal(poseStack, normal)
-                    .setLineWidth(this.width);
+                    .setLineWidth(WIDTH);
         });
         stack.popPose();
     }
@@ -49,10 +49,5 @@ public class LineRenderComponent implements WorldRenderComponent, RgbaSettable, 
     @Override
     public void setRgba(int rgba) {
         this.color.setRgba(rgba);
-    }
-
-    @Override
-    public void setWidth(float width) {
-        this.width = width;
     }
 }

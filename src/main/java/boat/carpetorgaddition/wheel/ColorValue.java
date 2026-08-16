@@ -1,5 +1,7 @@
 package boat.carpetorgaddition.wheel;
 
+import net.minecraft.util.ARGB;
+
 @SuppressWarnings("unused")
 public class ColorValue {
     private int rgba;
@@ -12,9 +14,21 @@ public class ColorValue {
         return new ColorValue(0);
     }
 
-    public static ColorValue fromRgba(int rgb, int alpha) {
+    public static ColorValue fromRgb(int rgb) {
+        return fromRgb(rgb, 255);
+    }
+
+    public static ColorValue fromRgb(int rgb, int alpha) {
         int rgba = ((rgb & 0x00FFFFFF) << 8) | (alpha & 0xFF);
         return new ColorValue(rgba);
+    }
+
+    public static ColorValue fromRgba(int rgba) {
+        return new ColorValue(rgba);
+    }
+
+    public static ColorValue fromArgb(int argb) {
+        return fromRgba(Integer.rotateLeft(argb, 8));
     }
 
     public int getRed() {
@@ -47,6 +61,27 @@ public class ColorValue {
 
     public void setAlpha(int alpha) {
         this.rgba = (this.rgba & 0xFFFFFF00) | (alpha & 0xFF);
+    }
+
+    public void multiply(ColorValue other) {
+        int argb = ARGB.multiply(this.toArgb(), other.toArgb());
+        this.rgba = Integer.rotateLeft(argb, 8);
+    }
+
+    public void multiplyRed(float factor) {
+        this.setRed(Math.round(this.getRed() * factor));
+    }
+
+    public void multiplyGreen(float factor) {
+        this.setGreen(Math.round(this.getGreen() * factor));
+    }
+
+    public void multiplyBlue(float factor) {
+        this.setBlue(Math.round(this.getBlue() * factor));
+    }
+
+    public void multiplyAlpha(float factor) {
+        this.setAlpha(Math.round(this.getAlpha() * factor));
     }
 
     public int toRgba() {

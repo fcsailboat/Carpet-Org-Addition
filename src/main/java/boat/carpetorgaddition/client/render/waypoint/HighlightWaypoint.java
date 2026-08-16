@@ -13,7 +13,7 @@ public class HighlightWaypoint extends Waypoint {
     /**
      * 路径点开始闪烁的时间
      */
-    private static final long FLICKER_TIME = 200L;
+    private static final long FLICKER_TIME = 20 * 10L;
     /**
      * 路径点是否以恒定的频率闪烁
      */

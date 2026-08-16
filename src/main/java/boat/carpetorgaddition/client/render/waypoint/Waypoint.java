@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
@@ -117,7 +116,7 @@ public abstract class Waypoint {
         graphics.pose().pushMatrix();
         graphics.pose().translate(-widthHeight / 2F, -widthHeight / 2F);
         int alpha = (int) (this.getRenderAlpha() * 255);
-        ColorValue color = ColorValue.fromRgba(CommonColors.WHITE, alpha);
+        ColorValue color = ColorValue.fromRgb(CommonColors.WHITE, alpha);
         int argb = color.toArgb();
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, 0, 0, widthHeight, widthHeight, argb);
         graphics.pose().popMatrix();
@@ -145,9 +144,14 @@ public abstract class Waypoint {
         float backgroundOpacity = ClientUtils.getGameOptions().getBackgroundOpacity(0.25F);
         int opacity = (int) (backgroundOpacity * 255.0F) << 24;
         if (opacity != 0) {
-            graphics.fill(-width / 2, 0, width / 2, textRenderer.lineHeight, ARGB.multiply(opacity, CommonColors.WHITE));
+            ColorValue color = ColorValue.fromArgb(CommonColors.WHITE);
+            color.multiply(ColorValue.fromArgb(opacity));
+            color.multiplyAlpha(this.getRenderAlpha());
+            graphics.fill(-width / 2, 0, width / 2, textRenderer.lineHeight, color.toArgb());
         }
-        graphics.text(textRenderer, component, -width / 2, 0, CommonColors.WHITE);
+        ColorValue color = ColorValue.fromArgb(CommonColors.WHITE);
+        color.multiplyAlpha(this.getRenderAlpha());
+        graphics.text(textRenderer, component, -width / 2, 0, color.toArgb());
         graphics.pose().popMatrix();
     }
 

@@ -11,7 +11,7 @@ public interface RgbaSettable {
         if (color == null) {
             this.setRgba(-1);
         } else {
-            this.setRgba(ColorValue.fromRgba(color, 255).toRgba());
+            this.setRgba(ColorValue.fromRgb(color).toRgba());
         }
     }
 }
