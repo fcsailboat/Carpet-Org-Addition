@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RuleConfig {
-    public static final String CONFIG_FINE_NAME = "config.json";
+    public static final String CONFIG_FINE_NAME = "rules.json";
     public static final String RULES = "rules";
     private final MinecraftServer server;
     private final File file;

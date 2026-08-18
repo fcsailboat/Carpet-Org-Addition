@@ -102,6 +102,9 @@ public class WorldFormat {
                 JsonObject version = new JsonObject();
                 version.addProperty(DataUpdater.DATA_VERSION, INITIAL_VERSION);
                 IOUtils.write(newPath.resolve("data_version.json").toFile(), version);
+                CarpetOrgAddition.LOGGER.info("Created 'data_version.json' file");
+                IOUtils.renameFile(newPath.resolve("config.json").toFile(), "rules.json");
+                CarpetOrgAddition.LOGGER.info("Renamed 'config.json' to 'rules.json'");
             }
         } catch (RuntimeException | IOException e) {
             CarpetOrgAddition.LOGGER.error("Failed to migrate config file", e);
