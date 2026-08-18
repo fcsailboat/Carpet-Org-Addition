@@ -242,7 +242,7 @@ public class GameProfileCache {
      */
     private void mergeUsercache() {
         try {
-            JsonArray array = IOUtils.loadJson(IOUtils.USERCACHE_JSON, JsonArray.class);
+            JsonArray array = IOUtils.readJson(IOUtils.USERCACHE_JSON, JsonArray.class);
             Set<Map.Entry<String, String>> set = array.asList().stream()
                     .map(JsonElement::getAsJsonObject)
                     .map(json -> Map.entry(json.get("name").getAsString(), json.get("uuid").getAsString()))
@@ -309,7 +309,7 @@ public class GameProfileCache {
     private void load() {
         if (this.config.isFile()) {
             try {
-                JsonObject json = IOUtils.loadJson(this.config);
+                JsonObject json = IOUtils.readJson(this.config);
                 JsonArray array = json.getAsJsonArray("usercache");
                 for (JsonElement element : array) {
                     UUID uuid;

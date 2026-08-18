@@ -126,7 +126,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
     }
 
     private FakePlayerSerializer(File file) throws IOException {
-        JsonObject json = IOUtils.loadJson(file);
+        JsonObject json = IOUtils.readJson(file);
         String name = IOUtils.getFileNameWithoutExtension(file);
         this(json, name, file);
     }

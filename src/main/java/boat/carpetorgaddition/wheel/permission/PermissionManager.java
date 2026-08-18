@@ -78,7 +78,7 @@ public class PermissionManager {
         if (file.isFile()) {
             JsonObject json;
             try {
-                json = IOUtils.loadJson(file);
+                json = IOUtils.readJson(file);
             } catch (IOException e) {
                 IOUtils.loggerError(e);
                 return;

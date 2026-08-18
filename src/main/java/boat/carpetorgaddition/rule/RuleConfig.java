@@ -67,7 +67,7 @@ public class RuleConfig {
         HashMap<String, String> map = new HashMap<>();
         if (this.file.isFile()) {
             try {
-                JsonObject json = IOUtils.loadJson(this.file);
+                JsonObject json = IOUtils.readJson(this.file);
                 CarpetConfDataUpdater updater = CarpetConfDataUpdater.getInstance();
                 json = updater.update(json, DataUpdater.getVersion(json), CURRENT_VERSION);
                 for (Map.Entry<String, JsonElement> entry : json.get(RULES).getAsJsonObject().entrySet()) {
