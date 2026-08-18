@@ -194,7 +194,7 @@ public abstract class SettingsManagerMixin {
     @WrapOperation(method = "setRule", at = @At(value = "INVOKE", target = "Ljava/lang/String;format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;"))
     private String setRule(String format, Object[] args, Operation<String> original, @Local(argsOnly = true, name = "rule") CarpetRule<?> rule) {
         if (rule instanceof BuiltRule<?>) {
-            return original.call(format, new Object[]{"%s/%s".formatted(CarpetOrgAdditionConstants.COMPACT_MOD_NAME_LOWER_CASE, RuleConfig.CONFIG_FINE_NAME)});
+            return original.call(format, new Object[]{"%s/%s".formatted(CarpetOrgAdditionConstants.MOD_ID, RuleConfig.CONFIG_FINE_NAME)});
         }
         return original.call(format, args);
     }

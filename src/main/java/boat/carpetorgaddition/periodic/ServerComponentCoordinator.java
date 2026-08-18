@@ -58,11 +58,11 @@ public class ServerComponentCoordinator {
     }
 
     public static ServerComponentCoordinator of(MinecraftServer server) {
-        PeriodicTaskManagerInterface anInterface = (PeriodicTaskManagerInterface) server;
-        ServerComponentCoordinator coordinator = anInterface.carpet_Org_Addition$getServerComponentCoordinator();
+        PeriodicTaskManagerInterface instance = (PeriodicTaskManagerInterface) server;
+        ServerComponentCoordinator coordinator = instance.carpet_Org_Addition$getServerComponentCoordinator();
         if (coordinator == null) {
             coordinator = new ServerComponentCoordinator(server);
-            anInterface.carpet_Org_Addition$setServerComponentCoordinator(coordinator);
+            instance.carpet_Org_Addition$setServerComponentCoordinator(coordinator);
         }
         return coordinator;
     }

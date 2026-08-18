@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.wheel.nbt;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
+import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.dataupdate.nbt.NbtDataUpdater;
 import boat.carpetorgaddition.network.event.ActionSource;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
@@ -25,7 +26,7 @@ public class NbtWriter {
 
     public NbtWriter(MinecraftServer server, int version) {
         this.output = TagValueOutput.createWithContext(REPORTER, server.registryAccess());
-        this.output.putInt(NbtDataUpdater.DATA_VERSION, version);
+        this.output.putInt(DataUpdater.DATA_VERSION, version);
         this.output.putInt(NbtDataUpdater.MINECRAFT_DATA_VERSION, NbtDataUpdater.CURRENT_MINECRAFT_DATA_VERSION);
     }
 
