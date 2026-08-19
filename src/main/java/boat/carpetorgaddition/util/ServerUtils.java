@@ -47,7 +47,6 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -552,9 +551,12 @@ public class ServerUtils {
         return BuiltInRegistries.BLOCK.getValue(Identifier.parse(id));
     }
 
-    @SuppressWarnings("unused")
-    public static Optional<UUID> uuidFromString(@Nullable String str) {
-        if (str == null || str.isEmpty()) {
+    public static boolean isUuidString(String uuid) {
+        return uuidFromString(uuid).isPresent();
+    }
+
+    public static Optional<UUID> uuidFromString(String str) {
+        if (str.length() != 36) {
             return Optional.empty();
         }
         try {

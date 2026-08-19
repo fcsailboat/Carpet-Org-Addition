@@ -150,12 +150,16 @@ public class WorldFormat {
      */
     @Unmodifiable
     public List<File> listFiles() {
-        File[] files = this.directory.listFiles();
-        if (files == null) {
-            return List.of();
-        }
         // 一些操作系统下文件排序可能不是按字母排序
-        return Stream.of(files).sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
+        return this.stream().sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
+    }
+
+    public Stream<File> stream() {
+        File[] files = this.directory.listFiles();
+        if (files == null || files.length == 0) {
+            return Stream.of();
+        }
+        return Stream.of(files);
     }
 
     /**
