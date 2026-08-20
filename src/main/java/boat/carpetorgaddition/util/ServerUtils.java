@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -238,7 +239,17 @@ public class ServerUtils {
      * 将一个实体传送到目标维度的指定位置并显示粒子和播放音效
      */
     public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos) {
-        teleport(entity, world, pos);
+        teleportWithEffect(entity, world, pos, entity.getYRot(), entity.getXRot());
+    }
+
+    public static void teleportIfServerWithEffect(Entity entity, Entity target) {
+        if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
+            teleportWithEffect(entity, world, ServerUtils.getFootPos(target), target.getYRot(), target.getXRot());
+        }
+    }
+
+    public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos, float yaw, float pitch) {
+        teleport(entity, world, pos.x(), pos.y(), pos.z(), yaw, pitch);
         world.broadcastEntityEvent(entity, EntityEvent.TELEPORT);
         SoundEvent soundEvent = switch (entity) {
             case Player _ -> SoundEvents.PLAYER_TELEPORT;
@@ -251,7 +262,7 @@ public class ServerUtils {
         entity.resetFallDistance();
     }
 
-    public static void teleportWithEffect(Entity entity, Vec3 pos) {
+    public static void teleportIfServerWithEffect(Entity entity, Vec3 pos) {
         if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
             teleportWithEffect(entity, world, pos);
         }
@@ -612,5 +623,9 @@ public class ServerUtils {
         String filename = uuid + ".dat";
         Path path = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(filename);
         return Files.exists(path);
+    }
+
+    public static void schedule(MinecraftServer server, Runnable runnable) {
+        server.schedule(new TickTask(server.getTickCount(), runnable));
     }
 }
