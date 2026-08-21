@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Contract;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class ReLoginTask extends PlayerScheduleTask {
@@ -53,8 +54,8 @@ public class ReLoginTask extends PlayerScheduleTask {
     public void tick() {
         // 启用内存泄漏修复
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SPAWN_MEMORY_LEAK_FIX.value()) {
-            ServerPlayer player = this.server.getPlayerList().getPlayerByName(this.getPlayerName());
-            if (player == null) {
+            Optional<ServerPlayer> optional = ServerUtils.getPlayer(this.server, this.getPlayerName());
+            if (optional.isEmpty()) {
                 if (this.canSpawn <= 0) {
                     this.loginPlayer();
                     this.canSpawn = 2;
@@ -63,7 +64,7 @@ public class ReLoginTask extends PlayerScheduleTask {
                 }
             } else if (this.remainingTick <= 0) {
                 this.remainingTick = this.interval;
-                if (player instanceof EntityPlayerMPFake fakePlayer) {
+                if (optional.get() instanceof EntityPlayerMPFake fakePlayer) {
                     // 如果假玩家坠入虚空，设置任务为停止
                     ServerLevel world = ServerUtils.getWorld(fakePlayer);
                     if (fakePlayer.getY() < ServerUtils.getMinArchitectureAltitude(world) - 64) {
@@ -77,13 +78,9 @@ public class ReLoginTask extends PlayerScheduleTask {
             }
         } else {
             Runnable function = () -> {
-                MessageUtils.sendErrorMessage(this.source, KEY.then("rule_not_enabled").translate());
                 // 如果假玩家已经下线，重新生成假玩家
-                // TODO 游戏快进时，结束任务有时玩家不会重新上线
-                ServerPlayer player = this.server.getPlayerList().getPlayerByName(this.getPlayerName());
-                if (player == null) {
-                    this.loginPlayer();
-                }
+                MessageUtils.sendErrorMessage(this.source, KEY.then("rule_not_enabled").translate());
+                ServerUtils.schedule(this.server, this::loginPlayer);
             };
             throw new TaskExecutionException(function);
         }
@@ -120,10 +117,7 @@ public class ReLoginTask extends PlayerScheduleTask {
     public void onCancel(CommandContext<CommandSourceStack> context) {
         this.markRemove();
         MessageUtils.sendMessage(context, KEY.then("stop").translate(this.getPlayerName()));
-        ServerPlayer player = this.server.getPlayerList().getPlayerByName(this.getPlayerName());
-        if (player == null) {
-            this.loginPlayer();
-        }
+        ServerUtils.schedule(this.server, this::loginPlayer);
     }
 
     @Override
@@ -136,7 +130,7 @@ public class ReLoginTask extends PlayerScheduleTask {
         this.remainingTick = interval;
     }
 
-    public void stop() {
+    private void stop() {
         this.stop = true;
     }
 
