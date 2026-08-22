@@ -87,7 +87,7 @@ public class PlayerCommandExtension {
         // 断言指定玩家为假玩家
         CommandUtils.requireFakePlayer(fakePlayer);
         // 传送玩家
-        ServerUtils.teleportWithEffect(fakePlayer, ServerUtils.getWorld(player), ServerUtils.getFootPos(player));
+        ServerUtils.teleportIfServerWithEffect(fakePlayer, player);
         LocalizationKey key = LocalizationKey.literal("commands.teleport.success.entity.single");
         MessageUtils.sendMessage(context.getSource(), key.translate(fakePlayer.getDisplayName(), player.getDisplayName()));
         return 1;

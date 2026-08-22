@@ -207,7 +207,7 @@ public class SpectatorCommand extends AbstractServerCommand {
         File file = worldFormat.file(player.getStringUUID() + IOUtils.JSON_EXTENSION);
         if (file.isFile()) {
             try {
-                JsonObject oldJson = IOUtils.loadJson(file);
+                JsonObject oldJson = IOUtils.readJson(file);
                 int version = DataUpdater.getVersion(oldJson);
                 SpectatorDataUpdater dataUpdater = SpectatorDataUpdater.getInstance();
                 JsonObject json = dataUpdater.update(oldJson, version, CURRENT_VERSION);

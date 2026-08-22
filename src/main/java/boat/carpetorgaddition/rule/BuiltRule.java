@@ -53,7 +53,7 @@ public class BuiltRule<T> implements CarpetRule<T> {
      */
     private boolean enable = false;
 
-    public BuiltRule(
+    BuiltRule(
             Class<T> type,
             String name,
             Collection<String> categories,

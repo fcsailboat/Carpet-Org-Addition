@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -114,14 +115,18 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
     public AbstractOfflinePlayerSearchTask(CommandSourceStack source, ServerPlayer player) {
         super(source, player);
         this.server = ServerUtils.getServer(this.player);
-        this.files = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).toFile().listFiles();
+        this.files = this.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).toFile().listFiles();
         if (this.files == null) {
             throw new IllegalStateException("Unable to read \"playerdata\" folder");
         }
-        this.worldFormat = new WorldFormat(this.server, "backups", "playerdata");
+        this.worldFormat = createWorldFormat(this.server);
         PageManager manager = ServerComponentCoordinator.of(this.server).getPageManager();
         this.pagedCollection = manager.newPagedCollection(this.source);
-        this.accessManager = ServerComponentCoordinator.of(server).getAccessManager();
+        this.accessManager = ServerComponentCoordinator.of(this.server).getAccessManager();
+    }
+
+    private static WorldFormat createWorldFormat(MinecraftServer server) {
+        return new WorldFormat(server, "backups", "playerdata");
     }
 
     @Override
@@ -402,6 +407,51 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
 
     public static void removeCorruptedPlayerUUID(UUID uuid) {
         CORRUPTED_PLAYER_DATAS.remove(uuid);
+    }
+
+    /**
+     * 清理过期的备份文件
+     */
+    public static void cleanExpiredBackups(MinecraftServer server) {
+        WorldFormat worldFormat = createWorldFormat(server);
+        worldFormat.stream().filter(File::isDirectory).forEach(file -> {
+            String fileName = file.getName();
+            try {
+                String[] split = fileName.split("_");
+                if (split.length != 3) {
+                    CarpetOrgAddition.LOGGER.debug("Skipped file with unexpected name format: {}", fileName);
+                    return;
+                }
+                String time = "%s_%s".formatted(split[0], split[1]);
+                LocalDateTime fileTime = LocalDateTime.from(FORMATTER.parse(time));
+                long daysBetween = ChronoUnit.DAYS.between(fileTime, LocalDateTime.now());
+                // 删除超过30天的备份文件
+                if (daysBetween > 30) {
+                    CarpetOrgAddition.LOGGER.info("Deleting expired backup: {} (age: {} days)", fileName, daysBetween);
+                    removeBackupDirectory(file);
+                }
+            } catch (RuntimeException e) {
+                CarpetOrgAddition.LOGGER.warn("Error processing backup file: {}", fileName, e);
+            }
+        });
+    }
+
+    private static void removeBackupDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            String fileName = file.getName();
+            String[] split = fileName.split("\\.");
+            // 删除UUID.dat的文件，其他文件不动
+            // 一般情况下，文件夹内的文件都是这种格式的
+            // 但如果确实包含其他文件，则不删除文件夹（在下方删除文件夹时会抛出DirectoryNotEmptyException）
+            if (split.length == 2 && ServerUtils.isUuidString(split[0]) && "dat".equals(split[1])) {
+                IOUtils.removeFileIfExists(file);
+            }
+        }
+        IOUtils.removeFileIfExists(directory);
     }
 
     public static void clear() {

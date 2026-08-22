@@ -3,6 +3,8 @@ package boat.carpetorgaddition.mixin.util.carpet;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
+import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.FakePlayerGameExitMarker;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import carpet.patches.EntityPlayerMPFake;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
@@ -12,12 +14,17 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Relative;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,9 +39,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Mixin(value = EntityPlayerMPFake.class)
-public class EntityPlayerMPFakeMixin {
+public class EntityPlayerMPFakeMixin implements FakePlayerGameExitMarker {
     @Unique
     private final EntityPlayerMPFake self = (EntityPlayerMPFake) (Object) this;
+    @Unique
+    private boolean mark = false;
 
     @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;whenCompleteAsync(Ljava/util/function/BiConsumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
     private static <T> CompletableFuture<T> whenCompleteAsync(CompletableFuture<Optional<GameProfile>> instance, BiConsumer<? super T, ? super Throwable> action, Executor executor, Operation<CompletableFuture<T>> original) {
@@ -121,5 +130,31 @@ public class EntityPlayerMPFakeMixin {
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.getAction().onFakePlayerLogout();
         actionManager.stop();
+    }
+
+    @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;whenCompleteAsync(Ljava/util/function/BiConsumer;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
+    private static <T> CompletableFuture<T> deduplicate(CompletableFuture<T> instance, BiConsumer<? super T, ? super Throwable> action, Executor executor, Operation<CompletableFuture<T>> original) {
+        boolean deduplicate = FakePlayerSpawner.DEDUPLICATE.orElse(false);
+        BiConsumer<? super T, Throwable> biConsumer = (value, throwable) -> ScopedValue
+                .where(FakePlayerSpawner.DEDUPLICATE, deduplicate)
+                .run(() -> action.accept(value, throwable));
+        return original.call(instance, biConsumer, executor);
+    }
+
+    @Inject(method = "lambda$createFake$0", at = @At("HEAD"), cancellable = true)
+    private static void deduplicate(String name, GameProfile gameprofile, MinecraftServer server, ServerLevel worldIn, Vec3 pos, double yaw, double pitch, GameType gamemode, ResourceKey<Level> dimensionId, boolean flying, GameProfile p, Throwable t, CallbackInfo ci) {
+        if (FakePlayerSpawner.DEDUPLICATE.orElse(false) && ServerUtils.getPlayer(server, name).isPresent()) {
+            ci.cancel();
+        }
+    }
+
+    @Override
+    public void carpet_Org_Addition$markExitingTheGame() {
+        this.mark = true;
+    }
+
+    @Override
+    public boolean carpet_Org_Addition$isExitingTheGame() {
+        return this.mark;
     }
 }

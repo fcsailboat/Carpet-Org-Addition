@@ -149,7 +149,7 @@ public class CustomRuleValueManager {
     public void load() {
         if (this.file.isFile()) {
             try {
-                JsonObject json = IOUtils.loadJson(this.file);
+                JsonObject json = IOUtils.readJson(this.file);
                 JsonObject ruleself = json.get("ruleself").getAsJsonObject();
                 for (Map.Entry<String, JsonElement> entry : ruleself.entrySet()) {
                     HashSet<String> rules = new HashSet<>();

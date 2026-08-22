@@ -2,15 +2,21 @@ package boat.carpetorgaddition.wheel;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
+import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.exception.FileOperationException;
 import boat.carpetorgaddition.util.IOUtils;
+import com.google.gson.JsonObject;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -25,6 +31,9 @@ public class WorldFormat {
      */
     public static final Predicate<File> JSON_EXTENSIONS = file -> file.getName().endsWith(IOUtils.JSON_EXTENSION);
     public static final Predicate<File> NBT_EXTENSIONS = file -> file.getName().endsWith(IOUtils.NBT_EXTENSION);
+    private static final int INITIAL_VERSION = 1;
+    @SuppressWarnings("unused")
+    private static final int CURRENT_VERSION = 1;
     /**
      * 文件所在文件夹
      */
@@ -34,14 +43,17 @@ public class WorldFormat {
      * 尝试创建一个存档目录下的文件夹
      *
      * @param server      游戏当前运行的服务器，用来获取操作系统下服务器存档的路径
-     * @param directory   一个字符串，表示第二级子目录，有这个参数的原因是为了防止构造忘记传入第二级目录参数，该参数可以为null，
-     *                    表示没有第二级目录，此时不应该为第三个参数传入值
-     * @param directories 一个字符串数组，数组中第一个元素表示第三级子目录，第二个元素表示第四级子目录，以此类推
-     * @apiNote 第一级目录是carpetorgaddition文件夹
+     * @param directory   一个字符串，表示第三级子目录，有这个参数的原因是为了防止构造忘记传入第三级目录参数，该参数可以为null，
+     *                    表示没有第三级目录，此时不应该为第四个参数传入值
+     * @param directories 一个字符串数组，数组中第一个元素表示第四级子目录，第二个元素表示第五级子目录，以此类推
+     * @apiNote 第一级和第二级目录分别是 {@code config}和{@code carpet-org-addition}文件夹
      */
-    public WorldFormat(MinecraftServer server, @Nullable String directory, String... directories) {
+    public WorldFormat(@NonNull MinecraftServer server, @Nullable String directory, String... directories) {
+        this.moveServerConfigFileIfFirstCall(server);
         // 获取服务器存档保存文件的路径
-        Path path = server.getWorldPath(LevelResource.ROOT).resolve(CarpetOrgAdditionConstants.COMPACT_MOD_NAME_LOWER_CASE);
+        Path path = server.getWorldPath(LevelResource.ROOT)
+                .resolve("config")
+                .resolve(CarpetOrgAdditionConstants.MOD_ID);
         if (directory == null) {
             if (directories.length != 0) {
                 throw new IllegalArgumentException();
@@ -69,6 +81,34 @@ public class WorldFormat {
             return;
         }
         throw new FileOperationException("Unable to create directory: " + this.directory);
+    }
+
+    private void moveServerConfigFileIfFirstCall(MinecraftServer server) {
+        ServerConfigOneShotLatch oneShotLatch = (ServerConfigOneShotLatch) server;
+        if (oneShotLatch.carpet_Org_Addition$tryAcquire()) {
+            this.moveServerConfigFile(server);
+        }
+    }
+
+    private void moveServerConfigFile(MinecraftServer server) {
+        try {
+            Path root = server.getWorldPath(LevelResource.ROOT);
+            Path oldPath = root.resolve("carpetorgaddition");
+            Path newPath = root.resolve("config").resolve("carpet-org-addition");
+            if (Files.isDirectory(oldPath) && !Files.exists(newPath)) {
+                Files.createDirectories(newPath.getParent());
+                Files.move(oldPath, newPath, StandardCopyOption.ATOMIC_MOVE);
+                CarpetOrgAddition.LOGGER.info("{} has migrated the world config file from {} to {}", CarpetOrgAdditionConstants.MOD_NAME, oldPath, newPath);
+                JsonObject version = new JsonObject();
+                version.addProperty(DataUpdater.DATA_VERSION, INITIAL_VERSION);
+                IOUtils.write(newPath.resolve("data_version.json").toFile(), version);
+                CarpetOrgAddition.LOGGER.info("Created 'data_version.json' file");
+                IOUtils.renameFile(newPath.resolve("config.json").toFile(), "rules.json");
+                CarpetOrgAddition.LOGGER.info("Renamed 'config.json' to 'rules.json'");
+            }
+        } catch (RuntimeException | IOException e) {
+            CarpetOrgAddition.LOGGER.error("Failed to migrate config file", e);
+        }
     }
 
     /**
@@ -110,12 +150,16 @@ public class WorldFormat {
      */
     @Unmodifiable
     public List<File> listFiles() {
-        File[] files = this.directory.listFiles();
-        if (files == null) {
-            return List.of();
-        }
         // 一些操作系统下文件排序可能不是按字母排序
-        return Stream.of(files).sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
+        return this.stream().sorted(Comparator.comparing(file -> file.getName().toLowerCase())).toList();
+    }
+
+    public Stream<File> stream() {
+        File[] files = this.directory.listFiles();
+        if (files == null || files.length == 0) {
+            return Stream.of();
+        }
+        return Stream.of(files);
     }
 
     /**

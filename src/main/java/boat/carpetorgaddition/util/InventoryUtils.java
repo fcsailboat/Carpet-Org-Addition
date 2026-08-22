@@ -97,7 +97,7 @@ public class InventoryUtils {
             inventory.add(splitStack);
             if (!splitStack.isEmpty()) {
                 // 丢弃未插入物品栏的潜影盒，但不应该会插入失败
-                player.drop(splitStack, false, true);
+                ServerUtils.drop(player, splitStack);
             }
             return result;
         }

@@ -56,7 +56,7 @@ public class CustomCommandConfigEntry implements ConfigEntry<JsonObject> {
      */
     private JsonObject migrate(File file) {
         try {
-            JsonObject json = IOUtils.loadJson(file).getAsJsonObject("commands");
+            JsonObject json = IOUtils.readJson(file).getAsJsonObject("commands");
             IOUtils.deprecatedFile(file);
             return json;
         } catch (Exception e) {

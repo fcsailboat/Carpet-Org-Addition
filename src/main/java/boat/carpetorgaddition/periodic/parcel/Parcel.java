@@ -144,12 +144,12 @@ public class Parcel implements Comparable<Parcel> {
             return;
         }
         // 向快递发送者发送发出快递的消息
-        Component recall = TextProvider.clickRun(CommandProvider.recallParcel(this.getId(), false));
+        Component recall = TextProvider.clickRun(CommandProvider.recallParcel(this.getId()));
         LocalizationKey key = MailCommand.SEND;
         Object name = recipientPlayer == null ? this.recipient : recipientPlayer.getDisplayName();
         MessageUtils.sendMessage(senderPlayer, key.then("sender").translate(name, this.getCount(), this.getDisplayName(), recall));
         // 向快递接受者发送发出快递的消息
-        Component receive = TextProvider.clickRun(CommandProvider.collectParcel(this.getId(), false));
+        Component receive = TextProvider.clickRun(CommandProvider.collectParcel(this.getId()));
         if (recipientPlayer == null) {
             TextBuilder builder = TextBuilder.of(key.then("offline").translate());
             builder.setGrayItalic();

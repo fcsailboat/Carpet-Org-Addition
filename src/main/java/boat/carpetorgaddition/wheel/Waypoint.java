@@ -84,7 +84,7 @@ public class Waypoint {
     public static Waypoint load(MinecraftServer server, String name) throws IOException {
         WorldFormat worldFormat = new WorldFormat(server, WAYPOINT);
         File file = worldFormat.file(name, IOUtils.JSON_EXTENSION);
-        JsonObject json = IOUtils.loadJson(file);
+        JsonObject json = IOUtils.readJson(file);
         WaypointDataUpdater dataUpdater = WaypointDataUpdater.getInstance();
         json = dataUpdater.update(json, DataUpdater.getVersion(json), CURRENT_VERSION);
         // 路径点的位置

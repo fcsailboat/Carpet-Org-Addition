@@ -5,7 +5,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Range;
 import org.joml.Vector3f;
 
 import java.text.DecimalFormat;
@@ -475,34 +474,6 @@ public class MathUtils {
         } catch (NumberFormatException e) {
             return OptionalInt.empty();
         }
-    }
-
-    public static int rgba(@Range(from = 0, to = 255) int red, @Range(from = 0, to = 255) int green, @Range(from = 0, to = 255) int blue, @Range(from = 0, to = 255) int alpha) {
-        return (red & 0xFF) << 24 | (green & 0xFF) << 16 | (blue & 0xFF) << 8 | (alpha & 0xFF);
-    }
-
-    public static int rgba(int rgb, int alpha) {
-        return rgba(red(rgb << 8), green(rgb << 8), blue(rgb << 8), alpha);
-    }
-
-    public static int rgbaToArgb(int rgba) {
-        return Integer.rotateRight(rgba, 8);
-    }
-
-    public static int red(int rgba) {
-        return rgba >> 24 & 0xFF;
-    }
-
-    public static int green(int rgba) {
-        return rgba >> 16 & 0xFF;
-    }
-
-    public static int blue(int rgba) {
-        return rgba >> 8 & 0xFF;
-    }
-
-    public static int alpha(int rgba) {
-        return rgba & 0xFF;
     }
 
     public static int clamp(int value, int min, int max) {
