@@ -109,7 +109,7 @@ public class BlockExcavator {
         // 更新上次操作时间
         this.player.resetLastActionTime();
         // 摆动手
-        this.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+        ServerUtils.swing(this.player, InteractionHand.MAIN_HAND);
         return blockBroken;
     }
 

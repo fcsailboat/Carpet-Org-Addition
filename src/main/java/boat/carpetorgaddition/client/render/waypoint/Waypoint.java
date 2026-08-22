@@ -2,8 +2,8 @@ package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.client.util.ClientRenderUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
-import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.ColorValue;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import it.unimi.dsi.fastutil.floats.Float2FloatMap;
 import net.minecraft.client.Camera;
@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
@@ -117,8 +116,8 @@ public abstract class Waypoint {
         graphics.pose().pushMatrix();
         graphics.pose().translate(-widthHeight / 2F, -widthHeight / 2F);
         int alpha = (int) (this.getRenderAlpha() * 255);
-        int rgba = MathUtils.rgba(CommonColors.WHITE, alpha);
-        int argb = MathUtils.rgbaToArgb(rgba);
+        ColorValue color = ColorValue.fromRgb(CommonColors.WHITE, alpha);
+        int argb = color.toArgb();
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, 0, 0, widthHeight, widthHeight, argb);
         graphics.pose().popMatrix();
         if (this.isWatching(width, height, entry)) {
@@ -145,9 +144,14 @@ public abstract class Waypoint {
         float backgroundOpacity = ClientUtils.getGameOptions().getBackgroundOpacity(0.25F);
         int opacity = (int) (backgroundOpacity * 255.0F) << 24;
         if (opacity != 0) {
-            graphics.fill(-width / 2, 0, width / 2, textRenderer.lineHeight, ARGB.multiply(opacity, CommonColors.WHITE));
+            ColorValue color = ColorValue.fromArgb(CommonColors.WHITE);
+            color.multiply(ColorValue.fromArgb(opacity));
+            color.multiplyAlpha(this.getRenderAlpha());
+            graphics.fill(-width / 2, 0, width / 2, textRenderer.lineHeight, color.toArgb());
         }
-        graphics.text(textRenderer, component, -width / 2, 0, CommonColors.WHITE);
+        ColorValue color = ColorValue.fromArgb(CommonColors.WHITE);
+        color.multiplyAlpha(this.getRenderAlpha());
+        graphics.text(textRenderer, component, -width / 2, 0, color.toArgb());
         graphics.pose().popMatrix();
     }
 

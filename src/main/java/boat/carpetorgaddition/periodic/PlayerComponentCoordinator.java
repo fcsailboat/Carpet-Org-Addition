@@ -31,14 +31,14 @@ public class PlayerComponentCoordinator {
     }
 
     public static PlayerComponentCoordinator of(ServerPlayer player) {
-        PeriodicTaskManagerInterface anInterface = (PeriodicTaskManagerInterface) player;
-        PlayerComponentCoordinator coordinator = anInterface.carpet_Org_Addition$getPlayerPeriodicTaskManager();
+        PeriodicTaskManagerInterface instance = (PeriodicTaskManagerInterface) player;
+        PlayerComponentCoordinator coordinator = instance.carpet_Org_Addition$getPlayerPeriodicTaskManager();
         if (coordinator == null) {
             coordinator = switch (player) {
                 case EntityPlayerMPFake fakePlayer -> new FakePlayerComponentCoordinator(fakePlayer);
                 case ServerPlayer _ -> new PlayerComponentCoordinator(player);
             };
-            anInterface.carpet_Org_Addition$setPlayerComponentCoordinator(coordinator);
+            instance.carpet_Org_Addition$setPlayerComponentCoordinator(coordinator);
         }
         return coordinator;
     }

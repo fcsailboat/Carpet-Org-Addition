@@ -23,7 +23,7 @@ public class MixinTest {
 
     public MixinTest() throws IOException {
         File file = new File("src/main/resources/carpet-org-addition.mixins.json");
-        JsonObject json = IOUtils.loadJson(file);
+        JsonObject json = IOUtils.readJson(file);
         this.packagePath = "src/main/java/" + json.get("package").getAsString().replace(".", "/");
         ArrayList<String> list = new ArrayList<>();
         // 获取每个Mixin类文件

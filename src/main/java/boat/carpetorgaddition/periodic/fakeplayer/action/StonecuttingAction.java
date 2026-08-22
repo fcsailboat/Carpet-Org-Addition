@@ -74,7 +74,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
         PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
-            fakePlayer.drop(itemStack, true, Prediction.PREDICTED);
+            ServerUtils.drop(fakePlayer, itemStack);
         }
     }
 

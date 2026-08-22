@@ -142,11 +142,11 @@ public class IOUtils {
     /**
      * 从文件加载一个json对象
      */
-    public static JsonObject loadJson(File file) throws IOException {
-        return loadJson(file, JsonObject.class);
+    public static JsonObject readJson(File file) throws IOException {
+        return readJson(file, JsonObject.class);
     }
 
-    public static <T> T loadJson(File file, Class<T> type) throws IOException {
+    public static <T> T readJson(File file, Class<T> type) throws IOException {
         BufferedReader reader = toReader(file);
         try (reader) {
             return GSON.fromJson(reader, type);

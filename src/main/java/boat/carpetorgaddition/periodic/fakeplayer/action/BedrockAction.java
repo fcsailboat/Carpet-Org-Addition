@@ -228,7 +228,7 @@ public class BedrockAction extends AbstractPlayerAction {
             long minute = this.nonActionHours / 1200L;
             EntityPlayerMPFake fakePlayer = this.getFakePlayer();
             if (ALLOW_TELEPORT && minute <= 2) {
-                ServerUtils.teleportWithEffect(fakePlayer, this.initialPosition);
+                ServerUtils.teleportIfServerWithEffect(fakePlayer, this.initialPosition);
                 return;
             }
             long remaining = MAX_NON_ACTION_MINUTE_TIME - minute;

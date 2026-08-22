@@ -34,6 +34,10 @@ public class FakePlayerSpawner {
      */
     public static final ScopedValue<Optional<ServerPlayer>> SUMMONER = ScopedValue.newInstance();
     /**
+     * 假玩家是否可以重复召唤
+     */
+    public static final ScopedValue<Boolean> DEDUPLICATE = ScopedValue.newInstance();
+    /**
      * 玩家的名称
      */
     private final String name;
@@ -75,6 +79,7 @@ public class FakePlayerSpawner {
      * 是否隐藏登录消息
      */
     private boolean silence;
+    private boolean deduplicate = true;
     @Nullable
     private ServerPlayer summoner;
 
@@ -144,6 +149,12 @@ public class FakePlayerSpawner {
         return this;
     }
 
+    @SuppressWarnings("unused")
+    public FakePlayerSpawner setDeduplicate(boolean deduplicate) {
+        this.deduplicate = deduplicate;
+        return this;
+    }
+
     /**
      * 如果玩家不存在，则召唤玩家
      *
@@ -160,6 +171,7 @@ public class FakePlayerSpawner {
                 .where(CALLBACK, this.callback)
                 .where(ORIGINAL_POSITION, this.position == null)
                 .where(SUMMONER, Optional.ofNullable(this.summoner))
+                .where(DEDUPLICATE, this.deduplicate)
                 .call(() -> EntityPlayerMPFake.createFake(
                         this.name,
                         this.server,

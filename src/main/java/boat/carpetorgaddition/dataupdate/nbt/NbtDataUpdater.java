@@ -15,10 +15,6 @@ public abstract class NbtDataUpdater {
     protected final MinecraftServer server;
     protected final DataFixer fixerUpper;
     /**
-     * {@code Carpet Org Addition}的数据版本
-     */
-    public static final String DATA_VERSION = "data_version";
-    /**
      * {@code Minecraft}的数据版本
      */
     public static final String MINECRAFT_DATA_VERSION = "minecraft_data_version";

@@ -46,7 +46,7 @@ public class FakePlayerResidents {
                 .max((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName()))
                 .flatMap(file -> {
                     try {
-                        JsonObject json = IOUtils.loadJson(file);
+                        JsonObject json = IOUtils.readJson(file);
                         return Optional.of(this.listSerializer(json));
                     } catch (IOException | RuntimeException e) {
                         CarpetOrgAddition.LOGGER.warn("Failed to load fake player resident data from file: {}", file.getAbsolutePath(), e);
@@ -72,7 +72,7 @@ public class FakePlayerResidents {
         File file = this.worldFormat.file(this.getFileName(time));
         if (file.isFile()) {
             try {
-                JsonObject json = IOUtils.loadJson(file);
+                JsonObject json = IOUtils.readJson(file);
                 return new HashSet<>(this.listSerializer(json));
             } catch (IOException | RuntimeException e) {
                 CarpetOrgAddition.LOGGER.warn("Failed to load fake player resident data from file: {}", file.getAbsolutePath(), e);

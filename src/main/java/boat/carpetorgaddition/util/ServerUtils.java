@@ -18,16 +18,20 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
@@ -47,7 +51,6 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -239,7 +242,17 @@ public class ServerUtils {
      * 将一个实体传送到目标维度的指定位置并显示粒子和播放音效
      */
     public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos) {
-        teleport(entity, world, pos);
+        teleportWithEffect(entity, world, pos, entity.getYRot(), entity.getXRot());
+    }
+
+    public static void teleportIfServerWithEffect(Entity entity, Entity target) {
+        if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
+            teleportWithEffect(entity, world, ServerUtils.getFootPos(target), target.getYRot(), target.getXRot());
+        }
+    }
+
+    public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos, float yaw, float pitch) {
+        teleport(entity, world, pos.x(), pos.y(), pos.z(), yaw, pitch);
         world.broadcastEntityEvent(entity, EntityEvent.TELEPORT);
         SoundEvent soundEvent = switch (entity) {
             case Player _ -> SoundEvents.PLAYER_TELEPORT;
@@ -252,7 +265,7 @@ public class ServerUtils {
         entity.resetFallDistance();
     }
 
-    public static void teleportWithEffect(Entity entity, Vec3 pos) {
+    public static void teleportIfServerWithEffect(Entity entity, Vec3 pos) {
         if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
             teleportWithEffect(entity, world, pos);
         }
@@ -267,6 +280,20 @@ public class ServerUtils {
 
     public static void lookAt(Entity entity, EntityAnchorArgument.Anchor anchor, Vec3 pos) {
         entity.lookAt(anchor, pos);
+    }
+
+    /**
+     * 丢弃物品
+     */
+    public static Optional<ItemEntity> drop(LivingEntity entity, ItemStack itemStack) {
+        return Optional.ofNullable(entity.drop(itemStack, false, true));
+    }
+
+    /**
+     * 摆动手
+     */
+    public static void swing(LivingEntity entity, InteractionHand hand) {
+        entity.swing(hand, entity instanceof ServerPlayer player && PlayerUtils.isRealPlayer(player));
     }
 
     /**
@@ -560,9 +587,12 @@ public class ServerUtils {
         return BuiltInRegistries.BLOCK.getValue(Identifier.parse(id));
     }
 
-    @SuppressWarnings("unused")
-    public static Optional<UUID> uuidFromString(@Nullable String str) {
-        if (str == null || str.isEmpty()) {
+    public static boolean isUuidString(String uuid) {
+        return uuidFromString(uuid).isPresent();
+    }
+
+    public static Optional<UUID> uuidFromString(String str) {
+        if (str.length() != 36) {
             return Optional.empty();
         }
         try {
@@ -618,5 +648,9 @@ public class ServerUtils {
         String filename = uuid + ".dat";
         Path path = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(filename);
         return Files.exists(path);
+    }
+
+    public static void schedule(MinecraftServer server, Runnable runnable) {
+        server.schedule(new TickTask(server.getTickCount(), runnable));
     }
 }

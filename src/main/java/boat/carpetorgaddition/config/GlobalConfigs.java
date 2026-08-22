@@ -88,7 +88,7 @@ public class GlobalConfigs {
             if (this.configFile.isFile()) {
                 JsonObject json;
                 try {
-                    json = IOUtils.loadJson(this.configFile);
+                    json = IOUtils.readJson(this.configFile);
                 } catch (IOException | RuntimeException e) {
                     if (e instanceof RuntimeException) {
                         IOUtils.backupFile(this.configFile);

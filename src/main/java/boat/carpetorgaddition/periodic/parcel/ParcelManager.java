@@ -92,7 +92,7 @@ public class ParcelManager {
         ArrayList<Supplier<Component>> messages = new ArrayList<>();
         for (Parcel parcel : list) {
             messages.add(() -> {
-                Component clickRun = TextProvider.clickRun(CommandProvider.collectParcel(parcel.getId(), false));
+                Component clickRun = TextProvider.clickRun(CommandProvider.collectParcel(parcel.getId()));
                 return MailCommand.KEY.then("prompt_collect").translate(parcel.getCount(), parcel.getDisplayName(), clickRun);
             });
         }

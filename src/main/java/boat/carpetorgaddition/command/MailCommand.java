@@ -262,13 +262,13 @@ public class MailCommand extends AbstractServerCommand {
         Parcel.Operation operation = parcel.getPlayerOperation(player);
         TextBuilder builder = switch (operation) {
             case COLLECT -> TextBuilder.of(LIST.then("collect").translate())
-                    .setCommand(CommandProvider.collectParcel(parcel.getId(), false))
+                    .setCommand(CommandProvider.collectParcel(parcel.getId()))
                     .setColor(ChatFormatting.AQUA);
             case RECALL -> TextBuilder.of(LIST.then("recall").translate())
-                    .setCommand(CommandProvider.recallParcel(parcel.getId(), false))
+                    .setCommand(CommandProvider.recallParcel(parcel.getId()))
                     .setColor(ChatFormatting.AQUA);
             case INTERCEPT -> TextBuilder.of(LIST.then("intercept").translate())
-                    .setCommand(CommandProvider.interceptParcel(parcel.getId(), false))
+                    .setCommand(CommandProvider.interceptParcel(parcel.getId()))
                     .setColor(ChatFormatting.AQUA);
             case VIEW -> TextBuilder.of(LIST.then("view").translate())
                     .setColor(ChatFormatting.GRAY);

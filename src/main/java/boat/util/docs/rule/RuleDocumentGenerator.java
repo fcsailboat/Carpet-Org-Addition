@@ -26,7 +26,7 @@ public class RuleDocumentGenerator {
     private static final Path ROOT = Path.of("..");
 
     private RuleDocumentGenerator() throws IOException {
-        this.json = IOUtils.loadJson(ROOT.resolve(Path.of("src/main/resources/assets/carpet-org-addition/lang/zh_cn.json")).toFile());
+        this.json = IOUtils.readJson(ROOT.resolve(Path.of("src/main/resources/assets/carpet-org-addition/lang/zh_cn.json")).toFile());
         this.rules = CarpetOrgAdditionSettings.listRules();
     }
 

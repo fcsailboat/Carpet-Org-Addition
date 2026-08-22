@@ -151,7 +151,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
             // 清除着火时间
             player.setRemainingFireTicks(0);
             // 清除摔落高度
-            player.fallDistance = 0;
+            player.fallDistance = 0.0;
             // 清除负面效果
             player.getActiveEffects().removeIf(effect -> effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL);
         }
@@ -161,6 +161,7 @@ public class CarpetOrgAdditionExtension implements CarpetExtension {
     public void onServerLoadedWorlds(MinecraftServer server) {
         ServerComponentCoordinator.of(server).onServerStarted();
         PermissionManager.load(server);
+        AbstractOfflinePlayerSearchTask.cleanExpiredBackups(server);
     }
 
     @Override
