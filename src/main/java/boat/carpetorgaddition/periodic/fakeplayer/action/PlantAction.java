@@ -19,7 +19,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -263,7 +262,7 @@ public class PlantAction extends AbstractPlayerAction {
         // 让假玩家看向该位置（这不是必须的）
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         fakePlayer.lookAt(EntityAnchorArgument.Anchor.EYES, ServerUtils.getBlockCenter(cropPos));
-        BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(cropPos), Direction.UP, cropPos, false);
+        BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(farmlandPos), Direction.UP, cropPos, false);
         fakePlayer.gameMode.useItemOn(fakePlayer, world, itemStack, InteractionHand.OFF_HAND, hitResult);
         // 摆动手
         ServerUtils.swing(fakePlayer, InteractionHand.OFF_HAND);

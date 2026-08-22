@@ -20,7 +20,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Prediction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.Item;

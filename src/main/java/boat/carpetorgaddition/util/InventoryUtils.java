@@ -6,7 +6,6 @@ import boat.carpetorgaddition.wheel.ItemStackCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
