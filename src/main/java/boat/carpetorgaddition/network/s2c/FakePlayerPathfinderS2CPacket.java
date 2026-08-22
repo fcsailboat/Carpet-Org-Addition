@@ -19,13 +19,21 @@ public final class FakePlayerPathfinderS2CPacket implements CustomPacketPayload 
         @Override
         public void encode(RegistryFriendlyByteBuf output, FakePlayerPathfinderS2CPacket value) {
             output.writeInt(value.getEntityId());
-            output.writeCollection(value.getVec3List(), VEC3D_CODEC);
+            List<Vec3> list = value.getVec3List();
+            output.writeInt(list.size());
+            for (Vec3 vec3 : list) {
+                VEC3D_CODEC.encode(output, vec3);
+            }
         }
 
         @Override
         public FakePlayerPathfinderS2CPacket decode(RegistryFriendlyByteBuf input) {
             int entityId = input.readInt();
-            List<Vec3> list = input.readCollection(ArrayList::new, VEC3D_CODEC);
+            int size = input.readInt();
+            ArrayList<Vec3> list = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                list.add(VEC3D_CODEC.decode(input));
+            }
             return new FakePlayerPathfinderS2CPacket(entityId, list);
         }
     };

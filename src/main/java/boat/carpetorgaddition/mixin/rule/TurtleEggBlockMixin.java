@@ -2,9 +2,10 @@ package boat.carpetorgaddition.mixin.rule;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -41,7 +42,7 @@ public abstract class TurtleEggBlockMixin extends Block {
 
     // 海龟蛋快速采集
     @Inject(method = "playerDestroy", at = @At("HEAD"), cancellable = true)
-    private void afterBreak(Level level, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack destroyedWith, CallbackInfo ci) {
+    private void afterBreak(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack destroyedWith, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.TURTLE_EGG_FAST_MINE.value()) {
             for (int i = 0; i < state.getValue(EGGS); i++) {
                 super.playerDestroy(level, player, pos, state, blockEntity, destroyedWith);

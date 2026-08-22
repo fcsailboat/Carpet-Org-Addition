@@ -5,6 +5,7 @@ import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
@@ -122,7 +123,7 @@ public abstract class AbstractCustomSizeInventory implements Container {
             if (itemStack == PLACEHOLDER) {
                 continue;
             }
-            player.drop(itemStack, false, false);
+            player.drop(itemStack, true, Prediction.PREDICTED);
         }
     }
 

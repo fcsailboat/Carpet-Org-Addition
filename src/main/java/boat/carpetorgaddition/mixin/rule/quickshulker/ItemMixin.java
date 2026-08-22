@@ -3,6 +3,7 @@ package boat.carpetorgaddition.mixin.rule.quickshulker;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -60,7 +61,7 @@ public class ItemMixin {
         if (result.isEmpty()) {
             return;
         }
-        player.drop(result, false);
+        player.drop(result, true, Prediction.PREDICTED);
     }
 
     @Inject(method = "overrideOtherStackedOnMe", at = @At("HEAD"), cancellable = true)

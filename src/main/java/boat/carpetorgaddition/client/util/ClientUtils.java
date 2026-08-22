@@ -8,6 +8,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.state.GameRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -103,6 +106,10 @@ public class ClientUtils {
         return getClient().gameRenderer;
     }
 
+    public static GameRenderState getGameRenderState() {
+        return getGameRenderer().gameRenderState();
+    }
+
     /**
      * 获取文字渲染器
      */
@@ -116,6 +123,14 @@ public class ClientUtils {
     @Contract(pure = true)
     public static Camera getCamera() {
         return getGameRenderer().mainCamera();
+    }
+
+    public static LevelRenderState getLevelRenderState() {
+        return getGameRenderState().levelRenderState;
+    }
+
+    public static CameraRenderState getCameraRenderState() {
+        return getLevelRenderState().cameraRenderState;
     }
 
     @Contract(pure = true)

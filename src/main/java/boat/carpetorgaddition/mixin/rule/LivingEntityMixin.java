@@ -49,7 +49,7 @@ public abstract class LivingEntityMixin {
     private final LivingEntity self = (LivingEntity) (Object) this;
 
     // 禁用伤害免疫
-    @WrapOperation(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;invulnerableTime:I", opcode = Opcodes.GETFIELD))
+    @WrapOperation(method = "hurtServer", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;damageCooldownTime:I", opcode = Opcodes.GETFIELD))
     private int setTimeUntilRegen(LivingEntity instance, Operation<Integer> original) {
         if (CarpetOrgAdditionSettings.DISABLE_DAMAGE_IMMUNITY.value()) {
             return 0;

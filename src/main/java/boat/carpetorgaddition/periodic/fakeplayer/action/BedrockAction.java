@@ -654,7 +654,7 @@ public class BedrockAction extends AbstractPlayerAction {
             return StepResult.CONTINUE;
         }
         // 活塞上方的方块不会影响活塞推出
-        if (blockState.isAir() || blockState.getPistonPushReaction() == PushReaction.DESTROY) {
+        if (blockState.isAir() || blockState.getPistonPushReaction() == PushReaction.POPPED) {
             if (isPiston) {
                 return StepResult.CONTINUE;
             }

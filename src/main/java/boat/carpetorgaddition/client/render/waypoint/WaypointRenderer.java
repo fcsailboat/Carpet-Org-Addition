@@ -2,7 +2,9 @@ package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.client.util.ClientMessageUtils;
+import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
@@ -11,7 +13,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fc;
+import org.joml.Matrix4fStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -22,8 +24,6 @@ import java.util.Optional;
 
 public class WaypointRenderer implements HudElement {
     private final Map<Object, Waypoint> waypoints = new HashMap<>();
-    @Nullable
-    private Matrix4fc modelView;
     @Nullable
     private Matrix4f projection;
     private static WaypointRenderer INSTANCE;
@@ -85,13 +85,17 @@ public class WaypointRenderer implements HudElement {
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, @NonNull DeltaTracker deltaTracker) {
-        if (this.modelView == null || this.projection == null) {
+        if (this.projection == null) {
             return;
         }
         for (Waypoint waypoint : waypoints.values()) {
             try {
                 // 绘制图标
-                waypoint.render(graphics, this.modelView, this.projection);
+                Matrix4fStack modelView = RenderSystem.getModelViewStack();
+                modelView.pushMatrix();
+                modelView.mul(ClientUtils.getCameraRenderState().viewRotationMatrix);
+                waypoint.render(graphics, modelView, this.projection);
+                modelView.popMatrix();
             } catch (RuntimeException e) {
                 // 发送错误消息，然后停止渲染
                 ClientMessageUtils.sendErrorMessage(LocalizationKeys.Render.WAYPOINT.then("error").translate(), e);
@@ -100,10 +104,6 @@ public class WaypointRenderer implements HudElement {
                 waypoint.requestServerToStop();
             }
         }
-    }
-
-    public void setModelView(@Nullable Matrix4fc modelView) {
-        this.modelView = modelView;
     }
 
     public void setProjection(@Nullable Matrix4f projection) {

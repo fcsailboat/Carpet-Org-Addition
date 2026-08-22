@@ -19,6 +19,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -124,7 +125,7 @@ public class PlantAction extends AbstractPlayerAction {
      */
     private boolean plantCrops(ItemStack itemStack, BlockPos blockPos) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        Level world = ServerUtils.getWorld(fakePlayer);
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
         if (!world.getBlockState(blockPos).is(BlockTags.SUPPORTS_CROPS)) {
             return true;
         }
@@ -149,7 +150,7 @@ public class PlantAction extends AbstractPlayerAction {
         } else if (block instanceof PitcherCropBlock pitcherCropBlock) {
             // 处理瓶子草
             // 判断瓶子草是否可以施肥，如果可以，就施肥，否则瓶子草可能已经成熟，破坏瓶子草
-            if (pitcherCropBlock.isValidBonemealTarget(world, upPos, blockState)) {
+            if (pitcherCropBlock.isValidBonemealTarget(world, upPos, blockState, BonemealSource.INTERACTION)) {
                 // 施肥
                 this.fertilize(world, upPos);
             } else {
@@ -207,7 +208,7 @@ public class PlantAction extends AbstractPlayerAction {
             this.fertilize(world, bambooPos);
         } else if (block instanceof BambooStalkBlock bambooBlock) {
             // 判断竹子是否可以施肥
-            if (bambooBlock.isValidBonemealTarget(world, bambooPos, blockState)) {
+            if (bambooBlock.isValidBonemealTarget(world, bambooPos, blockState, BonemealSource.INTERACTION)) {
                 // 竹子上方第一个空气方块开始，向上空气方块的数量
                 int airCount = 0;
                 // 一个标记，从这个标记变为true开始，记录上方空气的数量
@@ -264,7 +265,7 @@ public class PlantAction extends AbstractPlayerAction {
         BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(cropPos), Direction.UP, cropPos, false);
         this.getFakePlayer().gameMode.useItemOn(this.getFakePlayer(), world, itemStack, InteractionHand.OFF_HAND, hitResult);
         // 摆动手
-        this.getFakePlayer().swing(InteractionHand.OFF_HAND, true);
+        this.getFakePlayer().swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
     }
 
     // 撒骨粉催熟
@@ -282,7 +283,7 @@ public class PlantAction extends AbstractPlayerAction {
             BlockHitResult hitResult = new BlockHitResult(centerPos, Direction.DOWN, cropPos, true);
             fakePlayer.gameMode.useItemOn(fakePlayer, world, itemStack, InteractionHand.MAIN_HAND, hitResult);
             // 摆动手
-            fakePlayer.swing(InteractionHand.MAIN_HAND, true);
+            fakePlayer.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
         }
     }
 

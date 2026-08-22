@@ -6,6 +6,7 @@ import boat.carpetorgaddition.wheel.ItemStackCounter;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -97,7 +98,7 @@ public class InventoryUtils {
             inventory.add(splitStack);
             if (!splitStack.isEmpty()) {
                 // 丢弃未插入物品栏的潜影盒，但不应该会插入失败
-                player.drop(splitStack, false, true);
+                player.drop(splitStack, true, Prediction.PREDICTED);
             }
             return result;
         }

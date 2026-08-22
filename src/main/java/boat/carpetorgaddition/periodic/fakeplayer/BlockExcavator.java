@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -108,7 +109,7 @@ public class BlockExcavator {
         // 更新上次操作时间
         this.player.resetLastActionTime();
         // 摆动手
-        this.player.swing(InteractionHand.MAIN_HAND);
+        this.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
         return blockBroken;
     }
 

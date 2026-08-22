@@ -15,6 +15,7 @@ import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -54,7 +55,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         PlayerStorageInventory.of(this.getFakePlayer()).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
-            this.getFakePlayer().drop(itemStack, false, true);
+            this.getFakePlayer().drop(itemStack, true, Prediction.PREDICTED);
         }
     }
 

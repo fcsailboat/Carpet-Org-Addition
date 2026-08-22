@@ -206,7 +206,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
                 return false;
             }
             // 被活塞推动时会被破坏
-            if (blockState.getPistonPushReaction() == PushReaction.DESTROY) {
+            if (blockState.getPistonPushReaction() == PushReaction.POPPED) {
                 return false;
             }
             // 高爆炸抗性
@@ -214,7 +214,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
                 return true;
             }
             // 不能推动（实体方块不能被推动）且含水
-            boolean blockPiston = blockState.getBlock() instanceof BaseEntityBlock || blockState.getPistonPushReaction() == PushReaction.BLOCK;
+            boolean blockPiston = blockState.getBlock() instanceof BaseEntityBlock || blockState.getPistonPushReaction() == PushReaction.IMMOVEABLE;
             boolean hasWater = !blockState.getFluidState().isEmpty();
             if (blockPiston && hasWater) {
                 return true;
@@ -228,11 +228,11 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
                 BlockState blockState = world.getBlockState(pos.below(i));
                 // 不可被推动的方块
                 PushReaction pistonBehavior = blockState.getPistonPushReaction();
-                if (pistonBehavior == PushReaction.BLOCK) {
+                if (pistonBehavior == PushReaction.IMMOVEABLE) {
                     return true;
                 }
                 // 下方方块可以被推动
-                if (pistonBehavior == PushReaction.DESTROY) {
+                if (pistonBehavior == PushReaction.POPPED) {
                     return false;
                 }
             }
