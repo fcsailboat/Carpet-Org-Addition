@@ -194,7 +194,7 @@ public class PlayerUtils {
      * @apiNote 此方法不应用于丢弃GUI中的物品，因为这不会触发{@link AbstractContainerMenu#clicked}的行为
      */
     public static void dropCopyItemAndClear(ServerPlayer player, ItemStack itemStack) {
-        player.drop(itemStack.copyAndClear(), false, false);
+        ServerUtils.drop(player, itemStack.copyAndClear());
     }
 
     /**

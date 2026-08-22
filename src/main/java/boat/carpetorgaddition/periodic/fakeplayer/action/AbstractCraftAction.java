@@ -51,10 +51,11 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
     protected void tick() {
         AutoGrowInventory inventory = new AutoGrowInventory();
         this.craft(inventory);
-        PlayerStorageInventory.of(this.getFakePlayer()).mergeEmptyShulkerBox();
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
-            this.getFakePlayer().drop(itemStack, false, true);
+            ServerUtils.drop(fakePlayer, itemStack);
         }
     }
 

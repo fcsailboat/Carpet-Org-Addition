@@ -260,11 +260,12 @@ public class PlantAction extends AbstractPlayerAction {
     // 种植
     private void plant(Level world, ItemStack itemStack, BlockPos farmlandPos, BlockPos cropPos) {
         // 让假玩家看向该位置（这不是必须的）
-        this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.EYES, cropPos.getCenter());
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        fakePlayer.lookAt(EntityAnchorArgument.Anchor.EYES, cropPos.getCenter());
         BlockHitResult hitResult = new BlockHitResult(farmlandPos.getCenter(), Direction.UP, cropPos, false);
-        this.getFakePlayer().gameMode.useItemOn(this.getFakePlayer(), world, itemStack, InteractionHand.OFF_HAND, hitResult);
+        fakePlayer.gameMode.useItemOn(fakePlayer, world, itemStack, InteractionHand.OFF_HAND, hitResult);
         // 摆动手
-        this.getFakePlayer().swing(InteractionHand.OFF_HAND, true);
+        ServerUtils.swing(fakePlayer, InteractionHand.OFF_HAND);
     }
 
     // 撒骨粉催熟
@@ -282,7 +283,7 @@ public class PlantAction extends AbstractPlayerAction {
             BlockHitResult hitResult = new BlockHitResult(centerPos, Direction.DOWN, cropPos, true);
             fakePlayer.gameMode.useItemOn(fakePlayer, world, itemStack, InteractionHand.MAIN_HAND, hitResult);
             // 摆动手
-            fakePlayer.swing(InteractionHand.MAIN_HAND, true);
+            ServerUtils.swing(fakePlayer, InteractionHand.MAIN_HAND);
         }
     }
 

@@ -24,11 +24,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.fox.Fox;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
@@ -277,6 +280,20 @@ public class ServerUtils {
 
     public static void lookAt(Entity entity, EntityAnchorArgument.Anchor anchor, Vec3 pos) {
         entity.lookAt(anchor, pos);
+    }
+
+    /**
+     * 丢弃物品
+     */
+    public static Optional<ItemEntity> drop(LivingEntity entity, ItemStack itemStack) {
+        return Optional.ofNullable(entity.drop(itemStack, false, true));
+    }
+
+    /**
+     * 摆动手
+     */
+    public static void swing(LivingEntity entity, InteractionHand hand) {
+        entity.swing(hand, entity instanceof ServerPlayer player && PlayerUtils.isRealPlayer(player));
     }
 
     /**
