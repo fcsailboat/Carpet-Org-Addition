@@ -80,6 +80,7 @@ public class FinderCommand extends AbstractServerCommand {
         super(dispatcher, access);
     }
 
+    // TODO 将range参数重命名为radius
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)

@@ -66,6 +66,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
         ItemSearchContext itemSearchContext = new ItemSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.ITEM_SEARCH_CODEC.encode(itemSearchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(Type.ITEM, name, json);
+        // TODO 为发送数据包添加延迟以强化命令弃用文本显示
         ClientPlayNetworking.send(packet);
         return list.size();
     }
