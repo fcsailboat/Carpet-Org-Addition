@@ -10,6 +10,10 @@ public class ClientMessageUtils {
     private ClientMessageUtils() {
     }
 
+    public static void sendEmptyMessage() {
+        sendMessage(TextBuilder.empty());
+    }
+
     /**
      * 向客户端玩家发送一条聊天消息
      */

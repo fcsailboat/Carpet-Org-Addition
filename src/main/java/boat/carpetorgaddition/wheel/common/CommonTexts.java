@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.wheel.provider;
+package boat.carpetorgaddition.wheel.common;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.MathUtils;
@@ -17,13 +17,13 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 
-public class TextProvider {
+public class CommonTexts {
     /**
      * 换行
      */
     public static final Component NEW_LINE = TextBuilder.create("\n");
 
-    private TextProvider() {
+    private CommonTexts() {
     }
 
     /**
@@ -56,13 +56,13 @@ public class TextProvider {
         switch (CarpetOrgAdditionSettings.CAN_HIGHLIGHT_BLOCK_POS.value()) {
             case OMMC -> joiner.append(
                     TextBuilder.of(" [H]")
-                            .setCommand(CommandProvider.highlightWaypointByOmmc(blockPos))
+                            .setCommand(CommonCommands.highlightWaypointByOmmc(blockPos))
                             .setHover(LocalizationKey.literal("ommc.highlight_waypoint.tooltip").translate())
                             .build()
             );
             case DEFAULT -> joiner.append(
                     TextBuilder.of(" [H]")
-                            .setCommand(CommandProvider.highlightWaypoint(blockPos))
+                            .setCommand(CommonCommands.highlightWaypoint(blockPos))
                             .setHover(LocalizationKeys.Button.HIGHLIGHT.translate())
                             .build()
             );

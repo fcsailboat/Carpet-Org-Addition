@@ -1,7 +1,8 @@
-package boat.carpetorgaddition.wheel.provider;
+package boat.carpetorgaddition.wheel.common;
 
 import boat.carpetorgaddition.client.command.AbstractClientCommand;
 import boat.carpetorgaddition.client.command.ClientCommandRegister;
+import boat.carpetorgaddition.client.command.FinderByNameCommand;
 import boat.carpetorgaddition.client.command.HighlightCommand;
 import boat.carpetorgaddition.command.*;
 import boat.carpetorgaddition.util.PlayerUtils;
@@ -13,8 +14,8 @@ import net.minecraft.world.entity.player.Player;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-public class CommandProvider {
-    private CommandProvider() {
+public class CommonCommands {
+    private CommonCommands() {
     }
 
     /**
@@ -206,6 +207,21 @@ public class CommandProvider {
 
     public static String finderStop() {
         return "/%s stop".formatted(getCommandName(FinderCommand.class));
+    }
+
+    public static String finderByNameFindItem(String name, int radius) {
+        String finderByName = getClientCommandName(FinderByNameCommand.class, "finderbyname");
+        return "/%s item %s %s".formatted(finderByName, name, radius);
+    }
+
+    public static String finderByNameFindItemFromOfflinePlayer(String name) {
+        String finderByName = getClientCommandName(FinderByNameCommand.class, "finderbyname");
+        return "/%s item %s from offline_player".formatted(finderByName, name);
+    }
+
+    public static String finderByNameFindBlock(String name, int radius) {
+        String finderByName = getClientCommandName(FinderByNameCommand.class, "finderbyname");
+        return "/%s block %s %s".formatted(finderByName, name, radius);
     }
 
     private static <T extends AbstractServerCommand> String getCommandName(Class<T> clazz) {

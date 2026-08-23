@@ -8,10 +8,10 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.ProgressBar;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.predicate.BlockStatePredicate;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.commands.CommandSourceStack;
@@ -183,7 +183,7 @@ public class BlockSearchTask extends ServerSearchTask {
 
     private Component getResultMessage(Block block, Set<BlockPos> set) {
         BlockPos center = MathUtils.calculateTheGeometricCenter(set);
-        return KEY.then("each").translate(TextProvider.blockPos(center), set.size(), block.getName());
+        return KEY.then("each").translate(CommonTexts.blockPos(center), set.size(), block.getName());
     }
 
     @Override

@@ -355,6 +355,7 @@
   "carpet-org-addition.misc.inventory": "物品栏",
   "carpet-org-addition.misc.ender_chest": "末影箱",
   "carpet-org-addition.misc.self": "自己",
+  "carpet-org-addition.commands.deprecated": "在未来版本中，此命令将会被移除，请改用：",
   "carpet-org-addition.command.finder.cancelled": "任务已停止",
   "carpet-org-addition.command.finder.not_canceled": "没有任务被停止",
   "carpet-org-addition.command.finder.waiting_to_be_completed": "任务长时间未完成，请耐心等待，或点击%s停止",

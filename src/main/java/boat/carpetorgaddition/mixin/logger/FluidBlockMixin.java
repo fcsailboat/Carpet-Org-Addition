@@ -3,7 +3,7 @@ package boat.carpetorgaddition.mixin.logger;
 import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.BlockPos;
@@ -26,7 +26,7 @@ public class FluidBlockMixin {
             if (server != null) {
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                     if (Loggers.OBSIDIAN.isSubscribed(player)) {
-                        Component text = TextProvider.blockPos(pos, ServerUtils.getColor(world));
+                        Component text = CommonTexts.blockPos(pos, ServerUtils.getColor(world));
                         MessageUtils.sendMessage(player, Loggers.OBSIDIAN.getLocalizationKey().then("generate").translate(text));
                     }
                 }

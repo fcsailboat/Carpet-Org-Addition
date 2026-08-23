@@ -5,7 +5,7 @@ import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.Waypoint;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -57,14 +57,14 @@ public class WaypointNavigator extends Navigator {
         // 玩家所在维度
         if (this.world.equals(this.playerWorld)) {
             // 玩家和路径点在相同的维度
-            Component display = IN.translate(waypoint.getName(), TextProvider.simpleBlockPos(this.target));
+            Component display = IN.translate(waypoint.getName(), CommonTexts.simpleBlockPos(this.target));
             int distance = MathUtils.getBlockIntegerDistance(playerPos, this.target);
             Component text = this.getHUDText(this.target.getCenter(), display, distance);
             MessageUtils.sendMessageToHud(this.player, text);
         } else {
             if (this.canMapping(this.secondTarget)) {
                 // 玩家和路径点在不同的维度，但是两个世界的坐标可以互相转换
-                TextBuilder builder = TextBuilder.of(TextProvider.simpleBlockPos(this.secondTarget));
+                TextBuilder builder = TextBuilder.of(CommonTexts.simpleBlockPos(this.secondTarget));
                 // 将坐标设置为斜体
                 builder.setItalic();
                 Component in = IN.translate(waypoint.getName(), builder.build());
@@ -73,8 +73,8 @@ public class WaypointNavigator extends Navigator {
                 MessageUtils.sendMessageToHud(this.player, text);
             } else {
                 // 玩家和路径点在不同维度
-                Component dimensionName = TextProvider.dimension(ServerUtils.getWorld(ServerUtils.getServer(this.player), this.waypoint.getWorldAsString()));
-                Component in = IN.translate(waypoint.getName(), TextBuilder.combineAll(dimensionName, TextProvider.simpleBlockPos(this.target)));
+                Component dimensionName = CommonTexts.dimension(ServerUtils.getWorld(ServerUtils.getServer(this.player), this.waypoint.getWorldAsString()));
+                Component in = IN.translate(waypoint.getName(), TextBuilder.combineAll(dimensionName, CommonTexts.simpleBlockPos(this.target)));
                 MessageUtils.sendMessageToHud(this.player, in);
             }
         }

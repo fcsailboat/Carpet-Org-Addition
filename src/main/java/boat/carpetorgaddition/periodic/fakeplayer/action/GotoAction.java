@@ -3,7 +3,7 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerPathfinder;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
@@ -35,7 +35,7 @@ public class GotoAction extends AbstractPlayerAction {
         this.target = () -> Optional.of(blockPos);
         this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this.target);
         this.targetType = TargetType.BLOCK;
-        this.displayName = TextProvider.blockPos(blockPos);
+        this.displayName = CommonTexts.blockPos(blockPos);
     }
 
     public GotoAction(@NonNull EntityPlayerMPFake fakePlayer, Entity entity) {

@@ -9,9 +9,9 @@ import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerPathfinder;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.HorizontalBlockPos;
 import boat.carpetorgaddition.wheel.SimpleCounter;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.CylinderBlockPosTraverser;
@@ -1293,13 +1293,13 @@ public class BedrockAction extends AbstractPlayerAction {
         list.add(key.translate(getFakePlayer().getDisplayName()));
         switch (this.regionType) {
             case CUBOID -> {
-                Component from = TextProvider.blockPos(this.traverser.getMinBlockPos(), ChatFormatting.GREEN);
-                Component to = TextProvider.blockPos(this.traverser.getMaxBlockPos(), ChatFormatting.GREEN);
+                Component from = CommonTexts.blockPos(this.traverser.getMinBlockPos(), ChatFormatting.GREEN);
+                Component to = CommonTexts.blockPos(this.traverser.getMaxBlockPos(), ChatFormatting.GREEN);
                 list.add(key.then("cuboid").then("range").translate(from, to));
             }
             case CYLINDER -> {
                 CylinderBlockPosTraverser iterator = (CylinderBlockPosTraverser) this.traverser;
-                Component center = TextProvider.blockPos(iterator.getCenter());
+                Component center = CommonTexts.blockPos(iterator.getCenter());
                 LocalizationKey cylinder = key.then("cylinder");
                 list.add(cylinder.then("center").translate(center));
                 list.add(cylinder.then("radius").translate(iterator.getRadius()));

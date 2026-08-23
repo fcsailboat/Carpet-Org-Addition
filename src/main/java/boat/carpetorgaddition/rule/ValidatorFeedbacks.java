@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.rule;
 
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys.Rule.Validate;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -66,7 +66,7 @@ public class ValidatorFeedbacks {
         for (String suggestion : rule.suggestions()) {
             TextBuilder option = TextBuilder.of(suggestion)
                     .setHover(LocalizationKey.literal("carpet.settings.command.switch_to").translate(suggestion))
-                    .setSuggestCommand(CommandProvider.setCarpetRule(rule.name(), suggestion));
+                    .setSuggestCommand(CommonCommands.setCarpetRule(rule.name(), suggestion));
             // 规则默认值设置为粗体
             if (Objects.equals(suggestion, RuleHelper.toRuleString(rule.defaultValue()))) {
                 option.setBold();

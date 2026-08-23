@@ -6,9 +6,9 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.Waypoint;
 import boat.carpetorgaddition.wheel.WorldFormat;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.brigadier.CommandDispatcher;
@@ -285,24 +285,24 @@ public class LocationsCommand extends AbstractServerCommand {
             case ServerUtils.OVERWORLD -> key.then("cross").translate(
                     player.getDisplayName(),
                     LocalizationKeys.Dimension.OVERWORLD.translate(),
-                    TextProvider.blockPos(blockPos, ChatFormatting.GREEN),
-                    TextProvider.blockPos(MathUtils.getTheNetherPos(player), ChatFormatting.RED)
+                    CommonTexts.blockPos(blockPos, ChatFormatting.GREEN),
+                    CommonTexts.blockPos(MathUtils.getTheNetherPos(player), ChatFormatting.RED)
             );
             case ServerUtils.THE_NETHER -> key.then("cross").translate(
                     player.getDisplayName(),
                     LocalizationKeys.Dimension.THE_NETHER.translate(),
-                    TextProvider.blockPos(blockPos, ChatFormatting.RED),
-                    TextProvider.blockPos(MathUtils.getOverworldPos(player), ChatFormatting.GREEN)
+                    CommonTexts.blockPos(blockPos, ChatFormatting.RED),
+                    CommonTexts.blockPos(MathUtils.getOverworldPos(player), ChatFormatting.GREEN)
             );
             case ServerUtils.THE_END -> key.translate(
                     player.getDisplayName(),
                     LocalizationKeys.Dimension.THE_END.translate(),
-                    TextProvider.blockPos(blockPos, ChatFormatting.DARK_PURPLE)
+                    CommonTexts.blockPos(blockPos, ChatFormatting.DARK_PURPLE)
             );
             default -> key.translate(
                     player.getDisplayName(),
                     ServerUtils.getIdAsString(world),
-                    TextProvider.blockPos(blockPos, null)
+                    CommonTexts.blockPos(blockPos, null)
             );
         };
         MessageUtils.sendMessage(context.getSource().getServer(), text);

@@ -3,7 +3,7 @@ package boat.carpetorgaddition.wheel.misc;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -76,7 +76,7 @@ public class BeaconRangeBox extends AABB {
             double y2 = vertices[v2Index + 1];
             double z2 = vertices[v2Index + 2];
             // 执行命令
-            CommandUtils.execute(player, CommandProvider.drawParticleLine(x1, y1, z1, x2, y2, z2));
+            CommandUtils.execute(player, CommonCommands.drawParticleLine(x1, y1, z1, x2, y2, z2));
         }
     }
 

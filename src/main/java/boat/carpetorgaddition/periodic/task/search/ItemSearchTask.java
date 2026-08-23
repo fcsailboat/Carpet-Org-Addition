@@ -8,11 +8,11 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -265,7 +265,7 @@ public class ItemSearchTask extends ServerSearchTask {
     ) implements Supplier<Component> {
         @Override
         public Component get() {
-            Component pos = TextProvider.blockPos(blockPos, ChatFormatting.GREEN);
+            Component pos = CommonTexts.blockPos(blockPos, ChatFormatting.GREEN);
             return KEY.then("each").translate(pos, containerName, statistics.getCountText());
         }
     }

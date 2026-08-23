@@ -3,8 +3,8 @@ package boat.carpetorgaddition.periodic.task.search;
 import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.predicate.EnchantedBookPredicate;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.ChatFormatting;
@@ -100,7 +100,7 @@ public class TradeEnchantedBookSearchTask extends AbstractTradeSearchTask {
 
         @Override
         public Component get() {
-            Component pos = TextProvider.blockPos(this.villagerPos(), ChatFormatting.GREEN);
+            Component pos = CommonTexts.blockPos(this.villagerPos(), ChatFormatting.GREEN);
             // 村民或流浪商人的名称
             Component villagerName = merchant.getName();
             String indices = getIndexArray(this.list);

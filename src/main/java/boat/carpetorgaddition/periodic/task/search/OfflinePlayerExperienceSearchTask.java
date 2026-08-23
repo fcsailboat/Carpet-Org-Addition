@@ -9,10 +9,10 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.ProgressBar;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.misc.ExperienceTransfer;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -175,7 +175,7 @@ public class OfflinePlayerExperienceSearchTask extends AbstractOfflinePlayerSear
             String name = this.nameAndId.name();
             String uuid = this.nameAndId.id().toString();
             // 悬停提示
-            Component hover = TextBuilder.combineAll("UUID: %s\n".formatted(uuid), TextProvider.COPY_CLICK);
+            Component hover = TextBuilder.combineAll("UUID: %s\n".formatted(uuid), CommonTexts.COPY_CLICK);
             String format = MathUtils.formatToMaxTwoDecimals(this.experienceValue.level() + this.experienceValue.progress());
             Component level = TextBuilder.of(format)
                     .setColor(ChatFormatting.GRAY)
@@ -209,7 +209,7 @@ public class OfflinePlayerExperienceSearchTask extends AbstractOfflinePlayerSear
         // 创建单击上线按钮
         private Component createLoginButton() {
             if (CommandUtils.canUseCommand(this.source, CarpetSettings.commandPlayer)) {
-                String command = CommandProvider.spawnFakePlayer(this.nameAndId.name());
+                String command = CommonCommands.spawnFakePlayer(this.nameAndId.name());
                 TextBuilder builder = TextBuilder.of(" [↑]");
                 builder.setCommand(command);
                 builder.setHover(LocalizationKeys.Button.LOGIN.translate());

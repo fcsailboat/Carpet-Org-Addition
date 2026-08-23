@@ -6,10 +6,10 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.Counter;
 import boat.carpetorgaddition.wheel.WorldFormat;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.commands.CommandSourceStack;
@@ -92,7 +92,7 @@ public class ParcelManager {
         ArrayList<Supplier<Component>> messages = new ArrayList<>();
         for (Parcel parcel : list) {
             messages.add(() -> {
-                Component clickRun = TextProvider.clickRun(CommandProvider.collectParcel(parcel.getId()));
+                Component clickRun = CommonTexts.clickRun(CommonCommands.collectParcel(parcel.getId()));
                 return MailCommand.KEY.then("prompt_collect").translate(parcel.getCount(), parcel.getDisplayName(), clickRun);
             });
         }

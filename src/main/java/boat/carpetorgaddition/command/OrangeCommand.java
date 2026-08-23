@@ -11,10 +11,10 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.permission.CommandPermission;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -179,7 +179,7 @@ public class OrangeCommand extends AbstractServerCommand {
             boolean enabled = valueManager.isEnabled(player, ruleString);
             Component displayName = RuleUtils.simpleTranslationName(entry.getRule());
             MessageUtils.sendMessage(context, key.then("rule").translate(displayName));
-            TextBuilder builder = TextBuilder.of(key.then("enable").translate(TextProvider.getBoolean(enabled)));
+            TextBuilder builder = TextBuilder.of(key.then("enable").translate(CommonTexts.getBoolean(enabled)));
             if (!control.allowCustomSwitch()) {
                 builder.setHover(RULESELF.then("invalid").translate());
                 builder.setStrikethrough();

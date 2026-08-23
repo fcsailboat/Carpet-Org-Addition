@@ -8,12 +8,12 @@ import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.periodic.task.search.*;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
 import boat.carpetorgaddition.wheel.predicate.BlockStatePredicate;
 import boat.carpetorgaddition.wheel.predicate.EnchantedBookPredicate;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -62,7 +62,11 @@ public class FinderCommand extends AbstractServerCommand {
     /**
      * 最大查找半径
      */
-    public static final int MAX_HORIZONTAL_RANGE = 512;
+    public static final int MAX_HORIZONTAL_RADIUS = 512;
+    /**
+     * 默认命令补全中的半径
+     */
+    public static final String[] SUGGESTED_RADIUS = {"64", "128", "256", "512"};
     /**
      * 村民的游戏内名称
      */
@@ -84,7 +88,7 @@ public class FinderCommand extends AbstractServerCommand {
                         .requires(PermissionManager.register(FINDER_BLOCK, PermissionLevel.PASS))
                         .then(Commands.argument("blockState", BlockPredicateArgument.blockPredicate(this.access))
                                 .executes(context -> blockFinder(context, 64))
-                                .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RANGE))
+                                .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
                                         .executes(context -> blockFinder(context, IntegerArgumentType.getInteger(context, "range"))))
                                 .then(Commands.literal("from")
@@ -96,7 +100,7 @@ public class FinderCommand extends AbstractServerCommand {
                         .requires(PermissionManager.register(FINDER_ITEM, PermissionLevel.PASS))
                         .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
                                 .executes(context -> searchItem(context, 64))
-                                .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RANGE))
+                                .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
                                         .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "range"))))
                                 .then(Commands.literal("from")
@@ -112,13 +116,13 @@ public class FinderCommand extends AbstractServerCommand {
                         .then(Commands.literal("item")
                                 .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
                                         .executes(context -> searchTradeItem(context, 64))
-                                        .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RANGE))
+                                        .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
                                                 .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "range"))))))
                         .then(Commands.literal("enchanted_book")
                                 .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
                                         .executes(context -> searchEnchantedBookTrade(context, 64))
-                                        .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RANGE))
+                                        .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
                                                 .executes(context -> searchEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "range")))))))
                 .then(Commands.literal("worldEater")
@@ -138,7 +142,7 @@ public class FinderCommand extends AbstractServerCommand {
     }
 
     private SuggestionProvider<CommandSourceStack> suggestionDefaultDistance() {
-        return (_, builder) -> SharedSuggestionProvider.suggest(new String[]{"64", "128", "256", "512"}, builder);
+        return (_, builder) -> SharedSuggestionProvider.suggest(SUGGESTED_RADIUS, builder);
     }
 
     /**
@@ -320,7 +324,7 @@ public class FinderCommand extends AbstractServerCommand {
     }
 
     private void checkBoxSize(WorldTraverser<?> traverser) throws CommandSyntaxException {
-        int max = (MAX_HORIZONTAL_RANGE << 1) + 1;
+        int max = (MAX_HORIZONTAL_RADIUS << 1) + 1;
         if (traverser.length() > max || traverser.width() > max) {
             throw CommandUtils.createException(KEY.then("toobig").translate(max));
         }
@@ -330,7 +334,7 @@ public class FinderCommand extends AbstractServerCommand {
      * 将物品数量转换为“多少组多少个”的形式
      */
     public static Component showCount(ItemStack itemStack, int count, boolean inTheShulkerBox) {
-        TextBuilder builder = TextBuilder.of(TextProvider.itemCount(count, itemStack.getMaxStackSize()));
+        TextBuilder builder = TextBuilder.of(CommonTexts.itemCount(count, itemStack.getMaxStackSize()));
         // 如果包含在潜影盒内找到的物品，在数量上添加斜体效果
         return inTheShulkerBox ? builder.setItalic().build() : builder.build();
     }

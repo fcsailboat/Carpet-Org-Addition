@@ -5,10 +5,10 @@ import boat.carpetorgaddition.logger.LoggerAccessor;
 import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.misc.WanderingTraderSpawnData;
 import boat.carpetorgaddition.wheel.misc.WanderingTraderSpawnData.SpawnCountdown;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -65,7 +65,7 @@ public abstract class WanderingTraderManagerMixin {
             }
             Set<Map.Entry<String, String>> entries = accessor.getSubscribedOnlinePlayers().entrySet();
             // 普通消息
-            Component blockPos = TextProvider.blockPos(trader.blockPosition(), ChatFormatting.GREEN);
+            Component blockPos = CommonTexts.blockPos(trader.blockPosition(), ChatFormatting.GREEN);
             for (Map.Entry<String, String> entry : entries) {
                 ServerPlayer player = optional.get().getPlayerList().getPlayerByName(entry.getKey());
                 if (player == null) {
@@ -75,7 +75,7 @@ public abstract class WanderingTraderManagerMixin {
                 if (CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(player)) {
                     // 带点击导航的消息
                     Component button = TextBuilder.of(LocalizationKeys.Button.NAVIGATE.translate())
-                            .setCommand(CommandProvider.navigateToUuidEntity(trader.getUUID()))
+                            .setCommand(CommonCommands.navigateToUuidEntity(trader.getUUID()))
                             .setHover(LocalizationKeys.Button.NAVIGATE_HOVER.translate(trader.getName()))
                             .setColor(ChatFormatting.AQUA)
                             .build();

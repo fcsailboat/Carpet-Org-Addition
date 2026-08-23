@@ -3,7 +3,7 @@ package boat.carpetorgaddition.periodic.navigator;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -22,13 +22,13 @@ public class HasNamePosNavigator extends BlockPosNavigator {
     @Override
     public void tick() {
         Component text;
-        Component pos = TextProvider.simpleBlockPos(this.blockPos);
+        Component pos = CommonTexts.simpleBlockPos(this.blockPos);
         // 玩家与目的地是否在同一维度
         if (ServerUtils.getWorld(this.player).equals(this.world)) {
             int distance = MathUtils.getBlockIntegerDistance(this.player.blockPosition(), this.blockPos);
             text = getHUDText(this.blockPos.getCenter(), IN.translate(this.name, pos), distance);
         } else {
-            text = IN.translate(this.name, TextBuilder.combineAll(TextProvider.dimension(this.world), pos));
+            text = IN.translate(this.name, TextBuilder.combineAll(CommonTexts.dimension(this.world), pos));
         }
         MessageUtils.sendMessageToHud(this.player, text);
     }

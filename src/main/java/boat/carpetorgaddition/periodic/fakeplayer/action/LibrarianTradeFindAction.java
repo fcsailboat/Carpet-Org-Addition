@@ -9,9 +9,9 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemIdentity;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -196,7 +196,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                 .setHover(new TextJoiner()
                         .newline(key
                                 .then("time_taken")
-                                .translate(TextProvider.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)))
+                                .translate(CommonTexts.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)))
                         .newline(key
                                 .then("refresh_count")
                                 .translate(this.refreshCount))

@@ -2,8 +2,8 @@ package boat.carpetorgaddition.wheel.text;
 
 import boat.carpetorgaddition.network.event.ActionSource;
 import boat.carpetorgaddition.util.CommandUtils;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Message;
 import net.minecraft.ChatFormatting;
@@ -156,7 +156,7 @@ public class TextBuilder {
     public TextBuilder setCopyToClipboard(String str, boolean hover) {
         this.text.withStyle(style -> style.withClickEvent(new ClickEvent.CopyToClipboard(str)));
         if (hover) {
-            this.setHover(TextProvider.COPY_CLICK);
+            this.setHover(CommonTexts.COPY_CLICK);
         }
         return this;
     }
@@ -300,7 +300,7 @@ public class TextBuilder {
      * @return 拼接后的文本对象
      */
     public static Component joinList(List<? extends Component> list) {
-        return joinList(list, TextProvider.NEW_LINE);
+        return joinList(list, CommonTexts.NEW_LINE);
     }
 
     /**

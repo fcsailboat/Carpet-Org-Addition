@@ -11,8 +11,8 @@ import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.WorldFormat;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -267,15 +267,15 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
                 MathUtils.formatToMaxTwoDecimals(this.pitch))
         );
         // 维度
-        joiner.newline(key.then("dimension").translate(TextProvider.dimension(this.dimension)));
+        joiner.newline(key.then("dimension").translate(CommonTexts.dimension(this.dimension)));
         // 游戏模式
         joiner.newline(key.then("gamemode").translate(this.gameMode.getLongDisplayName()));
         // 是否飞行
-        joiner.newline(key.then("flying").translate(TextProvider.getBoolean(this.flying)));
+        joiner.newline(key.then("flying").translate(CommonTexts.getBoolean(this.flying)));
         // 是否潜行
-        joiner.newline(key.then("sneaking").translate(TextProvider.getBoolean(this.sneaking)));
+        joiner.newline(key.then("sneaking").translate(CommonTexts.getBoolean(this.sneaking)));
         // 是否自动登录
-        joiner.newline(key.then("autologin").translate(TextProvider.getBoolean(this.autologin)));
+        joiner.newline(key.then("autologin").translate(CommonTexts.getBoolean(this.autologin)));
         if (!this.getGroups().isEmpty()) {
             String group = "group";
             if (this.getGroups().size() == 1) {
@@ -438,8 +438,8 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
     public Supplier<Component> line() {
         return () -> {
             String name = this.getName();
-            String logonCommand = CommandProvider.playerManagerSpawn(name);
-            String logoutCommand = CommandProvider.killFakePlayer(name);
+            String logonCommand = CommonCommands.playerManagerSpawn(name);
+            String logoutCommand = CommonCommands.killFakePlayer(name);
             Component login = TextBuilder.of("[↑]")
                     .setCommand(logonCommand)
                     .setHover(LocalizationKeys.Button.LOGIN.translate())

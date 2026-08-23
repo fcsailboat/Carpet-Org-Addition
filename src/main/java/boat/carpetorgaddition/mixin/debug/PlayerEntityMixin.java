@@ -4,7 +4,7 @@ import boat.carpetorgaddition.debug.DebugSettings;
 import boat.carpetorgaddition.debug.OnlyDeveloped;
 import boat.carpetorgaddition.exception.ProductionEnvironmentError;
 import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -32,7 +32,7 @@ public class PlayerEntityMixin {
         ProductionEnvironmentError.assertDevelopmentEnvironment();
         if (DebugSettings.openFakePlayerInventory.get() && entity instanceof EntityPlayerMPFake fakePlayer) {
             if (thisPlayer instanceof ServerPlayer player) {
-                CommandUtils.execute(player, CommandProvider.openPlayerInventory(fakePlayer));
+                CommandUtils.execute(player, CommonCommands.openPlayerInventory(fakePlayer));
             }
             cir.setReturnValue(InteractionResult.SUCCESS);
         }

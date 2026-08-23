@@ -6,8 +6,8 @@ import boat.carpetorgaddition.exception.OperationTimeoutException;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.misc.ExperienceTransfer;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -284,7 +284,7 @@ public class XpTransferCommand extends AbstractServerCommand {
                                 inputCurrentLevel
                         )
                 ).setColor(ChatFormatting.GREEN).build(),
-                TextProvider.NEW_LINE,
+                CommonTexts.NEW_LINE,
                 TextBuilder.of(
                         KEY.then("degrade").translate(
                                 outputPlayer.getDisplayName(),

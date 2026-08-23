@@ -33,9 +33,11 @@ public class BlockBehaviourMixin {
                 return;
             }
             /*
-             * 应该检测侦测器的方块状态吗？虽然已经激活的侦测器不应该再次右键激活，但这如果该侦测器
-             * 没有计划刻，例如通过粘贴投影原理图放置的激活的侦测器，则可以通过右键来添加计划刻
+             * 应该检测侦测器的方块状态吗？虽然已经激活的侦测器不应该再次右键激活，
+             * 但这如果该侦测器没有计划刻，例如通过粘贴投影原理图放置的激活的侦测器，
+             * 则可以通过右键来添加计划刻
              */
+            // TODO 添加物品使用冷却可能是过度设计
             if (itemStack.is(Items.FLINT_AND_STEEL)) {
                 itemStack.hurtAndBreak(1, player, hand);
                 level.playSound(player, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1, 1);

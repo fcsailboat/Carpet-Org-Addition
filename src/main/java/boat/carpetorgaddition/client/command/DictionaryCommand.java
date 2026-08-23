@@ -2,7 +2,7 @@ package boat.carpetorgaddition.client.command;
 
 import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType;
 import boat.carpetorgaddition.client.util.ClientMessageUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -78,7 +78,7 @@ public class DictionaryCommand extends AbstractClientCommand {
     private Component canCopyId(String id) {
         return TextBuilder.of(id)
                 .setCopyToClipboard(id)
-                .setHover(TextProvider.COPY_CLICK)
+                .setHover(CommonTexts.COPY_CLICK)
                 .setColor(ChatFormatting.GREEN)
                 .build();
     }
