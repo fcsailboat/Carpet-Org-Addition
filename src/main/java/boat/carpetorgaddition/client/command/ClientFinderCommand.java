@@ -4,6 +4,7 @@ import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType;
 import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientBlockArgumentType;
 import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientItemArgumentType;
 import boat.carpetorgaddition.client.util.ClientMessageUtils;
+import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket.Type;
@@ -66,8 +67,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
         ItemSearchContext itemSearchContext = new ItemSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.ITEM_SEARCH_CODEC.encode(itemSearchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(Type.ITEM, name, json);
-        // TODO 为发送数据包添加延迟以强化命令弃用文本显示
-        ClientPlayNetworking.send(packet);
+        ClientUtils.schedule(20, () -> ClientPlayNetworking.send(packet));
         return list.size();
     }
 
@@ -78,7 +78,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
         OfflinePlayerItemSearchContext searchContext = new OfflinePlayerItemSearchContext(list);
         JsonObject json = ObjectSearchTaskCodecs.OFFLINE_PLAYER_SEARCH_CODEC.encode(searchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(Type.OFFLINE_PLAYER_ITEM, name, json);
-        ClientPlayNetworking.send(packet);
+        ClientUtils.schedule(20, () -> ClientPlayNetworking.send(packet));
         return list.size();
     }
 
@@ -92,7 +92,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
         BlockSearchContext searchContext = new BlockSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.BLOCK_SEARCH_CODEC.encode(searchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(Type.BLOCK, name, json);
-        ClientPlayNetworking.send(packet);
+        ClientUtils.schedule(20, () -> ClientPlayNetworking.send(packet));
         return list.size();
     }
 

@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.client.util;
 
 import com.mojang.blaze3d.platform.Window;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.Font;
@@ -17,21 +18,32 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientUtils {
     public static final Set<UUID> FAKE_PLAYERS = ConcurrentHashMap.newKeySet();
+    private static final Map<MutableInt, Runnable> SCHEDULE_TASK = new HashMap<>();
 
     static {
-        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> FAKE_PLAYERS.clear());
+        ClientTickEvents.START_CLIENT_TICK.register(_ -> {
+            for (Map.Entry<MutableInt, Runnable> entry : SCHEDULE_TASK.entrySet()) {
+                MutableInt i = entry.getKey();
+                if (i.intValue() > 0 && i.decrementAndGet() == 0) {
+                    entry.getValue().run();
+                }
+            }
+            SCHEDULE_TASK.entrySet().removeIf(entry -> entry.getKey().intValue() <= 0);
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
+            FAKE_PLAYERS.clear();
+            SCHEDULE_TASK.clear();
+        });
     }
 
     private ClientUtils() {
@@ -192,5 +204,9 @@ public class ClientUtils {
 
     public static int getScreenHeight() {
         return getWindow().getGuiScaledHeight();
+    }
+
+    public static void schedule(int delay, Runnable task) {
+        SCHEDULE_TASK.put(new MutableInt(delay), task);
     }
 }
