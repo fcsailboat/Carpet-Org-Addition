@@ -19,6 +19,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.traverser.BlockEntityTraverser;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
+import boat.carpetorgaddition.wheel.traverser.NoAirBlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.WorldTraverser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -208,7 +209,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.blockPosition();
         ServerLevel world = ServerUtils.getWorld(player);
-        BlockPosTraverser traverser = new BlockPosTraverser(world, sourceBlockPos, range);
+        NoAirBlockPosTraverser traverser = new NoAirBlockPosTraverser(world, sourceBlockPos, range);
         this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         CommandSourceStack source = context.getSource();
@@ -229,7 +230,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.blockPosition();
         ServerLevel world = ServerUtils.getWorld(player);
-        BlockPosTraverser traverser = new BlockPosTraverser(from, to);
+        NoAirBlockPosTraverser traverser = new NoAirBlockPosTraverser(world, from, to);
         this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofWorldEater();
         CommandSourceStack source = context.getSource();
@@ -247,7 +248,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPos from = BlockPosArgument.getBlockPos(context, "from");
         BlockPos to = BlockPosArgument.getBlockPos(context, "to");
         // 计算要查找的区域
-        BlockPosTraverser traverser = new BlockPosTraverser(from, to);
+        NoAirBlockPosTraverser traverser = new NoAirBlockPosTraverser(ServerUtils.getWorld(player), from, to);
         this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         // 添加查找任务

@@ -55,7 +55,7 @@ public class ChunkTraverser extends WorldTraverser<Optional<ChunkAccess>> {
         @Override
         public Optional<ChunkAccess> next() {
             if (this.hasNext()) {
-                ChunkAccess chunk = this.world.getChunk(currentX, currentZ, ChunkStatus.FULL, false);
+                ChunkAccess chunk = this.world.getChunk(this.currentX, this.currentZ, ChunkStatus.FULL, true);
                 this.currentX++;
                 if (currentX > end.x()) {
                     this.currentX = start.x();

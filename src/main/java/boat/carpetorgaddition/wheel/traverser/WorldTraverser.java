@@ -102,15 +102,44 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
     }
 
     /**
-     * @return 选区是否包含区块或与区块重叠
+     * 该选区是否完全包含指定区块
      */
-    @SuppressWarnings("unused")
+    public boolean contains(ChunkPos chunkPos) {
+        int chunkMinX = chunkPos.getBlockX(0);
+        int chunkMinZ = chunkPos.getBlockZ(0);
+        int chunkMaxX = chunkPos.getBlockX(15);
+        int chunkMaxZ = chunkPos.getBlockZ(15);
+        return this.minX <= chunkMinX && this.maxX >= chunkMaxX && this.minZ <= chunkMinZ && this.maxZ >= chunkMaxZ;
+    }
+
+    /**
+     * 该选区是否与指定区块相交
+     */
     public boolean intersects(ChunkPos chunkPos) {
         int chunkMinX = chunkPos.getBlockX(0);
         int chunkMinZ = chunkPos.getBlockZ(0);
         int chunkMaxX = chunkPos.getBlockX(15);
         int chunkMaxZ = chunkPos.getBlockZ(15);
         return chunkMinX <= this.maxX && chunkMaxX >= this.minX && chunkMinZ <= this.maxZ && chunkMaxZ >= this.minZ;
+    }
+
+    public int getOverlapBlockCount(ChunkPos chunkPos) {
+        int chunkMinX = chunkPos.getBlockX(0);
+        int chunkMaxX = chunkPos.getBlockX(15);
+        int chunkMinZ = chunkPos.getBlockZ(0);
+        int chunkMaxZ = chunkPos.getBlockZ(15);
+        int overlapX = Math.min(this.maxX, chunkMaxX) - Math.max(this.minX, chunkMinX) + 1;
+        int overlapZ = Math.min(this.maxZ, chunkMaxZ) - Math.max(this.minZ, chunkMinZ) + 1;
+        if (overlapX <= 0 || overlapZ <= 0) {
+            return 0;
+        }
+        return overlapX * overlapZ;
+    }
+
+    public int getOverlapHeight(int minY, int maxY) {
+        int overlapMin = Math.max(this.minY, minY);
+        int overlapMax = Math.min(this.maxY, maxY);
+        return Math.max(overlapMax - overlapMin + 1, 0);
     }
 
     /**
