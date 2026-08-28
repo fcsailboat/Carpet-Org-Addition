@@ -45,6 +45,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
@@ -644,5 +645,21 @@ public class ServerUtils {
 
     public static void schedule(MinecraftServer server, Runnable runnable) {
         server.schedule(new TickTask(server.getTickCount(), runnable));
+    }
+
+    public static boolean areEqual(BlockState first, BlockState second) {
+        if (first.equals(second)) {
+            return true;
+        }
+        if (first.is(second.getBlock()) && first.getProperties().size() == second.getProperties().size()) {
+            for (Property<?> property : first.getProperties()) {
+                if (first.getOptionalValue(property).equals(second.getOptionalValue(property))) {
+                    continue;
+                }
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 }

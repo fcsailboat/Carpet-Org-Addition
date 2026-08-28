@@ -10,47 +10,54 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Predicate;
 
-public class NoAirBlockPosTraverser extends BlockPosTraverser {
+public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
     private final Level world;
+    @Nullable
+    private final Predicate<BlockState> paletteMatcher;
 
-    public NoAirBlockPosTraverser(Level world, BlockPos from, BlockPos to) {
+    public QuickBlockPosTraverser(Level world, BlockPos from, BlockPos to, @Nullable Predicate<BlockState> paletteMatcher) {
         super(from, to);
         this.world = world;
+        this.paletteMatcher = paletteMatcher;
     }
 
-    public NoAirBlockPosTraverser(Level world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    public QuickBlockPosTraverser(Level world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, @Nullable Predicate<BlockState> paletteMatcher) {
         super(minX, minY, minZ, maxX, maxY, maxZ);
         this.world = world;
+        this.paletteMatcher = paletteMatcher;
     }
 
-    public NoAirBlockPosTraverser(ServerLevel world, BlockPos sourceBlockPos, int range) {
+    public QuickBlockPosTraverser(ServerLevel world, BlockPos sourceBlockPos, int range, @Nullable Predicate<BlockState> paletteMatcher) {
         super(world, sourceBlockPos, range);
         this.world = world;
+        this.paletteMatcher = paletteMatcher;
     }
 
-    @Override
-    public NoAirBlockPosTraverser clamp(Level world) {
+    public QuickBlockPosTraverser clamp(Level world) {
         int minY = Math.max(this.minY, ServerUtils.getMinArchitectureAltitude(world));
         int maxY = Math.min(this.maxY, ServerUtils.getMaxArchitectureAltitude(world));
-        return new NoAirBlockPosTraverser(world, this.minX, minY, this.minZ, this.maxX, maxY, this.maxZ);
+        return new QuickBlockPosTraverser(world, this.minX, minY, this.minZ, this.maxX, maxY, this.maxZ, this.paletteMatcher);
     }
 
     @Override
-    public @NonNull NoAirBlockPosIterator iterator() {
-        return new NoAirBlockPosIterator(this.world, this.from, this.to);
+    public QuickBlockPosTraverser.@NonNull QuickBlockPosIterator iterator() {
+        return new QuickBlockPosIterator(this.world, this.from, this.to);
     }
 
-    public class NoAirBlockPosIterator implements Iterator<BlockPos> {
+    public class QuickBlockPosIterator implements Iterator<Optional<BlockPos>> {
         private final Iterator<Optional<ChunkAccess>> iterator;
         /**
          * 已经遍历过的方块数量，包含空气
          */
         private long count = 0L;
+        private boolean timeout = false;
         private ChunkAccess currentChunk;
         private BlockPos next = null;
         private int sectionIndex;
@@ -59,7 +66,7 @@ public class NoAirBlockPosTraverser extends BlockPosTraverser {
         private int y;
         private int z;
 
-        private NoAirBlockPosIterator(Level world, BlockPos from, BlockPos to) {
+        private QuickBlockPosIterator(Level world, BlockPos from, BlockPos to) {
             ChunkTraverser traverser = new ChunkTraverser(world, from, to);
             this.iterator = traverser.iterator();
         }
@@ -69,7 +76,13 @@ public class NoAirBlockPosTraverser extends BlockPosTraverser {
             if (this.next != null) {
                 return true;
             }
+            this.timeout = false;
+            long l = System.currentTimeMillis();
             while (true) {
+                if (System.currentTimeMillis() - l >= 20) {
+                    this.timeout = true;
+                    return true;
+                }
                 if (this.sections == null) {
                     while (this.iterator.hasNext()) {
                         Optional<ChunkAccess> optional = this.iterator.next();
@@ -105,7 +118,7 @@ public class NoAirBlockPosTraverser extends BlockPosTraverser {
                 int sectionMinY = minBuildHeight + this.sectionIndex * 16;
                 int sectionMaxY = sectionMinY + 15;
                 int height = getOverlapHeight(sectionMinY, sectionMaxY);
-                if (section.hasOnlyAir() || height == 0) {
+                if (section.hasOnlyAir() || height == 0 || !(paletteMatcher != null && section.maybeHas(paletteMatcher))) {
                     this.sectionIndex++;
                     if (contains(chunkPos)) {
                         this.count += 16L * height * 16L;
@@ -139,7 +152,7 @@ public class NoAirBlockPosTraverser extends BlockPosTraverser {
                         ServerUtils.getMinArchitectureAltitude(world) + SectionPos.sectionToBlockCoord(this.sectionIndex, this.y),
                         SectionPos.sectionToBlockCoord(chunkPos.z(), this.z)
                 );
-                boolean contains = NoAirBlockPosTraverser.this.contains(blockPos);
+                boolean contains = QuickBlockPosTraverser.this.contains(blockPos);
                 if (contains) {
                     this.count++;
                 }
@@ -161,13 +174,16 @@ public class NoAirBlockPosTraverser extends BlockPosTraverser {
         }
 
         @Override
-        public BlockPos next() {
+        public Optional<BlockPos> next() {
+            if (this.timeout) {
+                return Optional.empty();
+            }
             if (this.next == null) {
                 throw new NoSuchElementException();
             }
             BlockPos result = this.next;
             this.next = null;
-            return result;
+            return Optional.of(result);
         }
 
         public long getCount() {

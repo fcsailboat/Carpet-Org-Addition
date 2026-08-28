@@ -19,7 +19,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.traverser.BlockEntityTraverser;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
-import boat.carpetorgaddition.wheel.traverser.NoAirBlockPosTraverser;
+import boat.carpetorgaddition.wheel.traverser.QuickBlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.WorldTraverser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -209,9 +209,9 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.blockPosition();
         ServerLevel world = ServerUtils.getWorld(player);
-        NoAirBlockPosTraverser traverser = new NoAirBlockPosTraverser(world, sourceBlockPos, range);
+        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, this.access.lookupOrThrow(Registries.BLOCK), "blockState");
+        QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(world, sourceBlockPos, range, predicate.getPaletteMatcher());
         this.checkBoxSize(traverser);
-        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         CommandSourceStack source = context.getSource();
         BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
@@ -230,9 +230,9 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.blockPosition();
         ServerLevel world = ServerUtils.getWorld(player);
-        NoAirBlockPosTraverser traverser = new NoAirBlockPosTraverser(world, from, to);
-        this.checkBoxSize(traverser);
         BlockStatePredicate predicate = BlockStatePredicate.ofWorldEater();
+        QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(world, from, to, predicate.getPaletteMatcher());
+        this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
         BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
@@ -247,10 +247,10 @@ public class FinderCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         BlockPos from = BlockPosArgument.getBlockPos(context, "from");
         BlockPos to = BlockPosArgument.getBlockPos(context, "to");
+        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, this.access.lookupOrThrow(Registries.BLOCK), "blockState");
         // 计算要查找的区域
-        NoAirBlockPosTraverser traverser = new NoAirBlockPosTraverser(ServerUtils.getWorld(player), from, to);
+        QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(ServerUtils.getWorld(player), from, to, predicate.getPaletteMatcher());
         this.checkBoxSize(traverser);
-        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, "blockState");
         // 添加查找任务
         CommandSourceStack source = context.getSource();
         BlockSearchTask task = new BlockSearchTask(ServerUtils.getWorld(player), player.blockPosition(), traverser, source, predicate, player);

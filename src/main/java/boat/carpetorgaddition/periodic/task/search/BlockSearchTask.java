@@ -13,7 +13,7 @@ import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.predicate.BlockStatePredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import boat.carpetorgaddition.wheel.traverser.NoAirBlockPosTraverser;
+import boat.carpetorgaddition.wheel.traverser.QuickBlockPosTraverser;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -26,9 +26,9 @@ import java.util.function.Supplier;
 
 public class BlockSearchTask extends ServerSearchTask {
     protected final ServerLevel world;
-    private final NoAirBlockPosTraverser traverser;
+    private final QuickBlockPosTraverser traverser;
     protected final BlockPos sourcePos;
-    private NoAirBlockPosTraverser.NoAirBlockPosIterator iterator;
+    private QuickBlockPosTraverser.QuickBlockPosIterator iterator;
     private FindState findState;
     private final BlockStatePredicate predicate;
     /**
@@ -48,7 +48,7 @@ public class BlockSearchTask extends ServerSearchTask {
     private boolean cancelled = false;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("block");
 
-    public BlockSearchTask(ServerLevel world, BlockPos sourcePos, NoAirBlockPosTraverser traverser, CommandSourceStack source, BlockStatePredicate predicate, ServerPlayer player) {
+    public BlockSearchTask(ServerLevel world, BlockPos sourcePos, QuickBlockPosTraverser traverser, CommandSourceStack source, BlockStatePredicate predicate, ServerPlayer player) {
         super(source, player);
         this.world = world;
         this.sourcePos = sourcePos;
@@ -94,12 +94,12 @@ public class BlockSearchTask extends ServerSearchTask {
             if (this.isTimeExpired()) {
                 return;
             }
-            BlockPos blockPos = this.iterator.next();
-            if (this.blockPosCache.contains(blockPos)) {
+            Optional<BlockPos> optional = this.iterator.next();
+            if (optional.isPresent() && this.blockPosCache.contains(optional.get())) {
                 continue;
             }
             try {
-                this.iterate(blockPos);
+                optional.ifPresent(this::iterate);
                 this.progressBar.setProgress(this.iterator.getCount());
             } catch (ForceReturnException e) {
                 return;
