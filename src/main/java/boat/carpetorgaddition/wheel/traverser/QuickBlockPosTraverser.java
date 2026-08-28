@@ -118,7 +118,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
                 int sectionMinY = minBuildHeight + this.sectionIndex * 16;
                 int sectionMaxY = sectionMinY + 15;
                 int height = getOverlapHeight(sectionMinY, sectionMaxY);
-                if (section.hasOnlyAir() || height == 0 || !(paletteMatcher != null && section.maybeHas(paletteMatcher))) {
+                if (this.shouldSkip(section, height)) {
                     this.sectionIndex++;
                     if (contains(chunkPos)) {
                         this.count += 16L * height * 16L;
@@ -135,6 +135,16 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
                 this.resetPos();
             }
             return null;
+        }
+
+        private boolean shouldSkip(LevelChunkSection section, int height) {
+            if (section.hasOnlyAir() || height == 0) {
+                return true;
+            }
+            if (paletteMatcher == null) {
+                return false;
+            }
+            return !section.maybeHas(paletteMatcher);
         }
 
         private void resetPos() {
