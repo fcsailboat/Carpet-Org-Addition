@@ -161,7 +161,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
                 this.stream()
                         .map(this::entry)
                         .distinct()
-                        .map(entry -> Map.entry(quoteIfContainsSpace(entry.getKey()), entry.getValue()))
+                        .map(entry -> Map.entry(quoteIfContainsSpace(entry.getKey()), getIdValue(entry.getValue())))
                         .forEach(entry -> {
                             String key = entry.getKey();
                             if (key.toLowerCase(Locale.ROOT).contains(remaining) || (ID_COMPLETION_NAME && entry.getValue().contains(remaining))) {
@@ -176,6 +176,11 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
 
     private static String quoteIfContainsSpace(String str) {
         return str.contains(" ") ? "\"" + str + "\"" : str;
+    }
+
+    private static String getIdValue(String id) {
+        String[] split = id.split(":");
+        return split.length == 2 ? split[1] : id;
     }
 
     /**
