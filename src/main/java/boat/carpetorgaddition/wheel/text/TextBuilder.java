@@ -42,8 +42,8 @@ public class TextBuilder {
         return new TextBuilder(text.copy());
     }
 
-    public static TextBuilder of(String str) {
-        return of(create(str));
+    public static TextBuilder of(String text) {
+        return of(create(text));
     }
 
     public static TextBuilder of(Number number) {

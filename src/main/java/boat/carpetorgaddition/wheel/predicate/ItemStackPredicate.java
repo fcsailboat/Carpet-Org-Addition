@@ -200,10 +200,8 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
             return ServerUtils.getName(this.convert);
         }
         if (this.input.length() > 30) {
-            String substring = this.input.substring(0, 30);
-            Component ellipsis = TextBuilder.create("...");
-            Component result = TextBuilder.combineAll(substring, ellipsis);
-            TextBuilder builder = TextBuilder.of(result).setGrayItalic().setHover(this.input);
+            String substring = this.input.substring(0, 27);
+            TextBuilder builder = TextBuilder.of(substring + "...").setGrayItalic().setHover(this.input);
             return builder.build();
         }
         return TextBuilder.create(this.input);
@@ -287,15 +285,13 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
         @Override
         public Component getDisplayName() throws IdentifierException {
             if (this.name.length() > 30) {
-                String substring = this.name.substring(0, 30);
-                Component ellipsis = TextBuilder.create("...");
-                Component result = TextBuilder.combineAll(substring, ellipsis);
                 TextJoiner joiner = new TextJoiner();
                 joiner.append(this.name).append(": ");
                 for (Item item : this.items) {
                     joiner.enter(ServerUtils.getName(item));
                 }
-                return TextBuilder.of(result)
+                String substring = this.name.substring(0, 27);
+                return TextBuilder.of(substring + "...")
                         .setGrayItalic()
                         .setHover(joiner.join())
                         .build();

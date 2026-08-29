@@ -4,6 +4,7 @@ import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
@@ -157,10 +158,8 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
             return this.block.getName();
         }
         if (this.content.length() > 30) {
-            String substring = this.content.substring(0, 30);
-            Component ellipsis = TextBuilder.create("...");
-            Component result = TextBuilder.combineAll(substring, ellipsis);
-            TextBuilder builder = TextBuilder.of(result).setGrayItalic().setHover(this.content);
+            String substring = this.content.substring(0, 27);
+            TextBuilder builder = TextBuilder.of(substring + "...").setGrayItalic().setHover(this.content);
             return builder.build();
         }
         return TextBuilder.create(this.content);
@@ -228,22 +227,37 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
     }
 
     public static class AnyOfBlockPredicate extends BlockStatePredicate {
+        private final LinkedHashSet<Block> blocks;
         private final String name;
 
         private AnyOfBlockPredicate(LinkedHashSet<Block> blocks, String name) {
             super(blocks);
+            this.blocks = blocks;
             this.name = name;
         }
 
         @Override
         public Component getDisplayName() {
             if (this.name.length() > 30) {
-                String display = this.name.substring(0, 30) + "...";
-                TextBuilder builder = TextBuilder.of(display).setGrayItalic().setHover(this.name);
-                return builder.build();
+                TextJoiner joiner = new TextJoiner();
+                joiner.append(this.name).append(": ");
+                for (Block block : this.blocks) {
+                    joiner.enter(ServerUtils.getName(block));
+                }
+                String display = this.name.substring(0, 27) + "...";
+                return TextBuilder.of(display)
+                        .setGrayItalic()
+                        .setHover(joiner.join())
+                        .build();
             }
-            // TODO 鼠标悬停显示方块名称
-            return TextBuilder.of(this.name).setColor(ChatFormatting.GRAY).build();
+            TextJoiner joiner = new TextJoiner();
+            for (Block block : this.blocks) {
+                joiner.newline(ServerUtils.getName(block));
+            }
+            return TextBuilder.of(this.name)
+                    .setColor(ChatFormatting.GRAY)
+                    .setHover(joiner.join())
+                    .build();
         }
     }
 }
