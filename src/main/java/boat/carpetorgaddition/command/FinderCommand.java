@@ -81,7 +81,6 @@ public class FinderCommand extends AbstractServerCommand {
         super(dispatcher, access);
     }
 
-    // TODO 将range参数重命名为radius
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
@@ -90,9 +89,9 @@ public class FinderCommand extends AbstractServerCommand {
                         .requires(PermissionManager.register(FINDER_BLOCK, PermissionLevel.PASS))
                         .then(Commands.argument("blockState", BlockPredicateArgument.blockPredicate(this.access))
                                 .executes(context -> blockFinder(context, 64))
-                                .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> blockFinder(context, IntegerArgumentType.getInteger(context, "range"))))
+                                        .executes(context -> blockFinder(context, IntegerArgumentType.getInteger(context, "radius"))))
                                 .then(Commands.literal("from")
                                         .then(Commands.argument("from", BlockPosArgument.blockPos())
                                                 .then(Commands.literal("to")
@@ -102,9 +101,9 @@ public class FinderCommand extends AbstractServerCommand {
                         .requires(PermissionManager.register(FINDER_ITEM, PermissionLevel.PASS))
                         .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
                                 .executes(context -> searchItem(context, 64))
-                                .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "range"))))
+                                        .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "radius"))))
                                 .then(Commands.literal("from")
                                         .then(Commands.argument("from", BlockPosArgument.blockPos())
                                                 .then(Commands.literal("to")
@@ -118,15 +117,15 @@ public class FinderCommand extends AbstractServerCommand {
                         .then(Commands.literal("item")
                                 .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
                                         .executes(context -> searchTradeItem(context, 64))
-                                        .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                        .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
-                                                .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "range"))))))
+                                                .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "radius"))))))
                         .then(Commands.literal("enchanted_book")
                                 .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
                                         .executes(context -> searchEnchantedBookTrade(context, 64))
-                                        .then(Commands.argument("range", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                        .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
-                                                .executes(context -> searchEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "range")))))))
+                                                .executes(context -> searchEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "radius")))))))
                 .then(Commands.literal("worldEater")
                         .requires(((Predicate<CommandSourceStack>) _ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
                                 .and(PermissionManager.registerHiddenCommand("finder.worldEater", PermissionLevel.PASS)))
@@ -150,7 +149,7 @@ public class FinderCommand extends AbstractServerCommand {
     /**
      * 物品查找
      */
-    private int searchItem(CommandContext<CommandSourceStack> context, int range) throws CommandSyntaxException {
+    private int searchItem(CommandContext<CommandSourceStack> context, int radius) throws CommandSyntaxException {
         // 获取执行命令的玩家并非空判断
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
@@ -158,7 +157,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPos sourceBlockPos = player.blockPosition();
         // 查找周围容器中的物品
         Level world = ServerUtils.getWorld(player);
-        BlockEntityTraverser traverser = new BlockEntityTraverser(world, sourceBlockPos, range);
+        BlockEntityTraverser traverser = new BlockEntityTraverser(world, sourceBlockPos, radius);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
         ItemSearchTask task = new ItemSearchTask(world, predicate, traverser, source, player);
@@ -203,14 +202,14 @@ public class FinderCommand extends AbstractServerCommand {
     /**
      * 方块查找
      */
-    private int blockFinder(CommandContext<CommandSourceStack> context, int range) throws CommandSyntaxException {
+    private int blockFinder(CommandContext<CommandSourceStack> context, int radius) throws CommandSyntaxException {
         // 获取执行命令的玩家并非空判断
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.blockPosition();
         ServerLevel world = ServerUtils.getWorld(player);
         BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, this.access.lookupOrThrow(Registries.BLOCK), "blockState");
-        QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(world, sourceBlockPos, range, predicate.getPaletteMatcher());
+        QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(world, sourceBlockPos, radius, predicate.getPaletteMatcher());
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
         BlockSearchTask task = new BlockSearchTask(world, sourceBlockPos, traverser, source, predicate, player);
@@ -262,7 +261,7 @@ public class FinderCommand extends AbstractServerCommand {
     /**
      * 准备根据物品查找交易项
      */
-    private int searchTradeItem(CommandContext<CommandSourceStack> context, int range) throws CommandSyntaxException {
+    private int searchTradeItem(CommandContext<CommandSourceStack> context, int radius) throws CommandSyntaxException {
         // 获取执行命令的玩家对象
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取要匹配的物品
@@ -271,7 +270,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPos sourcePos = player.blockPosition();
         Level world = ServerUtils.getWorld(player);
         // 查找范围
-        BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, range);
+        BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, radius);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
         TradeItemSearchTask task = new TradeItemSearchTask(world, traverser, sourcePos, predicate, source, player);
@@ -284,7 +283,7 @@ public class FinderCommand extends AbstractServerCommand {
     /**
      * 准备查找出售指定附魔书的村民
      */
-    private int searchEnchantedBookTrade(CommandContext<CommandSourceStack> context, int range) throws CommandSyntaxException {
+    private int searchEnchantedBookTrade(CommandContext<CommandSourceStack> context, int radius) throws CommandSyntaxException {
         // 获取执行命令的玩家
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取需要查找的附魔
@@ -296,7 +295,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPos sourcePos = player.blockPosition();
         Level world = ServerUtils.getWorld(player);
         // 查找范围
-        BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, range);
+        BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, radius);
         this.checkBoxSize(traverser);
         TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate, player);
         // 向任务管理器添加任务

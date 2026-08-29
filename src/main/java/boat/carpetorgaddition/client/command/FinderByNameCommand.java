@@ -31,28 +31,28 @@ public class FinderByNameCommand extends AbstractClientCommand {
                 .then(ClientCommands.literal("item")
                         .then(ClientCommands.argument("item", new ClientObjectArgumentType.ClientItemArgumentType(true))
                                 .executes(context -> searchItem(context, 64))
-                                .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "range"))))
+                                        .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "radius"))))
                                 .then(ClientCommands.literal("from")
                                         .then(ClientCommands.literal("offline_player")
                                                 .executes(this::searchItem)))))
                 .then(ClientCommands.literal("block")
                         .then(ClientCommands.argument("block", new ClientObjectArgumentType.ClientBlockArgumentType(true))
                                 .executes(context -> searchBlock(context, 64))
-                                .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> searchBlock(context, IntegerArgumentType.getInteger(context, "range")))))));
+                                        .executes(context -> searchBlock(context, IntegerArgumentType.getInteger(context, "radius")))))));
     }
 
     private SuggestionProvider<FabricClientCommandSource> suggestionDefaultDistance() {
         return (_, builder) -> SharedSuggestionProvider.suggest(FinderCommand.SUGGESTED_RADIUS, builder);
     }
 
-    private int searchItem(CommandContext<FabricClientCommandSource> context, int range) {
+    private int searchItem(CommandContext<FabricClientCommandSource> context, int radius) {
         List<Item> list = getItemList(context);
         String name = CommandUtils.getArgumentLiteral(context, "item").orElseThrow();
-        ObjectSearchTaskCodecs.ItemSearchContext itemSearchContext = new ObjectSearchTaskCodecs.ItemSearchContext(range, list);
+        ObjectSearchTaskCodecs.ItemSearchContext itemSearchContext = new ObjectSearchTaskCodecs.ItemSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.ITEM_SEARCH_CODEC.encode(itemSearchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.ITEM, name, json);
         ClientPlayNetworking.send(packet);
@@ -69,13 +69,13 @@ public class FinderByNameCommand extends AbstractClientCommand {
         return list.size();
     }
 
-    private int searchBlock(CommandContext<FabricClientCommandSource> context, int range) {
+    private int searchBlock(CommandContext<FabricClientCommandSource> context, int radius) {
         List<Block> list = ClientObjectArgumentType.getType(context, "block").stream()
                 .filter(t -> t instanceof Block)
                 .map(t -> (Block) t)
                 .toList();
         String name = CommandUtils.getArgumentLiteral(context, "block").orElseThrow();
-        ObjectSearchTaskCodecs.BlockSearchContext searchContext = new ObjectSearchTaskCodecs.BlockSearchContext(range, list);
+        ObjectSearchTaskCodecs.BlockSearchContext searchContext = new ObjectSearchTaskCodecs.BlockSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.BLOCK_SEARCH_CODEC.encode(searchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.BLOCK, name, json);
         ClientPlayNetworking.send(packet);
