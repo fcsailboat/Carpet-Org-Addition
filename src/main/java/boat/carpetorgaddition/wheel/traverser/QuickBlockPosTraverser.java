@@ -48,10 +48,12 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
 
     @Override
     public QuickBlockPosTraverser.@NonNull QuickBlockPosIterator iterator() {
-        return new QuickBlockPosIterator(this.world, this.from, this.to);
+        return new QuickBlockPosIterator(this.world, this.from, this.to, this.paletteMatcher);
     }
 
     public class QuickBlockPosIterator implements Iterator<Optional<BlockPos>> {
+        @Nullable
+        private final Predicate<BlockState> paletteMatcher;
         private final Iterator<Optional<ChunkAccess>> iterator;
         /**
          * 已经遍历过的方块数量，包含空气
@@ -66,8 +68,9 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
         private int y;
         private int z;
 
-        private QuickBlockPosIterator(Level world, BlockPos from, BlockPos to) {
+        private QuickBlockPosIterator(Level world, BlockPos from, BlockPos to, @Nullable Predicate<BlockState> paletteMatcher) {
             ChunkTraverser traverser = new ChunkTraverser(world, from, to);
+            this.paletteMatcher = paletteMatcher;
             this.iterator = traverser.iterator();
         }
 
@@ -79,7 +82,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
             this.timeout = false;
             long l = System.currentTimeMillis();
             while (true) {
-                if (System.currentTimeMillis() - l >= 20) {
+                if (System.currentTimeMillis() - l >= 25) {
                     this.timeout = true;
                     return true;
                 }
@@ -141,10 +144,10 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
             if (section.hasOnlyAir() || height == 0) {
                 return true;
             }
-            if (paletteMatcher == null) {
+            if (this.paletteMatcher == null) {
                 return false;
             }
-            return !section.maybeHas(paletteMatcher);
+            return !section.maybeHas(this.paletteMatcher);
         }
 
         private void resetPos() {
