@@ -3,6 +3,7 @@ package boat.carpetorgaddition.client.command.argument;
 import boat.carpetorgaddition.client.util.ClientCommandUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.CommandUtils;
+import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.brigadier.StringReader;
@@ -164,7 +165,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
                         .map(entry -> Map.entry(quoteIfContainsSpace(entry.getKey()), getIdValue(entry.getValue())))
                         .forEach(entry -> {
                             String key = entry.getKey();
-                            if (key.toLowerCase(Locale.ROOT).contains(remaining) || (ID_COMPLETION_NAME && entry.getValue().contains(remaining))) {
+                            if (key.toLowerCase(Locale.ROOT).contains(remaining) || MathUtils.isPinyinMatch(key, remaining) || (ID_COMPLETION_NAME && entry.getValue().contains(remaining))) {
                                 builder.suggest(key);
                             }
                         });

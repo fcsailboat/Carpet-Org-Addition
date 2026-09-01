@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.util;
 
+import com.github.promeg.pinyinhelper.Pinyin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -23,9 +24,7 @@ public class MathUtils {
     /**
      * 所有水平的基本方向
      */
-    public static final Direction[] HORIZONTAL = Arrays.stream(Direction.values())
-            .filter(direction -> direction.getAxis().isHorizontal())
-            .toArray(Direction[]::new);
+    public static final Direction[] HORIZONTAL = Arrays.stream(Direction.values()).filter(direction -> direction.getAxis().isHorizontal()).toArray(Direction[]::new);
 
     /**
      * 获取两个方块坐标的距离的平方
@@ -151,22 +150,14 @@ public class MathUtils {
      */
     @SuppressWarnings("unused")
     public static BlockPos toMinBlockPos(BlockPos pos1, BlockPos pos2) {
-        return new BlockPos(
-                Math.min(pos1.getX(), pos2.getX()),
-                Math.min(pos1.getY(), pos2.getY()),
-                Math.min(pos1.getZ(), pos2.getZ())
-        );
+        return new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
     }
 
     /**
      * 计算两个方块坐标的最大边界点
      */
     public static BlockPos toMaxBlockPos(BlockPos pos1, BlockPos pos2) {
-        return new BlockPos(
-                Math.max(pos1.getX(), pos2.getX()),
-                Math.max(pos1.getY(), pos2.getY()),
-                Math.max(pos1.getZ(), pos2.getZ())
-        );
+        return new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
     }
 
     /**
@@ -478,5 +469,62 @@ public class MathUtils {
 
     public static int clamp(int value, int min, int max) {
         return Math.clamp(value, min, max);
+    }
+
+    /**
+     *  @return 文字是否与拼音匹配（支持部分匹配、全拼、简拼、混合）
+     *  @author DeepSeek
+     */
+    public static boolean isPinyinMatch(String text, String rawPinyin) {
+        if (rawPinyin.isEmpty()) {
+            return true;
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < rawPinyin.length(); i++) {
+            char c = rawPinyin.charAt(i);
+            builder.append(Pinyin.isChinese(c) ? Pinyin.toPinyin(c) : c);
+        }
+        String pinyin = builder.toString().toLowerCase(Locale.ROOT);
+        char[] chars = text.toCharArray();
+        for (int start = 0; start < chars.length; start++) {
+            Boolean[][] memo = new Boolean[chars.length + 1][pinyin.length() + 1];
+            if (matchRecursive(chars, start, pinyin, 0, memo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean matchRecursive(char[] chars, int textIndex, String query, int queryIndex, Boolean[][] memo) {
+        if (queryIndex == query.length()) {
+            return true;
+        }
+        if (textIndex >= chars.length) {
+            return false;
+        }
+        if (memo[textIndex][queryIndex] != null) {
+            return memo[textIndex][queryIndex];
+        }
+        char c = chars[textIndex];
+        String rawPinyin = Pinyin.toPinyin(c);
+        String pinyin = rawPinyin.toLowerCase(Locale.ROOT);
+        boolean result = false;
+        if (Pinyin.isChinese(c)) {
+            String shortPinyin = pinyin.substring(0, 1);
+            if (query.startsWith(shortPinyin, queryIndex)) {
+                if (matchRecursive(chars, textIndex + 1, query, queryIndex + 1, memo)) {
+                    result = true;
+                }
+            }
+            if (!result && query.startsWith(pinyin, queryIndex)) {
+                if (matchRecursive(chars, textIndex + 1, query, queryIndex + pinyin.length(), memo)) {
+                    result = true;
+                }
+            }
+        } else if (query.startsWith(pinyin, queryIndex)) {
+            result = matchRecursive(chars, textIndex + 1, query, queryIndex + pinyin.length(), memo);
+        }
+        memo[textIndex][queryIndex] = result;
+        return result;
     }
 }
