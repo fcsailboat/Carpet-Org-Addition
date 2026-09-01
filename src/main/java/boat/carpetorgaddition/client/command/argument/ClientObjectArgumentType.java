@@ -38,13 +38,6 @@ import java.util.stream.StreamSupport;
 public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T>> {
     private static final List<String> PATTERNS = Arrays.stream(MatchPattern.values()).map(MatchPattern::toString).toList();
     /**
-     * 是否允许通过id补全名称<br>
-     * 启用后，可以通过输入部分或全部对象id来补全对象名称<br>
-     * 例如：输入apple，则补全候选中会出现苹果、金苹果和附魔金苹果。<br>
-     * 但是，该命令参数本身就是为了通过对象名称查询对象id，允许反向补全可能没有实际意义。
-     */
-    private static final boolean ID_COMPLETION_NAME = false;
-    /**
      * 字符串是否使用匹配模式
      */
     private final boolean patternMatching;
@@ -165,7 +158,8 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
                         .map(entry -> Map.entry(quoteIfContainsSpace(entry.getKey()), getIdValue(entry.getValue())))
                         .forEach(entry -> {
                             String key = entry.getKey();
-                            if (key.toLowerCase(Locale.ROOT).contains(remaining) || MathUtils.isPinyinMatch(key, remaining) || (ID_COMPLETION_NAME && entry.getValue().contains(remaining))) {
+                            String value = entry.getValue();
+                            if (key.toLowerCase(Locale.ROOT).contains(remaining) || MathUtils.isPinyinMatch(key, remaining) || value.contains(remaining)) {
                                 builder.suggest(key);
                             }
                         });

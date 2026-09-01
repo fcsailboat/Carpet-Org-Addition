@@ -479,16 +479,23 @@ public class MathUtils {
         if (rawPinyin.isEmpty()) {
             return true;
         }
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < rawPinyin.length(); i++) {
-            char c = rawPinyin.charAt(i);
-            builder.append(Pinyin.isChinese(c) ? Pinyin.toPinyin(c) : c);
+        if (hasChinese(text)) {
+            String pinyin = rawPinyin.toLowerCase(Locale.ROOT);
+            char[] chars = text.toCharArray();
+            for (int start = 0; start < chars.length; start++) {
+                Boolean[][] memo = new Boolean[chars.length + 1][pinyin.length() + 1];
+                if (matchRecursive(chars, start, pinyin, 0, memo)) {
+                    return true;
+                }
+            }
+            return false;
         }
-        String pinyin = builder.toString().toLowerCase(Locale.ROOT);
-        char[] chars = text.toCharArray();
-        for (int start = 0; start < chars.length; start++) {
-            Boolean[][] memo = new Boolean[chars.length + 1][pinyin.length() + 1];
-            if (matchRecursive(chars, start, pinyin, 0, memo)) {
+        return text.toLowerCase(Locale.ROOT).contains(rawPinyin.toLowerCase(Locale.ROOT));
+    }
+
+    private static boolean hasChinese(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            if (Pinyin.isChinese(text.charAt(i))) {
                 return true;
             }
         }
@@ -511,7 +518,7 @@ public class MathUtils {
         boolean result = false;
         if (Pinyin.isChinese(c)) {
             String shortPinyin = pinyin.substring(0, 1);
-            if (query.startsWith(shortPinyin, queryIndex)) {
+            if (query.startsWith(shortPinyin, queryIndex) || query.charAt(queryIndex) == c) {
                 if (matchRecursive(chars, textIndex + 1, query, queryIndex + 1, memo)) {
                     result = true;
                 }
