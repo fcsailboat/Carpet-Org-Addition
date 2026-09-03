@@ -4,6 +4,7 @@ import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import boat.carpetorgaddition.wheel.text.TextJoiner;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
@@ -32,7 +33,7 @@ import java.util.function.Predicate;
 public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<ItemStackPredicate> {
     private final Predicate<ItemStack> predicate;
     private final String input;
-    private final boolean isWildcard;
+    private final boolean wildcard;
     @Nullable
     private final Item convert;
     public static final ItemStackPredicate EMPTY = new ItemStackPredicate(Items.AIR);
@@ -47,7 +48,7 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
     private ItemStackPredicate() {
         this.predicate = itemStack -> !itemStack.isEmpty();
         this.input = "*";
-        this.isWildcard = true;
+        this.wildcard = true;
         this.convert = null;
     }
 
@@ -57,8 +58,8 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
                 StringRange range = commandNode.getRange();
                 this.input = context.getInput().substring(range.getStart(), range.getEnd());
                 Result predicate = ItemPredicateArgument.getItemPredicate(context, arguments);
-                this.isWildcard = this.isWildcard();
-                this.predicate = this.isWildcard ? itemStack -> !itemStack.isEmpty() && predicate.test(itemStack) : predicate;
+                this.wildcard = this.isWildcard();
+                this.predicate = this.wildcard ? itemStack -> !itemStack.isEmpty() && predicate.test(itemStack) : predicate;
                 this.convert = tryConvert(this.input);
                 return;
             }
@@ -69,7 +70,7 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
     public ItemStackPredicate(@NonNull Item item) {
         this.predicate = itemStack -> itemStack.is(item);
         this.input = ServerUtils.getIdAsString(item);
-        this.isWildcard = false;
+        this.wildcard = false;
         this.convert = item;
     }
 
@@ -89,14 +90,14 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
             joiner.add(ServerUtils.getIdAsString(item));
         }
         this.input = joiner.toString();
-        this.isWildcard = false;
+        this.wildcard = false;
         this.convert = null;
     }
 
     private ItemStackPredicate(Predicate<ItemStack> predicate, String input) {
         this.input = input;
-        this.isWildcard = this.isWildcard();
-        this.predicate = this.isWildcard ? itemStack -> !itemStack.isEmpty() && predicate.test(itemStack) : predicate;
+        this.wildcard = this.isWildcard();
+        this.predicate = this.wildcard ? itemStack -> !itemStack.isEmpty() && predicate.test(itemStack) : predicate;
         this.convert = tryConvert(input);
     }
 
@@ -192,17 +193,15 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
         if (this.isEmpty()) {
             return ServerUtils.getName(Items.AIR);
         }
-        if (this.isWildcard) {
+        if (this.wildcard) {
             return LocalizationKeys.Item.ANY_ITEM.translate();
         }
         if (this.convert != null) {
             return ServerUtils.getName(this.convert);
         }
         if (this.input.length() > 30) {
-            String substring = this.input.substring(0, 30);
-            Component ellipsis = TextBuilder.create("...");
-            Component result = TextBuilder.combineAll(substring, ellipsis);
-            TextBuilder builder = TextBuilder.of(result).setGrayItalic().setHover(this.input);
+            String substring = this.input.substring(0, 27);
+            TextBuilder builder = TextBuilder.of(substring + "...").setGrayItalic().setHover(this.input);
             return builder.build();
         }
         return TextBuilder.create(this.input);
@@ -274,23 +273,38 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
     }
 
     public static class AnyOfItemPredicate extends ItemStackPredicate {
+        private final Set<Item> items;
         private final String name;
 
         private AnyOfItemPredicate(LinkedHashSet<Item> items, String name) {
             super(items);
+            this.items = items;
             this.name = name;
         }
 
         @Override
         public Component getDisplayName() throws IdentifierException {
             if (this.name.length() > 30) {
-                String substring = this.name.substring(0, 30);
-                Component ellipsis = TextBuilder.create("...");
-                Component result = TextBuilder.combineAll(substring, ellipsis);
-                TextBuilder builder = TextBuilder.of(result).setGrayItalic().setHover(name);
-                return builder.build();
+                TextJoiner joiner = new TextJoiner();
+                joiner.append(this.name).append(": ");
+                for (Item item : this.items) {
+                    joiner.enter(ServerUtils.getName(item));
+                }
+                String substring = this.name.substring(0, 27);
+                return TextBuilder.of(substring + "...")
+                        .setGrayItalic()
+                        .setHover(joiner.join())
+                        .build();
             }
-            return TextBuilder.of(this.name).setColor(ChatFormatting.GRAY).build();
+            TextJoiner joiner = new TextJoiner();
+            for (Item item : this.items) {
+                joiner.newline(ServerUtils.getName(item));
+            }
+            Component hover = joiner.join();
+            return TextBuilder.of(this.name)
+                    .setColor(ChatFormatting.GRAY)
+                    .setHover(hover)
+                    .build();
         }
     }
 }

@@ -19,6 +19,7 @@ import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.traverser.BlockEntityTraverser;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
+import boat.carpetorgaddition.wheel.traverser.QuickBlockPosTraverser;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandSourceStack;
@@ -56,8 +57,8 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
             }
             case BLOCK -> {
                 ObjectSearchTaskCodecs.BlockSearchContext decode = ObjectSearchTaskCodecs.BLOCK_SEARCH_CODEC.decode(packet.json());
-                BlockPosTraverser traverser = new BlockPosTraverser(world, blockPos, decode.range());
                 BlockStatePredicate predicate = BlockStatePredicate.ofBlocks(decode.list(), packet.name());
+                QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(world, blockPos, decode.range(), predicate.getPaletteMatcher());
                 yield new BlockSearchTask(world, blockPos, traverser, source, predicate, player);
             }
             case TRADE_ITEM -> {

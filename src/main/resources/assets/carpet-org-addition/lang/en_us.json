@@ -249,6 +249,7 @@
   "carpet-org-addition.misc.inventory": "Inventory",
   "carpet-org-addition.misc.ender_chest": "Ender Chest",
   "carpet-org-addition.misc.self": "Self",
+  "carpet-org-addition.commands.deprecated": "In a future version, this command will be removed, please use:",
   "carpet-org-addition.command.finder.cancelled": "Task stopped",
   "carpet-org-addition.command.finder.not_canceled": "No task was stopped",
   "carpet-org-addition.command.finder.waiting_to_be_completed": "The task is taking a long time to complete. Please wait patiently, or click %s to stop",

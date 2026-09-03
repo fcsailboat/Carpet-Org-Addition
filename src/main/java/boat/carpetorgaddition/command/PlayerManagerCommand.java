@@ -17,12 +17,12 @@ import boat.carpetorgaddition.periodic.task.schedule.ReLoginTask;
 import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.WorldFormat;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -364,12 +364,12 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             throw CommandUtils.createException(GROUP.then("non_existent").translate(group));
         }
         Component login = TextBuilder.of("[↑]")
-                .setCommand(CommandProvider.playerManagerSpawnGroup(group))
+                .setCommand(CommonCommands.playerManagerSpawnGroup(group))
                 .setHover(LocalizationKeys.Button.LOGIN.translate())
                 .setColor(ChatFormatting.GREEN)
                 .build();
         Component logout = TextBuilder.of("[↓]")
-                .setCommand(CommandProvider.playerManagerKillGroup(group))
+                .setCommand(CommonCommands.playerManagerKillGroup(group))
                 .setHover(LocalizationKeys.Button.LOGOUT.translate())
                 .setColor(ChatFormatting.RED)
                 .build();
@@ -514,10 +514,10 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 throw CommandExecuteIOException.of(e);
             }
         } else {
-            String command = CommandProvider.setupSafeAfkPermanentlyChange(fakePlayer, threshold);
+            String command = CommonCommands.setupSafeAfkPermanentlyChange(fakePlayer, threshold);
             MessageUtils.sendMessage(
                     context,
-                    SAFE_AFK.then("set").translate(fakePlayer.getDisplayName(), threshold, TextProvider.clickRun(command))
+                    SAFE_AFK.then("set").translate(fakePlayer.getDisplayName(), threshold, CommonTexts.clickRun(command))
             );
         }
         return (int) threshold;
@@ -562,7 +562,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 throw CommandExecuteIOException.of(e);
             }
         } else {
-            Component command = TextProvider.clickRun(CommandProvider.cancelSafeAfkPermanentlyChange(fakePlayer));
+            Component command = CommonTexts.clickRun(CommonCommands.cancelSafeAfkPermanentlyChange(fakePlayer));
             MessageUtils.sendMessage(context, SAFE_AFK.then("remove").translate(fakePlayer.getDisplayName(), command));
         }
         return 1;
@@ -675,11 +675,11 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             for (Map.Entry<@Nullable String, List<FakePlayerSerializer>> entry : map.entrySet()) {
                 if (entry.getKey() == null) {
                     ungrouped = TextBuilder.of(groupNameKey.then("ungrouped").translate());
-                    setStyle(ungrouped, entry.getValue().size(), CommandProvider.listUngroupedPlayer());
+                    setStyle(ungrouped, entry.getValue().size(), CommonCommands.listUngroupedPlayer());
                     continue;
                 }
                 TextBuilder builder = TextBuilder.of("[" + entry.getKey() + "]");
-                setStyle(builder, entry.getValue().size(), CommandProvider.listGroupPlayer(entry.getKey()));
+                setStyle(builder, entry.getValue().size(), CommonCommands.listGroupPlayer(entry.getKey()));
                 list.add(builder.build());
             }
             if (ungrouped != null) {
@@ -687,7 +687,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             }
             // 包含所有玩家的组，在最后一个展示
             TextBuilder builder = TextBuilder.of(groupNameKey.then("all").translate());
-            setStyle(builder, manager.size(), CommandProvider.listAllPlayer());
+            setStyle(builder, manager.size(), CommonCommands.listAllPlayer());
             list.add(builder.build());
             Component message = TextBuilder.joinList(list, TextBuilder.create(" "));
             MessageUtils.sendMessage(context.getSource(), message);
@@ -749,7 +749,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         boolean autologin = BoolArgumentType.getBool(context, "autologin");
         LocalizationKey key = KEY.then("autologin");
         if (displayWarning) {
-            String command = CommandProvider.playerManagerAutologin(name, autologin);
+            String command = CommonCommands.playerManagerAutologin(name, autologin);
             Component component = key.then("warn").builder(command).setGrayItalic().build();
             MessageUtils.sendMessage(context, component);
         }
@@ -778,9 +778,9 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         Optional<FakePlayerSerializer> optional = manager.get(name);
         LocalizationKey key = KEY.then("save");
         if (optional.isPresent()) {
-            String command = CommandProvider.playerManagerResave(name);
+            String command = CommonCommands.playerManagerResave(name);
             // 单击执行命令
-            Component clickResave = TextProvider.clickRun(command);
+            Component clickResave = CommonTexts.clickRun(command);
             MessageUtils.sendMessage(context, key.then("file_already_exist").translate(clickResave));
             return 0;
         } else {
@@ -1112,7 +1112,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             return true;
         }
         // 单击后输入的命令
-        String command = CommandProvider.setCarpetRule("fakePlayerSpawnMemoryLeakFix", "true");
+        String command = CommonCommands.setCarpetRule("fakePlayerSpawnMemoryLeakFix", "true");
         // 文本内容：[这里]
         Component here = TextBuilder.of(LocalizationKeys.Button.HERE.translate())
                 .setSuggest(command)
@@ -1150,7 +1150,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 .findFirst();
         // 等待时间
         long tick = unit.getDelayed(context);
-        Component time = TextBuilder.of(TextProvider.tickToTime(tick)).setHover(TextProvider.tickToRealTime(tick)).build();
+        Component time = TextBuilder.of(CommonTexts.tickToTime(tick)).setHover(CommonTexts.tickToRealTime(tick)).build();
         if (optional.isEmpty()) {
             // 添加上线任务
             FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
@@ -1182,7 +1182,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         // 获取假玩家延时下线游戏刻数
         long tick = unit.getDelayed(context);
-        Component time = TextBuilder.of(TextProvider.tickToTime(tick)).setHover(TextProvider.tickToRealTime(tick)).build();
+        Component time = TextBuilder.of(CommonTexts.tickToTime(tick)).setHover(CommonTexts.tickToRealTime(tick)).build();
         ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         Optional<DelayedLogoutTask> optional = manager.stream(DelayedLogoutTask.class)
                 .filter(task -> fakePlayer.equals(task.getFakePlayer()))

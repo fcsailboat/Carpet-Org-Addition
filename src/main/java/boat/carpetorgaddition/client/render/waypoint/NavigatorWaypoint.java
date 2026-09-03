@@ -2,7 +2,7 @@ package boat.carpetorgaddition.client.render.waypoint;
 
 import boat.carpetorgaddition.client.util.ClientCommandUtils;
 import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -51,7 +51,7 @@ public class NavigatorWaypoint extends Waypoint {
 
     @Override
     public void requestServerToStop() {
-        ClientCommandUtils.sendCommand(CommandProvider.stopNavigate());
+        ClientCommandUtils.sendCommand(CommonCommands.stopNavigate());
     }
 
     @Override

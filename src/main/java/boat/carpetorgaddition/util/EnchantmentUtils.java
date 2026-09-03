@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.level.Level;
 
@@ -106,6 +107,40 @@ public class EnchantmentUtils {
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
             if (entry.getKey().is(enchantment)) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasBookEnchantment(ItemStack itemStack, ResourceKey<Enchantment> enchantment) {
+        if (itemStack.is(Items.ENCHANTED_BOOK)) {
+            ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
+            for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                if (entry.getKey().is(enchantment)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasEnchantment(ItemStack itemStack, Holder<Enchantment> enchantment) {
+        ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+            if (entry.getKey().equals(enchantment)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasBookEnchantment(ItemStack itemStack, Holder<Enchantment> enchantment) {
+        if (itemStack.is(Items.ENCHANTED_BOOK)) {
+            ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
+            for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                if (entry.getKey().equals(enchantment)) {
+                    return true;
+                }
             }
         }
         return false;

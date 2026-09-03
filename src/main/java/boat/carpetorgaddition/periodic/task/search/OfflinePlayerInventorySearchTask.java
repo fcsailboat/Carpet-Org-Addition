@@ -11,12 +11,12 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
 import boat.carpetorgaddition.wheel.ProgressBar;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
 import boat.carpetorgaddition.wheel.inventory.SimulatePlayerInventory;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -248,7 +248,7 @@ public class OfflinePlayerInventorySearchTask extends AbstractOfflinePlayerSearc
             String name = playerConfigEntry.name();
             String uuid = playerConfigEntry().id().toString();
             // 悬停提示
-            Component hover = TextBuilder.combineAll("UUID: %s\n".formatted(uuid), TextProvider.COPY_CLICK);
+            Component hover = TextBuilder.combineAll("UUID: %s\n".formatted(uuid), CommonTexts.COPY_CLICK);
             // 获取物品数量，如果包含在潜影盒中找到的物品，就设置物品为斜体
             Component count = statistics().getCountText();
             TextBuilder builder = getDisplayPlayerName(name, uuid, hover, count, this.type);
@@ -286,7 +286,7 @@ public class OfflinePlayerInventorySearchTask extends AbstractOfflinePlayerSearc
         // 创建单击上线按钮
         private Component createLoginButton() {
             if (CommandUtils.canUseCommand(source, CarpetSettings.commandPlayer)) {
-                String command = CommandProvider.spawnFakePlayer(playerConfigEntry().name());
+                String command = CommonCommands.spawnFakePlayer(playerConfigEntry().name());
                 TextBuilder builder = TextBuilder.of(" [↑]");
                 builder.setCommand(command);
                 builder.setHover(LocalizationKeys.Button.LOGIN.translate());

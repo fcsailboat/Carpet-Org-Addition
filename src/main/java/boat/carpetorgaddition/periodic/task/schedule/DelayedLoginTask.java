@@ -3,7 +3,7 @@ package boat.carpetorgaddition.periodic.task.schedule;
 import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerSerializer;
 import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -48,8 +48,8 @@ public class DelayedLoginTask extends PlayerScheduleTask {
 
     // 获取带有悬停提示的时间
     private @NonNull Component getDisplayTime() {
-        TextBuilder builder = TextBuilder.of(TextProvider.tickToTime(this.delayed));
-        builder.setHover(TextProvider.tickToRealTime(this.delayed));
+        TextBuilder builder = TextBuilder.of(CommonTexts.tickToTime(this.delayed));
+        builder.setHover(CommonTexts.tickToRealTime(this.delayed));
         return builder.build();
     }
 

@@ -6,7 +6,7 @@ import boat.carpetorgaddition.dataupdate.json.WaypointDataUpdater;
 import boat.carpetorgaddition.util.IOUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys.Dimension;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -125,33 +125,33 @@ public class Waypoint {
                 case ServerUtils.THE_END -> Map.entry(Dimension.THE_END.translate(), ChatFormatting.DARK_PURPLE);
                 default -> Map.entry(TextBuilder.create(worldId), ChatFormatting.GREEN);
             };
-            return where.translate(this.formatName(), entry.getKey(), TextProvider.blockPos(this.blockPos, entry.getValue()));
+            return where.translate(this.formatName(), entry.getKey(), CommonTexts.blockPos(this.blockPos, entry.getValue()));
         } else {
             LocalizationKey cross = where.then("cross");
             return switch (worldId) {
                 case ServerUtils.OVERWORLD -> cross.translate(
                         this.formatName(),
                         Dimension.OVERWORLD.translate(),
-                        TextProvider.blockPos(this.blockPos, ChatFormatting.GREEN),
+                        CommonTexts.blockPos(this.blockPos, ChatFormatting.GREEN),
                         Dimension.THE_NETHER.translate(),
-                        TextProvider.blockPos(this.anotherBlockPos, ChatFormatting.RED)
+                        CommonTexts.blockPos(this.anotherBlockPos, ChatFormatting.RED)
                 );
                 case ServerUtils.THE_NETHER -> cross.translate(
                         this.formatName(),
                         Dimension.THE_NETHER.translate(),
-                        TextProvider.blockPos(this.blockPos, ChatFormatting.RED),
+                        CommonTexts.blockPos(this.blockPos, ChatFormatting.RED),
                         Dimension.OVERWORLD.translate(),
-                        TextProvider.blockPos(this.anotherBlockPos, ChatFormatting.GREEN)
+                        CommonTexts.blockPos(this.anotherBlockPos, ChatFormatting.GREEN)
                 );
                 case ServerUtils.THE_END -> where.translate(
                         this.formatName(),
                         Dimension.THE_END.translate(),
-                        TextProvider.blockPos(this.blockPos, ChatFormatting.DARK_PURPLE)
+                        CommonTexts.blockPos(this.blockPos, ChatFormatting.DARK_PURPLE)
                 );
                 default -> where.translate(
                         this.formatName(),
                         TextBuilder.create(worldId),
-                        TextProvider.blockPos(this.blockPos, ChatFormatting.GREEN)
+                        CommonTexts.blockPos(this.blockPos, ChatFormatting.GREEN)
                 );
             };
         }

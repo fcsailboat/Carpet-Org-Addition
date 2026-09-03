@@ -684,6 +684,7 @@ public class CarpetOrgAdditionSettings {
     /**
      * 假玩家最大物品操作次数
      */
+    // TODO 实际操作次数可能比预期多一次
     public static final RuleAccessor<Integer> FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT = register(
             RuleFactory.of("fakePlayerMaxItemOperationCount", 3)
                     .addCategories(RuleCategory.SURVIVAL)

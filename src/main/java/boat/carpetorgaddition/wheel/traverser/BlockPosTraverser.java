@@ -42,6 +42,7 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
         super(box);
     }
 
+    @SuppressWarnings("unused")
     public BlockPosTraverser clamp(Level world) {
         int minY = Math.max(this.minY, ServerUtils.getMinArchitectureAltitude(world));
         int maxY = Math.min(this.maxY, ServerUtils.getMaxArchitectureAltitude(world));

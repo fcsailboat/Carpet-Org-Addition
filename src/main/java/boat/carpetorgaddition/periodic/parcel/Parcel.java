@@ -10,12 +10,12 @@ import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.Counter;
 import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.WorldFormat;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import boat.carpetorgaddition.wheel.nbt.NbtReader;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -144,12 +144,12 @@ public class Parcel implements Comparable<Parcel> {
             return;
         }
         // 向快递发送者发送发出快递的消息
-        Component recall = TextProvider.clickRun(CommandProvider.recallParcel(this.getId()));
+        Component recall = CommonTexts.clickRun(CommonCommands.recallParcel(this.getId()));
         LocalizationKey key = MailCommand.SEND;
         Object name = recipientPlayer == null ? this.recipient : recipientPlayer.getDisplayName();
         MessageUtils.sendMessage(senderPlayer, key.then("sender").translate(name, this.getCount(), this.getDisplayName(), recall));
         // 向快递接受者发送发出快递的消息
-        Component receive = TextProvider.clickRun(CommandProvider.collectParcel(this.getId()));
+        Component receive = CommonTexts.clickRun(CommonCommands.collectParcel(this.getId()));
         if (recipientPlayer == null) {
             TextBuilder builder = TextBuilder.of(key.then("offline").translate());
             builder.setGrayItalic();

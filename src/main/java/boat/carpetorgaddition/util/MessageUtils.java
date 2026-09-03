@@ -72,7 +72,6 @@ public class MessageUtils {
         sendMessage(context.getSource(), message);
     }
 
-
     private static void writeLog(String name, String message) {
         CarpetOrgAddition.LOGGER.info("({}) [{}] {}", CarpetOrgAdditionConstants.COMPACT_MOD_NAME, name, message);
     }

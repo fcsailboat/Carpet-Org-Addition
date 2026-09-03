@@ -6,8 +6,8 @@ import boat.carpetorgaddition.network.event.CustomClickEvents;
 import boat.carpetorgaddition.network.event.CustomClickKeys;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -73,7 +73,7 @@ public class PagedCollection implements Iterable<Page> {
             joiner.append("/");
             joiner.append(TextBuilder.of(this.totalPages()).setColor(ChatFormatting.GOLD).build());
             joiner.append("]");
-            Component percentage = TextProvider.percentage((pagination / (double) this.totalPages()));
+            Component percentage = CommonTexts.percentage((pagination / (double) this.totalPages()));
             list.add(TextBuilder.of(joiner.join()).setHover(percentage));
             list.add(" ");
             list.add(this.nextPageButton(pagination));

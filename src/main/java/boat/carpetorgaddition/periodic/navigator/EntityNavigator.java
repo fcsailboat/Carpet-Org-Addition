@@ -5,7 +5,7 @@ import boat.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -60,14 +60,14 @@ public class EntityNavigator extends Navigator {
         Component text;
         if (ServerUtils.getWorld(this.player).equals(world)) {
             // 获取翻译后的文本信息
-            Component in = IN.translate(entity.getName(), TextProvider.simpleBlockPos(entity.blockPosition()));
+            Component in = IN.translate(entity.getName(), CommonTexts.simpleBlockPos(entity.blockPosition()));
             int distance = MathUtils.getBlockIntegerDistance(player.blockPosition(), entity.blockPosition());
             // 添加上下箭头
             Vec3 eyePos = ServerUtils.getEyePos(this.entity);
             text = getHUDText(eyePos, in, distance);
         } else {
-            Component dimension = TextProvider.dimension(ServerUtils.getWorld(this.entity));
-            Component pos = TextProvider.simpleBlockPos(entity.blockPosition());
+            Component dimension = CommonTexts.dimension(ServerUtils.getWorld(this.entity));
+            Component pos = CommonTexts.simpleBlockPos(entity.blockPosition());
             text = IN.translate(entity.getName(), TextBuilder.combineAll(dimension, pos));
         }
         MessageUtils.sendMessageToHud(this.player, text);
