@@ -160,7 +160,11 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                                         .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
                                                         .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
                                                                 .suggests(suggestMixPrice(true))
-                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))));
+                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))
+                        .then(Commands.literal("enchanting")
+                                .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
+                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                                .executes(this::setEnchanting))))));
     }
 
     private static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
@@ -605,6 +609,15 @@ public class PlayerActionCommand extends AbstractServerCommand {
                 }
             }
         }
+        return 1;
+    }
+
+    private int setEnchanting(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
+        Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        EnchantingAction action = new EnchantingAction(fakePlayer, predicate, holder);
+        PlayerComponentCoordinator.of(fakePlayer).getFakePlayerActionManager().setAction(action);
         return 1;
     }
 

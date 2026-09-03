@@ -10,6 +10,7 @@ import carpet.api.settings.SettingsManager;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
+import carpet.script.utils.Tracer;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Direction;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -268,5 +270,11 @@ public class PlayerUtils {
                 pos.z() + range
         );
         return world.getEntities(player, aabb);
+    }
+
+    public static Optional<HitResult> getHitResult(ServerPlayer player) {
+        // 使用硬编码的距离并不准确，这里是为了与Carpet的假玩家交互相兼容
+        double reach = player.gameMode.isCreative() ? 5.0 : 4.5;
+        return Optional.of(Tracer.rayTrace(player, 1F, reach, false));
     }
 }
