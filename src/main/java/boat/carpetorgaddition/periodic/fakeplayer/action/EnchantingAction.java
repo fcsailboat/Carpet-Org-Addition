@@ -7,13 +7,16 @@ import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
+import boat.carpetorgaddition.wheel.traverser.EntityTraverser;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.ItemStack;
@@ -24,20 +27,21 @@ import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 public class EnchantingAction extends AbstractPlayerAction {
     private final ItemStackPredicate predicate;
-    private final Holder<Enchantment> enchantment;
+    private final Holder.Reference<Enchantment> enchantment;
     private boolean notified = false;
     private static final int FIRST_INPUT = 0;
     private static final int SECOND_INPUT = 1;
     private static final int OUTPUT = 2;
     private static final LocalizationKey KEY = PlayerActionCommand.KEY.then("enchanting");
 
-    public EnchantingAction(@Nullable EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, Holder<Enchantment> enchantment) {
+    public EnchantingAction(@Nullable EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, Holder.Reference<Enchantment> enchantment) {
         super(fakePlayer);
         this.predicate = predicate;
         this.enchantment = enchantment;
@@ -57,21 +61,19 @@ public class EnchantingAction extends AbstractPlayerAction {
             if (tick % 30 == 0L) {
                 PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
             }
-        } else {
-            if (tick % 10 == 0L) {
-                PlayerUtils.getHitResult(fakePlayer)
-                        .filter(hitResult -> hitResult instanceof BlockHitResult)
-                        .map(hitResult -> (BlockHitResult) hitResult)
-                        .map(BlockHitResult::getBlockPos)
-                        .map(blockPos -> ServerUtils.getWorld(fakePlayer).getBlockState(blockPos))
-                        .filter(blockState -> blockState.getBlock() instanceof AnvilBlock)
-                        .filter(blockState -> blockState.is(BlockTags.ANVIL))
-                        .ifPresent(_ -> PlayerUtils.use(fakePlayer));
-            }
+        } else if (tick % 10 == 0L) {
+            ServerLevel world = ServerUtils.getWorld(fakePlayer);
+            PlayerUtils.getHitResult(fakePlayer)
+                    .filter(hitResult -> hitResult instanceof BlockHitResult)
+                    .map(hitResult -> (BlockHitResult) hitResult)
+                    .map(BlockHitResult::getBlockPos)
+                    .filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof AnvilBlock)
+                    .filter(blockPos -> world.getBlockState(blockPos).is(BlockTags.ANVIL))
+                    .filter(blockPos -> new EntityTraverser<>(world, blockPos, blockPos.above(3), FallingBlockEntity.class).isEmpty())
+                    .ifPresent(_ -> PlayerUtils.use(fakePlayer));
         }
     }
 
-    // TODO 在生存模式下测试
     private void enchanting(AnvilMenu menu, MinecraftServer server, EntityPlayerMPFake fakePlayer) {
         int count = 0;
         int maxCount = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
@@ -79,27 +81,32 @@ public class EnchantingAction extends AbstractPlayerAction {
             count++;
             if (this.switchItem(menu)) {
                 ItemStack itemStack = menu.getSlot(OUTPUT).getItem();
+                LocalizationKey key = this.getLocalizationKey();
                 if (itemStack.isEmpty()) {
-                    Component message = this.getLocalizationKey().then("no_output").translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
+                    Component message = key.then("no_output").translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
                     MessageUtils.sendMessage(server, message);
                     this.stop();
                     return;
                 } else if (itemStack.is(Items.ENCHANTED_BOOK) ? EnchantmentUtils.hasBookEnchantment(itemStack, this.enchantment) : EnchantmentUtils.hasEnchantment(itemStack, this.enchantment)) {
-                    if (this.hasExperience(menu)) {
+                    // TODO 测试过于昂贵
+                    if (menu.getCost() >= 40 && !fakePlayer.hasInfiniteMaterials()) {
+                        Component message = key.then("expensive").translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
+                        MessageUtils.sendMessage(server, message);
+                        this.stop();
+                    } else if (this.hasExperience(menu)) {
                         FakePlayerUtils.throwItem(menu, OUTPUT, fakePlayer);
                     } else {
                         if (this.notified) {
                             return;
                         }
-                        // TODO 测试经验不足
-                        Component message = this.getLocalizationKey()
+                        Component message = key
                                 .then("lack_of_experience")
                                 .translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
                         MessageUtils.sendMessage(server, message);
                         this.notified = true;
                     }
                 } else {
-                    Component message = this.getLocalizationKey().then("unable_to_enchant").translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
+                    Component message = key.then("unable_to_enchant").translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
                     MessageUtils.sendMessage(server, message);
                     this.stop();
                     return;
@@ -107,7 +114,7 @@ public class EnchantingAction extends AbstractPlayerAction {
             } else {
                 return;
             }
-        } while (maxCount == -1 || count < maxCount);
+        } while ((maxCount == -1 || count < maxCount) && menu.access.evaluate((world, blockPos) -> world.getBlockState(blockPos).is(BlockTags.ANVIL), true));
     }
 
     protected boolean hasExperience(AnvilMenu menu) {
@@ -199,12 +206,20 @@ public class EnchantingAction extends AbstractPlayerAction {
 
     @Override
     public List<Component> info() {
-        return List.of();
+        ArrayList<Component> list = new ArrayList<>();
+        LocalizationKey key = this.getLocalizationKey().then("info");
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        list.add(key.translate(fakePlayer.getDisplayName(), EnchantmentUtils.getName(this.enchantment), this.predicate.getDisplayName()));
+        list.add(key.then("xp").translate(fakePlayer.experienceLevel));
+        return list;
     }
 
     @Override
     public JsonObject toJson() {
-        return new JsonObject();
+        JsonObject json = new JsonObject();
+        json.addProperty("item", this.predicate.toString());
+        json.addProperty("enchantment", ServerUtils.getIdAsString(this.enchantment));
+        return json;
     }
 
     @Override
@@ -214,7 +229,7 @@ public class EnchantingAction extends AbstractPlayerAction {
 
     @Override
     public ActionSerializeType getActionSerializeType() {
-        return ActionSerializeType.STOP;
+        return ActionSerializeType.ENCHANTING;
     }
 
     @Override

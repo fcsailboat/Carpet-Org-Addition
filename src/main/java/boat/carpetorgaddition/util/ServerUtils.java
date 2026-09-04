@@ -368,6 +368,10 @@ public class ServerUtils {
         return Optional.ofNullable(CarpetServer.minecraft_server);
     }
 
+    public static MinecraftServer getCurrentServerOrThrow() {
+        return getCurrentServer().orElseThrow(() -> new IllegalStateException("Server not started"));
+    }
+
     public static ServerLevel getWorld(ServerPlayer player) {
         return player.level();
     }
@@ -524,6 +528,10 @@ public class ServerUtils {
         return registryAccess.lookup(Registries.GAME_RULE).map(registry -> registry.getKey(gameRule));
     }
 
+    public static <T> Identifier getId(Holder.Reference<T> holder) {
+        return holder.key().identifier();
+    }
+
     public static String getIdAsString(Item item) {
         return getId(item).toString();
     }
@@ -564,6 +572,10 @@ public class ServerUtils {
 
     public static String getIdAsString(RegistryAccess registryAccess, GameRule<?> gameRule) {
         return getId(registryAccess, gameRule).map(Identifier::toString).orElse(UNREGISTERED);
+    }
+
+    public static <T> String getIdAsString(Holder.Reference<T> holder) {
+        return getId(holder).toString();
     }
 
     /**

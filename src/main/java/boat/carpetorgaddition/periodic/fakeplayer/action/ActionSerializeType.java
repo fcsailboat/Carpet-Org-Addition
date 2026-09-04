@@ -154,7 +154,7 @@ public enum ActionSerializeType {
     GOTO(_ -> new StopAction(null)),
     LIBRARIAN(json -> {
         Identifier id = Identifier.parse(json.get("enchantment").getAsString());
-        MinecraftServer server = ServerUtils.getCurrentServer().orElseThrow(() -> new IllegalStateException("Server not started"));
+        MinecraftServer server = ServerUtils.getCurrentServerOrThrow();
         Holder.Reference<Enchantment> enchantment = EnchantmentUtils.parse(server, id).orElseThrow(() -> new IllegalStateException("Unable to parse the enchantment: " + id));
         BlockPos blockPos = AbstractPlayerAction.fromJson(json.get("block_pos").getAsJsonObject());
         int minLevel = json.get("min_level").getAsInt();
@@ -164,6 +164,13 @@ public enum ActionSerializeType {
         LibrarianTradeFindAction action = new LibrarianTradeFindAction(null, blockPos, enchantment, minLevel, maxPrice, startTime);
         action.setRefreshCount(refreshCount);
         return action;
+    }),
+    ENCHANTING(json -> {
+        Identifier id = Identifier.parse(json.get("enchantment").getAsString());
+        MinecraftServer server = ServerUtils.getCurrentServerOrThrow();
+        ItemStackPredicate predicate = ItemStackPredicate.parse(json.get("item").getAsString());
+        Holder.Reference<Enchantment> enchantment = EnchantmentUtils.parse(server, id).orElseThrow(() -> new IllegalStateException("Unable to parse the enchantment: " + id));
+        return new EnchantingAction(null, predicate, enchantment);
     });
 
     private final String serializedName;

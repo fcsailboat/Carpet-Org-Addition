@@ -499,6 +499,8 @@
   "carpet-org-addition.command.playerAction.enchanting.expensive": "%s正在进行的%s因过于昂贵而停止",
   "carpet-org-addition.command.playerAction.enchanting.no_output": "%s正在进行的%s因无法输出物品而停止",
   "carpet-org-addition.command.playerAction.enchanting.unable_to_enchant": "%s正在进行的%s因无法附魔而停止",
+  "carpet-org-addition.command.playerAction.enchanting.info": "%s正在将%s附魔到%s上",
+  "carpet-org-addition.command.playerAction.enchanting.info.xp": "剩余经验：%s级",
   "carpet-org-addition.command.playerManager.cannot_find_file": "找不到%s的玩家数据",
   "carpet-org-addition.command.playerManager.reload": "已重新加载玩家数据",
   "carpet-org-addition.command.playerManager.save": "已保存%s的玩家数据",

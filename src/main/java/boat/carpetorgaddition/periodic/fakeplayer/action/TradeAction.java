@@ -58,7 +58,7 @@ public class TradeAction extends AbstractPlayerAction {
         super(fakePlayer);
         this.index = index;
         this.voidTrade = voidTrade;
-        timer.setValue(TRADE_WAIT_TIME);
+        this.timer.setValue(TRADE_WAIT_TIME);
     }
 
     @Override

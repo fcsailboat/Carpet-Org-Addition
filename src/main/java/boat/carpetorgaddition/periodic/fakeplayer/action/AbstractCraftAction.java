@@ -90,6 +90,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
                         continue;
                     } else {
                         // 如果不是，丢出该物品
+                        // TODO 改为优先回到物品栏
                         FakePlayerUtils.throwItem(screenHandler, craftGridIndex, fakePlayer);
                     }
                 } else if (matcher.isEmpty()) {
