@@ -83,17 +83,16 @@ public class EnchantingAction extends AbstractPlayerAction {
                 ItemStack itemStack = menu.getSlot(OUTPUT).getItem();
                 LocalizationKey key = this.getLocalizationKey();
                 if (itemStack.isEmpty()) {
-                    Component message = key.then("no_output").translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
+                    int value = CarpetOrgAdditionSettings.SET_ANVIL_EXPERIENCE_CONSUMPTION_LIMIT.value();
+                    boolean expensive = menu.getCost() >= (value == -1 ? 40 : value) && !fakePlayer.hasInfiniteMaterials();
+                    Component message = key
+                            .then(expensive ? "expensive" : "no_output")
+                            .translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
                     MessageUtils.sendMessage(server, message);
                     this.stop();
                     return;
                 } else if (itemStack.is(Items.ENCHANTED_BOOK) ? EnchantmentUtils.hasBookEnchantment(itemStack, this.enchantment) : EnchantmentUtils.hasEnchantment(itemStack, this.enchantment)) {
-                    // TODO 测试过于昂贵
-                    if (menu.getCost() >= 40 && !fakePlayer.hasInfiniteMaterials()) {
-                        Component message = key.then("expensive").translate(this.getFakePlayer().getDisplayName(), this.getDisplayName());
-                        MessageUtils.sendMessage(server, message);
-                        this.stop();
-                    } else if (this.hasExperience(menu)) {
+                    if (this.hasExperience(menu)) {
                         FakePlayerUtils.throwItem(menu, OUTPUT, fakePlayer);
                     } else {
                         if (this.notified) {
