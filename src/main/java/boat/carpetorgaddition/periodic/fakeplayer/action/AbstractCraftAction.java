@@ -89,15 +89,15 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
                         materialsCount++;
                         continue;
                     } else {
-                        // 如果不是，丢出该物品
-                        // TODO 改为优先回到物品栏
-                        FakePlayerUtils.throwItem(screenHandler, craftGridIndex, fakePlayer);
+                        // 如果不是，放回物品栏
+                        ItemStack itemStack = screenHandler.getSlot(craftGridIndex).getItem().copyAndClear();
+                        PlayerStorageInventory.of(fakePlayer).insertWithInventoryPriority(itemStack);
                     }
                 } else if (matcher.isEmpty()) {
                     materialsCount++;
                     continue;
                 }
-                if (takeItemFromInventory(screenHandler, matcher, craftGridIndex, fakePlayer)) {
+                if (this.takeItemFromInventory(screenHandler, matcher, craftGridIndex, fakePlayer)) {
                     materialsCount++;
                 }
             }
@@ -218,14 +218,12 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
     /**
      * 是否应该因为合成次数过多而停止合成
      *
-     * @param craftCount 当前合成次数
+     * @param count 当前合成次数
      * @return 是否应该停止
      */
-    private boolean shouldStop(int craftCount) {
-        if (CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value() < 0) {
-            return false;
-        }
-        return craftCount >= CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
+    private boolean shouldStop(int count) {
+        int value = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
+        return value >= 0 && count >= value;
     }
 
     /**

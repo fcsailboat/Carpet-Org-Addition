@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
+import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.ChatFormatting;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+@Deprecated
 public class FakePlayerUtils {
     /**
      * 槽位外部的索引，相当于点击GUI外面，用来丢弃光标上的物品
@@ -177,5 +179,19 @@ public class FakePlayerUtils {
         String capitalizeFirstLetter = "[" + Character.toUpperCase(split[index].charAt(0)) + "]";
         Component hover = TextBuilder.combineAll(ServerUtils.getDefaultName(itemStack), "*" + itemStack.getCount());
         return TextBuilder.of(capitalizeFirstLetter).setHover(hover).build();
+    }
+
+    public static void recyclingItem(AbstractContainerMenu menu, int index, EntityPlayerMPFake fakePlayer) {
+        if (menu.getSlot(index).hasItem()) {
+            ItemStack before = menu.getCarried();
+            if (!before.isEmpty()) {
+                PlayerStorageInventory.of(fakePlayer).insertWithInventoryPriority(before);
+            }
+            menu.clicked(index, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, fakePlayer);
+            ItemStack after = menu.getCarried();
+            if (!after.isEmpty()) {
+                PlayerStorageInventory.of(fakePlayer).insertWithInventoryPriority(after);
+            }
+        }
     }
 }

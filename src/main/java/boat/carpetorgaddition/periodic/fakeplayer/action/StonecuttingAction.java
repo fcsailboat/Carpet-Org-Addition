@@ -96,7 +96,8 @@ public class StonecuttingAction extends AbstractPlayerAction {
                     if (this.predicate.test(itemStack)) {
                         hasMaterials = true;
                     } else {
-                        FakePlayerUtils.throwItem(stonecutterMenu, 0, fakePlayer);
+                        ItemStack stack = stonecutterMenu.getSlot(0).getItem().copyAndClear();
+                        PlayerStorageInventory.of(fakePlayer).insertWithInventoryPriority(stack);
                     }
                 }
                 // 如果输入槽没有材料，尝试从物品栏中获取合成材料

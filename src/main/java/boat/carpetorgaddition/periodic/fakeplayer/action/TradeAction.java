@@ -182,7 +182,8 @@ public class TradeAction extends AbstractPlayerAction {
         Slot tradeSlot = screenHandler.getSlot(slotIndex);
         // 如果交易槽上的物品不是需要的物品，就丢弃槽位中的物品
         if (!tradeSlot.getItem().is(buyItem.getItem())) {
-            FakePlayerUtils.throwItem(screenHandler, slotIndex, this.getFakePlayer());
+            ItemStack itemStack = screenHandler.getSlot(slotIndex).getItem().copyAndClear();
+            PlayerStorageInventory.of(this.getFakePlayer()).insertWithInventoryPriority(itemStack);
         }
         // 如果交易所需的物品为空，或者槽位的物品已经是所需的物品，直接跳过该物品
         if (buyItem.isEmpty() || slotItemCanTrade(tradeSlot.getItem(), buyItem)) {
