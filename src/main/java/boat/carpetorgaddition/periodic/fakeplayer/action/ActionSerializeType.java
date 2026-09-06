@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.phys.Vec3;
 
@@ -98,9 +97,9 @@ public enum ActionSerializeType {
      * 自动重命名物品
      */
     RENAME(json -> {
-        Item item = ServerUtils.asItem(json.get(RenameAction.ITEM).getAsString());
-        String newName = json.get(RenameAction.NEW_NAME).getAsString();
-        return new RenameAction(null, item, newName);
+        ItemStackPredicate predicate = ItemStackPredicate.parse(json.get(RenameAction.ITEM).getAsString());
+        String newName = json.get(RenameAction.NAME).getAsString();
+        return new RenameAction(null, predicate, newName);
     }),
     /**
      * 自动使用切石机
