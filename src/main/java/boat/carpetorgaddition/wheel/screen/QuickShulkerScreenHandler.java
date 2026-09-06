@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.wheel.screen;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.MathUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.ContainerComponentInventory;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.server.level.ServerPlayer;
@@ -56,7 +56,7 @@ public class QuickShulkerScreenHandler extends ShulkerBoxMenu implements Unavail
     @Override
     public void clicked(int slotIndex, int button, @NonNull ContainerInput input, @NonNull Player player) {
         if (MathUtils.isInRange(this.from(), this.to(), slotIndex)) {
-            if (button == FakePlayerUtils.PICKUP_RIGHT_CLICK) {
+            if (button == MenuController.PICKUP_RIGHT_CLICK) {
                 ItemStack cursorStack = this.getCarried();
                 // 光标物品是否可以放入潜影盒
                 if (cursorStack.getItem().canFitInsideContainerItems()) {

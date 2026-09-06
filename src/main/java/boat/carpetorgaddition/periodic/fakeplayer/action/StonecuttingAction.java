@@ -3,11 +3,11 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
@@ -79,8 +79,9 @@ public class StonecuttingAction extends AbstractPlayerAction {
 
     private void stonecutting(AutoGrowInventory inventory) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        if (fakePlayer.containerMenu instanceof StonecutterMenu stonecutterMenu) {
-            // 合成物品的此处
+        if (fakePlayer.containerMenu instanceof StonecutterMenu menu) {
+            MenuController<StonecutterMenu> controller = new MenuController<>(menu, fakePlayer);
+            // 合成物品的次数
             int craftCount = 0;
             // 循环次数
             int loopCount = 0;
@@ -90,23 +91,22 @@ public class StonecuttingAction extends AbstractPlayerAction {
                     throw new InfiniteLoopException();
                 }
                 boolean hasMaterials = false;
-                Slot inputSlot = stonecutterMenu.getSlot(0);
+                Slot inputSlot = controller.getSlot(0);
                 if (inputSlot.hasItem()) {
                     ItemStack itemStack = inputSlot.getItem();
                     if (this.predicate.test(itemStack)) {
                         hasMaterials = true;
                     } else {
-                        ItemStack stack = stonecutterMenu.getSlot(0).getItem().copyAndClear();
-                        PlayerStorageInventory.of(fakePlayer).insertWithInventoryPriority(stack);
+                        controller.moveSlotStackToInventory(0);
                     }
                 }
                 // 如果输入槽没有材料，尝试从物品栏中获取合成材料
-                if (hasMaterials || this.takeItemFromInventory(stonecutterMenu)) {
+                if (hasMaterials || this.takeItemFromInventory(controller)) {
                     // 模拟单击切石机按钮
-                    stonecutterMenu.clickMenuButton(fakePlayer, this.button);
-                    Slot outputSlot = stonecutterMenu.getSlot(1);
+                    controller.getMenu().clickMenuButton(fakePlayer, this.button);
+                    Slot outputSlot = controller.getSlot(1);
                     if (outputSlot.hasItem()) {
-                        FakePlayerUtils.collectItem(stonecutterMenu, 1, inventory, fakePlayer);
+                        controller.collect(1, inventory);
                         craftCount++;
                         // 限制每个游戏刻合成次数
                         int maxCount = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
@@ -132,15 +132,15 @@ public class StonecuttingAction extends AbstractPlayerAction {
      *
      * @return 物品栏是否有材料
      */
-    private boolean takeItemFromInventory(StonecutterMenu screenHandler) {
+    private boolean takeItemFromInventory(MenuController<StonecutterMenu> controller) {
         int start = 2;
-        int end = screenHandler.slots.size();
+        int end = controller.getSlots().size();
         IntList shulkerSlotIndex = new IntArrayList(end - start);
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         for (int index = start; index < end; index++) {
-            ItemStack itemStack = screenHandler.getSlot(index).getItem();
+            ItemStack itemStack = controller.getSlot(index).getItem();
             if (this.predicate.test(itemStack)) {
-                if (FakePlayerUtils.withKeepPickupAndMoveItemStack(screenHandler, index, 0, fakePlayer)) {
+                if (controller.moveItemStack(index, 0)) {
                     return true;
                 }
             } else if (InventoryUtils.isShulkerBoxItem(itemStack)) {
@@ -154,7 +154,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
             IntList stackedNonEmptyShulkerIndex = new IntArrayList(shulkerSlotIndex.size());
             for (int i = 0; i < shulkerSlotIndex.size(); i++) {
                 int index = shulkerSlotIndex.getInt(i);
-                ItemStack itemStack = screenHandler.getSlot(index).getItem();
+                ItemStack itemStack = controller.getSlot(index).getItem();
                 if (InventoryUtils.containsShulkerStackable(itemStack, this.predicate) && itemStack.getCount() > 1) {
                     stackedNonEmptyShulkerIndex.add(index);
                 } else if (InventoryUtils.isOperableSulkerBox(itemStack)) {
@@ -163,19 +163,19 @@ public class StonecuttingAction extends AbstractPlayerAction {
                     if (content.isEmpty()) {
                         continue;
                     }
-                    this.moveItemToInputSlot(screenHandler, content, fakePlayer);
+                    this.moveItemToInputSlot(controller, content);
                     return true;
                 }
             }
             for (int i = 0; i < stackedNonEmptyShulkerIndex.size(); i++) {
                 int index = stackedNonEmptyShulkerIndex.getInt(i);
-                ItemStack itemStack = screenHandler.getSlot(index).getItem();
+                ItemStack itemStack = controller.getSlot(index).getItem();
                 // 仅在合成结束时合并一次空潜影盒，可能导致在合并潜影盒之前，空潜影盒把空槽位占满，进而导致无法从堆叠的非空潜影盒中取物，但不考虑这种情况
                 ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, this.predicate);
                 if (content.isEmpty()) {
                     continue;
                 }
-                this.moveItemToInputSlot(screenHandler, content, fakePlayer);
+                this.moveItemToInputSlot(controller, content);
                 return true;
             }
         }
@@ -184,13 +184,10 @@ public class StonecuttingAction extends AbstractPlayerAction {
     }
 
     // 将物品移动到切石机输入槽
-    private void moveItemToInputSlot(StonecutterMenu screenHandler, ItemStack itemStack, EntityPlayerMPFake fakePlayer) {
-        // 丢弃光标上的物品（如果有）
-        FakePlayerUtils.dropCursorStack(screenHandler, fakePlayer);
-        // 将光标上的物品设置为从潜影盒中取出来的物品
-        screenHandler.setCarried(itemStack);
-        // 将光标上的物品放在切石机输入槽位上
-        FakePlayerUtils.pickupCursorStack(screenHandler, 0, fakePlayer);
+    private void moveItemToInputSlot(MenuController<StonecutterMenu> controller, ItemStack itemStack) {
+        controller.moveCursorStackToInventory();
+        controller.setCursorStack(itemStack);
+        controller.leftClick(0);
     }
 
     @Override
@@ -213,8 +210,8 @@ public class StonecuttingAction extends AbstractPlayerAction {
             list.add(key.then("button").translate(this.button + 1));
             // 将切石机当前输入输出槽位的状态
             list.add(TextBuilder.combineAll("    ",
-                    FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(0).getItem()), " -> ",
-                    FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(1).getItem())));
+                    AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(0).getItem()), " -> ",
+                    AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(1).getItem())));
         } else {
             // 假玩家没有打开切石机
             list.add(key.then("no_stonecutter").translate(fakePlayer.getDisplayName(), ServerUtils.getName(Items.STONECUTTER)));

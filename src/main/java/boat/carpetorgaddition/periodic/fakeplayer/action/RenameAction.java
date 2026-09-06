@@ -1,9 +1,9 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
@@ -28,25 +28,25 @@ public class RenameAction extends AbstractPlayerAction {
     /**
      * 物品的新名称
      */
-    private final String newName;
+    private final String name;
     private boolean canSendMessage = true;
     public static final String ITEM = "item";
     public static final String NEW_NAME = "new_name";
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("rename");
 
-    public RenameAction(EntityPlayerMPFake fakePlayer, Item item, String newName) {
+    public RenameAction(EntityPlayerMPFake fakePlayer, Item item, String name) {
         super(fakePlayer);
         this.item = item;
-        this.newName = newName;
+        this.name = name;
     }
 
     @Override
     protected void tick() {
         // 如果假玩家对铁砧持续按住右键，就会一直打开新的铁砧界面，同时旧的铁砧界面会自动关闭，关闭旧的铁砧界面时，铁砧内的物品会回到玩家物品栏
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        if (fakePlayer.containerMenu instanceof AnvilMenu anvilScreenHandler) {
+        if (fakePlayer.containerMenu instanceof AnvilMenu menu) {
             // 如果假玩家没有足够的经验，直接结束方法，创造玩家给物品重命名不需要消耗经验
-            if (fakePlayer.experienceLevel < 1 && !fakePlayer.isCreative()) {
+            if (fakePlayer.experienceLevel < 1 && !fakePlayer.hasInfiniteMaterials()) {
                 if (this.canSendMessage) {
                     LocalizationKey key = KEY.then("wait");
                     MessageUtils.sendMessage(this.getServer(), key.translate(fakePlayer.getDisplayName(), this.getDisplayName()));
@@ -54,17 +54,18 @@ public class RenameAction extends AbstractPlayerAction {
                 }
                 return;
             }
-            Slot oneSlot = anvilScreenHandler.getSlot(0);
+            MenuController<AnvilMenu> controller = new MenuController<>(menu, fakePlayer);
+            Slot oneSlot = controller.getSlot(0);
             // 第一个槽位的物品是否正确：是指定物品，没有被正确重命名，已经最大堆叠
             boolean oneSlotCorrect = false;
             // 判断第一个槽位是否有物品
             if (oneSlot.hasItem()) {
                 ItemStack itemStack = oneSlot.getItem();
                 // 判断该槽位的物品是否已经正确重命名
-                if (itemStack.getHoverName().getString().equals(newName) || !itemStack.is(item)) {
+                if (Objects.equals(itemStack.getHoverName().getString(), this.name) || !itemStack.is(this.item)) {
                     // 如果已经重命名，或者当前槽位不是指定物品，丢出该槽位的物品
                     // 因为该槽位的物品被丢弃，所以该槽位已经没有物品，没有必要继续判断，直接结束方法
-                    FakePlayerUtils.pickupAndThrow(anvilScreenHandler, 0, fakePlayer);
+                    controller.dropAllByPickup(0);
                     return;
                 } else {
                     // 判断当前物品堆栈对象是否为指定物品
@@ -76,48 +77,48 @@ public class RenameAction extends AbstractPlayerAction {
             }
             // 遍历玩家物品栏，找到指定需要重命名的物品
             // 第一个槽位的物品必须是正确的
-            for (int index = 3; !oneSlotCorrect && index < anvilScreenHandler.slots.size(); index++) {
+            for (int index = 3; !oneSlotCorrect && index < controller.getSlots().size(); index++) {
                 // 这里遍历的是玩家物品栏
-                if (anvilScreenHandler.getSlot(index).hasItem()
-                    && anvilScreenHandler.getSlot(index).getItem().is(item)) {
+                if (controller.getSlot(index).hasItem()
+                    && controller.getSlot(index).getItem().is(item)) {
                     // 找到指定物品后，模拟按住Shift键将物品移动到铁砧输入槽，然后跳出for循环
-                    FakePlayerUtils.quickMove(anvilScreenHandler, index, fakePlayer);
+                    // TODO 是否不会保留物品
+                    controller.quickMove(index);
                     break;
                 }
                 // 如果遍历完物品栏还是没有找到指定物品，认为玩家物品栏中已经没有指定物品，结束方法
-                if (index == anvilScreenHandler.slots.size() - 1) {
+                if (index == controller.getSlots().size() - 1) {
                     return;
                 }
             }
             // 获取铁砧第二个输入槽
-            Slot twoSlot = anvilScreenHandler.getSlot(1);
+            Slot twoSlot = controller.getSlot(1);
             // 判断该槽位是否有物品
             if (twoSlot.hasItem()) {
                 // 如果有，移动到物品栏，如果不能移动，直接丢出
-                FakePlayerUtils.quickMove(anvilScreenHandler, 1, fakePlayer);
+                controller.quickMove(1);
                 if (twoSlot.hasItem()) {
-                    FakePlayerUtils.pickupAndThrow(anvilScreenHandler, 1, fakePlayer);
+                    controller.dropAllByPickup(1);
                 }
             }
             // 判断第一个输入槽是否正确，第二个格子是否没有物品
             if (oneSlotCorrect && !twoSlot.hasItem()) {
                 // 设置物品名称
-                anvilScreenHandler.setItemName(newName);
+                controller.getMenu().setItemName(name);
                 // 判断是否可以取出输出槽的物品
-                if (anvilScreenHandler.getSlot(2).hasItem() && canTakeOutput(anvilScreenHandler)) {
+                if (controller.getSlot(2).hasItem() && this.canTakeOutput(controller)) {
                     // 丢出输出槽的物品
-                    FakePlayerUtils.pickupAndThrow(anvilScreenHandler, 2, fakePlayer);
+                    controller.dropAllByPickup(2);
                 }
             }
         }
     }
 
     // 判断是否可以输出物品
-    private boolean canTakeOutput(AnvilMenu screenHandler) {
-        if (this.getFakePlayer().getAbilities().instabuild || this.getFakePlayer().experienceLevel >= screenHandler.getCost()) {
-            return screenHandler.getCost() > 0;
-        }
-        return false;
+    private boolean canTakeOutput(MenuController<AnvilMenu> controller) {
+        AnvilMenu menu = controller.getMenu();
+        EntityPlayerMPFake fakePlayer = controller.getFakePlayer();
+        return (fakePlayer.hasInfiniteMaterials() || fakePlayer.experienceLevel >= menu.getCost()) && menu.getCost() > 0;
     }
 
     @Override
@@ -132,15 +133,15 @@ public class RenameAction extends AbstractPlayerAction {
         Component playerName = getFakePlayer().getDisplayName();
         // 将假玩家要重命名的物品和物品新名称的信息添加到集合
         LocalizationKey key = this.getInfoLocalizationKey();
-        list.add(key.translate(playerName, this.item.getDefaultInstance().getDisplayName(), newName));
+        list.add(key.translate(playerName, this.item.getDefaultInstance().getDisplayName(), name));
         // 将假玩家剩余经验的信息添加到集合
         list.add(key.then("xp").translate(getFakePlayer().experienceLevel));
         if (getFakePlayer().containerMenu instanceof AnvilMenu anvilScreenHandler) {
             // 将铁砧GUI上的物品信息添加到集合
             list.add(TextBuilder.combineAll("    ",
-                    FakePlayerUtils.getWithCountHoverText(anvilScreenHandler.getSlot(0).getItem()), " ",
-                    FakePlayerUtils.getWithCountHoverText(anvilScreenHandler.getSlot(1).getItem()), " -> ",
-                    FakePlayerUtils.getWithCountHoverText(anvilScreenHandler.getSlot(2).getItem())));
+                    AbstractPlayerAction.getWithCountHoverText(anvilScreenHandler.getSlot(0).getItem()), " ",
+                    AbstractPlayerAction.getWithCountHoverText(anvilScreenHandler.getSlot(1).getItem()), " -> ",
+                    AbstractPlayerAction.getWithCountHoverText(anvilScreenHandler.getSlot(2).getItem())));
         } else {
             // 将假玩家没有打开铁砧的信息添加到集合
             list.add(key.then("no_anvil").translate(playerName, Blocks.ANVIL.getName()));
@@ -152,7 +153,7 @@ public class RenameAction extends AbstractPlayerAction {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.addProperty(ITEM, BuiltInRegistries.ITEM.getKey(item).toString());
-        json.addProperty(NEW_NAME, this.newName);
+        json.addProperty(NEW_NAME, this.name);
         return json;
     }
 
@@ -172,11 +173,11 @@ public class RenameAction extends AbstractPlayerAction {
             return false;
         }
         RenameAction that = (RenameAction) o;
-        return canSendMessage == that.canSendMessage && Objects.equals(item, that.item) && Objects.equals(newName, that.newName);
+        return canSendMessage == that.canSendMessage && Objects.equals(item, that.item) && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(item, newName, canSendMessage);
+        return Objects.hash(item, name, canSendMessage);
     }
 }

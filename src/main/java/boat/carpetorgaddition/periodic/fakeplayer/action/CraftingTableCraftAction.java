@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -90,7 +89,7 @@ public class CraftingTableCraftAction extends AbstractCraftAction {
                 .space()
                 .append(this.predicates[5].getInitialUpperCase());
         if (!craftOutput.isEmpty()) {
-            joiner.append(" -> ").append(FakePlayerUtils.getWithCountHoverText(craftOutput));
+            joiner.append(" -> ").append(AbstractPlayerAction.getWithCountHoverText(craftOutput));
         }
         // 配方第三排
         joiner.newline()
@@ -105,27 +104,27 @@ public class CraftingTableCraftAction extends AbstractCraftAction {
     private void addCraftGridState(CraftingMenu screenHandler, TextJoiner joiner) {
         // 合成格第一排
         joiner.newline()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(1).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(1).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(2).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(2).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(3).getItem()));
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(3).getItem()));
         // 合成格第二排和输出槽
         joiner.newline()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(4).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(4).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(5).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(5).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(6).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(6).getItem()))
                 .append(" -> ")
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(0).getItem()));
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(0).getItem()));
         // 合成格第三排
         joiner.newline()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(7).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(7).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(8).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(8).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(9).getItem()));
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(9).getItem()));
     }
 
     @Override

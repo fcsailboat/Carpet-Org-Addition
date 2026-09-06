@@ -1,9 +1,11 @@
 package boat.carpetorgaddition.wheel;
 
+import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import carpet.patches.EntityPlayerMPFake;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
@@ -16,21 +18,21 @@ public class MenuController<T extends AbstractContainerMenu> {
     /**
      * 槽位外部的索引，相当于点击GUI外面，用来丢弃光标上的物品
      */
-    public static final int EMPTY_SPACE_SLOT_INDEX = AbstractContainerMenu.SLOT_CLICKED_OUTSIDE;//-999
+    public static final int EMPTY_SPACE_SLOT_INDEX = AbstractContainerMenu.SLOT_CLICKED_OUTSIDE; // -999
     /**
-     * 模拟左键单击槽位
+     * 左键单击
      */
     public static final int PICKUP_LEFT_CLICK = 0;
     /**
-     * 模拟右键单击槽位
+     * 右键单击
      */
     public static final int PICKUP_RIGHT_CLICK = 1;
     /**
-     * 模拟按Q键丢弃物品
+     * Q键丢弃物品
      */
     public static final int THROW_Q = 0;
     /**
-     * 模拟Ctrl+Q丢弃物品
+     * Ctrl+Q丢弃物品
      */
     public static final int THROW_CTRL_Q = 1;
     private final T menu;
@@ -44,42 +46,57 @@ public class MenuController<T extends AbstractContainerMenu> {
     }
 
     /**
-     * 模拟Ctrl+Q丢弃物品
+     * 按下Ctrl+Q丢弃物品
      */
-    public void drop(int index) {
+    public void dropAll(int index) {
         this.menu.clicked(index, THROW_CTRL_Q, ContainerInput.THROW, this.fakePlayer);
+    }
+
+    /**
+     * 按下Q丢弃物品
+     */
+    public void dropOne(int index) {
+        this.menu.clicked(index, THROW_Q, ContainerInput.THROW, this.fakePlayer);
     }
 
     /**
      * 鼠标拾取并丢出物品
      * */
-    public void pickupAndDrop(int index) {
+    public void dropAllByPickup(int index) {
         this.leftClick(index);
         this.leftClick(EMPTY_SPACE_SLOT_INDEX);
     }
 
     /**
      * 按住Shift快速移动物品
+     *
+     * @return 当没有物品移动时，返回{@link ItemStack#EMPTY}，否则返回原物品
      */
-    public ItemStack quickMove(int slotIndex) {
-        return this.menu.quickMoveStack(this.fakePlayer, slotIndex);
+    public ItemStack quickMove(int index) {
+        return this.menu.quickMoveStack(this.fakePlayer, index);
     }
 
     /**
      * 将槽位上的物品放入玩家物品栏
      */
-    public void recycling(int index) {
+    public void moveSlotStackToInventory(int index) {
         if (this.menu.getSlot(index).hasItem()) {
-            ItemStack before = this.menu.getCarried();
-            if (!before.isEmpty()) {
-                this.inventory.insertWithInventoryPriority(before);
-            }
             this.leftClick(index);
-            ItemStack after = this.menu.getCarried();
-            if (!after.isEmpty()) {
-                this.inventory.insertWithInventoryPriority(after);
-            }
+            this.moveCursorStackToInventory();
+            // 如果一开始光标上有物品，再次单击可以重新拿起物品
+            this.leftClick(index);
         }
+    }
+
+    /**
+     * 将鼠标光标上的物品放入物品栏
+     */
+    public void moveCursorStackToInventory() {
+        ItemStack cursorStack = this.getCursorStack();
+        if (cursorStack.isEmpty()) {
+            return;
+        }
+        this.inventory.insertWithInventoryPriority(cursorStack);
     }
 
     public void collect(int index, AutoGrowInventory inventory) {
@@ -101,6 +118,62 @@ public class MenuController<T extends AbstractContainerMenu> {
         }
     }
 
+    /**
+     * 将物品从一个槽位移动到另一个槽位
+     * @return 物品是否可以移动
+     */
+    public boolean moveItemStack(int fromIndex, int toIndex) {
+        ItemStack itemStack = this.menu.getSlot(fromIndex).getItem();
+        boolean keep = CarpetOrgAdditionSettings.FAKE_PLAYER_ACTION_KEEP_ITEM.value();
+        if (keep && itemStack.getCount() == 1 && itemStack.getMaxStackSize() > 1) {
+            return false;
+        }
+        this.moveCursorStackToInventory();
+        this.leftClick(fromIndex);
+        if (keep && this.menu.getCarried().getMaxStackSize() > 1) {
+            // 放回一个物品
+            this.rightClick(fromIndex);
+        }
+        this.leftClick(toIndex);
+        return true;
+    }
+
+    /**
+     * 比较并丢出槽位物品<br>
+     * 如果槽位上的物品与预期物品相同，则丢出槽位上的物品
+     *
+     * @see <a href="https://bugs.mojang.com/browse/MC-157977">MC-157977</a>
+     * @see <a href="https://bugs.mojang.com/browse/MC-215441">MC-215441</a>
+     */
+    public void compareAndDrop(int index, ItemStack itemStack, boolean once) {
+        InventoryUtils.assertEmptyStack(this.getCursorStack());
+        Slot slot = this.getSlot(index);
+        while (slot.hasItem() && ItemStack.isSameItemSameComponents(itemStack, slot.getItem()) && slot.mayPickup(this.fakePlayer)) {
+            this.dropOne(index);
+            if (once) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * 左键单击槽位
+     */
+    public void leftClick(int index) {
+        this.menu.clicked(index, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, this.fakePlayer);
+    }
+
+    /**
+     * 右键单击槽位
+     */
+    public void rightClick(int index) {
+        this.menu.clicked(index, PICKUP_RIGHT_CLICK, ContainerInput.PICKUP, this.fakePlayer);
+    }
+
+    /**
+     * 丢弃光标上的物品
+     */
+    @SuppressWarnings("unused")
     public void dropCursorStack() {
         ItemStack itemStack = this.getCursorStack();
         if (itemStack.isEmpty()) {
@@ -117,11 +190,27 @@ public class MenuController<T extends AbstractContainerMenu> {
         this.menu.setCarried(itemStack);
     }
 
+    public Slot getSlot(int index) {
+        return this.menu.getSlot(index);
+    }
+
+    public ItemStack getSlotStack(int index) {
+        return this.getSlot(index).getItem();
+    }
+
+    public T getMenu() {
+        return this.menu;
+    }
+
     public EntityPlayerMPFake getFakePlayer() {
         return this.fakePlayer;
     }
 
-    private void leftClick(int index) {
-        this.menu.clicked(index, PICKUP_LEFT_CLICK, ContainerInput.PICKUP, this.fakePlayer);
+    public NonNullList<Slot> getSlots() {
+        return this.menu.slots;
+    }
+
+    public PlayerStorageInventory getInventory() {
+        return this.inventory;
     }
 }

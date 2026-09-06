@@ -2,11 +2,11 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
@@ -33,6 +33,10 @@ import java.util.Optional;
 
 public abstract class AbstractCraftAction extends AbstractPlayerAction {
     /**
+     * 最大循环次数
+     */
+    public static final int MAX_LOOP_COUNT = 1200;
+    /**
      * 物品合成所使用的物品栏
      */
     protected final ItemStackPredicate[] predicates;
@@ -52,6 +56,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         AutoGrowInventory inventory = new AutoGrowInventory();
         this.craft(inventory);
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        // TODO 改为隔一段时间执行一次
         PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
@@ -65,6 +70,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         if (screenHandler == null) {
             return;
         }
+        MenuController<AbstractContainerMenu> controller = new MenuController<>(screenHandler, fakePlayer);
         // 定义变量记录成功完成合成的次数
         int craftCount = 0;
         // 记录循环次数用来在游戏可能进入死循环时抛出异常
@@ -72,16 +78,18 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         while (true) {
             // 检查循环次数
             loopCount++;
-            if (loopCount > FakePlayerUtils.MAX_LOOP_COUNT) {
+            if (loopCount > MAX_LOOP_COUNT) {
                 throw new InfiniteLoopException();
             }
             // 定义变量记录找到正确合成材料的次数
             int materialsCount = 0;
             // 遍历4x4合成格
-            for (int craftGridIndex = this.getCraftGridStart(); craftGridIndex <= this.getCraftGridEnd(); craftGridIndex++) {
+            int start = this.getCraftGridStart();
+            int end = this.getCraftGridEnd();
+            for (int craftGridIndex = start; craftGridIndex <= end; craftGridIndex++) {
                 // 获取每一个合成材料
-                ItemStackPredicate matcher = this.predicates[craftGridIndex - 1];
-                Slot slot = screenHandler.getSlot(craftGridIndex);
+                ItemStackPredicate matcher = this.predicates[craftGridIndex - start];
+                Slot slot = controller.getSlot(craftGridIndex);
                 // 检查合成格上是否已经有物品
                 if (slot.hasItem()) {
                     // 如果有并且物品是正确的合成材料，直接结束本轮循环，即跳过该物品
@@ -90,14 +98,13 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
                         continue;
                     } else {
                         // 如果不是，放回物品栏
-                        ItemStack itemStack = screenHandler.getSlot(craftGridIndex).getItem().copyAndClear();
-                        PlayerStorageInventory.of(fakePlayer).insertWithInventoryPriority(itemStack);
+                        controller.moveSlotStackToInventory(craftGridIndex);
                     }
                 } else if (matcher.isEmpty()) {
                     materialsCount++;
                     continue;
                 }
-                if (this.takeItemFromInventory(screenHandler, matcher, craftGridIndex, fakePlayer)) {
+                if (this.takeItemFromInventory(controller, matcher, craftGridIndex)) {
                     materialsCount++;
                 }
             }
@@ -105,11 +112,11 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
             if (materialsCount == this.getCraftGridSize()) {
                 // 如果输出槽有物品，则丢出该物品
                 if (screenHandler.getSlot(0).hasItem()) {
-                    FakePlayerUtils.collectItem(screenHandler, 0, inventory, fakePlayer);
+                    controller.collect(0, inventory);
                     // 合成成功，合成计数器自增
                     craftCount++;
                     // 避免在一个游戏刻内合成太多物品造成巨量卡顿
-                    if (this.shouldStop(craftCount)) {
+                    if (this.isCompleted(craftCount)) {
                         return;
                     }
                 } else {
@@ -126,17 +133,17 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         }
     }
 
-    private boolean takeItemFromInventory(AbstractContainerMenu screenHandler, ItemStackPredicate matcher, int craftIndex, EntityPlayerMPFake fakePlayer) {
+    private boolean takeItemFromInventory(MenuController<AbstractContainerMenu> controller, ItemStackPredicate matcher, int craftIndex) {
         final int start = this.getInventoryStart();
         final int end = this.getInventoryEnd();
         // 所有包含潜影盒物品的槽位索引
         IntList shulkerSlotIndex = new IntArrayList(end - start);
         // 遍历物品栏，包括盔甲槽和副手槽
         for (int index = start; index < end; index++) {
-            ItemStack itemStack = screenHandler.getSlot(index).getItem();
+            ItemStack itemStack = controller.getSlotStack(index);
             // 如果该槽位是正确的合成材料，将该物品移动到合成格，然后增加找到正确合成材料的次数
             if (matcher.test(itemStack)) {
-                if (FakePlayerUtils.withKeepPickupAndMoveItemStack(screenHandler, index, craftIndex, fakePlayer)) {
+                if (controller.moveItemStack(index, craftIndex)) {
                     return true;
                 }
             } else if (InventoryUtils.isShulkerBoxItem(itemStack)) {
@@ -148,12 +155,12 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
             // 优先从未堆叠的非空潜影盒中拿取物品
             for (int i = 0; i < shulkerSlotIndex.size(); i++) {
                 int index = shulkerSlotIndex.getInt(i);
-                ItemStack itemStack = screenHandler.getSlot(index).getItem();
+                ItemStack itemStack = controller.getSlotStack(index);
                 if (InventoryUtils.containsShulkerStackable(itemStack, matcher) && itemStack.getCount() > 1) {
                     stackedNonEmptyShulkerIndex.add(index);
                 } else if (InventoryUtils.isOperableSulkerBox(itemStack)) {
                     ItemStack content = InventoryUtils.pickItemFromShulkerBox(itemStack, matcher);
-                    if (moveItemToInputSlot(screenHandler, craftIndex, fakePlayer, content)) {
+                    if (this.moveItemToInputSlot(controller, craftIndex, content)) {
                         return true;
                     }
                 }
@@ -161,9 +168,9 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
             // 从堆叠的潜影盒中拿取物品
             for (int i = 0; i < stackedNonEmptyShulkerIndex.size(); i++) {
                 int index = stackedNonEmptyShulkerIndex.getInt(i);
-                ItemStack itemStack = screenHandler.getSlot(index).getItem();
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, matcher);
-                if (moveItemToInputSlot(screenHandler, craftIndex, fakePlayer, content)) {
+                ItemStack itemStack = controller.getSlotStack(index);
+                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(controller.getFakePlayer(), itemStack, matcher);
+                if (this.moveItemToInputSlot(controller, craftIndex, content)) {
                     return true;
                 }
             }
@@ -171,14 +178,14 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         return false;
     }
 
-    private boolean moveItemToInputSlot(AbstractContainerMenu screenHandler, int craftIndex, EntityPlayerMPFake fakePlayer, ItemStack content) {
+    private boolean moveItemToInputSlot(MenuController<AbstractContainerMenu> controller, int craftIndex, ItemStack content) {
         if (content.isEmpty()) {
             return false;
         }
         // 如果光标上的物品则丢弃
-        FakePlayerUtils.dropCursorStack(screenHandler, fakePlayer);
-        screenHandler.setCarried(content);
-        FakePlayerUtils.pickupCursorStack(screenHandler, craftIndex, fakePlayer);
+        controller.moveCursorStackToInventory();
+        controller.setCursorStack(content);
+        controller.leftClick(craftIndex);
         return true;
     }
 
@@ -216,12 +223,10 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
     protected abstract AbstractContainerMenu getScreenHandler();
 
     /**
-     * 是否应该因为合成次数过多而停止合成
-     *
      * @param count 当前合成次数
-     * @return 是否应该停止
+     * @return 当前游戏刻是否合成完成
      */
-    private boolean shouldStop(int count) {
+    private boolean isCompleted(int count) {
         int value = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
         return value >= 0 && count >= value;
     }
