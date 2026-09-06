@@ -63,16 +63,20 @@ public class EnchantingAction extends AbstractPlayerAction {
                 controller.getInventory().mergeEmptyShulkerBox();
             }
         } else if (tick % 10 == 0L) {
-            ServerLevel world = ServerUtils.getWorld(fakePlayer);
-            PlayerUtils.getHitResult(fakePlayer)
-                    .filter(hitResult -> hitResult instanceof BlockHitResult)
-                    .map(hitResult -> (BlockHitResult) hitResult)
-                    .map(BlockHitResult::getBlockPos)
-                    .filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof AnvilBlock)
-                    .filter(blockPos -> world.getBlockState(blockPos).is(BlockTags.ANVIL))
-                    .filter(blockPos -> new EntityTraverser<>(world, blockPos, blockPos.above(3), FallingBlockEntity.class).isEmpty())
-                    .ifPresent(_ -> PlayerUtils.use(fakePlayer));
+            openAnvilMenu(fakePlayer);
         }
+    }
+
+    public static void openAnvilMenu(EntityPlayerMPFake fakePlayer) {
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
+        PlayerUtils.getHitResult(fakePlayer)
+                .filter(hitResult -> hitResult instanceof BlockHitResult)
+                .map(hitResult -> (BlockHitResult) hitResult)
+                .map(BlockHitResult::getBlockPos)
+                .filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof AnvilBlock)
+                .filter(blockPos -> world.getBlockState(blockPos).is(BlockTags.ANVIL))
+                .filter(blockPos -> new EntityTraverser<>(world, blockPos, blockPos.above(3), FallingBlockEntity.class).isEmpty())
+                .ifPresent(_ -> PlayerUtils.use(fakePlayer));
     }
 
     private void enchanting(MenuController<AnvilMenu> controller, MinecraftServer server) {

@@ -5,6 +5,7 @@ import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -14,6 +15,8 @@ import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -51,6 +54,8 @@ public class RenameAction extends AbstractPlayerAction {
     protected void tick() {
         // 如果假玩家对铁砧持续按住右键，就会一直打开新的铁砧界面，同时旧的铁砧界面会自动关闭，关闭旧的铁砧界面时，铁砧内的物品会回到玩家物品栏
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        MinecraftServer server = ServerUtils.getServer(fakePlayer);
+        long tick = ServerUtils.getCurrentGameTick(server);
         if (fakePlayer.containerMenu instanceof AnvilMenu menu) {
             // 如果假玩家没有足够的经验，直接结束方法，创造玩家给物品重命名不需要消耗经验
             if (fakePlayer.experienceLevel < 1 && !fakePlayer.hasInfiniteMaterials()) {
@@ -63,11 +68,22 @@ public class RenameAction extends AbstractPlayerAction {
                 return;
             }
             MenuController<AnvilMenu> controller = new MenuController<>(menu, fakePlayer);
-            this.rename(controller);
+            int count = 0;
+            int value = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
+            boolean renamed;
+            do {
+                count++;
+                renamed = this.rename(controller);
+            } while (renamed && (value > 0 && count < value) && controller.getMenu().access.evaluate((world, blockPos) -> world.getBlockState(blockPos).is(BlockTags.ANVIL), true));
+            if (tick % 30 == 0L) {
+                controller.getInventory().mergeEmptyShulkerBox();
+            }
+        } else if (tick % 10 == 0L) {
+            EnchantingAction.openAnvilMenu(fakePlayer);
         }
     }
 
-    private void rename(MenuController<AnvilMenu> controller) {
+    private boolean rename(MenuController<AnvilMenu> controller) {
         Slot inputSlot = controller.getSlot(FIRST_INPUT);
         // 第一个槽位的物品是否正确：是指定物品，没有被正确重命名，已经最大堆叠
         boolean oneSlotCorrect = false;
@@ -81,7 +97,7 @@ public class RenameAction extends AbstractPlayerAction {
                 // 如果已经重命名，或者当前槽位不是指定物品，放回该槽位的物品
                 // 因为该槽位的物品被丢弃，所以该槽位已经没有物品，没有必要继续判断，直接结束方法
                 controller.moveSlotStackToInventory(FIRST_INPUT);
-                return;
+                return true;
             }
         }
         if (oneSlotCorrect || this.switchItem(controller, inputSlot)) {
@@ -95,8 +111,10 @@ public class RenameAction extends AbstractPlayerAction {
             // 让物品最大堆叠后才能重命名，节省经验
             if (outputSlot.hasItem() && this.canTakeOutput(controller) && InventoryUtils.isItemStackFull(inputSlot.getItem())) {
                 controller.dropAllByPickup(OUTPUT);
+                return true;
             }
         }
+        return false;
     }
 
     private boolean switchItem(MenuController<AnvilMenu> controller, Slot inputSlot) {
