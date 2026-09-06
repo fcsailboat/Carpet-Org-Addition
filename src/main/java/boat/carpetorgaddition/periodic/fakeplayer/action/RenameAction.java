@@ -57,16 +57,6 @@ public class RenameAction extends AbstractPlayerAction {
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         long tick = ServerUtils.getCurrentGameTick(server);
         if (fakePlayer.containerMenu instanceof AnvilMenu menu) {
-            // 如果假玩家没有足够的经验，直接结束方法，创造玩家给物品重命名不需要消耗经验
-            if (fakePlayer.experienceLevel < 1 && !fakePlayer.hasInfiniteMaterials()) {
-                if (this.notified) {
-                    return;
-                }
-                LocalizationKey key = KEY.then("wait");
-                MessageUtils.sendMessage(this.getServer(), key.translate(fakePlayer.getDisplayName(), this.getDisplayName()));
-                this.notified = true;
-                return;
-            }
             MenuController<AnvilMenu> controller = new MenuController<>(menu, fakePlayer);
             int count = 0;
             int value = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
@@ -85,23 +75,17 @@ public class RenameAction extends AbstractPlayerAction {
 
     private boolean rename(MenuController<AnvilMenu> controller) {
         Slot inputSlot = controller.getSlot(FIRST_INPUT);
-        // 第一个槽位的物品是否正确：是指定物品，没有被正确重命名，已经最大堆叠
         boolean oneSlotCorrect = false;
-        // 判断第一个槽位是否有物品
         if (inputSlot.hasItem()) {
             ItemStack itemStack = inputSlot.getItem();
-            // 判断该槽位的物品是否已经正确重命名
             if ((this.predicate.test(itemStack)) && !Objects.equals(itemStack.getHoverName().getString(), this.name)) {
                 oneSlotCorrect = InventoryUtils.isItemStackFull(inputSlot.getItem());
             } else {
-                // 如果已经重命名，或者当前槽位不是指定物品，放回该槽位的物品
-                // 因为该槽位的物品被丢弃，所以该槽位已经没有物品，没有必要继续判断，直接结束方法
                 controller.moveSlotStackToInventory(FIRST_INPUT);
                 return true;
             }
         }
         if (oneSlotCorrect || this.switchItem(controller, inputSlot)) {
-            // 获取铁砧第二个输入槽
             Slot secondInputSlot = controller.getSlot(SECOND_INPUT);
             if (secondInputSlot.hasItem()) {
                 controller.moveSlotStackToInventory(SECOND_INPUT);
@@ -112,6 +96,16 @@ public class RenameAction extends AbstractPlayerAction {
             if (outputSlot.hasItem() && this.canTakeOutput(controller) && InventoryUtils.isItemStackFull(inputSlot.getItem())) {
                 controller.dropAllByPickup(OUTPUT);
                 return true;
+            } else {
+                EntityPlayerMPFake fakePlayer = controller.getFakePlayer();
+                if (fakePlayer.experienceLevel < controller.getMenu().getCost() && !fakePlayer.hasInfiniteMaterials()) {
+                    if (this.notified) {
+                        return false;
+                    }
+                    LocalizationKey key = KEY.then("wait");
+                    MessageUtils.sendMessage(this.getServer(), key.translate(fakePlayer.getDisplayName(), this.getDisplayName()));
+                    this.notified = true;
+                }
             }
         }
         return false;
@@ -198,21 +192,16 @@ public class RenameAction extends AbstractPlayerAction {
     @Override
     public List<Component> info() {
         ArrayList<Component> list = new ArrayList<>();
-        // 获取假玩家的显示名称
         Component playerName = getFakePlayer().getDisplayName();
-        // 将假玩家要重命名的物品和物品新名称的信息添加到集合
         LocalizationKey key = this.getInfoLocalizationKey();
         list.add(key.translate(playerName, this.predicate.getDisplayName(), name));
-        // 将假玩家剩余经验的信息添加到集合
         list.add(key.then("xp").translate(getFakePlayer().experienceLevel));
         if (getFakePlayer().containerMenu instanceof AnvilMenu anvilScreenHandler) {
-            // 将铁砧GUI上的物品信息添加到集合
             list.add(TextBuilder.combineAll("    ",
                     AbstractPlayerAction.getWithCountHoverText(anvilScreenHandler.getSlot(0).getItem()), " ",
                     AbstractPlayerAction.getWithCountHoverText(anvilScreenHandler.getSlot(1).getItem()), " -> ",
                     AbstractPlayerAction.getWithCountHoverText(anvilScreenHandler.getSlot(2).getItem())));
         } else {
-            // 将假玩家没有打开铁砧的信息添加到集合
             list.add(key.then("no_anvil").translate(playerName, Blocks.ANVIL.getName()));
         }
         return list;
