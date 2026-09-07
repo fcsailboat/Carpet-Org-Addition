@@ -9,7 +9,6 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.MenuController;
-import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
@@ -45,6 +44,7 @@ public class TradeAction extends AbstractPlayerAction {
      * 虚空交易的计时器
      */
     private final MutableInt timer = new MutableInt();
+    private int nextTimeMergeEmptyShulkerBox = 40;
     public static final String INDEX = "index";
     public static final String VOID_TRADE = "void_trade";
     /**
@@ -98,7 +98,11 @@ public class TradeAction extends AbstractPlayerAction {
             }
             // 尝试交易物品
             this.tryTrade(controller);
-            PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
+            this.nextTimeMergeEmptyShulkerBox--;
+            if (this.nextTimeMergeEmptyShulkerBox <= 0) {
+                this.nextTimeMergeEmptyShulkerBox = 40;
+                controller.getInventory().mergeEmptyShulkerBox();
+            }
             if (this.voidTrade) {
                 // 如果是虚空交易，交易完毕后关闭交易GUI
                 fakePlayer.closeContainer();
@@ -208,13 +212,21 @@ public class TradeAction extends AbstractPlayerAction {
         }
         // 从潜影盒寻找物品
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
-            return this.takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, false);
+            MutableBoolean hasMaterial = new MutableBoolean(false);
+            if (this.takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, false, hasMaterial)) {
+                return true;
+            }
+            if (hasMaterial.booleanValue()) {
+                controller.getInventory().mergeEmptyShulkerBox();
+                this.nextTimeMergeEmptyShulkerBox = 40;
+            }
+            return this.takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, false, hasMaterial);
         }
         return false;
     }
 
     // 从潜影盒拿取物品
-    private boolean takeFromShulkerBox(MenuController<MerchantMenu> controller, ItemStack buyItem, int slotIndex, Slot tradeSlot, boolean stacking) {
+    private boolean takeFromShulkerBox(MenuController<MerchantMenu> controller, ItemStack buyItem, int slotIndex, Slot tradeSlot, boolean stacking, @Nullable MutableBoolean hasMaterial) {
         NonNullList<Slot> list = controller.getSlots();
         // 从潜影盒寻找物品
         for (int index = 3; index < list.size(); index++) {
@@ -225,11 +237,16 @@ public class TradeAction extends AbstractPlayerAction {
                 return true;
             }
             // 获取当前槽位上的物品
-            ItemStack itemStack = list.get(index).getItem();
+            ItemStack shulker = list.get(index).getItem();
             Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlotItem);
-            if (InventoryUtils.isShulkerBoxItem(itemStack) && (stacking || itemStack.getCount() == 1)) {
+            if (InventoryUtils.isShulkerBoxItem(shulker) && (stacking || shulker.getCount() == 1)) {
+                if (hasMaterial != null && hasMaterial.isFalse()) {
+                    if (InventoryUtils.containsShulkerStackable(shulker, predicate)) {
+                        hasMaterial.setTrue();
+                    }
+                }
                 // 从潜影盒提取物品
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.getFakePlayer(), itemStack, predicate, difference);
+                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.getFakePlayer(), shulker, predicate, difference);
                 if (content.isEmpty()) {
                     continue;
                 }
@@ -241,7 +258,7 @@ public class TradeAction extends AbstractPlayerAction {
                 }
             }
         }
-        return !stacking && takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, true);
+        return !stacking && takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, true, hasMaterial);
     }
 
     private Predicate<ItemStack> getStackPredicate(ItemStack buyItem, final ItemStack slotItem) {

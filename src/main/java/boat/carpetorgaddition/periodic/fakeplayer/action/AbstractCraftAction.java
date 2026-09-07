@@ -8,7 +8,6 @@ import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
-import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
@@ -24,6 +23,7 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -40,6 +40,10 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
      * 物品合成所使用的物品栏
      */
     protected final ItemStackPredicate[] predicates;
+    /**
+     * 下一次合并空潜影盒的时间
+     */
+    private int nextTimeMergeEmptyShulkerBox = 40;
 
     public AbstractCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
         super(fakePlayer);
@@ -53,24 +57,27 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
 
     @Override
     protected void tick() {
-        AutoGrowInventory inventory = new AutoGrowInventory();
-        this.craft(inventory);
-        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        // TODO 改为隔一段时间执行一次
-        PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
-        // 丢弃合成输出
-        for (ItemStack itemStack : inventory) {
-            ServerUtils.drop(fakePlayer, itemStack);
-        }
-    }
-
-    private void craft(AutoGrowInventory inventory) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         AbstractContainerMenu screenHandler = this.getScreenHandler();
         if (screenHandler == null) {
             return;
         }
         MenuController<AbstractContainerMenu> controller = new MenuController<>(screenHandler, fakePlayer);
+        // 用物品栏收集合成产物，合成完毕后一次性丢出，提前合并物品，减少卡顿
+        AutoGrowInventory inventory = new AutoGrowInventory();
+        this.craft(controller, inventory);
+        this.nextTimeMergeEmptyShulkerBox--;
+        if (this.nextTimeMergeEmptyShulkerBox <= 0) {
+            this.nextTimeMergeEmptyShulkerBox = 40;
+            controller.getInventory().mergeEmptyShulkerBox();
+        }
+        // 丢弃合成输出
+        for (ItemStack itemStack : inventory) {
+            ServerUtils.drop(fakePlayer, itemStack);
+        }
+    }
+
+    private void craft(MenuController<AbstractContainerMenu> controller, AutoGrowInventory inventory) {
         // 定义变量记录成功完成合成的次数
         int craftCount = 0;
         // 记录循环次数用来在游戏可能进入死循环时抛出异常
@@ -111,7 +118,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
             // 找到了所有的合成材料，尝试输出物品
             if (materialsCount == this.getCraftGridSize()) {
                 // 如果输出槽有物品，则丢出该物品
-                if (screenHandler.getSlot(0).hasItem()) {
+                if (controller.getSlot(0).hasItem()) {
                     controller.collect(0, inventory);
                     // 合成成功，合成计数器自增
                     craftCount++;
@@ -123,7 +130,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
                     // 如果输出槽没有物品，认为前面的合成操作有误，停止合成
                     this.stop();
                     LocalizationKey key = this.getLocalizationKey();
-                    MessageUtils.sendMessage(this.getServer(), key.then("error").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
+                    MessageUtils.sendMessage(this.getServer(), key.then("error").translate(controller.getFakePlayer().getDisplayName(), this.getDisplayName()));
                     return;
                 }
             } else {
@@ -151,29 +158,54 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
             }
         }
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
-            IntList stackedNonEmptyShulkerIndex = new IntArrayList(shulkerSlotIndex.size());
-            // 优先从未堆叠的非空潜影盒中拿取物品
-            for (int i = 0; i < shulkerSlotIndex.size(); i++) {
-                int index = shulkerSlotIndex.getInt(i);
-                ItemStack itemStack = controller.getSlotStack(index);
-                if (InventoryUtils.containsShulkerStackable(itemStack, matcher) && itemStack.getCount() > 1) {
-                    stackedNonEmptyShulkerIndex.add(index);
-                } else if (InventoryUtils.isOperableSulkerBox(itemStack)) {
-                    ItemStack content = InventoryUtils.pickItemFromShulkerBox(itemStack, matcher);
-                    if (this.moveItemToInputSlot(controller, craftIndex, content)) {
-                        return true;
-                    }
-                }
+            MutableBoolean hasMaterial = new MutableBoolean(false);
+            if (this.takeItemFromShulkerBox(controller, matcher, craftIndex, shulkerSlotIndex, hasMaterial)) {
+                return true;
             }
-            // 从堆叠的潜影盒中拿取物品
-            for (int i = 0; i < stackedNonEmptyShulkerIndex.size(); i++) {
-                int index = stackedNonEmptyShulkerIndex.getInt(i);
-                ItemStack itemStack = controller.getSlotStack(index);
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(controller.getFakePlayer(), itemStack, matcher);
-                if (this.moveItemToInputSlot(controller, craftIndex, content)) {
+            if (hasMaterial.booleanValue()) {
+                controller.getInventory().mergeEmptyShulkerBox();
+                this.nextTimeMergeEmptyShulkerBox = 40;
+            }
+            return this.takeItemFromShulkerBox(controller, matcher, craftIndex, shulkerSlotIndex, null);
+        }
+        return false;
+    }
+
+    private boolean takeItemFromShulkerBox(MenuController<AbstractContainerMenu> controller, ItemStackPredicate matcher, int craftIndex, IntList shulkerSlotIndex, @Nullable MutableBoolean hasMaterial) {
+        IntList stackedNonEmptyShulkerIndex = new IntArrayList(shulkerSlotIndex.size());
+        // 优先从未堆叠的非空潜影盒中拿取物品
+        for (int i = 0; i < shulkerSlotIndex.size(); i++) {
+            int index = shulkerSlotIndex.getInt(i);
+            ItemStack itemStack = controller.getSlotStack(index);
+            if (InventoryUtils.containsShulkerStackable(itemStack, matcher)) {
+                if (hasMaterial != null) {
+                    hasMaterial.setTrue();
+                }
+                if (itemStack.getCount() > 1) {
+                    stackedNonEmptyShulkerIndex.add(index);
+                } else if (takeItemFromShulkerBox(controller, matcher, craftIndex, itemStack)) {
                     return true;
                 }
+            } else if (takeItemFromShulkerBox(controller, matcher, craftIndex, itemStack)) {
+                return true;
             }
+        }
+        // 从堆叠的潜影盒中拿取物品
+        for (int i = 0; i < stackedNonEmptyShulkerIndex.size(); i++) {
+            int index = stackedNonEmptyShulkerIndex.getInt(i);
+            ItemStack itemStack = controller.getSlotStack(index);
+            ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(controller.getFakePlayer(), itemStack, matcher);
+            if (this.moveItemToInputSlot(controller, craftIndex, content)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean takeItemFromShulkerBox(MenuController<AbstractContainerMenu> controller, ItemStackPredicate matcher, int index, ItemStack shulker) {
+        if (InventoryUtils.isOperableSulkerBox(shulker)) {
+            ItemStack content = InventoryUtils.pickItemFromShulkerBox(shulker, matcher);
+            return this.moveItemToInputSlot(controller, index, content);
         }
         return false;
     }
@@ -182,7 +214,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         if (content.isEmpty()) {
             return false;
         }
-        // 如果光标上的物品则丢弃
+        // 如果光标上有物品则丢弃
         controller.moveCursorStackToInventory();
         controller.setCursorStack(content);
         controller.leftClick(craftIndex);
