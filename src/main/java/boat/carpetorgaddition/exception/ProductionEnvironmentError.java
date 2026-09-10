@@ -23,14 +23,25 @@ public class ProductionEnvironmentError extends AssertionError {
         fail();
     }
 
+    public static void assertDevelopmentEnvironment(String message) {
+        if (CarpetOrgAddition.isDevelopment()) {
+            return;
+        }
+        fail(message);
+    }
+
     /**
      * 除非发生了逻辑错误，否则永远不会执行到这里
      */
     public static void fail() {
+        fail("Test code executed in production environment");
+    }
+
+    public static void fail(String message) {
         CarpetOrgAddition.LOGGER.error("{}遇到了严重的逻辑错误：生产环境中执行了测试代码", CarpetOrgAdditionConstants.MOD_NAME);
         CarpetOrgAddition.LOGGER.error("请附带完整的游戏日志提交问题至：https://github.com/fcsailboat/Carpet-Org-Addition/issues");
         CarpetOrgAddition.LOGGER.error("{} encountered a critical logic error: Test code executed in production environment", CarpetOrgAdditionConstants.MOD_NAME);
         CarpetOrgAddition.LOGGER.error("Please submit the issue with complete game logs at: https://github.com/fcsailboat/Carpet-Org-Addition/issues");
-        throw new ProductionEnvironmentError("Test code executed in production environment");
+        throw new ProductionEnvironmentError(message);
     }
 }

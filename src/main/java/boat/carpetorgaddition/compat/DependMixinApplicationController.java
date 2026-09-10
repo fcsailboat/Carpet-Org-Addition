@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 public class DependMixinApplicationController implements MixinApplicationController {
-    @SuppressWarnings("unchecked")
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         try {
@@ -27,6 +26,7 @@ public class DependMixinApplicationController implements MixinApplicationControl
             for (int i = 0; i < values.size(); i += 2) {
                 arguments.put((String) values.get(i), values.get(i + 1));
             }
+            @SuppressWarnings("unchecked")
             List<String> list = (List<String>) arguments.get("value");
             boolean result = list.stream().allMatch(FabricLoader.getInstance()::isModLoaded);
             CarpetOrgAddition.LOGGER.debug("Allow loading: {}", mixinClassName);
