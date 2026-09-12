@@ -193,7 +193,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
                     return true;
                 }
                 // 不能推动（实体方块不能被推动）且含水
-                boolean blockPiston = blockState.getBlock() instanceof BaseEntityBlock || blockState.getPistonPushReaction() == PushReaction.BLOCK;
+                boolean blockPiston = blockState.getBlock() instanceof BaseEntityBlock || blockState.getPistonPushReaction() == PushReaction.IMMOVEABLE;
                 boolean hasWater = !blockState.getFluidState().isEmpty();
                 if (blockPiston && hasWater) {
                     return true;
