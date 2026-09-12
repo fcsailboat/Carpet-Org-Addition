@@ -3,7 +3,7 @@ package boat.carpetorgaddition.periodic.task.schedule;
 import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
@@ -65,8 +65,8 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
     }
 
     private @NonNull Component getDisplayTime() {
-        TextBuilder builder = TextBuilder.of(TextProvider.tickToTime(this.delayed));
-        builder.setHover(TextProvider.tickToRealTime(this.delayed));
+        TextBuilder builder = TextBuilder.of(CommonTexts.tickToTime(this.delayed));
+        builder.setHover(CommonTexts.tickToRealTime(this.delayed));
         return builder.build();
     }
 

@@ -106,7 +106,7 @@ public class LoggerBuilder {
     }
 
     private String toUpperCamelCase(String name) {
-        String[] split = name.split("[_ ]]");
+        String[] split = name.split("[_ ]");
         StringBuilder builder = new StringBuilder();
         for (String str : split) {
             builder.append(str.substring(0, 1).toUpperCase(Locale.ROOT)).append(str.substring(1));

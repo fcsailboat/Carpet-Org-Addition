@@ -1,9 +1,9 @@
 package boat.carpetorgaddition.wheel.screen;
 
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory.ButtonInventory;
 import net.minecraft.resources.Identifier;
@@ -150,8 +150,8 @@ public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements
 
         private static ClickType of(int buttonId) {
             return switch (buttonId) {
-                case FakePlayerUtils.PICKUP_LEFT_CLICK -> LEFT_CLICK;
-                case FakePlayerUtils.PICKUP_RIGHT_CLICK -> RIGHT_CLICK;
+                case MenuController.PICKUP_LEFT_CLICK -> LEFT_CLICK;
+                case MenuController.PICKUP_RIGHT_CLICK -> RIGHT_CLICK;
                 default -> OTHER_CLICK;
             };
         }

@@ -1,6 +1,8 @@
 package boat.carpetorgaddition.mixin.rule;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.util.PlayerUtils;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -20,17 +22,21 @@ public abstract class FireworkRocketItemMixin {
         if (player == null) {
             return;
         }
-        //烟花火箭使用冷却(对方块使用)
+        // 烟花火箭使用冷却（对方块使用）
         if (CarpetOrgAdditionSettings.FIREWORK_ROCKET_USE_COOLDOWN.value()) {
-            player.getCooldowns().addCooldown(context.getItemInHand(), 5);
+            if (context.getLevel().isClientSide() || (player instanceof ServerPlayer && PlayerUtils.isRealPlayer((ServerPlayer) player))) {
+                player.getCooldowns().addCooldown(context.getItemInHand(), 5);
+            }
         }
     }
 
-    //烟花火箭使用冷却(使用鞘翅飞行时)
+    // 烟花火箭使用冷却（使用鞘翅飞行）
     @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;consume(ILnet/minecraft/world/entity/LivingEntity;)V"))
     private void use(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (CarpetOrgAdditionSettings.FIREWORK_ROCKET_USE_COOLDOWN.value() && player != null && player.isFallFlying()) {
-            player.getCooldowns().addCooldown(player.getItemInHand(hand), 5);
+        if (CarpetOrgAdditionSettings.FIREWORK_ROCKET_USE_COOLDOWN.value() && player.isFallFlying()) {
+            if (level.isClientSide() || (player instanceof ServerPlayer && PlayerUtils.isRealPlayer((ServerPlayer) player))) {
+                player.getCooldowns().addCooldown(player.getItemInHand(hand), 5);
+            }
         }
     }
 }

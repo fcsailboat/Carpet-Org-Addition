@@ -43,7 +43,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument.Result;
 import net.minecraft.core.BlockPos;
@@ -54,7 +53,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -117,7 +115,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
                         .then(Commands.literal("info")
                                 .executes(this::getAction))
                         .then(Commands.literal("rename")
-                                .then(Commands.argument("item", ItemArgument.item(this.access))
+                                .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
                                         .then(Commands.argument("name", StringArgumentType.string())
                                                 .executes(this::setRename))))
                         .then(Commands.literal("stonecutting")
@@ -160,7 +158,11 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                                         .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
                                                         .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
                                                                 .suggests(suggestMixPrice(true))
-                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))));
+                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))
+                        .then(Commands.literal("enchanting")
+                                .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
+                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                                .executes(this::setEnchanting))))));
     }
 
     private static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
@@ -276,7 +278,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         List<ItemStackPredicate> predicates = new ArrayList<>();
         // 获取要分拣的物品
         for (int i = 1; i <= count; i++) {
-            predicates.add(new ItemStackPredicate(context, "item" + i));
+            predicates.add(ItemStackPredicate.of(context, "item" + i));
         }
         // 获取分拣物品要丢出的方向
         Vec3 thisVec = Vec3Argument.getVec3(context, "this");
@@ -291,7 +293,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        ItemStackPredicate predicate = allItem ? ItemStackPredicate.WILDCARD : new ItemStackPredicate(context, "filter");
+        ItemStackPredicate predicate = allItem ? ItemStackPredicate.WILDCARD : ItemStackPredicate.of(context, "filter");
         actionManager.setAction(new EmptyTheContainerAction(fakePlayer, predicate));
         return 1;
     }
@@ -301,7 +303,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        ItemStackPredicate predicate = allItem ? ItemStackPredicate.WILDCARD : new ItemStackPredicate(context, "filter");
+        ItemStackPredicate predicate = allItem ? ItemStackPredicate.WILDCARD : ItemStackPredicate.of(context, "filter");
         actionManager.setAction(new FillTheContainerAction(fakePlayer, predicate, dropOther, moreContainer));
         return 1;
     }
@@ -309,7 +311,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     // 单个物品合成
     private int setOneCraft(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         ItemStackPredicate[] predicates = fillArray(predicate, new ItemStackPredicate[4], false);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
@@ -320,7 +322,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
     // 四个物品合成
     private int setFourCraft(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         ItemStackPredicate[] predicates = fillArray(predicate, new ItemStackPredicate[4], true);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
@@ -336,7 +338,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         ItemStackPredicate[] items = new ItemStackPredicate[4];
         for (int i = 1; i <= 4; i++) {
             // 获取每一个合成材料
-            items[i - 1] = new ItemStackPredicate(context, "item" + i);
+            items[i - 1] = ItemStackPredicate.of(context, "item" + i);
         }
         actionManager.setAction(new InventoryCraftAction(fakePlayer, items));
         return 1;
@@ -347,7 +349,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         ItemStackPredicate[] predicates = fillArray(predicate, new ItemStackPredicate[9], true);
         actionManager.setAction(new CraftingTableCraftAction(fakePlayer, predicates));
         return 1;
@@ -360,7 +362,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         ItemStackPredicate[] items = new ItemStackPredicate[9];
         for (int i = 1; i <= 9; i++) {
-            items[i - 1] = new ItemStackPredicate(context, "item" + i);
+            items[i - 1] = ItemStackPredicate.of(context, "item" + i);
         }
         actionManager.setAction(new CraftingTableCraftAction(fakePlayer, items));
         return 1;
@@ -383,9 +385,9 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         // 获取当前要操作的物品和要重命名的字符串
-        Item item = ItemArgument.getItem(context, "item").item().value();
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         String newName = StringArgumentType.getString(context, "name");
-        actionManager.setAction(new RenameAction(fakePlayer, item, newName));
+        actionManager.setAction(new RenameAction(fakePlayer, predicate, newName));
         return 1;
     }
 
@@ -396,7 +398,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         // 获取要切割的物品和按钮的索引
         int buttonIndex = IntegerArgumentType.getInteger(context, "button") - 1;
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "item");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         actionManager.setAction(new StonecuttingAction(fakePlayer, predicate, buttonIndex));
         return 1;
     }
@@ -605,6 +607,15 @@ public class PlayerActionCommand extends AbstractServerCommand {
                 }
             }
         }
+        return 1;
+    }
+
+    private int setEnchanting(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "itemStack");
+        Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        EnchantingAction action = new EnchantingAction(fakePlayer, predicate, holder);
+        PlayerComponentCoordinator.of(fakePlayer).getFakePlayerActionManager().setAction(action);
         return 1;
     }
 

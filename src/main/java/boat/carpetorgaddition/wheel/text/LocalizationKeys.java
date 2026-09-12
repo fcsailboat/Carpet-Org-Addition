@@ -14,6 +14,7 @@ public final class LocalizationKeys {
     private static final LocalizationKey LITERAL = LocalizationKey.of("literal");
     private static final LocalizationKey FILE = LocalizationKey.of("file");
     private static final LocalizationKey MISC = LocalizationKey.of("misc");
+    private static final LocalizationKey COMMANDS = LocalizationKey.of("commands");
     private static final LocalizationKey DIALOG = LocalizationKey.of("dialog");
     private static final LocalizationKey RENDER = LocalizationKey.of("render");
     private static final LocalizationKey KEYBOARD = LocalizationKey.of("keyboard");
@@ -212,6 +213,10 @@ public final class LocalizationKeys {
         public static final LocalizationKey INVENTORY = MISC.then("inventory");
         public static final LocalizationKey ENDER_CHEST = MISC.then("ender_chest");
         public static final LocalizationKey SELF = MISC.then("self");
+    }
+
+    public static class Commands {
+        public static final LocalizationKey DEPRECATED = COMMANDS.then("deprecated");
     }
 
     public static class Dialog {

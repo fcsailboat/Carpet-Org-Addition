@@ -1,0 +1,22 @@
+Carpet-Org-Addition Third-Party Notices
+========================================
+
+This mod bundles the following third-party components. The full license
+texts are available in the "licenses" directory of this archive and in the
+project repository at https://github.com/fcsailboat/Carpet-Org-Addition
+
+--------------------------------------------------------------------------
+1. TinyPinyin
+   Version : 2.0.3
+   Project : https://github.com/promeG/TinyPinyin
+   License : Apache License, Version 2.0
+   Text    : licenses/tinypinyin/LICENSE
+   Copyright: TinyPinyin contributors (promeG and contributors)
+
+--------------------------------------------------------------------------
+
+2. MixinExtras
+   Project : https://github.com/LlamaLad7/MixinExtras
+   License : MIT
+   Text    : licenses/mixinextras/LICENSE
+   Copyright: Copyright (c) 2022-present LlamaLad7

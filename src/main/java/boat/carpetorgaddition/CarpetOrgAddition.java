@@ -74,6 +74,7 @@ public class CarpetOrgAddition implements ModInitializer {
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             CarpetOrgAddition.LOGGER.debug("Hidden feature enabled");
         }
+        this.triggerEasterEgg();
         if (IS_DEVELOPMENT) {
             this.runs();
         }
@@ -85,6 +86,19 @@ public class CarpetOrgAddition implements ModInitializer {
                 CarpetOrgAddition.LOGGER.debug("Rule document has been generated");
             } catch (RuntimeException e) {
                 CarpetOrgAddition.LOGGER.warn("Unable to generate rule document: ", e);
+            }
+        }
+    }
+
+    private void triggerEasterEgg() {
+        if (FabricLoader.getInstance().isModLoaded("carpet-fga-addition")) {
+            CarpetOrgAddition.LOGGER.info("That half_kite guy is causing trouble again");
+            boolean flippedByCosmicRay = false;
+            // noinspection ConstantValue, StatementWithEmptyBody
+            if (flippedByCosmicRay) {
+                CarpetOrgAddition.LOGGER.info("Also, if you're seeing this message, it means the boolean was flipped by a cosmic ray");
+            } else {
+                // All good. Cosmic rays are slacking off today.
             }
         }
     }

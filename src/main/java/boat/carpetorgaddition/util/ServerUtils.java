@@ -47,6 +47,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
@@ -369,6 +370,10 @@ public class ServerUtils {
         return Optional.ofNullable(CarpetServer.minecraft_server);
     }
 
+    public static MinecraftServer getCurrentServerOrThrow() {
+        return getCurrentServer().orElseThrow(() -> new IllegalStateException("Server not started"));
+    }
+
     public static ServerLevel getWorld(ServerPlayer player) {
         return player.level();
     }
@@ -533,6 +538,10 @@ public class ServerUtils {
         return registryAccess.lookup(Registries.GAME_RULE).map(registry -> registry.getKey(gameRule));
     }
 
+    public static <T> Identifier getId(Holder.Reference<T> holder) {
+        return holder.key().identifier();
+    }
+
     public static String getIdAsString(Item item) {
         return getId(item).toString();
     }
@@ -573,6 +582,10 @@ public class ServerUtils {
 
     public static String getIdAsString(RegistryAccess registryAccess, GameRule<?> gameRule) {
         return getId(registryAccess, gameRule).map(Identifier::toString).orElse(UNREGISTERED);
+    }
+
+    public static <T> String getIdAsString(Holder.Reference<T> holder) {
+        return getId(holder).toString();
     }
 
     /**
@@ -654,5 +667,21 @@ public class ServerUtils {
 
     public static void schedule(MinecraftServer server, Runnable runnable) {
         server.schedule(new TickTask(server.getTickCount(), runnable));
+    }
+
+    public static boolean areEqual(BlockState first, BlockState second) {
+        if (first.equals(second)) {
+            return true;
+        }
+        if (first.is(second.getBlock()) && first.getProperties().size() == second.getProperties().size()) {
+            for (Property<?> property : first.getProperties()) {
+                if (first.getOptionalValue(property).equals(second.getOptionalValue(property))) {
+                    continue;
+                }
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 }

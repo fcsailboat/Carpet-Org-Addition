@@ -13,7 +13,7 @@ public class HighlightWaypoint extends Waypoint {
     /**
      * 路径点开始闪烁的时间
      */
-    private static final long FLICKER_TIME = 20 * 6L;
+    private static final long FLICKER_TIME = 20 * 8L;
     /**
      * 路径点是否以恒定的频率闪烁
      */
@@ -41,7 +41,7 @@ public class HighlightWaypoint extends Waypoint {
         double flicker = time / FLICKER_TIME;
         double speed = CONSTANT_FLICKER ? 1.0 : 1 + Math.pow(flicker, 2.0) * 1.2;
         double x = (0.5 * speed * time) + (Math.PI / 2.0);
-        return (float) Math.max(((Math.sin(x) / 2.0)) + 0.5F, 0.0);
+        return 0.2F + (float) Math.max(((Math.sin(x) / 2.0)) + 0.5F, 0.0) * 0.8F;
     }
 
     @Override

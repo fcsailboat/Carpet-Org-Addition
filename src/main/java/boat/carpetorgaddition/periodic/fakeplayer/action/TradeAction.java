@@ -4,12 +4,11 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.mixin.accessor.MerchantScreenHandlerAccessor;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
@@ -18,8 +17,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -27,6 +24,7 @@ import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.item.trading.MerchantOffer;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +44,7 @@ public class TradeAction extends AbstractPlayerAction {
      * 虚空交易的计时器
      */
     private final MutableInt timer = new MutableInt();
+    private int nextTimeMergeEmptyShulkerBox = 40;
     public static final String INDEX = "index";
     public static final String VOID_TRADE = "void_trade";
     /**
@@ -58,7 +57,7 @@ public class TradeAction extends AbstractPlayerAction {
         super(fakePlayer);
         this.index = index;
         this.voidTrade = voidTrade;
-        timer.setValue(TRADE_WAIT_TIME);
+        this.timer.setValue(TRADE_WAIT_TIME);
     }
 
     @Override
@@ -66,11 +65,12 @@ public class TradeAction extends AbstractPlayerAction {
         // 获取按钮的索引
         // 判断当前打开的GUI是否为交易界面
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        if (fakePlayer.containerMenu instanceof MerchantMenu merchantScreenHandler) {
+        if (fakePlayer.containerMenu instanceof MerchantMenu menu) {
             // 获取计时器，记录村民距离上次被加载的时间是否超过了1游戏刻（区块卸载后村民似乎不会立即卸载）
+            MenuController<MerchantMenu> controller = new MenuController<>(menu, fakePlayer);
             if (this.voidTrade) {
                 // 获取正在接受交易的村民
-                MerchantScreenHandlerAccessor accessor = (MerchantScreenHandlerAccessor) merchantScreenHandler;
+                MerchantScreenHandlerAccessor accessor = (MerchantScreenHandlerAccessor) controller.getMenu();
                 Merchant merchant = accessor.getMerchant();
                 if (merchant instanceof AbstractVillager merchantEntity) {
                     // 是否应该等待区块卸载
@@ -90,15 +90,19 @@ public class TradeAction extends AbstractPlayerAction {
                 }
             }
             // 判断按钮索引是否越界
-            if (merchantScreenHandler.getOffers().size() <= this.index) {
+            if (controller.getMenu().getOffers().size() <= this.index) {
                 MinecraftServer server = ServerUtils.getServer(fakePlayer);
                 MessageUtils.sendMessage(server, KEY.then("error").translate(fakePlayer.getDisplayName()));
                 this.stop();
                 return;
             }
             // 尝试交易物品
-            tryTrade(merchantScreenHandler);
-            PlayerStorageInventory.of(fakePlayer).mergeEmptyShulkerBox();
+            this.tryTrade(controller);
+            this.nextTimeMergeEmptyShulkerBox--;
+            if (this.nextTimeMergeEmptyShulkerBox <= 0) {
+                this.nextTimeMergeEmptyShulkerBox = 40;
+                controller.getInventory().mergeEmptyShulkerBox();
+            }
             if (this.voidTrade) {
                 // 如果是虚空交易，交易完毕后关闭交易GUI
                 fakePlayer.closeContainer();
@@ -107,8 +111,7 @@ public class TradeAction extends AbstractPlayerAction {
     }
 
     // 尝试交易物品
-    private void tryTrade(MerchantMenu screenHandler) {
-        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+    private void tryTrade(MenuController<MerchantMenu> controller) {
         int loopCount = 0;
         // 如果村民无限交易未启用或当前交易不是虚空交易，则只循环一次
         do {
@@ -116,37 +119,38 @@ public class TradeAction extends AbstractPlayerAction {
             if (loopCount > 1000) {
                 throw new InfiniteLoopException();
             }
-            if (trade(screenHandler, fakePlayer, loopCount, false, null)) {
+            if (this.trade(controller, loopCount, false, null)) {
                 return;
             }
             // 如果启用了村民无限交易或当前为虚空交易，则尽可能完成所有交易
         } while (this.voidTrade || CarpetOrgAdditionSettings.VILLAGER_INFINITE_TRADE.value());
     }
 
-    public boolean tradeOnce(MerchantMenu screenHandler, EntityPlayerMPFake fakePlayer) {
-        MutableBoolean bool = new MutableBoolean(false);
-        this.trade(screenHandler, fakePlayer, 0, true, bool);
-        return bool.booleanValue();
+    public boolean tradeOnce(MenuController<MerchantMenu> controller) {
+        MutableBoolean hasTrade = new MutableBoolean(false);
+        this.trade(controller, 0, true, hasTrade);
+        return hasTrade.booleanValue();
     }
 
-    private boolean trade(MerchantMenu screenHandler, EntityPlayerMPFake fakePlayer, int loopCount, boolean once, MutableBoolean bool) {
+    private boolean trade(MenuController<MerchantMenu> controller, int loopCount, boolean once, @Nullable MutableBoolean hasTrade) {
         //如果当前交易以锁定，直接结束方法
-        MerchantOffer tradeOffer = screenHandler.getOffers().get(this.index);
+        MerchantMenu menu = controller.getMenu();
+        MerchantOffer tradeOffer = menu.getOffers().get(this.index);
         if (tradeOffer.isOutOfStock()) {
             return true;
         }
         // 选择要交易物品的索引
-        screenHandler.setSelectionHint(this.index);
+        menu.setSelectionHint(this.index);
         // 填充交易槽位
-        if (switchItem(screenHandler, tradeOffer)) {
+        if (this.switchItem(controller, tradeOffer)) {
             // 判断输出槽是否有物品，如果有，丢出物品，否则停止交易，结束方法
-            Slot outputSlot = screenHandler.getSlot(2);
+            Slot outputSlot = controller.getSlot(2);
             // 假玩家可能交易出其他交易选项的物品，请参阅：https://bugs.mojang.com/browse/MC-215441
             if (outputSlot.hasItem()) {
-                if (bool != null) {
-                    bool.setTrue();
+                if (hasTrade != null) {
+                    hasTrade.setTrue();
                 }
-                this.compareAndThrow(screenHandler, 2, tradeOffer.getResult(), once, fakePlayer);
+                controller.compareAndDrop(2, tradeOffer.getResult(), once);
                 int maxTradeCount = CarpetOrgAdditionSettings.FAKE_PLAYER_MAX_ITEM_OPERATION_COUNT.value();
                 return CarpetOrgAdditionSettings.VILLAGER_INFINITE_TRADE.value() && maxTradeCount > 0 && loopCount >= maxTradeCount;
             } else {
@@ -159,30 +163,29 @@ public class TradeAction extends AbstractPlayerAction {
     }
 
     // 选择物品
-    private boolean switchItem(MerchantMenu merchantScreenHandler, MerchantOffer tradeOffer) {
+    private boolean switchItem(MenuController<MerchantMenu> controller, MerchantOffer tradeOffer) {
         // 获取第一个交易物品
         ItemStack firstBuyItem = tradeOffer.getCostA();// 0索引
         // 获取第二个交易物品
         ItemStack secondBuyItem = tradeOffer.getCostB();// 1索引
-        return fillTradeSlot(merchantScreenHandler, firstBuyItem, 0)
-               && fillTradeSlot(merchantScreenHandler, secondBuyItem, 1);
+        return fillTradeSlot(controller, firstBuyItem, 0) && fillTradeSlot(controller, secondBuyItem, 1);
     }
 
     /**
      * 填充交易槽位
      *
-     * @param screenHandler 假玩家当前打开的交易GUI
+     * @param controller 假玩家当前打开的交易GUI
      * @param buyItem       村民的交易物品
      * @param slotIndex     第几个交易物品
      * @return 槽位上的物品是否已经足够参与交易
      */
-    private boolean fillTradeSlot(MerchantMenu screenHandler, ItemStack buyItem, int slotIndex) {
-        NonNullList<Slot> list = screenHandler.slots;
+    private boolean fillTradeSlot(MenuController<MerchantMenu> controller, ItemStack buyItem, int slotIndex) {
+        NonNullList<Slot> list = controller.getSlots();
         // 获取交易槽上的物品
-        Slot tradeSlot = screenHandler.getSlot(slotIndex);
-        // 如果交易槽上的物品不是需要的物品，就丢弃槽位中的物品
+        Slot tradeSlot = controller.getSlot(slotIndex);
+        // 如果交易槽上的物品不是需要的物品，就放回槽位中的物品
         if (!tradeSlot.getItem().is(buyItem.getItem())) {
-            FakePlayerUtils.throwItem(screenHandler, slotIndex, this.getFakePlayer());
+            controller.moveSlotStackToInventory(slotIndex);
         }
         // 如果交易所需的物品为空，或者槽位的物品已经是所需的物品，直接跳过该物品
         if (buyItem.isEmpty() || slotItemCanTrade(tradeSlot.getItem(), buyItem)) {
@@ -196,10 +199,10 @@ public class TradeAction extends AbstractPlayerAction {
             Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlot.getItem());
             if (predicate.test(itemStack)) {
                 // 如果匹配，将当前物品移动到交易槽位
-                if (FakePlayerUtils.withKeepPickupAndMoveItemStack(screenHandler, index, slotIndex, this.getFakePlayer())) {
+                if (controller.moveItemStack(index, slotIndex)) {
                     // 如果假玩家填充交易槽后光标上有剩余的物品，将剩余的物品放回原槽位
-                    if (!screenHandler.getCarried().isEmpty()) {
-                        FakePlayerUtils.pickupCursorStack(screenHandler, index, this.getFakePlayer());
+                    if (!controller.getCursorStack().isEmpty()) {
+                        controller.leftClick(index);
                     }
                     if (slotItemCanTrade(tradeSlot.getItem(), buyItem)) {
                         return true;
@@ -209,14 +212,22 @@ public class TradeAction extends AbstractPlayerAction {
         }
         // 从潜影盒寻找物品
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
-            return this.takeFromShulkerBox(screenHandler, buyItem, slotIndex, tradeSlot, false);
+            MutableBoolean hasMaterial = new MutableBoolean(false);
+            if (this.takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, false, hasMaterial)) {
+                return true;
+            }
+            if (hasMaterial.booleanValue()) {
+                controller.getInventory().mergeEmptyShulkerBox();
+                this.nextTimeMergeEmptyShulkerBox = 40;
+            }
+            return this.takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, false, hasMaterial);
         }
         return false;
     }
 
     // 从潜影盒拿取物品
-    private boolean takeFromShulkerBox(MerchantMenu screenHandler, ItemStack buyItem, int slotIndex, Slot tradeSlot, boolean stacking) {
-        NonNullList<Slot> list = screenHandler.slots;
+    private boolean takeFromShulkerBox(MenuController<MerchantMenu> controller, ItemStack buyItem, int slotIndex, Slot tradeSlot, boolean stacking, @Nullable MutableBoolean hasMaterial) {
+        NonNullList<Slot> list = controller.getSlots();
         // 从潜影盒寻找物品
         for (int index = 3; index < list.size(); index++) {
             // 用来交易的物品还差多少个满一组
@@ -226,23 +237,28 @@ public class TradeAction extends AbstractPlayerAction {
                 return true;
             }
             // 获取当前槽位上的物品
-            ItemStack itemStack = list.get(index).getItem();
+            ItemStack shulker = list.get(index).getItem();
             Predicate<ItemStack> predicate = getStackPredicate(buyItem, tradeSlotItem);
-            if (InventoryUtils.isShulkerBoxItem(itemStack) && (stacking || itemStack.getCount() == 1)) {
+            if (InventoryUtils.isShulkerBoxItem(shulker) && (stacking || shulker.getCount() == 1)) {
+                if (hasMaterial != null && hasMaterial.isFalse()) {
+                    if (InventoryUtils.containsShulkerStackable(shulker, predicate)) {
+                        hasMaterial.setTrue();
+                    }
+                }
                 // 从潜影盒提取物品
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.getFakePlayer(), itemStack, predicate, difference);
+                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.getFakePlayer(), shulker, predicate, difference);
                 if (content.isEmpty()) {
                     continue;
                 }
-                FakePlayerUtils.dropCursorStack(screenHandler, this.getFakePlayer());
-                screenHandler.setCarried(content);
-                FakePlayerUtils.pickupCursorStack(screenHandler, slotIndex, this.getFakePlayer());
+                controller.moveCursorStackToInventory();
+                controller.setCursorStack(content);
+                controller.leftClick(slotIndex);
                 if (slotItemCanTrade(tradeSlotItem, buyItem)) {
                     return true;
                 }
             }
         }
-        return !stacking && takeFromShulkerBox(screenHandler, buyItem, slotIndex, tradeSlot, true);
+        return !stacking && takeFromShulkerBox(controller, buyItem, slotIndex, tradeSlot, true, hasMaterial);
     }
 
     private Predicate<ItemStack> getStackPredicate(ItemStack buyItem, final ItemStack slotItem) {
@@ -255,24 +271,6 @@ public class TradeAction extends AbstractPlayerAction {
             predicate = stack -> ItemStack.isSameItemSameComponents(slotItem, stack);
         }
         return predicate;
-    }
-
-    /**
-     * 比较并丢出槽位物品<br>
-     * 如果槽位上的物品与预期物品相同，则丢出槽位上的物品
-     *
-     * @see <a href="https://bugs.mojang.com/browse/MC-157977">MC-157977</a>
-     * @see <a href="https://bugs.mojang.com/browse/MC-215441">MC-215441</a>
-     */
-    public void compareAndThrow(AbstractContainerMenu screenHandler, int slotIndex, ItemStack itemStack, boolean once, EntityPlayerMPFake player) {
-        InventoryUtils.assertEmptyStack(screenHandler.getCarried());
-        Slot slot = screenHandler.getSlot(slotIndex);
-        while (slot.hasItem() && ItemStack.isSameItemSameComponents(itemStack, slot.getItem()) && slot.mayPickup(player)) {
-            screenHandler.clicked(slotIndex, FakePlayerUtils.THROW_Q, ContainerInput.THROW, player);
-            if (once) {
-                break;
-            }
-        }
     }
 
     // 检查槽位上的物品是否可以交易
@@ -296,9 +294,9 @@ public class TradeAction extends AbstractPlayerAction {
             MerchantOffer tradeOffer = merchantScreenHandler.getOffers().get(index);
             // 将交易的物品和价格添加到集合中
             list.add(TextBuilder.combineAll("    ",
-                    FakePlayerUtils.getWithCountHoverText(tradeOffer.getCostA()), " ",
-                    FakePlayerUtils.getWithCountHoverText(tradeOffer.getCostB()), " -> ",
-                    FakePlayerUtils.getWithCountHoverText(tradeOffer.getResult())));
+                    AbstractPlayerAction.getWithCountHoverText(tradeOffer.getCostA()), " ",
+                    AbstractPlayerAction.getWithCountHoverText(tradeOffer.getCostB()), " -> ",
+                    AbstractPlayerAction.getWithCountHoverText(tradeOffer.getResult())));
             // 如果当前交易已被锁定，将交易已锁定的消息添加到集合，然后直接结束方法并返回集合
             if (tradeOffer.isOutOfStock()) {
                 list.add(key.then("disabled").translate());
@@ -307,9 +305,9 @@ public class TradeAction extends AbstractPlayerAction {
             // 将“交易状态”文本信息添加到集合中
             list.add(key.then("state").translate());
             list.add(TextBuilder.combineAll("    ",
-                    FakePlayerUtils.getWithCountHoverText(merchantScreenHandler.getSlot(0).getItem()), " ",
-                    FakePlayerUtils.getWithCountHoverText(merchantScreenHandler.getSlot(1).getItem()), " -> ",
-                    FakePlayerUtils.getWithCountHoverText(merchantScreenHandler.getSlot(2).getItem())));
+                    AbstractPlayerAction.getWithCountHoverText(merchantScreenHandler.getSlot(0).getItem()), " ",
+                    AbstractPlayerAction.getWithCountHoverText(merchantScreenHandler.getSlot(1).getItem()), " -> ",
+                    AbstractPlayerAction.getWithCountHoverText(merchantScreenHandler.getSlot(2).getItem())));
         } else {
             // 将假玩家没有打开交易界面的消息添加到集合中
             list.add(key.then("no_villager").translate(getFakePlayer().getDisplayName()));

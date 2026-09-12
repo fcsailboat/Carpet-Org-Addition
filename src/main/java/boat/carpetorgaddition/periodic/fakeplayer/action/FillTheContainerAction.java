@@ -1,7 +1,8 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
@@ -36,10 +37,12 @@ public class FillTheContainerAction extends AbstractPlayerAction {
 
     @Override
     protected void tick() {
-        AbstractContainerMenu screenHandler = getFakePlayer().containerMenu;
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        AbstractContainerMenu screenHandler = fakePlayer.containerMenu;
         if (screenHandler instanceof InventoryMenu) {
             return;
         }
+        MenuController<AbstractContainerMenu> controller = new MenuController<>(screenHandler, fakePlayer);
         // 获取要装在潜影盒的物品
         for (int index : getRange(screenHandler)) {
             Slot slot = screenHandler.getSlot(index);
@@ -51,25 +54,25 @@ public class FillTheContainerAction extends AbstractPlayerAction {
                 if (screenHandler instanceof ShulkerBoxMenu && !itemStack.getItem().canFitInsideContainerItems()) {
                     // 丢弃不能放入潜影盒的物品
                     if (this.dropOther) {
-                        FakePlayerUtils.throwItem(screenHandler, index, this.getFakePlayer());
+                        controller.dropAll(index);
                     }
                     continue;
                 }
                 // 模拟按住Shift键移动物品
-                if (FakePlayerUtils.quickMove(screenHandler, index, this.getFakePlayer()).isEmpty()) {
-                    this.getFakePlayer().doCloseContainer();
+                if (controller.quickMove(index).isEmpty()) {
+                    PlayerUtils.closeScreen(fakePlayer);
                     return;
                 }
             } else if (this.dropOther) {
-                FakePlayerUtils.throwItem(screenHandler, index, this.getFakePlayer());
+                controller.dropAll(index);
             }
         }
     }
 
-    private Integer[] getRange(AbstractContainerMenu screenHandler) {
-        IntStream intStream;
+    private int[] getRange(AbstractContainerMenu screenHandler) {
+        IntStream stream;
         if (this.moreContainer) {
-            intStream = switch (screenHandler) {
+            stream = switch (screenHandler) {
                 case ShulkerBoxMenu _ -> IntStream.rangeClosed(27, 62);
                 // 箱子，末影箱，木桶等容器
                 case ChestMenu handler
@@ -85,14 +88,12 @@ public class FillTheContainerAction extends AbstractPlayerAction {
                 case CrafterMenu _ -> IntStream.rangeClosed(9, 44);
                 case null, default -> IntStream.of();
             };
+        } else if (screenHandler instanceof ShulkerBoxMenu) {
+            stream = IntStream.rangeClosed(27, 62);
         } else {
-            if (screenHandler instanceof ShulkerBoxMenu) {
-                intStream = IntStream.rangeClosed(27, 62);
-            } else {
-                intStream = IntStream.of();
-            }
+            stream = IntStream.of();
         }
-        return intStream.boxed().toArray(Integer[]::new);
+        return stream.toArray();
     }
 
     @Override

@@ -6,7 +6,7 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
-import boat.carpetorgaddition.wheel.provider.TextProvider;
+import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -59,9 +59,9 @@ public class EntityPlayerMPFakeMixin {
             ServerLevel world = ServerUtils.getWorld(fakePlayer);
             BlockPos blockPos = ServerUtils.getBlockPos(fakePlayer);
             Component hover = new TextJoiner()
-                    .append(TextProvider.dimension(world))
+                    .append(CommonTexts.dimension(world))
                     .append(": ")
-                    .append(TextProvider.simpleBlockPos(blockPos))
+                    .append(CommonTexts.simpleBlockPos(blockPos))
                     .join();
             builder.setHover(hover);
             MessageUtils.sendMessage(server, builder.build());

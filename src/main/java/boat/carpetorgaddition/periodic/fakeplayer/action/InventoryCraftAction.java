@@ -1,6 +1,5 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -76,7 +75,7 @@ public class InventoryCraftAction extends AbstractCraftAction {
                 .space()
                 .append(this.predicates[3].getInitialUpperCase());
         if (!craftOutput.isEmpty()) {
-            joiner.append(" -> ").append(FakePlayerUtils.getWithCountHoverText(craftOutput));
+            joiner.append(" -> ").append(AbstractPlayerAction.getWithCountHoverText(craftOutput));
         }
     }
 
@@ -84,16 +83,16 @@ public class InventoryCraftAction extends AbstractCraftAction {
     private void addCraftGridState(TextJoiner joiner, InventoryMenu screenHandler) {
         // 合成格第一排
         joiner.newline()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(1).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(1).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(2).getItem()));
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(2).getItem()));
         // 合成格第二排和输出槽
         joiner.newline()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(3).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(3).getItem()))
                 .space()
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(4).getItem()))
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(4).getItem()))
                 .append(" -> ")
-                .append(FakePlayerUtils.getWithCountHoverText(screenHandler.getSlot(0).getItem()));
+                .append(AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(0).getItem()));
     }
 
     @Override

@@ -272,7 +272,7 @@ public class InventoryUtils {
      * @return 物品是否已经堆叠满
      */
     public static boolean isItemStackFull(ItemStack itemStack) {
-        return itemStack.isStackable() && itemStack.getMaxStackSize() <= itemStack.getCount();
+        return itemStack.isStackable() && itemStack.getCount() >= itemStack.getMaxStackSize();
     }
 
     /**

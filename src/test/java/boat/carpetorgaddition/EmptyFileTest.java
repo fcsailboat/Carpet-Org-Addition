@@ -12,7 +12,7 @@ public class EmptyFileTest {
     // 检查是否有空文件
     @Test
     public void testEmptyFile() throws IOException {
-        File file = new File("src/main/java/org/carpetorgaddition");
+        File file = new File("src/main/java/boat/carpetorgaddition");
         this.traverse(file);
     }
 

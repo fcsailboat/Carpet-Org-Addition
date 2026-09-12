@@ -3,6 +3,8 @@ package boat.carpetorgaddition.client.command;
 import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType;
 import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientBlockArgumentType;
 import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientItemArgumentType;
+import boat.carpetorgaddition.client.util.ClientMessageUtils;
+import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket.Type;
@@ -11,6 +13,9 @@ import boat.carpetorgaddition.network.codec.ObjectSearchTaskCodecs.BlockSearchCo
 import boat.carpetorgaddition.network.codec.ObjectSearchTaskCodecs.ItemSearchContext;
 import boat.carpetorgaddition.network.codec.ObjectSearchTaskCodecs.OfflinePlayerItemSearchContext;
 import boat.carpetorgaddition.util.CommandUtils;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
+import boat.carpetorgaddition.wheel.text.LocalizationKeys;
+import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -37,7 +42,7 @@ public class ClientFinderCommand extends AbstractClientCommand {
                 .then(ClientCommands.literal("item")
                         .then(ClientCommands.argument("item", new ClientItemArgumentType(true))
                                 .executes(context -> searchItem(context, 64))
-                                .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RANGE))
+                                .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
                                         .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "range"))))
                                 .then(ClientCommands.literal("from")
@@ -46,45 +51,48 @@ public class ClientFinderCommand extends AbstractClientCommand {
                 .then(ClientCommands.literal("block")
                         .then(ClientCommands.argument("block", new ClientBlockArgumentType(true))
                                 .executes(context -> searchBlock(context, 64))
-                                .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RANGE))
+                                .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
                                         .executes(context -> searchBlock(context, IntegerArgumentType.getInteger(context, "range")))))));
     }
 
     private SuggestionProvider<FabricClientCommandSource> suggestionDefaultDistance() {
-        return (_, builder) -> SharedSuggestionProvider.suggest(new String[]{"64", "128", "256", "512"}, builder);
+        return (_, builder) -> SharedSuggestionProvider.suggest(FinderCommand.SUGGESTED_RADIUS, builder);
     }
 
-    private int searchItem(CommandContext<FabricClientCommandSource> context, int range) {
+    private int searchItem(CommandContext<FabricClientCommandSource> context, int radius) {
         List<Item> list = getItemList(context);
         String name = CommandUtils.getArgumentLiteral(context, "item").orElseThrow();
-        ItemSearchContext itemSearchContext = new ItemSearchContext(range, list);
+        this.notifyDeprecated(CommonCommands.finderByNameFindItem(name, radius));
+        ItemSearchContext itemSearchContext = new ItemSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.ITEM_SEARCH_CODEC.encode(itemSearchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(Type.ITEM, name, json);
-        ClientPlayNetworking.send(packet);
+        ClientUtils.schedule(20, () -> ClientPlayNetworking.send(packet));
         return list.size();
     }
 
     private int searchItem(CommandContext<FabricClientCommandSource> context) {
         List<Item> list = getItemList(context);
         String name = CommandUtils.getArgumentLiteral(context, "item").orElseThrow();
+        this.notifyDeprecated(CommonCommands.finderByNameFindItemFromOfflinePlayer(name));
         OfflinePlayerItemSearchContext searchContext = new OfflinePlayerItemSearchContext(list);
         JsonObject json = ObjectSearchTaskCodecs.OFFLINE_PLAYER_SEARCH_CODEC.encode(searchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(Type.OFFLINE_PLAYER_ITEM, name, json);
-        ClientPlayNetworking.send(packet);
+        ClientUtils.schedule(20, () -> ClientPlayNetworking.send(packet));
         return list.size();
     }
 
-    private int searchBlock(CommandContext<FabricClientCommandSource> context, int range) {
+    private int searchBlock(CommandContext<FabricClientCommandSource> context, int radius) {
         List<Block> list = ClientObjectArgumentType.getType(context, "block").stream()
                 .filter(t -> t instanceof Block)
                 .map(t -> (Block) t)
                 .toList();
         String name = CommandUtils.getArgumentLiteral(context, "block").orElseThrow();
-        BlockSearchContext searchContext = new BlockSearchContext(range, list);
+        this.notifyDeprecated(CommonCommands.finderByNameFindBlock(name, radius));
+        BlockSearchContext searchContext = new BlockSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.BLOCK_SEARCH_CODEC.encode(searchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(Type.BLOCK, name, json);
-        ClientPlayNetworking.send(packet);
+        ClientUtils.schedule(20, () -> ClientPlayNetworking.send(packet));
         return list.size();
     }
 
@@ -93,6 +101,12 @@ public class ClientFinderCommand extends AbstractClientCommand {
                 .filter(t -> t instanceof Item)
                 .map(t -> (Item) t)
                 .toList();
+    }
+
+    private void notifyDeprecated(String command) {
+        ClientMessageUtils.sendEmptyMessage();
+        ClientMessageUtils.sendMessage(LocalizationKeys.Commands.DEPRECATED.translate());
+        ClientMessageUtils.sendMessage(TextBuilder.of(command).setGrayItalic().build());
     }
 
     @Override

@@ -67,6 +67,32 @@ public final class FakePlayerSerializerDataUpdater extends DataUpdater {
                 newJson.addProperty("data_version", 4);
                 yield this.update(newJson, 4);
             }
+            case 4 -> {
+                JsonObject newJson = new JsonObject();
+                for (Map.Entry<String, JsonElement> entry : oldJson.entrySet()) {
+                    JsonElement value = entry.getValue();
+                    if ("script_action".equals(entry.getKey())) {
+                        JsonObject newAction = new JsonObject();
+                        for (Map.Entry<String, JsonElement> actionEntry : value.getAsJsonObject().entrySet()) {
+                            if ("rename".equals(actionEntry.getKey())) {
+                                JsonObject newRename = new JsonObject();
+                                for (Map.Entry<String, JsonElement> renameEntry : actionEntry.getValue().getAsJsonObject().entrySet()) {
+                                    String key = renameEntry.getKey();
+                                    newRename.add("new_name".equals(key) ? "name" : key, renameEntry.getValue());
+                                }
+                                newAction.add(actionEntry.getKey(), newRename);
+                            } else {
+                                newAction.add(actionEntry.getKey(), actionEntry.getValue());
+                            }
+                        }
+                        newJson.add(entry.getKey(), newAction);
+                    } else {
+                        newJson.add(entry.getKey(), value);
+                    }
+                }
+                newJson.addProperty("data_version", 5);
+                yield this.update(newJson, 5);
+            }
             default -> oldJson;
         };
     }

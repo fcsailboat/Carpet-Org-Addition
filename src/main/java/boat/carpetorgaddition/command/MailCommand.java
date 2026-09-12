@@ -7,11 +7,11 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.parcel.Parcel;
 import boat.carpetorgaddition.periodic.parcel.ParcelManager;
 import boat.carpetorgaddition.util.*;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
 import boat.carpetorgaddition.wheel.screen.SendParcelScreenHandler;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -262,13 +262,13 @@ public class MailCommand extends AbstractServerCommand {
         Parcel.Operation operation = parcel.getPlayerOperation(player);
         TextBuilder builder = switch (operation) {
             case COLLECT -> TextBuilder.of(LIST.then("collect").translate())
-                    .setCommand(CommandProvider.collectParcel(parcel.getId()))
+                    .setCommand(CommonCommands.collectParcel(parcel.getId()))
                     .setColor(ChatFormatting.AQUA);
             case RECALL -> TextBuilder.of(LIST.then("recall").translate())
-                    .setCommand(CommandProvider.recallParcel(parcel.getId()))
+                    .setCommand(CommonCommands.recallParcel(parcel.getId()))
                     .setColor(ChatFormatting.AQUA);
             case INTERCEPT -> TextBuilder.of(LIST.then("intercept").translate())
-                    .setCommand(CommandProvider.interceptParcel(parcel.getId()))
+                    .setCommand(CommonCommands.interceptParcel(parcel.getId()))
                     .setColor(ChatFormatting.AQUA);
             case VIEW -> TextBuilder.of(LIST.then("view").translate())
                     .setColor(ChatFormatting.GRAY);

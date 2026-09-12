@@ -1,10 +1,10 @@
 package boat.carpetorgaddition.mixin.rule.quickshulker;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -34,7 +34,7 @@ public abstract class ScreenHandlerMixin {
 
     @Inject(method = "clicked", at = @At("HEAD"), cancellable = true)
     private void onSlotClick(int slotIndex, int buttonNum, ContainerInput containerInput, Player player, CallbackInfo ci) {
-        if (CarpetOrgAdditionSettings.QUICK_SHULKER.value() && MathUtils.isInRange(0, this.slots.size(), slotIndex) && containerInput == ContainerInput.PICKUP && buttonNum == FakePlayerUtils.PICKUP_RIGHT_CLICK) {
+        if (CarpetOrgAdditionSettings.QUICK_SHULKER.value() && MathUtils.isInRange(0, this.slots.size(), slotIndex) && containerInput == ContainerInput.PICKUP && buttonNum == MenuController.PICKUP_RIGHT_CLICK) {
             ItemStack stack = this.getSlot(slotIndex).getItem();
             if (this.canOpenShulker() && InventoryUtils.isOperableSulkerBox(stack) && this.getCarried().isEmpty()) {
                 // 创造模式物品栏是一个客户端屏幕，因此点击潜影盒不会打开物品栏

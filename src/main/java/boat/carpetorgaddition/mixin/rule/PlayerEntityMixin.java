@@ -5,7 +5,7 @@ import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.rule.RuleUtils;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.provider.CommandProvider;
+import boat.carpetorgaddition.wheel.common.CommonCommands;
 import carpet.patches.EntityPlayerMPFake;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.fabricmc.api.EnvType;
@@ -132,11 +132,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
             }
             // 工作台
             if (itemStack.is(Items.CRAFTING_TABLE)) {
-                return Optional.of(CommandProvider::openPlayerCraftGui);
+                return Optional.of(CommonCommands::openPlayerCraftGui);
             }
             // 切石机
             if (itemStack.is(Items.STONECUTTER)) {
-                return Optional.of(CommandProvider::openPlayerStonecuttingGui);
+                return Optional.of(CommonCommands::openPlayerStonecuttingGui);
             }
         }
         return Optional.empty();

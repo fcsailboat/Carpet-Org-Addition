@@ -10,15 +10,9 @@ import java.util.function.Supplier;
 public class DebugSettings {
     static {
         // 不要在非开发环境加载
-        ProductionEnvironmentError.assertDevelopmentEnvironment();
+        ProductionEnvironmentError.assertDevelopmentEnvironment("Registering debug rules outside the development environment is not allowed");
     }
 
-    public static final Supplier<Boolean> openFakePlayerInventory = register(
-            RuleFactory.of("openFakePlayerInventory", false)
-                    .addCategories("Debug")
-                    .setDisplayName("打开玩家物品栏")
-                    .build()
-    );
     public static final Supplier<Boolean> showSoulSandItemCount = register(
             RuleFactory.of("showSoulSandItemCount", false)
                     .addCategories("Debug")

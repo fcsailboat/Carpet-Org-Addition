@@ -3,6 +3,7 @@ package boat.carpetorgaddition.client.command.argument;
 import boat.carpetorgaddition.client.util.ClientCommandUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.CommandUtils;
+import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.brigadier.StringReader;
@@ -36,13 +37,6 @@ import java.util.stream.StreamSupport;
 
 public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T>> {
     private static final List<String> PATTERNS = Arrays.stream(MatchPattern.values()).map(MatchPattern::toString).toList();
-    /**
-     * 是否允许通过id补全名称<br>
-     * 启用后，可以通过输入部分或全部对象id来补全对象名称<br>
-     * 例如：输入apple，则补全候选中会出现苹果、金苹果和附魔金苹果。<br>
-     * 但是，该命令参数本身就是为了通过对象名称查询对象id，允许反向补全可能没有实际意义。
-     */
-    private static final boolean ID_COMPLETION_NAME = false;
     /**
      * 字符串是否使用匹配模式
      */
@@ -161,10 +155,11 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
                 this.stream()
                         .map(this::entry)
                         .distinct()
-                        .map(entry -> Map.entry(quoteIfContainsSpace(entry.getKey()), entry.getValue()))
+                        .map(entry -> Map.entry(quoteIfContainsSpace(entry.getKey()), getIdValue(entry.getValue())))
                         .forEach(entry -> {
                             String key = entry.getKey();
-                            if (key.toLowerCase(Locale.ROOT).contains(remaining) || (ID_COMPLETION_NAME && entry.getValue().contains(remaining))) {
+                            String value = entry.getValue();
+                            if (key.toLowerCase(Locale.ROOT).contains(remaining) || MathUtils.isPinyinMatch(key, remaining) || value.contains(remaining)) {
                                 builder.suggest(key);
                             }
                         });
@@ -176,6 +171,11 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
 
     private static String quoteIfContainsSpace(String str) {
         return str.contains(" ") ? "\"" + str + "\"" : str;
+    }
+
+    private static String getIdValue(String id) {
+        String[] split = id.split(":");
+        return split.length == 2 ? split[1] : id;
     }
 
     /**
