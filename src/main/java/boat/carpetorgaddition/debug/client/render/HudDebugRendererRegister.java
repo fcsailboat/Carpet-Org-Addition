@@ -56,7 +56,7 @@ public class HudDebugRendererRegister {
 
     static {
         // 断言开发环境
-        ProductionEnvironmentError.assertDevelopmentEnvironment();
+        ProductionEnvironmentError.assertDevelopmentEnvironment("Registering HUD debug renderer outside the development environment is not allowed");
     }
 
     static {

@@ -1,8 +1,9 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
-import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
+import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
@@ -29,27 +30,29 @@ public class EmptyTheContainerAction extends AbstractPlayerAction {
 
     @Override
     protected void tick() {
-        AbstractContainerMenu screenHandler = getFakePlayer().containerMenu;
-        if (screenHandler instanceof InventoryMenu) {
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        AbstractContainerMenu menu = PlayerUtils.getCurrentScreen(fakePlayer);
+        if (menu instanceof InventoryMenu) {
             return;
         }
-        for (int index = 0; index < screenHandler.slots.size(); index++) {
+        MenuController<AbstractContainerMenu> controller = new MenuController<>(menu, fakePlayer);
+        for (int index = 0; index < controller.getSlots().size(); index++) {
             // 如果遍历到了玩家物品栏槽位，直接结束循环，因为后面一般不会再有容器槽位了
             // 合成器的输出槽位虽然在玩家物品栏槽位后面，但是这个槽位的物品无法取出，因此可以忽略
-            if (screenHandler.getSlot(index).container instanceof Inventory) {
+            if (controller.getSlot(index).container instanceof Inventory) {
                 break;
             }
-            ItemStack itemStack = screenHandler.getSlot(index).getItem();
+            ItemStack itemStack = controller.getSlot(index).getItem();
             if (itemStack.isEmpty() || InventoryUtils.isGcaItem(itemStack)) {
                 continue;
             }
             if (this.predicate.test(itemStack)) {
                 // 丢弃一组物品
-                FakePlayerUtils.throwItem(screenHandler, index, getFakePlayer());
+                controller.dropAll(index);
             }
         }
         // 物品全部丢出后自动关闭容器
-        getFakePlayer().closeContainer();
+        fakePlayer.closeContainer();
     }
 
     @Override

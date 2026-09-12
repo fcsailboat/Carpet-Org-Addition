@@ -106,7 +106,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
     /**
      * 当前数据文件的版本
      */
-    private static final int CURRENT_VERSION = 4;
+    private static final int CURRENT_VERSION = 5;
 
     /**
      * @apiNote 使用此构造方法会丢失玩家所在组，启动时动作等信息

@@ -5,11 +5,16 @@ import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
+import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -162,6 +167,26 @@ public abstract class AbstractPlayerAction {
 
     @Override
     public abstract int hashCode();
+
+    /**
+     * 获取物品堆栈的文本表示形式<br>
+     * 返回格式为 [物品ID首字母大写]，可以通过鼠标悬停查看物品名称和数量
+     */
+    protected static Component getWithCountHoverText(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return TextBuilder.of("[A]").setHover(ServerUtils.getName(Items.AIR)).setColor(ChatFormatting.DARK_GRAY).build();
+        }
+        // 获取物品堆栈对应的物品ID的首字母，然后转为大写，再放进中括号里
+        // 将物品名称的字符串切割为命名空间（如果有）和物品id
+        String name = BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString();
+        String[] split = name.split(":");
+        // 获取数组的索引，如果有命名空间，返回1索引，否则返回0索引，即舍弃命名空间
+        int index = (split.length == 1) ? 0 : 1;
+        // 获取物品id的首字母，然后大写
+        String capitalizeFirstLetter = "[" + Character.toUpperCase(split[index].charAt(0)) + "]";
+        Component hover = TextBuilder.combineAll(ServerUtils.getDefaultName(itemStack), "*" + itemStack.getCount());
+        return TextBuilder.of(capitalizeFirstLetter).setHover(hover).build();
+    }
 
     public static JsonObject toJson(BlockPos blockPos) {
         JsonObject json = new JsonObject();

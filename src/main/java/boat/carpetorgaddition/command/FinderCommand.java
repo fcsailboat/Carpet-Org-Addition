@@ -152,7 +152,7 @@ public class FinderCommand extends AbstractServerCommand {
     private int searchItem(CommandContext<CommandSourceStack> context, int radius) throws CommandSyntaxException {
         // 获取执行命令的玩家并非空判断
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "itemStack");
         // 获取玩家所在的位置，这是命令开始执行的坐标
         BlockPos sourceBlockPos = player.blockPosition();
         // 查找周围容器中的物品
@@ -174,7 +174,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPos from = BlockPosArgument.getBlockPos(context, "from");
         BlockPos to = BlockPosArgument.getBlockPos(context, "to");
         // 获取要查找的物品
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "itemStack");
         // 计算要查找的区域
         Level world = ServerUtils.getWorld(player);
         BlockEntityTraverser traverser = new BlockEntityTraverser(world, from, to);
@@ -191,7 +191,7 @@ public class FinderCommand extends AbstractServerCommand {
      */
     private int searchItemFromOfflinePlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "itemStack");
         CommandSourceStack source = context.getSource();
         ServerTask task = new OfflinePlayerInventorySearchTask(source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
@@ -265,7 +265,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取执行命令的玩家对象
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取要匹配的物品
-        ItemStackPredicate predicate = new ItemStackPredicate(context, "itemStack");
+        ItemStackPredicate predicate = ItemStackPredicate.of(context, "itemStack");
         // 获取玩家所在的坐标
         BlockPos sourcePos = player.blockPosition();
         Level world = ServerUtils.getWorld(player);

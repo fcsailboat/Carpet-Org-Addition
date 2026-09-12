@@ -53,7 +53,7 @@ public class RuleUtils {
 
     static {
         if (!CarpetOrgAddition.isDebugMode() && NON_EMPTY_SHULKER_BOX_STACKABLE) {
-            ProductionEnvironmentError.fail();
+            ProductionEnvironmentError.fail("Non-empty shulker box stacking has been enabled in a non-development environment");
         }
     }
 

@@ -52,7 +52,7 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
         this.convert = null;
     }
 
-    public ItemStackPredicate(CommandContext<CommandSourceStack> context, String arguments) {
+    private ItemStackPredicate(CommandContext<CommandSourceStack> context, String arguments) {
         for (ParsedCommandNode<CommandSourceStack> commandNode : context.getNodes()) {
             if (commandNode.getNode() instanceof ArgumentCommandNode<?, ?> node && Objects.equals(node.getName(), arguments)) {
                 StringRange range = commandNode.getRange();
@@ -72,6 +72,10 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
         this.input = ServerUtils.getIdAsString(item);
         this.wildcard = false;
         this.convert = item;
+    }
+
+    public static ItemStackPredicate of(CommandContext<CommandSourceStack> context, String arguments) {
+        return new ItemStackPredicate(context, arguments);
     }
 
     public static ItemStackPredicate of(Collection<Item> collection, String name) {
