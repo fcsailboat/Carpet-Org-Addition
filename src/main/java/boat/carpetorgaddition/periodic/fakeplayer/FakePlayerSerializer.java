@@ -567,7 +567,6 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
                 .map(startup -> (FakePlayerStartupAction.CommandAction) startup)
                 .map(FakePlayerStartupAction.CommandAction::getCommand)
                 .toList();
-
     }
 
     public interface Listener {

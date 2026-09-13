@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class CarpetOrgAddition implements ModInitializer {
+public final class CarpetOrgAddition implements ModInitializer {
     /**
      * 日志
      */

@@ -2,8 +2,7 @@ package boat.carpetorgaddition.mixin.debug;
 
 import boat.carpetorgaddition.debug.DebugSettings;
 import boat.carpetorgaddition.debug.OnlyDeveloped;
-import boat.carpetorgaddition.wheel.Counter;
-import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
+import boat.carpetorgaddition.wheel.ItemStackCounter;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.component.DataComponentGetter;
@@ -34,11 +33,11 @@ public class ItemContainerContentsMixin {
     @Inject(method = "addToTooltip", at = @At("HEAD"), cancellable = true)
     private void addToTooltip(Item.TooltipContext context, Consumer<Component> consumer, TooltipFlag flag, DataComponentGetter components, CallbackInfo ci) {
         if (DebugSettings.mergeShulkerTooltip.get()) {
-            List<ItemStack> list = this.items.stream().filter(Optional::isPresent).map(Optional::get).map(ItemStackTemplate::create).toList();
-            ImmutableInventory inventory = new ImmutableInventory(list);
-            Counter<ItemStack> counter = inventory.statistics();
+            ItemStackCounter counter = new ItemStackCounter();
+            this.items.forEach(optional -> optional.ifPresent(counter::add));
+            LocalizationKey key = LocalizationKey.literal("item.container.item_count");
             for (Object2IntMap.Entry<ItemStack> entry : counter.entrySet()) {
-                consumer.accept(LocalizationKey.literal("item.container.item_count").translate(entry.getKey().getHoverName(), entry.getIntValue()));
+                consumer.accept(key.translate(entry.getKey().getHoverName(), entry.getIntValue()));
             }
             ci.cancel();
         }

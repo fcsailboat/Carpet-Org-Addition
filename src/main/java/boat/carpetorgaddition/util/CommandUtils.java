@@ -228,11 +228,6 @@ public class CommandUtils {
         commandManager.performPrefixedCommand(source, command);
     }
 
-    @SuppressWarnings("unused")
-    public static void handlingException(ThrowingRunnable runnable, CommandContext<CommandSourceStack> context) {
-        handlingException(runnable, context.getSource());
-    }
-
     public static void handlingException(ThrowingRunnable runnable, CommandSourceStack source) {
         try {
             runnable.run();

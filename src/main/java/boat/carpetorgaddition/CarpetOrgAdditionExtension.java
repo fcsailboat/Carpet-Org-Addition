@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 
-public class CarpetOrgAdditionExtension implements CarpetExtension {
+public final class CarpetOrgAdditionExtension implements CarpetExtension {
     private static final CarpetOrgAdditionExtension INSTANCE = new CarpetOrgAdditionExtension();
     private boolean settingsLoaded = false;
 
