@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.periodic.task.search;
 
 import boat.carpetorgaddition.command.FinderCommand;
+import boat.carpetorgaddition.command.XpTransferCommand;
 import boat.carpetorgaddition.exception.TaskExecutionException;
 import boat.carpetorgaddition.network.event.CustomClickAction;
 import boat.carpetorgaddition.network.event.CustomClickEvents;
@@ -11,7 +12,6 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.ProgressBar;
 import boat.carpetorgaddition.wheel.common.CommonCommands;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
-import boat.carpetorgaddition.wheel.misc.ExperienceTransfer;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -64,7 +64,7 @@ public class OfflinePlayerExperienceSearchTask extends AbstractOfflinePlayerSear
             return true;
         }
         if (this.calculate == null) {
-            this.calculate = ExperienceTransfer.calculateUpgradeLevel(this.totals.get(), this::isCancelled);
+            this.calculate = XpTransferCommand.ExperienceTransfer.calculateUpgradeLevel(this.totals.get(), this::isCancelled);
         }
         return switch (this.calculate.state()) {
             case RUNNING -> false;
@@ -103,7 +103,7 @@ public class OfflinePlayerExperienceSearchTask extends AbstractOfflinePlayerSear
         } catch (ArithmeticException e) {
             return;
         }
-        BigInteger total = ExperienceTransfer.calculateTotalExperience(value.level(), value.point());
+        BigInteger total = XpTransferCommand.ExperienceTransfer.calculateTotalExperience(value.level(), value.point());
         if (value.level() == 0 && value.point() == 0) {
             return;
         }
@@ -142,8 +142,8 @@ public class OfflinePlayerExperienceSearchTask extends AbstractOfflinePlayerSear
 
     public record ExperienceValue(int level, float progress, int point, BigInteger total) implements Comparable<ExperienceValue> {
         public ExperienceValue(int level, float progress, int point) {
-            int correct = Math.min(level, ExperienceTransfer.MAX_EFFECTIVE_LEVEL);
-            BigInteger total = ExperienceTransfer.calculateTotalExperience(correct, point);
+            int correct = Math.min(level, XpTransferCommand.ExperienceTransfer.MAX_EFFECTIVE_LEVEL);
+            BigInteger total = XpTransferCommand.ExperienceTransfer.calculateTotalExperience(correct, point);
             this(correct, progress, point, total);
         }
 

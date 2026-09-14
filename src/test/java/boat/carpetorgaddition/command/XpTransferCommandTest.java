@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.command;
 
-import boat.carpetorgaddition.wheel.misc.ExperienceTransfer;
+import boat.carpetorgaddition.command.XpTransferCommand.ExperienceTransfer;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.*;
 
@@ -14,7 +14,7 @@ public class XpTransferCommandTest {
     public void testTransferAll(@NonNull RepetitionInfo info) {
         int level = (int) Math.pow(info.getCurrentRepetition(), 4);
         System.out.println("等级：" + level);
-        ExperienceTransfer.MockPlayer player = new ExperienceTransfer.MockPlayer(level);
+        XpTransferCommand.MockPlayer player = new XpTransferCommand.MockPlayer(level);
         BigInteger before = ExperienceTransfer.calculateTotalExperience(player.getExperienceLevel(), player.getPoint());
         System.out.println("转移前：" + before);
         player.clearExperience();
@@ -92,7 +92,7 @@ public class XpTransferCommandTest {
         Assertions.assertThrows(ArithmeticException.class, () -> ExperienceTransfer.calculateUpgradeExperience(0, 238609313));
     }
 
-    private void transfer(ExperienceTransfer.MockPlayer player, BigInteger experience) {
+    private void transfer(XpTransferCommand.MockPlayer player, BigInteger experience) {
         BigInteger maxValue = BigInteger.valueOf(Integer.MAX_VALUE);
         if (experience.compareTo(BigInteger.valueOf(10000000000L)) > 0) {
             experience = new BigDecimal(experience).multiply(new BigDecimal("0.9999999")).toBigInteger();
