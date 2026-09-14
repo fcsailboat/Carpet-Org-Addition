@@ -99,7 +99,7 @@ public abstract class ServerTask {
     /**
      * 获取当前任务本tick执行的时间
      */
-    private long getTickExecutionTime() {
+    protected long getTickExecutionTime() {
         if (this.tickTaskStartTime == -1L) {
             return 0L;
         }

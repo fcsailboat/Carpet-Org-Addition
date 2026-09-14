@@ -50,7 +50,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private final Level world;
     private final BlockEntityTraverser blockEntities;
     private Iterator<Entity> entitySearchIterator;
-    private Iterator<BlockEntity> blockEntitySearchIterator;
+    private BlockEntityTraverser.Cursor cursor;
     private FindState findState;
     private int count;
     private boolean shulkerBox;
@@ -92,26 +92,37 @@ public class ItemSearchTask extends ServerSearchTask {
 
     // 从容器查找
     private void searchFromContainer() {
-        if (this.blockEntitySearchIterator == null) {
-            this.blockEntitySearchIterator = blockEntities.iterator();
+        if (this.cursor == null) {
+            this.cursor = blockEntities.cursor();
         }
-        while (this.blockEntitySearchIterator.hasNext()) {
+        while (true) {
             this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
-            BlockEntity blockEntity = this.blockEntitySearchIterator.next();
-            BlockPos blockPos = blockEntity.getBlockPos();
-            if (blockEntity instanceof Container inventory) {
-                // 获取容器名称
-                Component containerName
-                        = inventory instanceof BaseContainerBlockEntity lockableContainer
-                        ? lockableContainer.getName()
-                        : this.world.getBlockState(blockPos).getBlock().getName();
-                this.count(inventory, blockPos, containerName);
+            long timeSlice = this.getMaxTimeSlice() == -1L ? FinderCommand.TIME_SLICE : this.getMaxTimeSlice();
+            switch (this.cursor.advance(timeSlice - this.getTickExecutionTime())) {
+                case ELEMENT -> {
+                    BlockEntity blockEntity = this.cursor.take();
+                    BlockPos blockPos = blockEntity.getBlockPos();
+                    if (blockEntity instanceof Container inventory) {
+                        // 获取容器名称
+                        Component containerName
+                                = inventory instanceof BaseContainerBlockEntity lockableContainer
+                                ? lockableContainer.getName()
+                                : this.world.getBlockState(blockPos).getBlock().getName();
+                        this.count(inventory, blockPos, containerName);
+                    }
+                }
+                case PAUSED -> {
+                    return;
+                }
+                case DONE -> {
+                    this.findState = FindState.ENTITY;
+                    return;
+                }
             }
         }
-        this.findState = FindState.ENTITY;
     }
 
     // 从实体查找
