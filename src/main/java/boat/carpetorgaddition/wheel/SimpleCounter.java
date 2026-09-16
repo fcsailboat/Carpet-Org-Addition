@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel;
 
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import org.jspecify.annotations.NonNull;
@@ -15,9 +15,14 @@ import java.util.stream.Stream;
  * @param <E> 计数器要统计数量的类
  */
 public class SimpleCounter<E> implements Counter<E> {
-    private final Object2IntMap<E> counter = new Object2IntArrayMap<>();
+    private final Object2IntMap<E> counter;
 
     public SimpleCounter() {
+        this(new Object2IntLinkedOpenHashMap<>());
+    }
+
+    public SimpleCounter(Object2IntMap<E> counter) {
+        this.counter = counter;
     }
 
     /**
@@ -100,6 +105,6 @@ public class SimpleCounter<E> implements Counter<E> {
 
     @Override
     public String toString() {
-        return counter.toString();
+        return this.counter.toString();
     }
 }
