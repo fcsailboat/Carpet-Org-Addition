@@ -24,6 +24,8 @@ public class BlockEntityTraverser extends WorldTraverser<BlockEntity> {
         this.world = world;
     }
 
+    // TODO 类需要重新设计
+    @Deprecated
     @Override
     public @NonNull Iterator<BlockEntity> iterator() {
         return new Itr();
@@ -80,5 +82,72 @@ public class BlockEntityTraverser extends WorldTraverser<BlockEntity> {
             this.next = null;
             return blockEntity;
         }
+    }
+
+    public Cursor cursor() {
+        return new CursorImpl(this.world, this.from, this.to);
+    }
+
+    private class CursorImpl implements Cursor {
+        private BlockEntity next;
+        private Iterator<BlockEntity> current;
+        private final Iterator<Optional<ChunkAccess>> chunkIterator;
+
+        private CursorImpl(Level world, BlockPos from, BlockPos to) {
+            ChunkTraverser traverser = new ChunkTraverser(world, from, to);
+            this.chunkIterator = traverser.iterator();
+        }
+
+        @Override
+        public Step advance(long timeSliceMillis) {
+            if (this.next != null) {
+                return Step.ELEMENT;
+            }
+            // this.current != null用来在this.chunkIterator.hasNext()耗尽时处理未完成的迭代器
+            long start = System.currentTimeMillis();
+            while (this.current != null || this.chunkIterator.hasNext()) {
+                if (System.currentTimeMillis() - start > timeSliceMillis) {
+                    return Step.PAUSED;
+                }
+                if (this.current == null) {
+                    Optional<LevelChunk> optional = this.chunkIterator.next()
+                            .filter(chunk -> chunk instanceof LevelChunk)
+                            .map(chunk -> (LevelChunk) chunk);
+                    // 区块可能未加载
+                    if (optional.isEmpty()) {
+                        continue;
+                    }
+                    this.current = optional.get().getBlockEntities().values().iterator();
+                }
+                while (this.current.hasNext()) {
+                    BlockEntity blockEntity = this.current.next();
+                    if (contains(blockEntity.getBlockPos())) {
+                        this.next = blockEntity;
+                        return Step.ELEMENT;
+                    }
+                }
+                this.current = null;
+            }
+            return Step.DONE;
+        }
+
+        @Override
+        public BlockEntity take() {
+            BlockEntity blockEntity = this.next;
+            this.next = null;
+            return blockEntity;
+        }
+    }
+
+    public interface Cursor {
+        Step advance(long timeSlice);
+
+        BlockEntity take();
+    }
+
+    public enum Step {
+        ELEMENT,
+        PAUSED,
+        DONE
     }
 }

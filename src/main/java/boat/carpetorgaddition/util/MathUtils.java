@@ -494,8 +494,8 @@ public class MathUtils {
     }
 
     private static boolean hasChinese(String text) {
-        for (int i = 0; i < text.length(); i++) {
-            if (Pinyin.isChinese(text.charAt(i))) {
+        for (char c : text.toCharArray()) {
+            if (Pinyin.isChinese(c)) {
                 return true;
             }
         }

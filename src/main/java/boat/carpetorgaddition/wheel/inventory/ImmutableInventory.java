@@ -95,8 +95,9 @@ public final class ImmutableInventory implements Container, Iterable<ItemStack> 
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("unused")
     public Counter<ItemStack> statistics() {
-        ItemStackCounter counter = new ItemStackCounter();
+        ItemStackCounter counter = new ItemStackCounter(true);
         this.inventory.forEach(counter::add);
         return counter;
     }
@@ -116,23 +117,20 @@ public final class ImmutableInventory implements Container, Iterable<ItemStack> 
 
     @Override
     public Iterator<ItemStack> iterator() {
-        return new java.util.Iterator<>() {
-            // 要返回的下一个元素的索引
-            private int cursor = 0;
+        return new Iterator<>() {
+            private int index = 0;
 
-            // 迭代器的大小
             private final int size = ImmutableInventory.this.getContainerSize();
 
             @Override
             public boolean hasNext() {
-                return this.cursor < this.size;
+                return this.index < this.size;
             }
 
             @Override
             public ItemStack next() {
-                // 由于对象不可变，所以是线程安全的，不需要考虑并发修改的问题
-                ItemStack itemStack = ImmutableInventory.this.getItem(cursor);
-                this.cursor++;
+                ItemStack itemStack = ImmutableInventory.this.getItem(index);
+                this.index++;
                 return itemStack;
             }
         };
