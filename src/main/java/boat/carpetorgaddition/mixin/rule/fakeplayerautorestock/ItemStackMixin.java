@@ -32,8 +32,8 @@ public class ItemStackMixin {
         ScopedValue.where(SELF_COPY, ((ItemStack) (Object) this).copy()).run(() -> original.call(instance, amount, level, player, onBreak));
     }
 
-    @WrapOperation(method = "lambda$hurtAndBreak$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;onEquippedItemBroken(Lnet/minecraft/world/item/Item;Lnet/minecraft/world/entity/EquipmentSlot;)V"))
-    private static void restock(LivingEntity instance, Item brokenItem, EquipmentSlot inSlot, Operation<Void> original, @Local(argsOnly = true, name = "owner") LivingEntity owner) {
+    @WrapOperation(method = "lambda$hurtAndBreak$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;onEquippedItemBroken(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;)V"))
+    private static void restock(LivingEntity instance, ItemStack brokenItem, EquipmentSlot inSlot, Operation<Void> original, @Local(argsOnly = true, name = "owner") LivingEntity owner) {
         original.call(instance, brokenItem, inSlot);
         if (FakePlayerActionManager.IN_ACTION.orElse(false)) {
             return;

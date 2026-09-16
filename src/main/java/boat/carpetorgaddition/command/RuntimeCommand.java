@@ -8,6 +8,7 @@ import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -18,7 +19,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Util;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
@@ -121,7 +121,7 @@ public class RuntimeCommand extends AbstractServerCommand {
      * 打开世界文件夹
      */
     private int openFolder(CommandContext<CommandSourceStack> context) {
-        Util.getPlatform().openPath(context.getSource().getServer().getWorldPath(LevelResource.ROOT));
+        Blaze3D.openPath(context.getSource().getServer().getWorldPath(LevelResource.ROOT));
         return 1;
     }
 
