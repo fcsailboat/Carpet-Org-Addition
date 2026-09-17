@@ -776,7 +776,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         PlayerSerializationManager manager = getSerializationManager(server);
         // 玩家数据是否已存在
         String name = PlayerUtils.getName(fakePlayer);
-        if (IOUtils.isValidFileName(name)) {
+        if (IOUtils.isInvalidFileName(name)) {
             throw CommandUtils.createException(LocalizationKeys.File.INVALID_NAME.translate());
         }
         Optional<FakePlayerSerializer> optional = manager.get(name);

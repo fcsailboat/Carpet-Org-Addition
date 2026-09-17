@@ -329,7 +329,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
         if (pickItemFromShulker) {
             for (Integer index : shulkers) {
                 ItemStack shulker = this.getItem(index);
-                ItemStack picked = InventoryUtils.pickItemFromShulkerBox(shulker, predicate);
+                ItemStack picked = InventoryUtils.takeItemFromShulkerBox(shulker, predicate);
                 if (picked.isEmpty()) {
                     continue;
                 }
@@ -376,7 +376,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
                 int index = shulkers.getInt(i);
                 int deficit = stackInHand.getMaxStackSize() - stackInHand.getCount();
                 Predicate<ItemStack> predicate = itemStack -> InventoryUtils.canMerge(itemStack, stackInHand);
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.player, this.getItem(index), predicate, deficit);
+                ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(this.player, this.getItem(index), predicate, deficit);
                 if (content.isEmpty()) {
                     continue;
                 }

@@ -194,7 +194,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         for (int i = 0; i < stackedNonEmptyShulkerIndex.size(); i++) {
             int index = stackedNonEmptyShulkerIndex.getInt(i);
             ItemStack itemStack = controller.getSlotStack(index);
-            ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(controller.getFakePlayer(), itemStack, matcher);
+            ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(controller.getFakePlayer(), itemStack, matcher);
             if (this.moveItemToInputSlot(controller, craftIndex, content)) {
                 return true;
             }
@@ -203,8 +203,8 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
     }
 
     private boolean takeItemFromShulkerBox(MenuController<AbstractContainerMenu> controller, ItemStackPredicate matcher, int index, ItemStack shulker) {
-        if (InventoryUtils.isOperableSulkerBox(shulker)) {
-            ItemStack content = InventoryUtils.pickItemFromShulkerBox(shulker, matcher);
+        if (InventoryUtils.isOperableShulkerBox(shulker)) {
+            ItemStack content = InventoryUtils.takeItemFromShulkerBox(shulker, matcher);
             return this.moveItemToInputSlot(controller, index, content);
         }
         return false;

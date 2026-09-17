@@ -9,7 +9,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -44,8 +47,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
@@ -345,10 +346,6 @@ public class ServerUtils {
         return Objects.requireNonNull(server.getLevel(key));
     }
 
-    public static BlockState getBlockState(MinecraftServer server, GlobalPos globalPos) {
-        return Objects.requireNonNull(server.getLevel(globalPos.dimension())).getBlockState(globalPos.pos());
-    }
-
     public static MinecraftServer getServer(ServerPlayer player) {
         return getWorld(player).getServer();
     }
@@ -641,7 +638,7 @@ public class ServerUtils {
     /**
      * @return 服务器是否停止运行
      */
-    public static boolean isStoping(MinecraftServer server) {
+    public static boolean isStopping(MinecraftServer server) {
         // server.stopped没有被volatile修饰，它可能不是线程安全的
         return !server.isRunning();
     }
@@ -657,21 +654,5 @@ public class ServerUtils {
 
     public static void schedule(MinecraftServer server, Runnable runnable) {
         server.schedule(new TickTask(server.getTickCount(), runnable));
-    }
-
-    public static boolean areEqual(BlockState first, BlockState second) {
-        if (first.equals(second)) {
-            return true;
-        }
-        if (first.is(second.getBlock()) && first.getProperties().size() == second.getProperties().size()) {
-            for (Property<?> property : first.getProperties()) {
-                if (first.getOptionalValue(property).equals(second.getOptionalValue(property))) {
-                    continue;
-                }
-                return false;
-            }
-            return true;
-        }
-        return false;
     }
 }

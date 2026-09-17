@@ -1,6 +1,5 @@
 package boat.carpetorgaddition.wheel;
 
-import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import net.minecraft.network.chat.Component;
 
@@ -17,7 +16,7 @@ public class ProgressBar {
     }
 
     public void setProgress(long current) {
-        this.progress = Math.min(MathUtils.normalize(current, 0.0, this.end), 1);
+        this.progress = Math.min((double) current / (this.end - 0.0), 1);
     }
 
     public void setCompleted() {

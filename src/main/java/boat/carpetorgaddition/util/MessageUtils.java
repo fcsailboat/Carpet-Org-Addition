@@ -12,11 +12,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@NullMarked
 public class MessageUtils {
     private MessageUtils() {
     }

@@ -489,7 +489,7 @@ public abstract class AbstractOfflinePlayerSearchTask extends ServerSearchTask {
 
     @Override
     public boolean isCancelled() {
-        return ServerUtils.isStoping(this.server) || this.cancelled;
+        return ServerUtils.isStopping(this.server) || this.cancelled;
     }
 
     public enum State {

@@ -122,9 +122,9 @@ public abstract class LivingEntityMixin {
             if (shulker.isEmpty()) {
                 continue;
             }
-            if (InventoryUtils.isOperableSulkerBox(shulker)) {
+            if (InventoryUtils.isOperableShulkerBox(shulker)) {
                 // 从潜影盒中拿取不死图腾
-                ItemStack itemStack = InventoryUtils.pickItemFromShulkerBox(shulker, InventoryUtils::isTotemItem, 1);
+                ItemStack itemStack = InventoryUtils.takeItemFromShulkerBox(shulker, InventoryUtils::isTotemItem, 1);
                 // 潜影盒中可能没有不死图腾
                 if (itemStack.isEmpty()) {
                     continue;
@@ -136,7 +136,7 @@ public abstract class LivingEntityMixin {
         }
         // 从堆叠的非空潜影盒中获取不死图腾
         for (ItemStack shulker : list) {
-            ItemStack itemStack = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(player, shulker, InventoryUtils::isTotemItem);
+            ItemStack itemStack = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(player, shulker, InventoryUtils::isTotemItem);
             if (itemStack.isEmpty()) {
                 continue;
             }

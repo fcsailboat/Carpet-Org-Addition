@@ -25,6 +25,7 @@ public class MathUtils {
      * 所有水平的基本方向
      */
     public static final Direction[] HORIZONTAL = Arrays.stream(Direction.values()).filter(direction -> direction.getAxis().isHorizontal()).toArray(Direction[]::new);
+    private static final ThreadLocal<DecimalFormat> TWO_DECIMALS_FORMAT = ThreadLocal.withInitial(() -> new DecimalFormat("#.##"));
 
     /**
      * 获取两个方块坐标的距离的平方
@@ -183,24 +184,17 @@ public class MathUtils {
 
     /**
      * 判断一个整数是否介于两个整数之间
-     *
-     * @param min    范围的最小值
-     * @param max    范围的最大值
-     * @param number 要检查是否介于这两个数之间的数
      */
-    public static boolean isInRange(int min, int max, int number) {
-        if (min > max) {
-            return false;
-        }
-        return max >= number && number >= min;
+    public static boolean isInRange(int first, int second, int value) {
+        return (first >= value && value >= second) || (first <= value && value <= second);
     }
 
-    public static boolean isInRange(double first, double second, double mid) {
-        return (first >= mid && mid >= second) || (first <= mid && mid <= second);
+    public static boolean isInRange(double first, double second, double value) {
+        return (first >= value && value >= second) || (first <= value && value <= second);
     }
 
-    public static boolean isInRange(Vec3 first, Vec3 second, Vec3 mid) {
-        return isInRange(first.x(), second.x(), mid.x()) && isInRange(first.y(), second.y(), mid.y()) && isInRange(first.z(), second.z(), mid.z());
+    public static boolean isInRange(Vec3 first, Vec3 second, Vec3 middle) {
+        return isInRange(first.x(), second.x(), middle.x()) && isInRange(first.y(), second.y(), middle.y()) && isInRange(first.z(), second.z(), middle.z());
     }
 
     /**
@@ -236,8 +230,7 @@ public class MathUtils {
      * @param value 将一个浮点数格式化为保留最多两位小数的字符串
      */
     public static String formatToMaxTwoDecimals(double value) {
-        DecimalFormat format = new DecimalFormat("#.##");
-        return format.format(value);
+        return TWO_DECIMALS_FORMAT.get().format(value);
     }
 
     /**
@@ -314,13 +307,6 @@ public class MathUtils {
     }
 
     /**
-     * 计算{@code current}相对于({@code end}-{@code start})区间长度的比例
-     */
-    public static double normalize(double current, double start, double end) {
-        return current / (end - start);
-    }
-
-    /**
      * @return 返回两个坐标水平方向的距离
      */
     public static double horizontalDistance(Vec3 a, Vec3 b) {
@@ -339,14 +325,6 @@ public class MathUtils {
     @SuppressWarnings("unused")
     public static Vector3f signum(Vector3f vector3f) {
         return new Vector3f(Math.signum(vector3f.x), Math.signum(vector3f.y), Math.signum(vector3f.z));
-    }
-
-    /**
-     * @return 获取数组中的随机元素
-     */
-    public static <T> T getRandomElement(T[] array) {
-        int len = array.length;
-        return array[RANDOM.nextInt(len)];
     }
 
     /**

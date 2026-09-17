@@ -272,9 +272,9 @@ public class PlayerUtils {
         return world.getEntities(player, aabb);
     }
 
-    public static Optional<HitResult> getHitResult(ServerPlayer player) {
+    public static HitResult getHitResult(ServerPlayer player) {
         // 使用硬编码的距离并不准确，这里是为了与Carpet的假玩家交互相兼容
         double reach = player.gameMode.isCreative() ? 5.0 : 4.5;
-        return Optional.of(Tracer.rayTrace(player, 1F, reach, false));
+        return Tracer.rayTrace(player, 1F, reach, false);
     }
 }

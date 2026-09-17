@@ -249,7 +249,7 @@ public class BedrockAction extends AbstractPlayerAction {
                         .setGrayItalic()
                         .build();
                 MessageUtils.sendMessage(server, second);
-                ServerUtils.forEachPlayer(server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
+                ServerUtils.forEachRealPlayer(server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
             }
         }
         this.executeWorkTick();
@@ -600,7 +600,7 @@ public class BedrockAction extends AbstractPlayerAction {
         }
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
             return list.stream()
-                    .filter(InventoryUtils::isOperableSulkerBox)
+                    .filter(InventoryUtils::isOperableShulkerBox)
                     .map(ContainerComponentInventory::new)
                     .anyMatch(inventory -> hasMaterial(inventory, pistonCount, levelCount));
         }

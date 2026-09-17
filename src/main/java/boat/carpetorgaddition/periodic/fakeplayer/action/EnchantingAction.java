@@ -11,6 +11,7 @@ import boat.carpetorgaddition.wheel.traverser.EntityTraverser;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -24,7 +25,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -69,14 +72,17 @@ public class EnchantingAction extends AbstractPlayerAction {
 
     public static void openAnvilMenu(EntityPlayerMPFake fakePlayer) {
         ServerLevel world = ServerUtils.getWorld(fakePlayer);
-        PlayerUtils.getHitResult(fakePlayer)
-                .filter(hitResult -> hitResult instanceof BlockHitResult)
-                .map(hitResult -> (BlockHitResult) hitResult)
-                .map(BlockHitResult::getBlockPos)
-                .filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof AnvilBlock)
-                .filter(blockPos -> world.getBlockState(blockPos).is(BlockTags.ANVIL))
-                .filter(blockPos -> new EntityTraverser<>(world, blockPos, blockPos.above(3), FallingBlockEntity.class).isEmpty())
-                .ifPresent(_ -> PlayerUtils.use(fakePlayer));
+        HitResult hitResult = PlayerUtils.getHitResult(fakePlayer);
+        if (hitResult instanceof BlockHitResult blockHitResult) {
+            BlockPos blockPos = blockHitResult.getBlockPos();
+            BlockState blockState = world.getBlockState(blockPos);
+            if (blockState.getBlock() instanceof AnvilBlock && blockState.is(BlockTags.ANVIL)) {
+                EntityTraverser<FallingBlockEntity> traverser = new EntityTraverser<>(world, blockPos, blockPos.above(3), FallingBlockEntity.class);
+                if (traverser.isEmpty()) {
+                    PlayerUtils.use(fakePlayer);
+                }
+            }
+        }
     }
 
     private void enchanting(MenuController<AnvilMenu> controller, MinecraftServer server) {
@@ -190,7 +196,7 @@ public class EnchantingAction extends AbstractPlayerAction {
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
             for (ItemStack itemStack : inventory) {
                 if (InventoryUtils.isShulkerBoxItem(itemStack)) {
-                    ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, predicate, 1);
+                    ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, predicate, 1);
                     if (content.isEmpty()) {
                         continue;
                     }

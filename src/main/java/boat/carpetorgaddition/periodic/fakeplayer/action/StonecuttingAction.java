@@ -181,7 +181,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 int index = stackedNonEmptyShulkerIndex.getInt(i);
                 ItemStack itemStack = controller.getSlot(index).getItem();
                 // 仅在合成结束时合并一次空潜影盒，可能导致在合并潜影盒之前，空潜影盒把空槽位占满，进而导致无法从堆叠的非空潜影盒中取物，但不考虑这种情况
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, this.predicate);
+                ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, this.predicate);
                 if (content.isEmpty()) {
                     continue;
                 }
@@ -194,9 +194,9 @@ public class StonecuttingAction extends AbstractPlayerAction {
     }
 
     private boolean takeItemFromShulkerBox(MenuController<StonecutterMenu> controller, ItemStack shulker) {
-        if (InventoryUtils.isOperableSulkerBox(shulker)) {
+        if (InventoryUtils.isOperableShulkerBox(shulker)) {
             // 从潜影盒中查找指定物品
-            ItemStack content = InventoryUtils.pickItemFromShulkerBox(shulker, this.predicate);
+            ItemStack content = InventoryUtils.takeItemFromShulkerBox(shulker, this.predicate);
             if (content.isEmpty()) {
                 return false;
             }

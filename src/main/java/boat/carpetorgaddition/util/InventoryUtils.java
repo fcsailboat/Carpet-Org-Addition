@@ -20,6 +20,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -30,6 +31,7 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+@NullUnmarked
 public class InventoryUtils {
     /**
      * 物品栏工具类，私有化构造方法
@@ -45,10 +47,10 @@ public class InventoryUtils {
      * @return 潜影盒中获取的指定物品
      */
     @CheckReturnValue
-    public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate) {
-        if (isOperableSulkerBox(shulkerBox)) {
+    public static ItemStack takeItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate) {
+        if (isOperableShulkerBox(shulkerBox)) {
             ContainerComponentInventory inventory = new ContainerComponentInventory(shulkerBox);
-            return inventory.pinkStack(predicate);
+            return inventory.takeStack(predicate);
         }
         return ItemStack.EMPTY;
     }
@@ -59,16 +61,16 @@ public class InventoryUtils {
      * @return 从潜影盒中取出的物品
      */
     @CheckReturnValue
-    public static ItemStack pickItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
+    public static ItemStack takeItemFromShulkerBox(ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
         if (count == -1) {
-            return pickItemFromShulkerBox(shulkerBox, predicate);
+            return takeItemFromShulkerBox(shulkerBox, predicate);
         }
         if (count == 0) {
             return ItemStack.EMPTY;
         }
-        if (isOperableSulkerBox(shulkerBox)) {
+        if (isOperableShulkerBox(shulkerBox)) {
             ContainerComponentInventory inventory = new ContainerComponentInventory(shulkerBox);
-            return inventory.pinkStack(predicate, count);
+            return inventory.takeStack(predicate, count);
         }
         return ItemStack.EMPTY;
     }
@@ -77,14 +79,14 @@ public class InventoryUtils {
      * 尝试从非空的堆叠潜影盒中拿取物品
      */
     @CheckReturnValue
-    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(Player player, ItemStack shulkerBox, Predicate<ItemStack> predicate) {
-        return tryPickItemFromStackedNonEmptyShulkerBox(player, shulkerBox, predicate, -1);
+    public static ItemStack tryTakeItemFromStackedNonEmptyShulkerBox(Player player, ItemStack shulkerBox, Predicate<ItemStack> predicate) {
+        return tryTakeItemFromStackedNonEmptyShulkerBox(player, shulkerBox, predicate, -1);
     }
 
     @CheckReturnValue
-    public static ItemStack tryPickItemFromStackedNonEmptyShulkerBox(Player player, ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
+    public static ItemStack tryTakeItemFromStackedNonEmptyShulkerBox(Player player, ItemStack shulkerBox, Predicate<ItemStack> predicate, int count) {
         if (shulkerBox.getCount() == 1) {
-            return pickItemFromShulkerBox(shulkerBox, predicate, count);
+            return takeItemFromShulkerBox(shulkerBox, predicate, count);
         }
         if (containsShulkerStackable(shulkerBox, predicate)) {
             Inventory inventory = player.getInventory();
@@ -93,7 +95,7 @@ public class InventoryUtils {
                 return ItemStack.EMPTY;
             }
             ItemStack splitStack = shulkerBox.split(1);
-            ItemStack result = pickItemFromShulkerBox(splitStack, predicate, count);
+            ItemStack result = takeItemFromShulkerBox(splitStack, predicate, count);
             inventory.add(splitStack);
             if (!splitStack.isEmpty()) {
                 // 丢弃未插入物品栏的潜影盒，但不应该会插入失败
@@ -116,7 +118,7 @@ public class InventoryUtils {
         if (container.isEmpty() || itemStack.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        if (isOperableSulkerBox(container) && itemStack.getItem().canFitInsideContainerItems()) {
+        if (isOperableShulkerBox(container) && itemStack.getItem().canFitInsideContainerItems()) {
             ContainerComponentInventory inventory = new ContainerComponentInventory(container);
             return inventory.addItem(itemStack);
         }
@@ -151,7 +153,7 @@ public class InventoryUtils {
      */
     @Contract(pure = true)
     public static ItemStack getFirstItemStack(ItemStack container) {
-        if (isOperableSulkerBox(container)) {
+        if (isOperableShulkerBox(container)) {
             ItemContainerContents component = container.get(DataComponents.CONTAINER);
             if (component == null || component == ItemContainerContents.EMPTY) {
                 return ItemStack.EMPTY;
@@ -204,7 +206,7 @@ public class InventoryUtils {
      * @return 潜影盒中是否有指定物品
      */
     public static boolean contains(ItemStack shulker, Predicate<ItemStack> predicate) {
-        return isOperableSulkerBox(shulker) && containsShulkerStackable(shulker, predicate);
+        return isOperableShulkerBox(shulker) && containsShulkerStackable(shulker, predicate);
     }
 
     /**
@@ -335,7 +337,7 @@ public class InventoryUtils {
             }
             int compareCount = -Integer.compare(left.getCount(), right.getCount());
             if (compareCount != 0) {
-                return compareComponent;
+                return compareCount;
             }
             return Integer.compare(ItemStack.hashItemAndComponents(left), ItemStack.hashItemAndComponents(right));
         } else {
@@ -352,7 +354,7 @@ public class InventoryUtils {
     }
 
     public static int compare(Item left, Item right) {
-        return getRegistryId(left).compareTo(getRegistryId(right));
+        return ServerUtils.getIdAsString(left).compareTo(ServerUtils.getIdAsString(right));
     }
 
     /**
@@ -402,7 +404,7 @@ public class InventoryUtils {
     /**
      * @return 指定潜影盒是否可以存取物品
      */
-    public static boolean isOperableSulkerBox(ItemStack shulker) {
+    public static boolean isOperableShulkerBox(ItemStack shulker) {
         return isShulkerBoxItem(shulker) && shulker.getCount() == 1;
     }
 
@@ -418,10 +420,6 @@ public class InventoryUtils {
             }
         }
         return count;
-    }
-
-    public static String getRegistryId(Item item) {
-        return item.toString();
     }
 
     /**

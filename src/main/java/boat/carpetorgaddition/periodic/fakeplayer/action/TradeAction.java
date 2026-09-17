@@ -246,7 +246,7 @@ public class TradeAction extends AbstractPlayerAction {
                     }
                 }
                 // 从潜影盒提取物品
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(this.getFakePlayer(), shulker, predicate, difference);
+                ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(this.getFakePlayer(), shulker, predicate, difference);
                 if (content.isEmpty()) {
                     continue;
                 }

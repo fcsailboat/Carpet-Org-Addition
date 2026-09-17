@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.wheel.misc;
 
 import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.common.CommonCommands;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,12 +26,12 @@ public class BeaconRangeBox extends AABB {
         double maxZ = this.maxZ + range;
         // 限制信标的最小范围为1x1格
         if (minX > maxX) {
-            double average = MathUtils.average(maxX, minX);
+            double average = (maxX + minX) / 2;
             minX = Math.floor(average);
             maxX = Math.ceil(average);
         }
         if (minZ > maxZ) {
-            double average = MathUtils.average(maxZ, minZ);
+            double average = (maxZ + minZ) / 2;
             minZ = Math.floor(average);
             maxZ = Math.ceil(average);
         }

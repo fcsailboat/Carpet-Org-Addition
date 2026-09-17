@@ -103,7 +103,7 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
             } else {
                 // 获取潜影盒内第一个非空气物品，获取后，该物品会在潜影盒内删除
                 // 设置当前物品为潜影盒内容物的第一个非空物品
-                itemStack = InventoryUtils.pickItemFromShulkerBox(itemStack, stack -> !stack.isEmpty());
+                itemStack = InventoryUtils.takeItemFromShulkerBox(itemStack, stack -> !stack.isEmpty());
                 if (itemStack.isEmpty()) {
                     itemStack = inventory.getItem(index);
                     // 设置当前朝向为丢出非指定物品朝向，然后丢弃这个潜影盒

@@ -147,8 +147,8 @@ public class RenameAction extends AbstractPlayerAction {
                 ItemStack itemStack = controller.getSlotStack(index);
                 if (InventoryUtils.containsShulkerStackable(itemStack, predicate) && itemStack.getCount() > 1) {
                     stackedNonEmptyShulkerIndex.add(index);
-                } else if (InventoryUtils.isOperableSulkerBox(itemStack)) {
-                    ItemStack content = InventoryUtils.pickItemFromShulkerBox(itemStack, predicate, count);
+                } else if (InventoryUtils.isOperableShulkerBox(itemStack)) {
+                    ItemStack content = InventoryUtils.takeItemFromShulkerBox(itemStack, predicate, count);
                     if (content.isEmpty()) {
                         continue;
                     }
@@ -160,7 +160,7 @@ public class RenameAction extends AbstractPlayerAction {
             for (int i = 0; i < stackedNonEmptyShulkerIndex.size(); i++) {
                 int index = stackedNonEmptyShulkerIndex.getInt(i);
                 ItemStack itemStack = controller.getSlotStack(index);
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(controller.getFakePlayer(), itemStack, predicate, count);
+                ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(controller.getFakePlayer(), itemStack, predicate, count);
                 if (content.isEmpty()) {
                     continue;
                 }
