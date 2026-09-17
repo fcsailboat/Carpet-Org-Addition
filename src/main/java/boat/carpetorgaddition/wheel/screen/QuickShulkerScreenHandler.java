@@ -17,7 +17,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.function.Predicate;
 
-public class QuickShulkerScreenHandler extends ShulkerBoxMenu implements UnavailableSlotSyncInterface {
+public class QuickShulkerScreenHandler extends ShulkerBoxMenu implements UnavailableSlotRange {
     private final int shulkerSlotIndex;
     private final ContainerComponentInventory inventory;
     private final ServerPlayer player;

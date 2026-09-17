@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.mixin.util;
 
-import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
+import boat.carpetorgaddition.wheel.mixin.CommandRegistryAccessor;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
 import org.spongepowered.asm.mixin.Mixin;

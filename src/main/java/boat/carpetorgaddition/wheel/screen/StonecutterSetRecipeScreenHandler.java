@@ -14,7 +14,7 @@ import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
 
-public class StonecutterSetRecipeScreenHandler extends StonecutterMenu implements UnavailableSlotSyncInterface {
+public class StonecutterSetRecipeScreenHandler extends StonecutterMenu implements UnavailableSlotRange {
     private final EntityPlayerMPFake fakePlayer;
 
     public StonecutterSetRecipeScreenHandler(

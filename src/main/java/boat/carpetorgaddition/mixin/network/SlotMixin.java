@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.mixin.network;
 
-import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncSlot;
+import boat.carpetorgaddition.wheel.mixin.BackgroundSpriteSyncSlot;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;

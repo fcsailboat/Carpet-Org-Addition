@@ -18,7 +18,7 @@ import org.jspecify.annotations.NullMarked;
 import java.util.Map;
 
 @NullMarked
-public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements BackgroundSpriteSyncServer {
+public class WithButtonPlayerInventoryScreenHandler extends ChestMenu implements BackgroundSpriteAccessor {
     private final WithButtonPlayerInventory inventory;
     private long lastClickTime = -1L;
     private boolean clicked = false;

@@ -5,6 +5,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.exception.FileOperationException;
 import boat.carpetorgaddition.util.IOUtils;
+import boat.carpetorgaddition.wheel.mixin.ServerConfigOneShotLatch;
 import com.google.gson.JsonObject;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;

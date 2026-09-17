@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.wheel.predicate;
 
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
+import boat.carpetorgaddition.wheel.mixin.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;

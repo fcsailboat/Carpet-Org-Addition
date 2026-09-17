@@ -1,8 +1,8 @@
 package boat.carpetorgaddition.mixin.util;
 
-import boat.carpetorgaddition.periodic.PeriodicTaskManagerInterface;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.wheel.ServerConfigOneShotLatch;
+import boat.carpetorgaddition.wheel.mixin.PeriodicTaskManagerInterface;
+import boat.carpetorgaddition.wheel.mixin.ServerConfigOneShotLatch;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

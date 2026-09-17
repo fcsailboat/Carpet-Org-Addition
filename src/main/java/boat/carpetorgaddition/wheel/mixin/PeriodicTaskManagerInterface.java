@@ -1,4 +1,7 @@
-package boat.carpetorgaddition.periodic;
+package boat.carpetorgaddition.wheel.mixin;
+
+import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
+import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 
 public interface PeriodicTaskManagerInterface {
     default ServerComponentCoordinator carpet_Org_Addition$getServerComponentCoordinator() {

@@ -16,7 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import org.jspecify.annotations.NonNull;
 
-public class CraftingSetRecipeScreenHandler extends CraftingMenu implements UnavailableSlotSyncInterface {
+public class CraftingSetRecipeScreenHandler extends CraftingMenu implements UnavailableSlotRange {
     /**
      * 一个假玩家对象，类中所有操作都是围绕这个假玩家进行的
      */

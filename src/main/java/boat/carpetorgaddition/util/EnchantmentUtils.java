@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.util;
 
-import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
+import boat.carpetorgaddition.wheel.mixin.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;

@@ -4,6 +4,6 @@ import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 
-public interface BackgroundSpriteSyncServer {
+public interface BackgroundSpriteAccessor {
     Map<Integer, Identifier> getBackgroundSprite();
 }

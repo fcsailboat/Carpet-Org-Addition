@@ -14,7 +14,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 
-public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> extends AbstractContainerMenu implements UnavailableSlotSyncInterface, BackgroundSpriteSyncServer {
+public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> extends AbstractContainerMenu implements UnavailableSlotRange, BackgroundSpriteAccessor {
     /**
      * 正在使用Shift移动物品
      */
