@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
+import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
@@ -176,14 +177,14 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
             int count = itemStack.getCount();
             int level = this.verify(offer.getResult());
             if (count <= this.maxPrice && level != -1) {
-                this.complete(villager, level, itemStack.getCount());
+                this.onComplete(villager, level, itemStack.getCount());
                 return true;
             }
         }
         return false;
     }
 
-    private void complete(Villager villager, int level, int price) {
+    private void onComplete(Villager villager, int level, int price) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 在原版中，拴绳无法拴住村民，将拴绳移出主手是为了与拴绳可拴村民等功能兼容
         this.inventory.replenish(itemStack -> !(itemStack.is(Items.NAME_TAG) || itemStack.is(Items.VILLAGER_SPAWN_EGG) || itemStack.is(Items.LEAD)));
@@ -192,12 +193,14 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         LocalizationKey key = this.getLocalizationKey().then("complete");
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         MessageUtils.sendEmptyMessage(server);
+        Component name = EnchantmentUtils.getName(this.enchantmentHolder, level);
+        long tick = ServerUtils.getCurrentGameTick(server) - this.startTime;
         MessageUtils.sendMessage(server, key
-                .builder(fakePlayer.getDisplayName(), EnchantmentUtils.getName(this.enchantmentHolder, level))
+                .builder(fakePlayer.getDisplayName(), name)
                 .setHover(new TextJoiner()
                         .newline(key
                                 .then("time_taken")
-                                .translate(CommonTexts.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)))
+                                .translate(CommonTexts.tickToTime(tick)))
                         .newline(key
                                 .then("refresh_count")
                                 .translate(this.refreshCount))
@@ -217,6 +220,13 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                 .builder()
                 .setGrayItalic()
                 .build());
+        CarpetOrgAddition.LOGGER.info(
+                "{} has now rolled an enchanted book with {}, refresh count: {}, time taken: {} ticks",
+                fakePlayer.getName().getString(),
+                name.getString(),
+                this.refreshCount,
+                tick
+        );
         PlayerUtils.closeScreen(fakePlayer);
         this.stop();
     }
@@ -259,7 +269,8 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
     public List<Component> info() {
         ArrayList<Component> list = new ArrayList<>();
         LocalizationKey key = this.getInfoLocalizationKey();
-        list.add(key.translate(this.getFakePlayer().getDisplayName()));
+        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+        list.add(key.translate(fakePlayer.getDisplayName()));
         list.add(key.then("enchantment").translate(EnchantmentUtils.getName(this.enchantmentHolder)));
         int maxLevel = EnchantmentUtils.getMaxLevel(this.enchantmentHolder);
         TextBuilder levelText = key.then(this.minLevel == maxLevel ? "max_level" : "level").builder(this.minLevel);
@@ -270,6 +281,9 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         TextBuilder priceText = key.then(minPrice == this.maxPrice ? "min_price" : "price").builder(this.maxPrice);
         priceText.setHover(key.then("price").then("prompt").translate(range.getIntKey(), range.getIntValue(), this.minLevel));
         list.add(priceText.build());
+        list.add(key.then("count").translate(this.refreshCount));
+        MinecraftServer server = ServerUtils.getServer(fakePlayer);
+        list.add(key.then("time").translate(CommonTexts.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)));
         return list;
     }
 

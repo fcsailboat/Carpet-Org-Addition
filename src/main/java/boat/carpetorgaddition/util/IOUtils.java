@@ -3,8 +3,9 @@ package boat.carpetorgaddition.util;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.exception.FileOperationException;
-import com.google.gson.*;
-import org.jetbrains.annotations.Contract;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.jspecify.annotations.NullMarked;
 
 import java.io.*;
@@ -16,7 +17,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 
 public class IOUtils {
     public static final String JSON_EXTENSION = ".json";
@@ -244,63 +244,6 @@ public class IOUtils {
 
     public static File configFile(String fileName) {
         return CONFIGURE_DIRECTORY.resolve(fileName).toFile();
-    }
-
-    /**
-     * 根据键获取json中对应的值，如果不存在，返回默认值
-     *
-     * @param defaultValue 如果为获取到值，返回默认值
-     * @param type         返回值的类型
-     */
-    @Deprecated
-    @Contract(value = "_,_,!null,_ -> !null")
-    public static <T> T getJsonElement(JsonObject json, String key, T defaultValue, Class<T> type) {
-        JsonElement element = json.get(key);
-        if (element == null) {
-            return defaultValue;
-        }
-        // 布尔值
-        if (type == boolean.class || type == Boolean.class) {
-            return type.cast(element.getAsBoolean());
-        }
-        // 整数
-        if (type == byte.class || type == Byte.class) {
-            return type.cast(element.getAsByte());
-        }
-        if (type == short.class || type == Short.class) {
-            return type.cast(element.getAsShort());
-        }
-        if (type == int.class || type == Integer.class) {
-            return type.cast(element.getAsInt());
-        }
-        if (type == long.class || type == Long.class) {
-            return type.cast(element.getAsLong());
-        }
-        // 浮点数
-        if (type == float.class || type == Float.class) {
-            return type.cast(element.getAsFloat());
-        }
-        if (type == double.class || type == Double.class) {
-            return type.cast(element.getAsDouble());
-        }
-        // 字符串
-        if (type == String.class) {
-            return type.cast(element.getAsString());
-        }
-        // jsonObject
-        if (JsonObject.class.isAssignableFrom(type)) {
-            return type.cast(element.getAsJsonObject());
-        }
-        // JsonArray
-        if (JsonArray.class.isAssignableFrom(type)) {
-            return type.cast(element.getAsJsonArray());
-        }
-        throw new IllegalArgumentException();
-    }
-
-    @Deprecated
-    public static <T> Optional<T> getJsonElement(JsonObject json, String key, Class<T> type) {
-        return Optional.ofNullable(getJsonElement(json, key, null, type));
     }
 
     /**

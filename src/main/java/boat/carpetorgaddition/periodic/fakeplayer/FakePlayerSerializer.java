@@ -154,7 +154,8 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         // 是否潜行
         this.sneaking = json.get("sneaking").getAsBoolean();
         // 是否自动登录
-        this.autologin = IOUtils.getJsonElement(json, "autologin", false, Boolean.class);
+//        this.autologin = IOUtils.getJsonElement(json, "autologin", false, Boolean.class);
+        this.autologin = json.has("autologin") && json.get("autologin").getAsBoolean();
         // 注释
         JsonElement element = json.get("annotation");
         this.comment = (element == null ? "" : element.getAsString());

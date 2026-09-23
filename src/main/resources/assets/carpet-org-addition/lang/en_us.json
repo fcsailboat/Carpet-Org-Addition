@@ -387,6 +387,8 @@
   "carpet-org-addition.command.playerAction.librarian.info.price": "Maximum accepted price: %s",
   "carpet-org-addition.command.playerAction.librarian.info.min_price": "Maximum accepted price: %s (min price)",
   "carpet-org-addition.command.playerAction.librarian.info.price.prompt": "Price range of this enchanted book: [%s-%s] (at min accepted level %s)",
+  "carpet-org-addition.command.playerAction.librarian.info.count": "Current refresh count: %s",
+  "carpet-org-addition.command.playerAction.librarian.info.time": "Current time taken: %s",
   "carpet-org-addition.command.playerAction.enchanting": "Enchant",
   "carpet-org-addition.command.playerAction.enchanting.lack_of_experience": "%s's enchanting of %s is paused due to insufficient experience, waiting for experience",
   "carpet-org-addition.command.playerAction.enchanting.expensive": "%s's enchanting of %s has been stopped because it is too expensive",

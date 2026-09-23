@@ -178,7 +178,10 @@ public class MessageUtils {
     }
 
     public static void sendEmptyMessage(CommandSourceStack source) {
-        sendEmptyMessage(source.getPlayer());
+        ServerPlayer player = source.getPlayer();
+        if (player != null) {
+            sendEmptyMessage(player);
+        }
     }
 
     public static void sendEmptyMessage(CommandContext<CommandSourceStack> context) {

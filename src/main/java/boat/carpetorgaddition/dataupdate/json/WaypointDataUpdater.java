@@ -16,12 +16,12 @@ public final class WaypointDataUpdater extends DataUpdater {
     @Override
     protected JsonObject update(JsonObject oldJson, int version) {
         if (version == 0) {
-            int x = IOUtils.getJsonElement(oldJson, "x", Integer.class).orElseThrow();
-            int y = IOUtils.getJsonElement(oldJson, "y", Integer.class).orElseThrow();
-            int z = IOUtils.getJsonElement(oldJson, "z", Integer.class).orElseThrow();
+            int x = oldJson.get("x").getAsInt();
+            int y = oldJson.get("y").getAsInt();
+            int z = oldJson.get("z").getAsInt();
             String dimension = oldJson.get("dimension").getAsString();
             String creator = oldJson.get("creator").getAsString();
-            String illustrate = IOUtils.getJsonElement(oldJson, "illustrate", "", String.class);
+            String illustrate = oldJson.has("illustrate") ? oldJson.get("illustrate").getAsString() : "";
             JsonObject anotherPos = new JsonObject();
             if (IOUtils.jsonHasElement(oldJson, "another_x", "another_y", "another_z")) {
                 int anotherX = oldJson.get("another_x").getAsInt();

@@ -112,18 +112,6 @@ public class EnchantmentUtils {
         return false;
     }
 
-    public static boolean hasBookEnchantment(ItemStack itemStack, ResourceKey<Enchantment> enchantment) {
-        if (itemStack.is(Items.ENCHANTED_BOOK)) {
-            ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
-            for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                if (entry.getKey().is(enchantment)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public static boolean hasEnchantment(ItemStack itemStack, Holder<Enchantment> enchantment) {
         ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {

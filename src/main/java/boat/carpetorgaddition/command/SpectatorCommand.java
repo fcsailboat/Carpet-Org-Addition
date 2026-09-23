@@ -44,6 +44,7 @@ public class SpectatorCommand extends AbstractServerCommand {
 
     @Override
     public void register(String name) {
+        // TODO 调整命令结构，添加观察玩家子命令
         this.dispatcher.register(Commands.literal(name)
                 .requires(source -> CarpetOrgAdditionSettings.COMMAND_SPECTATOR.value().hasPermission(source))
                 .executes(context -> setGameMode(context, false))

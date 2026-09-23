@@ -236,6 +236,7 @@ public abstract class Waypoint {
     private boolean isWatching(int width, int height, Float2FloatMap.Entry entry) {
         double x = width / 2.0 - entry.getFloatKey();
         double y = height / 2.0 - entry.getFloatValue();
+        // TODO 调大判定距离
         return Math.sqrt(x * x + y * y) < 150.0;
     }
 

@@ -134,6 +134,7 @@ public class FinderCommand extends AbstractServerCommand {
                                         .executes(this::mayAffectWorldEater))))
                 .then(Commands.literal("xp")
                         // 需要解决如何从未知名称的玩家中提取经验的问题
+                        // TODO 是否可以使用对话框来制作为玩家命名功能
                         .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
                         .then(Commands.literal("from")
                                 .then(Commands.literal("offline_player")
