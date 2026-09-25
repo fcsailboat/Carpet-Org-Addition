@@ -50,23 +50,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class LibrarianTradeFindAction extends AbstractPlayerAction {
     private final BlockPos lecternPos;
-    private final Holder.Reference<Enchantment> enchantmentHolder;
+    private final Triple triple;
     /**
      * 刷交易的开始时间
      */
     private final long startTime;
     private int refreshCount = 0;
-    /**
-     * 最小接受附魔书等级
-     */
-    private final int minLevel;
-    /**
-     * 最大接受附魔书价格
-     */
-    private final int maxPrice;
     /**
      * 是否正在挖掘方块
      */
@@ -92,10 +85,10 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
     public LibrarianTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, Holder.Reference<Enchantment> enchantmentHolder, int level, int price, long startTime) {
         super(fakePlayer);
         this.lecternPos = lecternPos;
-        this.enchantmentHolder = enchantmentHolder;
         this.startTime = startTime;
-        this.minLevel = level == -1 ? enchantmentHolder.value().getMaxLevel() : level;
-        this.maxPrice = price == -1 ? Integer.MAX_VALUE : price;
+        int minLevel = level == -1 ? enchantmentHolder.value().getMaxLevel() : level;
+        int maxPrice = price == -1 ? Integer.MAX_VALUE : price;
+        this.triple = new Triple(enchantmentHolder, minLevel, maxPrice);
     }
 
     @Override
@@ -174,9 +167,8 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         MerchantOffers offers = villager.getOffers();
         for (MerchantOffer offer : offers) {
             ItemStack itemStack = offer.getBaseCostA();
-            int count = itemStack.getCount();
-            int level = this.verify(offer.getResult());
-            if (count <= this.maxPrice && level != -1) {
+            int level = this.triple.getEnchantmentBookLevel(offer);
+            if (level != -1) {
                 this.onComplete(villager, level, itemStack.getCount());
                 return true;
             }
@@ -193,7 +185,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         LocalizationKey key = this.getLocalizationKey().then("complete");
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         MessageUtils.sendEmptyMessage(server);
-        Component name = EnchantmentUtils.getName(this.enchantmentHolder, level);
+        Component name = EnchantmentUtils.getName(this.triple.enchantment(), level);
         long tick = ServerUtils.getCurrentGameTick(server) - this.startTime;
         MessageUtils.sendMessage(server, key
                 .builder(fakePlayer.getDisplayName(), name)
@@ -206,7 +198,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                                 .translate(this.refreshCount))
                         .join())
                 .build());
-        Int2IntMap.Entry range = getPriceRange(this.enchantmentHolder, level);
+        Int2IntMap.Entry range = getPriceRange(this.triple.enchantment(), level);
         MessageUtils.sendMessage(server, key
                 .then("price")
                 .translate(key
@@ -251,35 +243,21 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         return false;
     }
 
-    private int verify(ItemStack enchantmentBook) {
-        ItemEnchantments enchantments = enchantmentBook.get(DataComponents.STORED_ENCHANTMENTS);
-        if (enchantments == null) {
-            return -1;
-        }
-        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            if (entry.getKey().equals(this.enchantmentHolder)) {
-                int level = entry.getIntValue();
-                return level >= this.minLevel ? level : -1;
-            }
-        }
-        return -1;
-    }
-
     @Override
     public List<Component> info() {
         ArrayList<Component> list = new ArrayList<>();
         LocalizationKey key = this.getInfoLocalizationKey();
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         list.add(key.translate(fakePlayer.getDisplayName()));
-        list.add(key.then("enchantment").translate(EnchantmentUtils.getName(this.enchantmentHolder)));
-        int maxLevel = EnchantmentUtils.getMaxLevel(this.enchantmentHolder);
-        TextBuilder levelText = key.then(this.minLevel == maxLevel ? "max_level" : "level").builder(this.minLevel);
+        list.add(key.then("enchantment").translate(EnchantmentUtils.getName(this.triple.enchantment())));
+        int maxLevel = EnchantmentUtils.getMaxLevel(this.triple.enchantment());
+        TextBuilder levelText = key.then(this.triple.minLevel() == maxLevel ? "max_level" : "level").builder(this.triple.minLevel());
         levelText.setHover(key.then("level").then("prompt").translate(maxLevel));
         list.add(levelText.build());
-        Int2IntMap.Entry range = getPriceRange(this.enchantmentHolder, this.minLevel);
+        Int2IntMap.Entry range = getPriceRange(this.triple.enchantment(), this.triple.minLevel());
         int minPrice = range.getIntKey();
-        TextBuilder priceText = key.then(minPrice == this.maxPrice ? "min_price" : "price").builder(this.maxPrice);
-        priceText.setHover(key.then("price").then("prompt").translate(range.getIntKey(), range.getIntValue(), this.minLevel));
+        TextBuilder priceText = key.then(minPrice == this.triple.maxPrice() ? "min_price" : "price").builder(this.triple.maxPrice());
+        priceText.setHover(key.then("price").then("prompt").translate(range.getIntKey(), range.getIntValue(), this.triple.minLevel()));
         list.add(priceText.build());
         list.add(key.then("count").translate(this.refreshCount));
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
@@ -290,10 +268,10 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("enchantment", this.enchantmentHolder.key().identifier().toString());
+        json.addProperty("enchantment", this.triple.enchantment().key().identifier().toString());
         json.add("block_pos", toJson(this.lecternPos));
-        json.addProperty("min_level", this.minLevel);
-        json.addProperty("max_price", this.maxPrice);
+        json.addProperty("min_level", this.triple.minLevel());
+        json.addProperty("max_price", this.triple.maxPrice());
         json.addProperty("start_time", this.startTime);
         json.addProperty("refresh_count", this.refreshCount);
         return json;
@@ -327,15 +305,12 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
             return false;
         }
         LibrarianTradeFindAction action = (LibrarianTradeFindAction) o;
-        return this.minLevel == action.minLevel
-               && this.maxPrice == action.maxPrice
-               && Objects.equals(this.lecternPos, action.lecternPos)
-               && Objects.equals(this.enchantmentHolder, action.enchantmentHolder);
+        return Objects.equals(this.lecternPos, action.lecternPos) && Objects.equals(this.triple, action.triple);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.lecternPos, this.enchantmentHolder, this.minLevel, this.maxPrice);
+        return Objects.hash(this.lecternPos, this.triple);
     }
 
     /**
@@ -381,6 +356,30 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                 case MEDIUM -> ChatFormatting.YELLOW;
                 case HIGH -> ChatFormatting.DARK_RED;
             };
+        }
+    }
+
+    public record Triple(Holder.Reference<Enchantment> enchantment, int minLevel, int maxPrice) implements Predicate<MerchantOffer> {
+        @Override
+        public boolean test(MerchantOffer offer) {
+            return this.getEnchantmentBookLevel(offer) != -1;
+        }
+
+        private int getEnchantmentBookLevel(MerchantOffer offer) {
+            if (offer.getBaseCostA().getCount() > this.maxPrice) {
+                return -1;
+            }
+            ItemEnchantments enchantments = offer.getResult().get(DataComponents.STORED_ENCHANTMENTS);
+            if (enchantments == null) {
+                return -1;
+            }
+            for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                if (entry.getKey().equals(this.enchantment)) {
+                    int level = entry.getIntValue();
+                    return level >= this.minLevel ? level : -1;
+                }
+            }
+            return -1;
         }
     }
 }

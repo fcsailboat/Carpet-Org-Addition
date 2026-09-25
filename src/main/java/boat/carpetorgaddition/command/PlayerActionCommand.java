@@ -165,7 +165,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                                 .executes(this::setEnchanting))))));
     }
 
-    private static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
+    public static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
         return (context, builder) -> {
             Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
             int level = maxLevel ? holder.value().getMaxLevel() : IntegerArgumentType.getInteger(context, "level");
@@ -178,7 +178,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         };
     }
 
-    private static CompletableFuture<Suggestions> suggestEnchantmentLevel(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+    public static CompletableFuture<Suggestions> suggestEnchantmentLevel(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) throws CommandSyntaxException {
         Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
         int maxLevel = holder.value().getMaxLevel();
         return SharedSuggestionProvider.suggest(IntStream.rangeClosed(1, maxLevel).mapToObj(Integer::toString), builder);

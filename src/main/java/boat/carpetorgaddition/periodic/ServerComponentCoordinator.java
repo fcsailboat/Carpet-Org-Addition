@@ -8,6 +8,7 @@ import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.rule.CustomRuleValueManager;
 import boat.carpetorgaddition.rule.RuleConfig;
 import boat.carpetorgaddition.wheel.inventory.FabricPlayerAccessManager;
+import boat.carpetorgaddition.wheel.misc.LibrarianTradeGroupManager;
 import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
 import boat.carpetorgaddition.wheel.mixin.PeriodicTaskManagerInterface;
 import boat.carpetorgaddition.wheel.page.PageManager;
@@ -43,6 +44,7 @@ public class ServerComponentCoordinator {
     private final DialogProvider dialogProvider;
     private final FakePlayerResidents fakePlayerResidents;
     private final LibrarianVillagerPoiCache librarianVillagerPoiCache;
+    private final LibrarianTradeGroupManager librarianTradeGroupManager;
     public static final ScopedValue<MinecraftServer> SERVER_INSTANCE = ScopedValue.newInstance();
 
     private ServerComponentCoordinator(MinecraftServer server) {
@@ -56,6 +58,7 @@ public class ServerComponentCoordinator {
         this.dialogProvider = new DialogProvider(server);
         this.fakePlayerResidents = new FakePlayerResidents(server);
         this.librarianVillagerPoiCache = new LibrarianVillagerPoiCache();
+        this.librarianTradeGroupManager = new LibrarianTradeGroupManager();
     }
 
     public static ServerComponentCoordinator of(MinecraftServer server) {
@@ -124,6 +127,10 @@ public class ServerComponentCoordinator {
 
     public LibrarianVillagerPoiCache getLibrarianVillagerPoiCache() {
         return this.librarianVillagerPoiCache;
+    }
+
+    public LibrarianTradeGroupManager getLibrarianTradeGroupManager() {
+        return this.librarianTradeGroupManager;
     }
 
     private void onServerSave() {

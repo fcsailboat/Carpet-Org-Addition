@@ -66,6 +66,7 @@ public class MessageUtils {
      * @param message 发送文本消息的内容
      */
     public static void sendMessage(CommandSourceStack source, Component message) {
+        // TODO 是否受到发送命令反馈游戏规则影响
         source.sendSystemMessage(message);
         writeLog(source.getTextName(), message.getString());
     }
@@ -181,6 +182,8 @@ public class MessageUtils {
         ServerPlayer player = source.getPlayer();
         if (player != null) {
             sendEmptyMessage(player);
+        } else {
+            sendMessage(source, TextBuilder.empty());
         }
     }
 

@@ -29,6 +29,7 @@ public class CommandRegister {
         // ParticleLineCommand.register(dispatcher);
         // 假玩家动作命令
         register(new PlayerActionCommand(dispatcher, access));
+        register(new PlayerActionsCommand(dispatcher, access));
         // 规则搜索命令
         register(new RuleSearchCommand(dispatcher, access));
         // 玩家管理器命令
