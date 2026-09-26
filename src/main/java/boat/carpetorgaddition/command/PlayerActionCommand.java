@@ -6,11 +6,14 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
+import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.*;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.wheel.misc.LibrarianTradeGroupManager;
+import boat.carpetorgaddition.wheel.misc.LibrarianTradeTriples;
 import boat.carpetorgaddition.wheel.permission.CommandPermission;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
@@ -147,18 +150,24 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                         .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
                         .then(Commands.literal("librarian")
                                 .then(Commands.argument("jobSite", BlockPosArgument.blockPos())
-                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
-                                                .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
-                                                .then(Commands.argument("level", IntegerArgumentType.integer(1))
-                                                        .suggests(PlayerActionCommand::suggestEnchantmentLevel)
-                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
-                                                                .suggests(suggestMixPrice(false))
-                                                                .executes(context -> this.setLibrarianTradeFind(context, IntegerArgumentType.getInteger(context, "level"), IntegerArgumentType.getInteger(context, "price")))))
-                                                .then(Commands.literal("max")
+                                        .then(Commands.literal("enchantment")
+                                                .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
                                                         .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
-                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
-                                                                .suggests(suggestMixPrice(true))
-                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))
+                                                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                                                .suggests(PlayerActionCommand::suggestEnchantmentLevel)
+                                                                .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                        .suggests(suggestMixPrice(false))
+                                                                        .executes(context -> this.setLibrarianTradeFind(context, IntegerArgumentType.getInteger(context, "level"), IntegerArgumentType.getInteger(context, "price")))))
+                                                        .then(Commands.literal("max")
+                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
+                                                                .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                                        .suggests(suggestMixPrice(true))
+                                                                        .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price")))))))
+                                        .then(Commands.literal("group")
+                                                .then(Commands.argument("group", StringArgumentType.string())
+                                                        .suggests(PlayerActionsCommand::suggestionsGroupName)
+                                                        .executes(this::setLibrarianTradeFindByGroup)))
+                                ))
                         .then(Commands.literal("enchanting")
                                 .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
                                         .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
@@ -607,6 +616,22 @@ public class PlayerActionCommand extends AbstractServerCommand {
                 }
             }
         }
+        return 1;
+    }
+
+    private int setLibrarianTradeFindByGroup(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
+        LibrarianTradeGroupManager groupManager = ServerComponentCoordinator.of(server).getLibrarianTradeGroupManager();
+        BlockPos blockPos = BlockPosArgument.getBlockPos(context, "jobSite");
+        String group = StringArgumentType.getString(context, "group");
+        LibrarianTradeTriples triples = groupManager.getTriples(group);
+        long startTime = ServerUtils.getCurrentGameTick(server);
+        LibrarianTradeFindAction action = new LibrarianTradeFindAction(fakePlayer, blockPos, triples, startTime);
+        FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
+        FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
+        actionManager.setAction(action);
         return 1;
     }
 

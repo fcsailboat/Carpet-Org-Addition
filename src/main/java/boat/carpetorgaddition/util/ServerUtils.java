@@ -50,6 +50,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
@@ -57,10 +58,7 @@ import org.jspecify.annotations.NullMarked;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
@@ -654,5 +652,10 @@ public class ServerUtils {
 
     public static void schedule(MinecraftServer server, Runnable runnable) {
         server.schedule(new TickTask(server.getTickCount(), runnable));
+    }
+
+    public static <T extends Entity> List<T> getEntities(ServerLevel world, BlockPos from, BlockPos to, Class<T> type) {
+        AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
+        return world.getEntitiesOfClass(type, aabb);
     }
 }

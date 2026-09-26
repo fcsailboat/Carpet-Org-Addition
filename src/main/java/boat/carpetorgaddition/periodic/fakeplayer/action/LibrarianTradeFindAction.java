@@ -13,6 +13,7 @@ import boat.carpetorgaddition.wheel.ItemIdentity;
 import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
+import boat.carpetorgaddition.wheel.misc.LibrarianTradeTriples;
 import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -54,7 +55,7 @@ import java.util.function.Predicate;
 
 public class LibrarianTradeFindAction extends AbstractPlayerAction {
     private final BlockPos lecternPos;
-    private final Triple triple;
+    private final LibrarianTradeTriples triples;
     /**
      * 刷交易的开始时间
      */
@@ -83,12 +84,17 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("librarian");
 
     public LibrarianTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, Holder.Reference<Enchantment> enchantmentHolder, int level, int price, long startTime) {
+        int minLevel = level == -1 ? enchantmentHolder.value().getMaxLevel() : level;
+        int maxPrice = price == -1 ? Integer.MAX_VALUE : price;
+        LibrarianTradeTriples triples = LibrarianTradeTriples.of(new Triple(enchantmentHolder, minLevel, maxPrice));
+        this(fakePlayer, lecternPos, triples, startTime);
+    }
+
+    public LibrarianTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, LibrarianTradeTriples triples, long startTime) {
         super(fakePlayer);
         this.lecternPos = lecternPos;
         this.startTime = startTime;
-        int minLevel = level == -1 ? enchantmentHolder.value().getMaxLevel() : level;
-        int maxPrice = price == -1 ? Integer.MAX_VALUE : price;
-        this.triple = new Triple(enchantmentHolder, minLevel, maxPrice);
+        this.triples = triples;
     }
 
     @Override
@@ -102,6 +108,9 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
             if (blockExcavator.mining(this.lecternPos, Direction.DOWN)) {
                 this.diggingBlock = false;
             }
+            return;
+        }
+        if (this.triples.isEmpty()) {
             return;
         }
         BlockState blockState = world.getBlockState(this.lecternPos);
@@ -165,18 +174,22 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
         ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(villager));
         MerchantOffers offers = villager.getOffers();
+        ArrayList<Triple> list = new ArrayList<>();
         for (MerchantOffer offer : offers) {
-            ItemStack itemStack = offer.getBaseCostA();
-            int level = this.triple.getEnchantmentBookLevel(offer);
-            if (level != -1) {
-                this.onComplete(villager, level, itemStack.getCount());
-                return true;
-            }
+            List<Triple> triples = this.triples.testAndRemove(offer);
+            list.addAll(triples);
         }
-        return false;
+        if (list.isEmpty()) {
+            return false;
+        }
+        for (Triple triple : list) {
+            this.onComplete(villager, triple);
+        }
+        this.stop();
+        return true;
     }
 
-    private void onComplete(Villager villager, int level, int price) {
+    private void onComplete(Villager villager, Triple triple) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 在原版中，拴绳无法拴住村民，将拴绳移出主手是为了与拴绳可拴村民等功能兼容
         this.inventory.replenish(itemStack -> !(itemStack.is(Items.NAME_TAG) || itemStack.is(Items.VILLAGER_SPAWN_EGG) || itemStack.is(Items.LEAD)));
@@ -185,7 +198,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         LocalizationKey key = this.getLocalizationKey().then("complete");
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         MessageUtils.sendEmptyMessage(server);
-        Component name = EnchantmentUtils.getName(this.triple.enchantment(), level);
+        Component name = EnchantmentUtils.getName(triple.enchantment(), triple.level());
         long tick = ServerUtils.getCurrentGameTick(server) - this.startTime;
         MessageUtils.sendMessage(server, key
                 .builder(fakePlayer.getDisplayName(), name)
@@ -198,14 +211,14 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                                 .translate(this.refreshCount))
                         .join())
                 .build());
-        Int2IntMap.Entry range = getPriceRange(this.triple.enchantment(), level);
+        Int2IntMap.Entry range = getPriceRange(triple.enchantment(), triple.level());
         MessageUtils.sendMessage(server, key
                 .then("price")
                 .translate(key
                         .then("price")
                         .then("value")
-                        .builder(price, range.getIntKey(), range.getIntValue())
-                        .setColor(PriceLevel.getPriceLevel(price, range.getIntKey(), range.getIntValue()).getColor())
+                        .builder(triple.price(), range.getIntKey(), range.getIntValue())
+                        .setColor(PriceLevel.getPriceLevel(triple.price(), range.getIntKey(), range.getIntValue()).getColor())
                         .build()));
         MessageUtils.sendMessage(server, key
                 .then(trade ? "locked" : "unlocked")
@@ -220,7 +233,6 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
                 tick
         );
         PlayerUtils.closeScreen(fakePlayer);
-        this.stop();
     }
 
     private boolean tryTrade(EntityPlayerMPFake fakePlayer, MerchantOffers offers) {
@@ -249,16 +261,23 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         LocalizationKey key = this.getInfoLocalizationKey();
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         list.add(key.translate(fakePlayer.getDisplayName()));
-        list.add(key.then("enchantment").translate(EnchantmentUtils.getName(this.triple.enchantment())));
-        int maxLevel = EnchantmentUtils.getMaxLevel(this.triple.enchantment());
-        TextBuilder levelText = key.then(this.triple.minLevel() == maxLevel ? "max_level" : "level").builder(this.triple.minLevel());
-        levelText.setHover(key.then("level").then("prompt").translate(maxLevel));
-        list.add(levelText.build());
-        Int2IntMap.Entry range = getPriceRange(this.triple.enchantment(), this.triple.minLevel());
-        int minPrice = range.getIntKey();
-        TextBuilder priceText = key.then(minPrice == this.triple.maxPrice() ? "min_price" : "price").builder(this.triple.maxPrice());
-        priceText.setHover(key.then("price").then("prompt").translate(range.getIntKey(), range.getIntValue(), this.triple.minLevel()));
-        list.add(priceText.build());
+        List<Triple> triples = this.triples.getTriples();
+        for (int i = 0; i < triples.size(); i++) {
+            Triple triple = triples.get(i);
+            list.add(key.then("enchantment").translate(EnchantmentUtils.getName(triple.enchantment())));
+            int maxLevel = EnchantmentUtils.getMaxLevel(triple.enchantment());
+            TextBuilder levelText = key.then(triple.level() == maxLevel ? "max_level" : "level").builder(triple.level());
+            levelText.setHover(key.then("level").then("prompt").translate(maxLevel));
+            list.add(levelText.build());
+            Int2IntMap.Entry range = getPriceRange(triple.enchantment(), triple.level());
+            int minPrice = range.getIntKey();
+            TextBuilder priceText = key.then(minPrice == triple.price() ? "min_price" : "price").builder(triple.price());
+            priceText.setHover(key.then("price").then("prompt").translate(range.getIntKey(), range.getIntValue(), triple.level()));
+            list.add(priceText.build());
+            if (i < triples.size() - 1) {
+                list.add(TextBuilder.create("-".repeat(30)));
+            }
+        }
         list.add(key.then("count").translate(this.refreshCount));
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         list.add(key.then("time").translate(CommonTexts.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)));
@@ -268,10 +287,13 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("enchantment", this.triple.enchantment().key().identifier().toString());
+        List<Triple> triples = this.triples.getTriples();
+        // TODO
+        Triple triple = triples.getFirst();
+        json.addProperty("enchantment", triple.enchantment().key().identifier().toString());
         json.add("block_pos", toJson(this.lecternPos));
-        json.addProperty("min_level", this.triple.minLevel());
-        json.addProperty("max_price", this.triple.maxPrice());
+        json.addProperty("min_level", triple.level());
+        json.addProperty("max_price", triple.price());
         json.addProperty("start_time", this.startTime);
         json.addProperty("refresh_count", this.refreshCount);
         return json;
@@ -305,12 +327,12 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
             return false;
         }
         LibrarianTradeFindAction action = (LibrarianTradeFindAction) o;
-        return Objects.equals(this.lecternPos, action.lecternPos) && Objects.equals(this.triple, action.triple);
+        return Objects.equals(this.lecternPos, action.lecternPos) && Objects.equals(this.triples, action.triples);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.lecternPos, this.triple);
+        return Objects.hash(this.lecternPos, this.triples);
     }
 
     /**
@@ -359,14 +381,14 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
     }
 
-    public record Triple(Holder.Reference<Enchantment> enchantment, int minLevel, int maxPrice) implements Predicate<MerchantOffer> {
+    public record Triple(Holder.Reference<Enchantment> enchantment, int level, int price) implements Predicate<MerchantOffer> {
         @Override
         public boolean test(MerchantOffer offer) {
             return this.getEnchantmentBookLevel(offer) != -1;
         }
 
-        private int getEnchantmentBookLevel(MerchantOffer offer) {
-            if (offer.getBaseCostA().getCount() > this.maxPrice) {
+        public int getEnchantmentBookLevel(MerchantOffer offer) {
+            if (offer.getBaseCostA().getCount() > this.price) {
                 return -1;
             }
             ItemEnchantments enchantments = offer.getResult().get(DataComponents.STORED_ENCHANTMENTS);
@@ -376,7 +398,7 @@ public class LibrarianTradeFindAction extends AbstractPlayerAction {
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 if (entry.getKey().equals(this.enchantment)) {
                     int level = entry.getIntValue();
-                    return level >= this.minLevel ? level : -1;
+                    return level >= this.level ? level : -1;
                 }
             }
             return -1;
