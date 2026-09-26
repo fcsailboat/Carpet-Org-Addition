@@ -63,7 +63,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
     // 快速设置假玩家合成
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
     private void interact(Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if (this.isSpectator()) {
+        if (this.isSpectator() || !(entity instanceof PlayerEntity)) {
             return;
         }
         switch (CarpetOrgAdditionSettings.quickSettingFakePlayerCraft.get()) {
