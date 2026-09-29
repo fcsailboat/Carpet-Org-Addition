@@ -189,7 +189,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             ItemStack result = offer.getResult();
             ItemEnchantments enchantments = result.get(DataComponents.STORED_ENCHANTMENTS);
             if (enchantments == null) {
-                return null;
+                continue;
             }
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 int level = entry.getIntValue();
