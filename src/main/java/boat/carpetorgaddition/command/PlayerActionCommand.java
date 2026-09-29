@@ -181,7 +181,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         return (context, builder) -> {
             Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
             int level = maxLevel ? holder.value().getMaxLevel() : IntegerArgumentType.getInteger(context, "level");
-            Int2IntMap.Entry range = LibrarianTradeFindAction.getPriceRange(holder, level);
+            Int2IntMap.Entry range = LibrarianTradeFindAction.getPriceBounds(holder, level);
             int min = range.getIntKey();
             if (min > 64) {
                 return null;
@@ -588,7 +588,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
                     .setColor(ChatFormatting.GRAY)
                     .build());
         }
-        int minPrice = LibrarianTradeFindAction.getPriceRange(enchantment, level == -1 ? maxLevel : level).getIntKey();
+        int minPrice = LibrarianTradeFindAction.getPriceBounds(enchantment, level == -1 ? maxLevel : level).getIntKey();
         if (price != -1 && price < minPrice) {
             list.add(reason
                     .then("price")

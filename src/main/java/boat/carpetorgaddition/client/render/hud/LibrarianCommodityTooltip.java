@@ -113,12 +113,12 @@ public class LibrarianCommodityTooltip implements HudElement {
                 int level = entry.getIntValue();
                 Component name = EnchantmentUtils.getName(holder, level);
                 list.add(name);
-                Int2IntMap.Entry range = LibrarianTradeFindAction.getPriceRange(holder, level);
+                Int2IntMap.Entry bounds = LibrarianTradeFindAction.getPriceBounds(holder, level);
                 int price = offer.getKey();
-                PriceLevel priceLevel = PriceLevel.getPriceLevel(price, range.getIntKey(), range.getIntValue());
+                PriceLevel priceLevel = PriceLevel.fromPrice(price, bounds.getIntKey(), bounds.getIntValue());
                 list.add(
                         KEY.then("price")
-                                .builder(price, range.getIntKey(), range.getIntValue())
+                                .builder(price, bounds.getIntKey(), bounds.getIntValue())
                                 .setColor(priceLevel.getColor())
                                 .build()
                 );

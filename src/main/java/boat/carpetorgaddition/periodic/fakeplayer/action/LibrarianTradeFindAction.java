@@ -47,7 +47,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     protected final BlockPos lecternPos;
@@ -63,7 +62,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     /**
      * 已经缺货的时间
      */
-    private long outOfStockTime = 0L;
+    private long outOfStockTicks = 0L;
     /**
      * 是否已经发送缺货通知
      */
@@ -111,13 +110,13 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
         BlockState blockState = world.getBlockState(this.lecternPos);
         if (blockState.is(Blocks.LECTERN)) {
-            if (this.checkAndStopIfCompleted(world)) {
+            if (this.checkCompletedAndStop(world)) {
                 return;
             }
             this.diggingBlock = true;
         } else if (blockState.isAir() || blockState.is(Blocks.WATER)) {
             if (this.inventory.replenish(itemStack -> itemStack.is(Items.LECTERN))) {
-                this.outOfStockTime = 0L;
+                this.outOfStockTicks = 0L;
                 this.outOfStockNotice = false;
                 BlockHitResult hitResult = new BlockHitResult(Vec3.atBottomCenterOf(this.lecternPos), Direction.DOWN, this.lecternPos, false);
                 PlayerUtils.useItemOn(fakePlayer, hitResult);
@@ -126,8 +125,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                     ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(this.prevVillager));
                 }
             } else {
-                this.outOfStockTime++;
-                if (this.outOfStockTime >= 100L && !this.outOfStockNotice) {
+                this.outOfStockTicks++;
+                if (this.outOfStockTicks >= 100L && !this.outOfStockNotice) {
                     MinecraftServer server = ServerUtils.getServer(fakePlayer);
                     MessageUtils.sendEmptyMessage(server);
                     MessageUtils.sendMessage(server, KEY.then("pause").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
@@ -143,7 +142,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
     }
 
-    private boolean checkAndStopIfCompleted(ServerLevel world) {
+    private boolean checkCompletedAndStop(ServerLevel world) {
         if (world.getPoiManager().getType(this.lecternPos).filter(type -> type.is(PoiTypes.LIBRARIAN)).isEmpty()) {
             return false;
         }
@@ -169,17 +168,19 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             this.lockedNotice = true;
         }
         ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(villager));
-        if (this.tryComplete(fakePlayer, villager)) {
+        TradeMatch tradeMatch = this.findMatchingTrade(fakePlayer, villager);
+        if (tradeMatch != null) {
+            this.onTradeFound(villager, tradeMatch);
             this.stop();
             return true;
         }
         return false;
     }
 
-    protected abstract boolean tryComplete(EntityPlayerMPFake fakePlayer, Villager villager);
+    protected abstract TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager);
 
     @Nullable
-    protected Triple hasTargetTrade(Villager villager, int minLevel, @Nullable Holder<Enchantment> holder) {
+    protected TradeMatch findMatchingOffer(Villager villager, int minLevel, @Nullable Holder<Enchantment> holder) {
         if (minLevel != -1 && minLevel <= 0) {
             throw new IllegalArgumentException("Invalid enchantment level: %s".formatted(minLevel));
         }
@@ -193,28 +194,29 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                 int level = entry.getIntValue();
                 Holder<Enchantment> enchantment = entry.getKey();
+                int price = offer.getBaseCostA().getCount();
                 if ((holder == null || enchantment.equals(holder))
                     && level >= (minLevel == -1 ? enchantment.value().getMaxLevel() : minLevel)
-                    && this.isFairPrice(enchantment, offer.getBaseCostA().getCount())) {
-                    return new Triple(enchantment, level, TradePrice.of(level));
+                    && this.isPriceAcceptable(enchantment, price)) {
+                    return new TradeMatch(enchantment, level, price);
                 }
             }
         }
         return null;
     }
 
-    protected abstract boolean isFairPrice(Holder<Enchantment> enchantment, int price);
+    protected abstract boolean isPriceAcceptable(Holder<Enchantment> enchantment, int price);
 
-    protected void onComplete(Villager villager, Triple triple) {
+    protected void onTradeFound(Villager villager, TradeMatch tradeMatch) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 在原版中，拴绳无法拴住村民，将拴绳移出主手是为了与拴绳可拴村民等功能兼容
         this.inventory.replenish(itemStack -> !(itemStack.is(Items.NAME_TAG) || itemStack.is(Items.VILLAGER_SPAWN_EGG) || itemStack.is(Items.LEAD)));
         villager.mobInteract(fakePlayer, InteractionHand.MAIN_HAND);
-        boolean trade = this.tryTrade(fakePlayer, villager.getOffers());
+        boolean trade = this.tryLockTrade(fakePlayer, villager.getOffers());
         LocalizationKey key = this.getLocalizationKey().then("complete");
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         MessageUtils.sendEmptyMessage(server);
-        Component name = EnchantmentUtils.getName(triple.enchantment(), triple.level());
+        Component name = EnchantmentUtils.getName(tradeMatch.enchantment(), tradeMatch.level());
         long tick = ServerUtils.getCurrentGameTick(server) - this.startTime;
         MessageUtils.sendMessage(server, key
                 .builder(fakePlayer.getDisplayName(), name)
@@ -227,14 +229,14 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                                 .translate(this.refreshCount))
                         .join())
                 .build());
-        Int2IntMap.Entry range = getPriceRange(triple.enchantment(), triple.level());
+        Int2IntMap.Entry range = getPriceBounds(tradeMatch.enchantment(), tradeMatch.level());
         MessageUtils.sendMessage(server, key
                 .then("price")
                 .translate(key
                         .then("price")
                         .then("value")
-                        .builder(triple.price(), range.getIntKey(), range.getIntValue())
-                        .setColor(PriceLevel.getPriceLevel(triple.price().asInt(), range.getIntKey(), range.getIntValue()).getColor())
+                        .builder(tradeMatch.price(), range.getIntKey(), range.getIntValue())
+                        .setColor(PriceLevel.fromPrice(tradeMatch.price(), range.getIntKey(), range.getIntValue()).getColor())
                         .build()));
         MessageUtils.sendMessage(server, key
                 .then(trade ? "locked" : "unlocked")
@@ -251,7 +253,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         PlayerUtils.closeScreen(fakePlayer);
     }
 
-    private boolean tryTrade(EntityPlayerMPFake fakePlayer, MerchantOffers offers) {
+    private boolean tryLockTrade(EntityPlayerMPFake fakePlayer, MerchantOffers offers) {
         if (PlayerUtils.getCurrentScreen(fakePlayer) instanceof MerchantMenu menu) {
             MenuController<MerchantMenu> controller = new MenuController<>(menu, fakePlayer);
             for (int i = 0; i < offers.size(); i++) {
@@ -277,20 +279,20 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         LocalizationKey key = this.getInfoLocalizationKey();
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         list.add(key.translate(fakePlayer.getDisplayName()));
-        this.appendInfoMessage(list, key);
+        this.appendInfo(list, key);
         list.add(key.then("count").translate(this.refreshCount));
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         list.add(key.then("time").translate(CommonTexts.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)));
         return list;
     }
 
-    protected abstract void appendInfoMessage(List<Component> list, LocalizationKey key);
+    protected abstract void appendInfo(List<Component> list, LocalizationKey key);
 
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        String fieldName = this.getSerializeFieldName();
-        JsonObject action = this.getActionJson();
+        String fieldName = this.getJsonFieldName();
+        JsonObject action = this.toActionJson();
         json.add(fieldName, action);
         json.add("lectern_pos", toJson(this.lecternPos));
         json.addProperty("start_time", this.startTime);
@@ -298,9 +300,9 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         return json;
     }
 
-    protected abstract String getSerializeFieldName();
+    protected abstract String getJsonFieldName();
 
-    protected abstract JsonObject getActionJson();
+    protected abstract JsonObject toActionJson();
 
     @Override
     protected LocalizationKey getLocalizationKey() {
@@ -331,7 +333,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
      * @param level       魔咒等级
      * @see <a href="https://zh.minecraft.wiki/w/%E4%BA%A4%E6%98%93#%E5%9B%BE%E4%B9%A6%E7%AE%A1%E7%90%86%E5%91%98">交易#图书管理员</a>
      */
-    public static Int2IntMap.Entry getPriceRange(Holder<Enchantment> enchantment, int level) {
+    public static Int2IntMap.Entry getPriceBounds(Holder<Enchantment> enchantment, int level) {
         int min = 2 + level * 3;
         int max = 6 + level * 13;
         if (enchantment.is(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
@@ -358,28 +360,23 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected boolean tryComplete(EntityPlayerMPFake fakePlayer, Villager villager) {
-            Triple triple = this.hasTargetTrade(villager, this.minLevel, this.enchantment);
-            if (triple == null) {
-                return false;
-            }
-            this.onComplete(villager, triple);
-            return true;
+        protected TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
+            return this.findMatchingOffer(villager, this.minLevel, this.enchantment);
         }
 
         @Override
-        protected boolean isFairPrice(Holder<Enchantment> enchantment, int price) {
+        protected boolean isPriceAcceptable(Holder<Enchantment> enchantment, int price) {
             return price <= this.maxPrice;
         }
 
         @Override
-        protected void appendInfoMessage(List<Component> list, LocalizationKey key) {
+        protected void appendInfo(List<Component> list, LocalizationKey key) {
             list.add(key.then("enchantment").translate(EnchantmentUtils.getName(this.enchantment)));
             int maxLevel = EnchantmentUtils.getMaxLevel(this.enchantment);
             TextBuilder levelText = key.then(this.minLevel == maxLevel ? "max_level" : "level").builder(this.minLevel);
             levelText.setHover(key.then("level").then("prompt").translate(maxLevel));
             list.add(levelText.build());
-            Int2IntMap.Entry range = getPriceRange(this.enchantment, this.minLevel);
+            Int2IntMap.Entry range = getPriceBounds(this.enchantment, this.minLevel);
             int minPrice = range.getIntKey();
             TextBuilder priceText = key.then(minPrice == this.maxPrice ? "min_price" : "price").builder(this.maxPrice);
             priceText.setHover(key.then("price").then("prompt").translate(range.getIntKey(), range.getIntValue(), this.minLevel));
@@ -387,12 +384,12 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected String getSerializeFieldName() {
+        protected String getJsonFieldName() {
             return "specific";
         }
 
         @Override
-        protected JsonObject getActionJson() {
+        protected JsonObject toActionJson() {
             JsonObject json = new JsonObject();
             json.addProperty("enchantment", this.enchantment.key().identifier().toString());
             json.addProperty("min_level", this.minLevel);
@@ -429,32 +426,27 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected boolean tryComplete(EntityPlayerMPFake fakePlayer, Villager villager) {
-            Triple triple = this.hasTargetTrade(villager, -1, null);
-            if (triple == null) {
-                return false;
-            }
-            this.onComplete(villager, triple);
-            return true;
+        protected TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
+            return this.findMatchingOffer(villager, -1, null);
         }
 
         @Override
-        protected boolean isFairPrice(Holder<Enchantment> enchantment, int price) {
-            return price <= PriceLevel.getPriceUpperBound(this.priceLevel, enchantment);
+        protected boolean isPriceAcceptable(Holder<Enchantment> enchantment, int price) {
+            return price <= PriceLevel.getMaxPrice(this.priceLevel, enchantment);
         }
 
         @Override
-        protected void appendInfoMessage(List<Component> list, LocalizationKey key) {
+        protected void appendInfo(List<Component> list, LocalizationKey key) {
             // TODO
         }
 
         @Override
-        protected String getSerializeFieldName() {
+        protected String getJsonFieldName() {
             return "any";
         }
 
         @Override
-        protected JsonObject getActionJson() {
+        protected JsonObject toActionJson() {
             JsonObject json = new JsonObject();
             json.addProperty("price", this.priceLevel.name().toLowerCase(Locale.ROOT));
             return json;
@@ -491,38 +483,38 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected boolean tryComplete(EntityPlayerMPFake fakePlayer, Villager villager) {
-            Triple triple = this.hasTargetTrade(villager, -1, null);
-            if (triple != null) {
+        protected TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
+            TradeMatch tradeMatch = this.findMatchingOffer(villager, -1, null);
+            if (tradeMatch != null) {
                 ServerLevel world = ServerUtils.getWorld(fakePlayer);
                 boolean exclusive = ServerUtils.getEntities(world, this.from, this.to, Villager.class)
                         .stream()
                         .filter(value -> value != villager)
-                        .allMatch(value -> this.hasTargetTrade(value, -1, triple.enchantment()) == null);
+                        .allMatch(value -> this.findMatchingOffer(value, -1, tradeMatch.enchantment()) == null);
                 if (exclusive) {
-                    this.onComplete(villager, triple);
+                    return tradeMatch;
                 }
             }
-            return false;
+            return null;
         }
 
         @Override
-        protected boolean isFairPrice(Holder<Enchantment> enchantment, int price) {
-            return price <= PriceLevel.getPriceUpperBound(this.priceLevel, enchantment);
+        protected boolean isPriceAcceptable(Holder<Enchantment> enchantment, int price) {
+            return price <= PriceLevel.getMaxPrice(this.priceLevel, enchantment);
         }
 
         @Override
-        protected void appendInfoMessage(List<Component> list, LocalizationKey key) {
+        protected void appendInfo(List<Component> list, LocalizationKey key) {
             // TODO
         }
 
         @Override
-        protected String getSerializeFieldName() {
+        protected String getJsonFieldName() {
             return "missing";
         }
 
         @Override
-        protected JsonObject getActionJson() {
+        protected JsonObject toActionJson() {
             JsonObject json = new JsonObject();
             json.add("from", toJson(this.from));
             json.add("to", toJson(this.to));
@@ -556,7 +548,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         MEDIUM,
         HIGH;
 
-        public static PriceLevel getPriceLevel(int price, int min, int max) {
+        public static PriceLevel fromPrice(int price, int min, int max) {
             if (price == min) {
                 return PriceLevel.MIN;
             }
@@ -570,8 +562,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             }
         }
 
-        public static int getPriceUpperBound(PriceLevel level, Holder<Enchantment> enchantment) {
-            Int2IntMap.Entry range = getPriceRange(enchantment, enchantment.value().getMaxLevel());
+        public static int getMaxPrice(PriceLevel level, Holder<Enchantment> enchantment) {
+            Int2IntMap.Entry range = getPriceBounds(enchantment, enchantment.value().getMaxLevel());
             int min = range.getIntKey();
             int max = range.getIntValue();
             int total = max - min + 1;
@@ -593,62 +585,6 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
     }
 
-    public interface TradePrice {
-        boolean isFairPrice(int price);
-
-        int asInt();
-
-        static TradePrice of(int maxPrice) {
-            return new TradePrice() {
-
-                @Override
-                public boolean isFairPrice(int price) {
-                    return price <= maxPrice;
-                }
-
-                @Override
-                public int asInt() {
-                    return maxPrice;
-                }
-            };
-        }
-
-        static TradePrice of(PriceLevel level, Holder.Reference<Enchantment> enchantment) {
-            return new TradePrice() {
-
-                @Override
-                public boolean isFairPrice(int price) {
-                    return price <= this.asInt();
-                }
-
-                @Override
-                public int asInt() {
-                    return PriceLevel.getPriceUpperBound(level, enchantment);
-                }
-            };
-        }
-    }
-
-    public record Triple(Holder<Enchantment> enchantment, int level, TradePrice price) implements Predicate<MerchantOffer> {
-        @Override
-        public boolean test(MerchantOffer offer) {
-            return this.getEnchantmentBookLevel(offer) != -1;
-        }
-
-        public int getEnchantmentBookLevel(MerchantOffer offer) {
-            if (this.price.isFairPrice(offer.getBaseCostA().getCount())) {
-                ItemEnchantments enchantments = offer.getResult().get(DataComponents.STORED_ENCHANTMENTS);
-                if (enchantments == null) {
-                    return -1;
-                }
-                for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                    if (entry.getKey().equals(this.enchantment)) {
-                        int level = entry.getIntValue();
-                        return level >= this.level ? level : -1;
-                    }
-                }
-            }
-            return -1;
-        }
+    public record TradeMatch(Holder<Enchantment> enchantment, int level, int price) {
     }
 }
