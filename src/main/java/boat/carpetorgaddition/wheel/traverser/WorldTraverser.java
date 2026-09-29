@@ -7,6 +7,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class WorldTraverser<T> implements Iterable<T> {
@@ -183,5 +184,10 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
     @Override
     public int hashCode() {
         return Objects.hash(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    public static Map.Entry<BlockPos, BlockPos> normalize(BlockPos from, BlockPos to) {
+        BlockPosTraverser traverser = new BlockPosTraverser(from, to);
+        return Map.entry(traverser.getMinBlockPos(), traverser.getMaxBlockPos());
     }
 }

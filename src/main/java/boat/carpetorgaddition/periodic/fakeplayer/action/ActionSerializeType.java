@@ -160,7 +160,7 @@ public enum ActionSerializeType {
         int maxPrice = json.get("max_price").getAsInt();
         int startTime = json.get("start_time").getAsInt();
         int refreshCount = json.get("refresh_count").getAsInt();
-        LibrarianTradeFindAction action = new LibrarianTradeFindAction(null, blockPos, enchantment, minLevel, maxPrice, startTime);
+        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(null, blockPos, enchantment, minLevel, maxPrice, startTime);
         action.setRefreshCount(refreshCount);
         return action;
     }),

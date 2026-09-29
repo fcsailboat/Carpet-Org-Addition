@@ -24,6 +24,7 @@ public abstract class SpawnerBlockMixin extends BaseEntityBlock {
     @Inject(method = "spawnAfterBreak", at = @At("HEAD"), cancellable = true)
     // 使用精准采集工具挖掘时不会掉落经验
     private void onStacksDropped(BlockState state, ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience, CallbackInfo ci) {
+        // TODO 更改注入位置
         if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && EnchantmentUtils.hasSilkTouch(tool)) {
             super.spawnAfterBreak(state, level, pos, tool, dropExperience);
             ci.cancel();

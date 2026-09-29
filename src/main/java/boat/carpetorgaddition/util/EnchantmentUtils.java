@@ -76,7 +76,7 @@ public class EnchantmentUtils {
         return Enchantment.getFullname(holder, level);
     }
 
-    public static int getMaxLevel(Holder.Reference<Enchantment> enchantment) {
+    public static int getMaxLevel(Holder<Enchantment> enchantment) {
         return enchantment.value().getMaxLevel();
     }
 

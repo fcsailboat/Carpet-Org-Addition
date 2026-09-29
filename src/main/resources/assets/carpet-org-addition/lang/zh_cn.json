@@ -497,6 +497,7 @@
   "carpet-org-addition.command.playerAction.librarian.info.time": "当前用时：%s",
   "carpet-org-addition.command.playerAction.librarian.group.add.success": "已将%s添加到[%s]组中",
   "carpet-org-addition.command.playerAction.librarian.group.add.fail": "%s已存在于[%s]组中",
+  "carpet-org-addition.command.playerAction.librarian.group.add.all": "已将%s个魔咒添加到[%s]组中",
   "carpet-org-addition.command.playerAction.librarian.group.remove.group.success": "已删除[%s]组",
   "carpet-org-addition.command.playerAction.librarian.group.remove.group.fail": "不存在名为[%s]的组",
   "carpet-org-addition.command.playerAction.librarian.group.remove.enchantment.success": "已于[%s]组中删除%s",
