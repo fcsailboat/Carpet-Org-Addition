@@ -7,10 +7,7 @@ import boat.carpetorgaddition.config.GlobalConfigs;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.*;
-import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.permission.CommandPermission;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
@@ -51,6 +48,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -580,7 +578,6 @@ public class PlayerActionCommand extends AbstractServerCommand {
         LocalizationKey reason = LibrarianTradeFindAction.KEY.then("reason");
         ArrayList<Component> list = new ArrayList<>();
         int maxLevel = enchantment.value().getMaxLevel();
-        // TODO 添加村民不会出售附魔书提示
         if (level != -1 && level > maxLevel) {
             list.add(reason
                     .then("level")
@@ -593,6 +590,13 @@ public class PlayerActionCommand extends AbstractServerCommand {
             list.add(reason
                     .then("price")
                     .builder(price, minPrice)
+                    .setColor(ChatFormatting.GRAY)
+                    .build());
+        }
+        if (!enchantment.is(EnchantmentTags.TRADEABLE)) {
+            list.add(reason
+                    .then("untradable")
+                    .builder(EnchantmentUtils.getName(enchantment))
                     .setColor(ChatFormatting.GRAY)
                     .build());
         }

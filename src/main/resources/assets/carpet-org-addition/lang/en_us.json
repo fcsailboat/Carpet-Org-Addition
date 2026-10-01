@@ -370,6 +370,7 @@
   "carpet-org-addition.command.playerAction.librarian.reason": "Reason: %s",
   "carpet-org-addition.command.playerAction.librarian.reason.level": "Minimum accepted level %s exceeds target maximum level %s",
   "carpet-org-addition.command.playerAction.librarian.reason.price": "Maximum accepted price %s is below target minimum price %s",
+  "carpet-org-addition.command.playerAction.librarian.reason.untradable": "Villagers do not sell %s enchanted books",
   "carpet-org-addition.command.playerAction.librarian.reason.locked": "Target villager trade is locked",
   "carpet-org-addition.command.playerAction.librarian.reason.lectern": "Missing lectern item",
   "carpet-org-addition.command.playerAction.librarian.reason.no_missing": "All types of enchanted books in the specified range are already being sold",
