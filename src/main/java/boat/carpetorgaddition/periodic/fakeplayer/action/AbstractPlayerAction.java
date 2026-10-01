@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public abstract class AbstractPlayerAction {
+    // TODO 移除成员
     @Nullable
     private EntityPlayerMPFake fakePlayer;
     private boolean isPlayerChanged = false;

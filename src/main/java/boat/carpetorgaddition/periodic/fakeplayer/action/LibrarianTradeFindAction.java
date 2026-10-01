@@ -25,13 +25,16 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
@@ -47,6 +50,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     protected final BlockPos lecternPos;
@@ -437,7 +442,9 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
 
         @Override
         protected void appendInfo(List<Component> list, LocalizationKey key) {
-            // TODO
+            list.add(key.then("enchantment").translate(key.then("enchantment").then("any").builder().setItalic().build()));
+            list.add(key.then("level").translate(key.then("level").then("max").translate()));
+            list.add(key.then("price").translate(key.then("price").then(this.priceLevel.name().toLowerCase(Locale.ROOT)).translate()));
         }
 
         @Override
@@ -474,6 +481,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         private final BlockPos from;
         private final BlockPos to;
         private final PriceLevel priceLevel;
+        private boolean noMissingNotice = false;
+        private long nextCheckNoMissingRemainingTicks = 1200L;
 
         protected LibrarianMissingTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, BlockPos from, BlockPos to, PriceLevel priceLevel, long startTime) {
             super(fakePlayer, lecternPos, startTime);
@@ -484,6 +493,27 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
 
         @Override
         protected TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
+            this.nextCheckNoMissingRemainingTicks--;
+            if (this.nextCheckNoMissingRemainingTicks == 0L) {
+                if (!this.noMissingNotice) {
+                    MinecraftServer server = ServerUtils.getServer(fakePlayer);
+                    if (this.getMissingEnchantments(ServerUtils.getWorld(fakePlayer), server).isEmpty()) {
+                        Component head = KEY.then("unfeasible").translate(fakePlayer.getDisplayName(), this.getDisplayName());
+                        MessageUtils.sendEmptyMessage(server);
+                        MessageUtils.sendMessage(server, head);
+                        LocalizationKey reason = KEY.then("reason");
+                        MessageUtils.sendMessage(server, reason
+                                .translate(reason
+                                        .then("no_missing")
+                                        .builder()
+                                        .setColor(ChatFormatting.GRAY)
+                                        .build()));
+                        this.noMissingNotice = true;
+                    } else {
+                        this.nextCheckNoMissingRemainingTicks = 1200L;
+                    }
+                }
+            }
             TradeMatch tradeMatch = this.findMatchingOffer(villager, -1, null);
             if (tradeMatch != null) {
                 ServerLevel world = ServerUtils.getWorld(fakePlayer);
@@ -505,7 +535,53 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
 
         @Override
         protected void appendInfo(List<Component> list, LocalizationKey key) {
-            // TODO
+            EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+            MinecraftServer server = ServerUtils.getServer(fakePlayer);
+            ServerLevel world = ServerUtils.getWorld(fakePlayer);
+            TextBuilder builder = key.then("enchantment").then("missing").builder(CommonTexts.blockPos(this.from), CommonTexts.blockPos(this.to));
+            List<Holder<Enchantment>> missing = getMissingEnchantments(world, server);
+            if (!missing.isEmpty()) {
+                TextJoiner joiner = new TextJoiner();
+                missing.forEach(holder -> joiner.newline(EnchantmentUtils.getName(holder)));
+                builder.setHover(joiner.join());
+                this.nextCheckNoMissingRemainingTicks = 1200L;
+            }
+            list.add(key.then("enchantment").translate(builder.build()));
+            list.add(key.then("level").translate(key.then("level").then("max").translate()));
+            list.add(key.then("price").translate(key.then("price").then(this.priceLevel.name().toLowerCase(Locale.ROOT)).translate()));
+        }
+
+        private List<Holder<Enchantment>> getMissingEnchantments(ServerLevel world, MinecraftServer server) {
+            Set<Holder<Enchantment>> existing = ServerUtils.getEntities(world, this.from, this.to, Villager.class)
+                    .stream()
+                    .map(AbstractVillager::getOffers)
+                    .flatMap(Collection::stream)
+                    .map(offer -> {
+                        ItemStack result = offer.getResult();
+                        ItemEnchantments enchantments = result.get(DataComponents.STORED_ENCHANTMENTS);
+                        if (enchantments == null) {
+                            return null;
+                        }
+                        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                            int level = entry.getIntValue();
+                            Holder<Enchantment> enchantment = entry.getKey();
+                            int price = offer.getBaseCostA().getCount();
+                            if (level >= (enchantment.value().getMaxLevel()) && this.isPriceAcceptable(enchantment, price)) {
+                                return enchantment;
+                            }
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            return server.registryAccess()
+                    .lookup(Registries.ENCHANTMENT)
+                    .map(Registry::asHolderIdMap)
+                    .stream()
+                    .flatMap(holders -> StreamSupport.stream(holders.spliterator(), false))
+                    .filter(holder -> holder.is(EnchantmentTags.TRADEABLE))
+                    .filter(holder -> !existing.contains(holder))
+                    .toList();
         }
 
         @Override
