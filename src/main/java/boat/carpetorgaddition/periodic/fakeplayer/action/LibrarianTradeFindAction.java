@@ -47,6 +47,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -173,23 +174,25 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             this.lockedNotice = true;
         }
         ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(villager));
-        TradeMatch tradeMatch = this.findMatchingTrade(fakePlayer, villager);
-        if (tradeMatch != null) {
-            this.onTradeFound(villager, tradeMatch);
-            this.stop();
-            return true;
+        List<TradeMatch> tradeMatches = this.findMatchingTrade(fakePlayer, villager);
+        if (tradeMatches.isEmpty()) {
+            return false;
         }
-        return false;
+        this.onTradeFound(villager, tradeMatches);
+        this.stop();
+        return true;
     }
 
-    protected abstract TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager);
+    @NonNull
+    protected abstract List<TradeMatch> findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager);
 
-    @Nullable
-    protected TradeMatch findMatchingOffer(Villager villager, int minLevel, @Nullable Holder<Enchantment> holder) {
-        if (minLevel != -1 && minLevel <= 0) {
+    @NonNull
+    protected List<TradeMatch> findMatchingOffer(Villager villager, int minLevel, @Nullable Holder<Enchantment> holder) {
+        if (minLevel <= 0 && minLevel != -1) {
             throw new IllegalArgumentException("Invalid enchantment level: %s".formatted(minLevel));
         }
         MerchantOffers offers = villager.getOffers();
+        ArrayList<TradeMatch> results = new ArrayList<>();
         for (MerchantOffer offer : offers) {
             ItemStack result = offer.getResult();
             ItemEnchantments enchantments = result.get(DataComponents.STORED_ENCHANTMENTS);
@@ -203,16 +206,16 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                 if ((holder == null || enchantment.equals(holder))
                     && level >= (minLevel == -1 ? enchantment.value().getMaxLevel() : minLevel)
                     && this.isPriceAcceptable(enchantment, price)) {
-                    return new TradeMatch(enchantment, level, price);
+                    results.add(new TradeMatch(enchantment, level, price));
                 }
             }
         }
-        return null;
+        return results;
     }
 
     protected abstract boolean isPriceAcceptable(Holder<Enchantment> enchantment, int price);
 
-    protected void onTradeFound(Villager villager, TradeMatch tradeMatch) {
+    protected void onTradeFound(Villager villager, List<TradeMatch> tradeMatches) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         // 在原版中，拴绳无法拴住村民，将拴绳移出主手是为了与拴绳可拴村民等功能兼容
         this.inventory.replenish(itemStack -> !(itemStack.is(Items.NAME_TAG) || itemStack.is(Items.VILLAGER_SPAWN_EGG) || itemStack.is(Items.LEAD)));
@@ -221,40 +224,42 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         LocalizationKey key = this.getLocalizationKey().then("complete");
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
         MessageUtils.sendEmptyMessage(server);
-        Component name = EnchantmentUtils.getName(tradeMatch.enchantment(), tradeMatch.level());
-        long tick = ServerUtils.getCurrentGameTick(server) - this.startTime;
-        MessageUtils.sendMessage(server, key
-                .builder(fakePlayer.getDisplayName(), name)
-                .setHover(new TextJoiner()
-                        .newline(key
-                                .then("time_taken")
-                                .translate(CommonTexts.tickToTime(tick)))
-                        .newline(key
-                                .then("refresh_count")
-                                .translate(this.refreshCount))
-                        .join())
-                .build());
-        Int2IntMap.Entry range = getPriceBounds(tradeMatch.enchantment(), tradeMatch.level());
-        MessageUtils.sendMessage(server, key
-                .then("price")
-                .translate(key
-                        .then("price")
-                        .then("value")
-                        .builder(tradeMatch.price(), range.getIntKey(), range.getIntValue())
-                        .setColor(PriceLevel.fromPrice(tradeMatch.price(), range.getIntKey(), range.getIntValue()).getColor())
-                        .build()));
+        for (TradeMatch tradeMatch : tradeMatches) {
+            Component name = EnchantmentUtils.getName(tradeMatch.enchantment(), tradeMatch.level());
+            long tick = ServerUtils.getCurrentGameTick(server) - this.startTime;
+            MessageUtils.sendMessage(server, key
+                    .builder(fakePlayer.getDisplayName(), name)
+                    .setHover(new TextJoiner()
+                            .newline(key
+                                    .then("time_taken")
+                                    .translate(CommonTexts.tickToTime(tick)))
+                            .newline(key
+                                    .then("refresh_count")
+                                    .translate(this.refreshCount))
+                            .join())
+                    .build());
+            Int2IntMap.Entry range = getPriceBounds(tradeMatch.enchantment(), tradeMatch.level());
+            MessageUtils.sendMessage(server, key
+                    .then("price")
+                    .translate(key
+                            .then("price")
+                            .then("value")
+                            .builder(tradeMatch.price(), range.getIntKey(), range.getIntValue())
+                            .setColor(PriceLevel.fromPrice(tradeMatch.price(), range.getIntKey(), range.getIntValue()).getColor())
+                            .build()));
+            CarpetOrgAddition.LOGGER.info(
+                    "{} has now rolled an enchanted book with {}, refresh count: {}, time taken: {} ticks",
+                    fakePlayer.getName().getString(),
+                    name.getString(),
+                    this.refreshCount,
+                    tick
+            );
+        }
         MessageUtils.sendMessage(server, key
                 .then(trade ? "locked" : "unlocked")
                 .builder()
                 .setGrayItalic()
                 .build());
-        CarpetOrgAddition.LOGGER.info(
-                "{} has now rolled an enchanted book with {}, refresh count: {}, time taken: {} ticks",
-                fakePlayer.getName().getString(),
-                name.getString(),
-                this.refreshCount,
-                tick
-        );
         PlayerUtils.closeScreen(fakePlayer);
     }
 
@@ -365,7 +370,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
+        protected @NonNull List<TradeMatch> findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
             return this.findMatchingOffer(villager, this.minLevel, this.enchantment);
         }
 
@@ -431,7 +436,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
+        protected @NonNull List<TradeMatch> findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
             return this.findMatchingOffer(villager, -1, null);
         }
 
@@ -492,7 +497,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected TradeMatch findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
+        protected @NonNull List<TradeMatch> findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
             this.nextCheckNoMissingRemainingTicks--;
             if (this.nextCheckNoMissingRemainingTicks == 0L) {
                 if (!this.noMissingNotice) {
@@ -514,18 +519,18 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                     }
                 }
             }
-            TradeMatch tradeMatch = this.findMatchingOffer(villager, -1, null);
-            if (tradeMatch != null) {
+            List<TradeMatch> tradeMatches = this.findMatchingOffer(villager, -1, null);
+            if (!tradeMatches.isEmpty()) {
                 ServerLevel world = ServerUtils.getWorld(fakePlayer);
                 boolean exclusive = ServerUtils.getEntities(world, this.from, this.to, Villager.class)
                         .stream()
                         .filter(value -> value != villager)
-                        .allMatch(value -> this.findMatchingOffer(value, -1, tradeMatch.enchantment()) == null);
+                        .allMatch(value -> tradeMatches.stream().allMatch(tradeMatch -> this.findMatchingOffer(value, -1, tradeMatch.enchantment()).isEmpty()));
                 if (exclusive) {
-                    return tradeMatch;
+                    return tradeMatches;
                 }
             }
-            return null;
+            return List.of();
         }
 
         @Override
