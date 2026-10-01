@@ -449,7 +449,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         protected void appendInfo(List<Component> list, LocalizationKey key) {
             list.add(key.then("enchantment").translate(key.then("enchantment").then("any").builder().setItalic().build()));
             list.add(key.then("level").translate(key.then("level").then("max").translate()));
-            list.add(key.then("price").translate(key.then("price").then(this.priceLevel.name().toLowerCase(Locale.ROOT)).translate()));
+            list.add(key.then("price").then("upper_limit").translate(key.then("price").then(this.priceLevel.name().toLowerCase(Locale.ROOT)).translate()));
         }
 
         @Override
@@ -553,7 +553,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             }
             list.add(key.then("enchantment").translate(builder.build()));
             list.add(key.then("level").translate(key.then("level").then("max").translate()));
-            list.add(key.then("price").translate(key.then("price").then(this.priceLevel.name().toLowerCase(Locale.ROOT)).translate()));
+            list.add(key.then("price").then("upper_limit").translate(key.then("price").then(this.priceLevel.name().toLowerCase(Locale.ROOT)).translate()));
         }
 
         private List<Holder<Enchantment>> getMissingEnchantments(ServerLevel world, MinecraftServer server) {
