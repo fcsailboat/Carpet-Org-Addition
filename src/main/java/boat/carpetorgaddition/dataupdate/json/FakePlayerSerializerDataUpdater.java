@@ -1,6 +1,5 @@
 package boat.carpetorgaddition.dataupdate.json;
 
-import boat.carpetorgaddition.periodic.fakeplayer.PlayerSerializationManager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,24 +18,24 @@ public final class FakePlayerSerializerDataUpdater extends DataUpdater {
     }
 
     @Override
-    protected JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject json, int version) {
         return switch (version) {
             case 0, 1, 2 -> {
                 // 更新玩家动作数据
-                if (oldJson.has(PlayerSerializationManager.SCRIPT_ACTION)) {
-                    JsonObject scriptJson = oldJson.get(PlayerSerializationManager.SCRIPT_ACTION).getAsJsonObject();
+                if (json.has("script_action")) {
+                    JsonObject scriptJson = json.get("script_action").getAsJsonObject();
                     FakePlayerActionDataUpdater updater = FakePlayerActionDataUpdater.getInstance();
                     JsonObject newJson = updater.update(scriptJson, version);
                     if (newJson != scriptJson) {
-                        oldJson.add(PlayerSerializationManager.SCRIPT_ACTION, newJson);
+                        json.add("script_action", newJson);
                     }
                 }
-                oldJson.addProperty("data_version", 3);
-                yield this.update(oldJson, 3);
+                json.addProperty("data_version", 3);
+                yield this.update(json, 3);
             }
             case 3 -> {
                 JsonObject newJson = new JsonObject();
-                for (Map.Entry<String, JsonElement> entry : oldJson.entrySet()) {
+                for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
                     switch (entry.getKey()) {
                         case "hand_action" -> newJson.add("simple_action", entry.getValue());
                         case "startup" -> {
@@ -69,7 +68,7 @@ public final class FakePlayerSerializerDataUpdater extends DataUpdater {
             }
             case 4 -> {
                 JsonObject newJson = new JsonObject();
-                for (Map.Entry<String, JsonElement> entry : oldJson.entrySet()) {
+                for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
                     JsonElement value = entry.getValue();
                     if ("script_action".equals(entry.getKey())) {
                         JsonObject newAction = new JsonObject();
@@ -93,7 +92,21 @@ public final class FakePlayerSerializerDataUpdater extends DataUpdater {
                 newJson.addProperty("data_version", 5);
                 yield this.update(newJson, 5);
             }
-            default -> oldJson;
+            case 5 -> {
+                if (json.has("script_action")) {
+                    JsonObject scriptAction = json.get("script_action").getAsJsonObject();
+                    if (scriptAction.has("librarian")) {
+                        JsonObject librarian = scriptAction.get("librarian").getAsJsonObject();
+                        if (librarian.has("block_pos")) {
+                            librarian.add("lectern_pos", librarian.remove("block_pos"));
+                        }
+                        librarian.addProperty("type", "specific");
+                    }
+                }
+                json.addProperty("data_version", 6);
+                yield this.update(json, 6);
+            }
+            default -> json;
         };
     }
 }

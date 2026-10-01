@@ -72,11 +72,11 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     /**
      * 是否已经发送缺货通知
      */
-    private boolean outOfStockNotice = false;
+    private boolean outOfStockNoticeSent = false;
     /**
      * 是否已经发送交易锁定通知
      */
-    private boolean lockedNotice = false;
+    private boolean lockedNoticeSent = false;
     @Nullable
     private Villager prevVillager = null;
     private LibrarianVillagerPoiCache caches;
@@ -123,7 +123,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         } else if (blockState.isAir() || blockState.is(Blocks.WATER)) {
             if (this.inventory.replenish(itemStack -> itemStack.is(Items.LECTERN))) {
                 this.outOfStockTicks = 0L;
-                this.outOfStockNotice = false;
+                this.outOfStockNoticeSent = false;
                 BlockHitResult hitResult = new BlockHitResult(Vec3.atBottomCenterOf(this.lecternPos), Direction.DOWN, this.lecternPos, false);
                 PlayerUtils.useItemOn(fakePlayer, hitResult);
                 this.refreshCount++;
@@ -132,7 +132,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                 }
             } else {
                 this.outOfStockTicks++;
-                if (this.outOfStockTicks >= 100L && !this.outOfStockNotice) {
+                if (this.outOfStockTicks >= 100L && !this.outOfStockNoticeSent) {
                     MinecraftServer server = ServerUtils.getServer(fakePlayer);
                     MessageUtils.sendEmptyMessage(server);
                     MessageUtils.sendMessage(server, KEY.then("pause").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
@@ -142,7 +142,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                             .builder()
                             .setColor(ChatFormatting.GRAY)
                             .build()));
-                    this.outOfStockNotice = true;
+                    this.outOfStockNoticeSent = true;
                 }
             }
         }
@@ -160,7 +160,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         this.prevVillager = villager;
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         MinecraftServer server = ServerUtils.getServer(fakePlayer);
-        if (villager.getVillagerXp() != 0 && !this.lockedNotice) {
+        if (villager.getVillagerXp() != 0 && !this.lockedNoticeSent) {
             Component head = KEY.then("unfeasible").translate(fakePlayer.getDisplayName(), this.getDisplayName());
             MessageUtils.sendEmptyMessage(server);
             MessageUtils.sendMessage(server, head);
@@ -171,7 +171,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                             .builder()
                             .setColor(ChatFormatting.GRAY)
                             .build()));
-            this.lockedNotice = true;
+            this.lockedNoticeSent = true;
         }
         ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(villager));
         List<TradeMatch> tradeMatches = this.findMatchingTrade(fakePlayer, villager);
@@ -301,9 +301,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        String fieldName = this.getJsonFieldName();
-        JsonObject action = this.toActionJson();
-        json.add(fieldName, action);
+        json.addProperty("type", this.getJsonFieldName());
+        this.writeActionData(json);
         json.add("lectern_pos", toJson(this.lecternPos));
         json.addProperty("start_time", this.startTime);
         json.addProperty("refresh_count", this.refreshCount);
@@ -312,7 +311,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
 
     protected abstract String getJsonFieldName();
 
-    protected abstract JsonObject toActionJson();
+    protected abstract void writeActionData(JsonObject json);
 
     @Override
     protected LocalizationKey getLocalizationKey() {
@@ -399,12 +398,10 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected JsonObject toActionJson() {
-            JsonObject json = new JsonObject();
+        protected void writeActionData(JsonObject json) {
             json.addProperty("enchantment", this.enchantment.key().identifier().toString());
             json.addProperty("min_level", this.minLevel);
             json.addProperty("max_price", this.maxPrice);
-            return json;
         }
 
         @Override
@@ -458,10 +455,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected JsonObject toActionJson() {
-            JsonObject json = new JsonObject();
+        protected void writeActionData(JsonObject json) {
             json.addProperty("price", this.priceLevel.name().toLowerCase(Locale.ROOT));
-            return json;
         }
 
         @Override
@@ -486,8 +481,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         private final BlockPos from;
         private final BlockPos to;
         private final PriceLevel priceLevel;
-        private boolean noMissingNotice = false;
-        private long nextCheckNoMissingRemainingTicks = 1200L;
+        private boolean noMissingNoticeSent = false;
+        private long callsUntilNoMissingRecheck = 60L;
 
         protected LibrarianMissingTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, BlockPos from, BlockPos to, PriceLevel priceLevel, long startTime) {
             super(fakePlayer, lecternPos, startTime);
@@ -498,9 +493,9 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
 
         @Override
         protected @NonNull List<TradeMatch> findMatchingTrade(EntityPlayerMPFake fakePlayer, Villager villager) {
-            this.nextCheckNoMissingRemainingTicks--;
-            if (this.nextCheckNoMissingRemainingTicks == 0L) {
-                if (!this.noMissingNotice) {
+            this.callsUntilNoMissingRecheck--;
+            if (this.callsUntilNoMissingRecheck == 0L) {
+                if (!this.noMissingNoticeSent) {
                     MinecraftServer server = ServerUtils.getServer(fakePlayer);
                     if (this.getMissingEnchantments(ServerUtils.getWorld(fakePlayer), server).isEmpty()) {
                         Component head = KEY.then("unfeasible").translate(fakePlayer.getDisplayName(), this.getDisplayName());
@@ -513,9 +508,9 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                                         .builder()
                                         .setColor(ChatFormatting.GRAY)
                                         .build()));
-                        this.noMissingNotice = true;
+                        this.noMissingNoticeSent = true;
                     } else {
-                        this.nextCheckNoMissingRemainingTicks = 1200L;
+                        this.callsUntilNoMissingRecheck = 60L;
                     }
                 }
             }
@@ -549,7 +544,6 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                 TextJoiner joiner = new TextJoiner();
                 missing.forEach(holder -> joiner.newline(EnchantmentUtils.getName(holder)));
                 builder.setHover(joiner.join());
-                this.nextCheckNoMissingRemainingTicks = 1200L;
             }
             list.add(key.then("enchantment").translate(builder.build()));
             list.add(key.then("level").translate(key.then("level").then("max").translate()));
@@ -595,12 +589,10 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         @Override
-        protected JsonObject toActionJson() {
-            JsonObject json = new JsonObject();
+        protected void writeActionData(JsonObject json) {
             json.add("from", toJson(this.from));
             json.add("to", toJson(this.to));
             json.addProperty("price", this.priceLevel.name().toLowerCase(Locale.ROOT));
-            return json;
         }
 
         @Override

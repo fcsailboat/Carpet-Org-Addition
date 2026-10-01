@@ -1,11 +1,13 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
+import boat.carpetorgaddition.periodic.fakeplayer.action.LibrarianTradeFindAction.PriceLevel;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -152,15 +154,34 @@ public enum ActionSerializeType {
     }),
     GOTO(_ -> new StopAction(null)),
     LIBRARIAN(json -> {
-        Identifier id = Identifier.parse(json.get("enchantment").getAsString());
-        MinecraftServer server = ServerUtils.getCurrentServerOrThrow();
-        Holder.Reference<Enchantment> enchantment = EnchantmentUtils.parse(server, id).orElseThrow(() -> new IllegalStateException("Unable to parse the enchantment: " + id));
-        BlockPos blockPos = AbstractPlayerAction.fromJson(json.get("block_pos").getAsJsonObject());
-        int minLevel = json.get("min_level").getAsInt();
-        int maxPrice = json.get("max_price").getAsInt();
-        int startTime = json.get("start_time").getAsInt();
+        BlockPos lecternPos = AbstractPlayerAction.fromJson(json.get("lectern_pos").getAsJsonObject());
+        long startTime = json.get("start_time").getAsLong();
+        String type = json.get("type").getAsString();
+        LibrarianTradeFindAction action = switch (type.toLowerCase(Locale.ROOT)) {
+            case "specific" -> {
+                Identifier id = Identifier.parse(json.get("enchantment").getAsString());
+                MinecraftServer server = ServerUtils.getCurrentServerOrThrow();
+                Holder.Reference<Enchantment> enchantment = EnchantmentUtils.parse(server, id).orElseThrow(() -> new IllegalStateException("Unable to parse the enchantment: " + id));
+                int minLevel = json.get("min_level").getAsInt();
+                int maxPrice = json.get("max_price").getAsInt();
+                yield LibrarianTradeFindAction.of(null, lecternPos, enchantment, minLevel, maxPrice, startTime);
+            }
+            case "any" -> {
+                PriceLevel price = PriceLevel.valueOf(json.get("price").getAsString().toUpperCase(Locale.ROOT));
+                yield LibrarianTradeFindAction.of(null, lecternPos, price, startTime);
+            }
+            case "missing" -> {
+                PriceLevel price = PriceLevel.valueOf(json.get("price").getAsString().toUpperCase(Locale.ROOT));
+                BlockPos from = AbstractPlayerAction.fromJson(json.get("from").getAsJsonObject());
+                BlockPos to = AbstractPlayerAction.fromJson(json.get("to").getAsJsonObject());
+                yield LibrarianTradeFindAction.of(null, lecternPos, from, to, price, startTime);
+            }
+            default -> throw new JsonSyntaxException(
+                    "Invalid 'type' for %s: '%s'. Expected one of: specific, any, missing"
+                            .formatted(LibrarianTradeFindAction.class.getSimpleName(), type)
+            );
+        };
         int refreshCount = json.get("refresh_count").getAsInt();
-        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(null, blockPos, enchantment, minLevel, maxPrice, startTime);
         action.setRefreshCount(refreshCount);
         return action;
     }),
