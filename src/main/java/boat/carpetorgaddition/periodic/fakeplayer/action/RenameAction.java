@@ -44,8 +44,8 @@ public class RenameAction extends AbstractPlayerAction {
     private static final int OUTPUT = 2;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("rename");
 
-    public RenameAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, String name) {
-        super(fakePlayer);
+    public RenameAction(MinecraftServer server, ItemStackPredicate predicate, String name) {
+        super(server);
         this.predicate = predicate;
         this.name = name;
     }
@@ -54,8 +54,7 @@ public class RenameAction extends AbstractPlayerAction {
     protected void tick() {
         // 如果假玩家对铁砧持续按住右键，就会一直打开新的铁砧界面，同时旧的铁砧界面会自动关闭，关闭旧的铁砧界面时，铁砧内的物品会回到玩家物品栏
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        MinecraftServer server = ServerUtils.getServer(fakePlayer);
-        long tick = ServerUtils.getCurrentGameTick(server);
+        long tick = ServerUtils.getCurrentGameTick(this.server);
         if (fakePlayer.containerMenu instanceof AnvilMenu menu) {
             MenuController<AnvilMenu> controller = new MenuController<>(menu, fakePlayer);
             int count = 0;
@@ -103,7 +102,7 @@ public class RenameAction extends AbstractPlayerAction {
                         return false;
                     }
                     LocalizationKey key = KEY.then("wait");
-                    MessageUtils.sendMessage(this.getServer(), key.translate(fakePlayer.getDisplayName(), this.getDisplayName()));
+                    MessageUtils.sendMessage(this.server, key.translate(fakePlayer.getDisplayName(), this.getDisplayName()));
                     this.notified = true;
                 }
             }
@@ -185,8 +184,8 @@ public class RenameAction extends AbstractPlayerAction {
     }
 
     @Override
-    public void onFakePlayerLogout() {
-        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
+    public void onFakePlayerLogout(EntityPlayerMPFake fakePlayer) {
+        PlayerUtils.closeScreen(fakePlayer);
     }
 
     @Override

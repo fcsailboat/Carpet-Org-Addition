@@ -294,7 +294,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         Vec3 thisVec = Vec3Argument.getVec3(context, "this");
         // 获取非分拣物品要丢出的方向
         Vec3 otherVec = Vec3Argument.getVec3(context, "other");
-        actionManager.setAction(new ItemCategorizeAction(fakePlayer, predicates, thisVec, otherVec));
+        actionManager.setAction(new ItemCategorizeAction(ServerUtils.getServer(fakePlayer), predicates, thisVec, otherVec));
         return 1;
     }
 
@@ -304,7 +304,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         ItemStackPredicate predicate = allItem ? ItemStackPredicate.WILDCARD : ItemStackPredicate.of(context, "filter");
-        actionManager.setAction(new EmptyTheContainerAction(fakePlayer, predicate));
+        actionManager.setAction(new EmptyTheContainerAction(ServerUtils.getServer(fakePlayer), predicate));
         return 1;
     }
 
@@ -314,7 +314,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         ItemStackPredicate predicate = allItem ? ItemStackPredicate.WILDCARD : ItemStackPredicate.of(context, "filter");
-        actionManager.setAction(new FillTheContainerAction(fakePlayer, predicate, dropOther, moreContainer));
+        actionManager.setAction(new FillTheContainerAction(ServerUtils.getServer(fakePlayer), predicate, dropOther, moreContainer));
         return 1;
     }
 
@@ -325,7 +325,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         ItemStackPredicate[] predicates = fillArray(predicate, new ItemStackPredicate[4], false);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        actionManager.setAction(new InventoryCraftAction(fakePlayer, predicates));
+        actionManager.setAction(new InventoryCraftAction(ServerUtils.getServer(fakePlayer), predicates));
         return 1;
     }
 
@@ -336,7 +336,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         ItemStackPredicate[] predicates = fillArray(predicate, new ItemStackPredicate[4], true);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        actionManager.setAction(new InventoryCraftAction(fakePlayer, predicates));
+        actionManager.setAction(new InventoryCraftAction(ServerUtils.getServer(fakePlayer), predicates));
         return 1;
     }
 
@@ -350,7 +350,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
             // 获取每一个合成材料
             items[i - 1] = ItemStackPredicate.of(context, "item" + i);
         }
-        actionManager.setAction(new InventoryCraftAction(fakePlayer, items));
+        actionManager.setAction(new InventoryCraftAction(ServerUtils.getServer(fakePlayer), items));
         return 1;
     }
 
@@ -361,7 +361,8 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         ItemStackPredicate[] predicates = fillArray(predicate, new ItemStackPredicate[9], true);
-        actionManager.setAction(new CraftingTableCraftAction(fakePlayer, predicates));
+        MinecraftServer server = ServerUtils.getServer(context.getSource());
+        actionManager.setAction(new CraftingTableCraftAction(server, predicates));
         return 1;
     }
 
@@ -374,7 +375,8 @@ public class PlayerActionCommand extends AbstractServerCommand {
         for (int i = 1; i <= 9; i++) {
             items[i - 1] = ItemStackPredicate.of(context, "item" + i);
         }
-        actionManager.setAction(new CraftingTableCraftAction(fakePlayer, items));
+        MinecraftServer server = ServerUtils.getServer(context.getSource());
+        actionManager.setAction(new CraftingTableCraftAction(server, items));
         return 1;
     }
 
@@ -385,7 +387,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         // 获取按钮的索引，减去1
         int index = IntegerArgumentType.getInteger(context, "index") - 1;
-        actionManager.setAction(new TradeAction(fakePlayer, index, voidTrade));
+        actionManager.setAction(new TradeAction(ServerUtils.getServer(fakePlayer), index, voidTrade));
         return 1;
     }
 
@@ -397,7 +399,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         // 获取当前要操作的物品和要重命名的字符串
         ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         String newName = StringArgumentType.getString(context, "name");
-        actionManager.setAction(new RenameAction(fakePlayer, predicate, newName));
+        actionManager.setAction(new RenameAction(ServerUtils.getServer(fakePlayer), predicate, newName));
         return 1;
     }
 
@@ -409,7 +411,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         // 获取要切割的物品和按钮的索引
         int buttonIndex = IntegerArgumentType.getInteger(context, "button") - 1;
         ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
-        actionManager.setAction(new StonecuttingAction(fakePlayer, predicate, buttonIndex));
+        actionManager.setAction(new StonecuttingAction(ServerUtils.getServer(fakePlayer), predicate, buttonIndex));
         return 1;
     }
 
@@ -432,7 +434,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        actionManager.setAction(new FishingAction(fakePlayer));
+        actionManager.setAction(new FishingAction(ServerUtils.getServer(fakePlayer)));
         return 1;
     }
 
@@ -442,7 +444,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
             FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-            actionManager.setAction(new PlantAction(fakePlayer));
+            actionManager.setAction(new PlantAction(ServerUtils.getServer(fakePlayer)));
             return 1;
         }
         return 0;
@@ -452,17 +454,18 @@ public class PlayerActionCommand extends AbstractServerCommand {
     private int setBreakBedrock(CommandContext<CommandSourceStack> context, BedrockAction.BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) throws CommandSyntaxException {
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
+            MinecraftServer server = ServerUtils.getServer(fakePlayer);
             BedrockAction action = switch (regionType) {
                 case CUBOID -> {
                     BlockPos from = BlockPosArgument.getBlockPos(context, "from");
                     BlockPos to = BlockPosArgument.getBlockPos(context, "to");
-                    yield new BedrockAction(fakePlayer, from, to, ai, timedMaterialRecycling);
+                    yield new BedrockAction(server, from, to, ai, timedMaterialRecycling);
                 }
                 case CYLINDER -> {
                     BlockPos center = BlockPosArgument.getBlockPos(context, "center");
                     int radius = IntegerArgumentType.getInteger(context, "radius");
                     int height = IntegerArgumentType.getInteger(context, "height");
-                    yield new BedrockAction(fakePlayer, center, radius, height, ai, timedMaterialRecycling);
+                    yield new BedrockAction(server, center, radius, height, ai, timedMaterialRecycling);
                 }
             };
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
@@ -485,7 +488,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
             FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-            actionManager.setAction(new GotoAction(fakePlayer, target));
+            actionManager.setAction(new GotoAction(ServerUtils.getServer(fakePlayer), target));
             return 1;
         }
         return 0;
@@ -498,7 +501,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
             EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
             FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
             FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-            actionManager.setAction(new GotoAction(fakePlayer, target));
+            actionManager.setAction(new GotoAction(ServerUtils.getServer(fakePlayer), target));
             return 1;
         }
         return 0;
@@ -571,7 +574,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         long startTime = ServerUtils.getCurrentGameTick(server);
-        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(fakePlayer, blockPos, enchantment, level, price, startTime);
+        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(server, blockPos, enchantment, level, price, startTime);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.setAction(action);
@@ -633,7 +636,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         long startTime = ServerUtils.getCurrentGameTick(server);
-        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(fakePlayer, blockPos, priceLevel, startTime);
+        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(server, blockPos, priceLevel, startTime);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.setAction(action);
@@ -648,7 +651,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         BlockPos from = BlockPosArgument.getBlockPos(context, "from");
         BlockPos to = BlockPosArgument.getBlockPos(context, "to");
         long startTime = ServerUtils.getCurrentGameTick(server);
-        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(fakePlayer, blockPos, from, to, priceLevel, startTime);
+        LibrarianTradeFindAction action = LibrarianTradeFindAction.of(server, blockPos, from, to, priceLevel, startTime);
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         actionManager.setAction(action);
@@ -659,7 +662,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         ItemStackPredicate predicate = ItemStackPredicate.of(context, "itemStack");
         Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        EnchantingAction action = new EnchantingAction(fakePlayer, predicate, holder);
+        EnchantingAction action = new EnchantingAction(ServerUtils.getServer(fakePlayer), predicate, holder);
         PlayerComponentCoordinator.of(fakePlayer).getFakePlayerActionManager().setAction(action);
         return 1;
     }

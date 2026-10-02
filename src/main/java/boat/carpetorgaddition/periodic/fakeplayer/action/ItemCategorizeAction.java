@@ -9,11 +9,11 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
-import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -40,11 +40,11 @@ public class ItemCategorizeAction extends AbstractPlayerAction {
     private final Vec3 otherVec;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("sorting");
 
-    public ItemCategorizeAction(EntityPlayerMPFake fakePlayer, List<ItemStackPredicate> predicates, Vec3 thisVec, Vec3 otherVec) {
+    public ItemCategorizeAction(MinecraftServer server, List<ItemStackPredicate> predicates, Vec3 thisVec, Vec3 otherVec) {
+        super(server);
         if (predicates.isEmpty()) {
             throw new IllegalArgumentException("At least one item predicate is required");
         }
-        super(fakePlayer);
         this.predicates = predicates.stream().distinct().sorted().toList();
         this.thisVec = thisVec;
         this.otherVec = otherVec;

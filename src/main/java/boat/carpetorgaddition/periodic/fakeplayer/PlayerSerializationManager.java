@@ -49,7 +49,7 @@ public class PlayerSerializationManager {
                     .toList();
             for (File file : files) {
                 try {
-                    FakePlayerSerializer serializer = FakePlayerSerializer.loadFromFile(file);
+                    FakePlayerSerializer serializer = FakePlayerSerializer.loadFromFile(this.server, file);
                     this.add(serializer, false);
                 } catch (IOException | JsonParseException | NullPointerException e) {
                     // 译：未能成功加载玩家数据

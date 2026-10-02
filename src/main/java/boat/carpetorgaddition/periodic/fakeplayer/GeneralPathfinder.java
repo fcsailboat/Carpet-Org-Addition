@@ -26,13 +26,12 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public class GeneralPathfinder implements FakePlayerPathfinder {
-    private final Supplier<EntityPlayerMPFake> fakePlayerSupplier;
+    private final EntityPlayerMPFake fakePlayer;
     private final Supplier<Optional<BlockPos>> target;
     private final ArrayList<Vec3> nodes = new ArrayList<>();
     private int currentIndex;
@@ -63,15 +62,15 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
     private int retryCount;
     private static final int FOLLOW_RANGE = 48;
 
-    public GeneralPathfinder(Supplier<@NonNull EntityPlayerMPFake> fakePlayerSupplier, Supplier<Optional<BlockPos>> targetSupplier) {
-        this.target = targetSupplier;
-        this.fakePlayerSupplier = fakePlayerSupplier;
+    public GeneralPathfinder(EntityPlayerMPFake fakePlayer, Supplier<Optional<BlockPos>> target) {
+        this.target = target;
+        this.fakePlayer = fakePlayer;
         this.pathfinding();
     }
 
     @Override
     public void tick() {
-        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) getFakePlayer()).getActionPack();
+        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) this.fakePlayer).getActionPack();
         if (this.sneakTime > 0) {
             this.sneakTime--;
         }
@@ -94,7 +93,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             this.setValid();
         }
         this.previous = blockPos;
-        Vec3 pos = ServerUtils.getFootPos(this.getFakePlayer());
+        Vec3 pos = ServerUtils.getFootPos(this.fakePlayer);
         this.directTravelTime--;
         if (this.updateTime > 0) {
             this.updateTime--;
@@ -119,21 +118,20 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             return;
         }
         Vec3 current = this.getCurrentNode();
-        boolean onGround = this.getFakePlayer().onGround();
+        boolean onGround = this.fakePlayer.onGround();
         if (onGround) {
             if (this.directTravelTime <= 0) {
-                Vec3 target = new Vec3(current.x(), Math.min(current.y(), this.getFakePlayer().getY()), current.z());
-                this.getFakePlayer().lookAt(EntityAnchorArgument.Anchor.FEET, target);
+                Vec3 target = new Vec3(current.x(), Math.min(current.y(), this.fakePlayer.getY()), current.z());
+                this.fakePlayer.lookAt(EntityAnchorArgument.Anchor.FEET, target);
             }
-        } else if (this.getFakePlayer().getDeltaMovement().y() < 0) {
+        } else if (this.fakePlayer.getDeltaMovement().y() < 0) {
             // 玩家跳跃时，也会执行到这里
             // 玩家在从一格高的方块上下来，有时会尝试回到上一个节点
             this.directTravelTime = 1;
             // 如果下一个位置需要跳下去，设置潜行
-            EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-            Direction direction = fakePlayer.getMotionDirection();
-            BlockPos down = fakePlayer.blockPosition().below();
-            Level world = ServerUtils.getWorld(fakePlayer);
+            Direction direction = this.fakePlayer.getMotionDirection();
+            BlockPos down = this.fakePlayer.blockPosition().below();
+            Level world = ServerUtils.getWorld(this.fakePlayer);
             BlockState blockState = world.getBlockState(down);
             if (blockState.isAir() || blockState.isFaceSturdy(world, down, Direction.UP)) {
                 BlockPos offset = down.relative(direction);
@@ -159,7 +157,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         double horizontal = MathUtils.horizontalDistance(current, pos);
         double vertical = MathUtils.verticalDistance(current, pos);
         // 玩家可以直接走向方块，不需要跳跃
-        if (vertical <= getFakePlayer().getAttributeValue(Attributes.STEP_HEIGHT)) {
+        if (vertical <= this.fakePlayer.getAttributeValue(Attributes.STEP_HEIGHT)) {
             return;
         }
         // 当前位置比玩家位置低，不需要跳跃
@@ -168,7 +166,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         }
         // 跳跃高度可能受多种因素影响，但这里不考虑它
         if (horizontal < 1.0 && vertical < 1.25) {
-            this.getFakePlayer().jumpFromGround();
+            this.fakePlayer.jumpFromGround();
         }
     }
 
@@ -183,7 +181,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
     @Override
     public void pause(int time) {
         this.pauseTime = time;
-        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) getFakePlayer()).getActionPack();
+        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) this.fakePlayer).getActionPack();
         actionPack.setForward(0);
     }
 
@@ -197,14 +195,13 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         if (optional.isEmpty()) {
             return;
         }
-        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        BlockPos blockPos = fakePlayer.blockPosition();
+        BlockPos blockPos = this.fakePlayer.blockPosition();
         BlockPos from = blockPos.offset(-FOLLOW_RANGE, -FOLLOW_RANGE, -FOLLOW_RANGE);
         BlockPos to = blockPos.offset(FOLLOW_RANGE, FOLLOW_RANGE, FOLLOW_RANGE);
-        Level world = ServerUtils.getWorld(fakePlayer);
+        Level world = ServerUtils.getWorld(this.fakePlayer);
         PathNavigationRegion chunkCache = new PathNavigationRegion(world, from, to);
         WalkNodeEvaluator maker = new WalkNodeEvaluator();
-        Vec3 pos = ServerUtils.getFootPos(fakePlayer);
+        Vec3 pos = ServerUtils.getFootPos(this.fakePlayer);
         DummyEntity entity = new DummyEntity(world, pos);
         PathFinder navigator = new PathFinder(maker, FOLLOW_RANGE * 16);
         Path path = navigator.findPath(chunkCache, entity, Set.of(optional.get()), FOLLOW_RANGE, 0, 1F);
@@ -213,7 +210,10 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         }
         for (int i = 0; i < path.getNodeCount(); i++) {
             Node node = path.getNode(i);
-            this.nodes.add(node.asBlockPos().getBottomCenter());
+            BlockPos down = node.asBlockPos().below();
+            BlockState blockState = world.getBlockState(down);
+            double top = blockState.getCollisionShape(world, down).bounds().maxY;
+            this.nodes.add(new Vec3(down.getX() + 0.5, down.getY() + top, down.getZ() + 0.5));
         }
         this.nodes.set(0, pos);
         this.onStart();
@@ -231,7 +231,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
     public boolean arrivedAtAnyNode() {
         for (int i = this.currentIndex; i < this.nodes.size(); i++) {
             Vec3 current = this.nodes.get(i);
-            Vec3 pos = ServerUtils.getFootPos(this.getFakePlayer());
+            Vec3 pos = ServerUtils.getFootPos(this.fakePlayer);
             if (current.distanceTo(pos) <= 0.5) {
                 if (i > 0) {
                     this.setValid();
@@ -252,7 +252,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             return false;
         }
         for (int i = 0; i < this.currentIndex; i++) {
-            if (this.nodes.get(i).distanceTo(ServerUtils.getFootPos(this.getFakePlayer())) < 0.5) {
+            if (this.nodes.get(i).distanceTo(ServerUtils.getFootPos(this.fakePlayer)) < 0.5) {
                 return true;
             }
         }
@@ -273,11 +273,10 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
     @Override
     public void onStart() {
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
-            EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-            MinecraftServer server = ServerUtils.getServer(fakePlayer);
+            MinecraftServer server = ServerUtils.getServer(this.fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (Loggers.PATHFINDING.isSubscribed(player)) {
-                    PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), this.nodes));
+                    PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(this.fakePlayer.getId(), this.nodes));
                 }
             }
         }
@@ -285,16 +284,15 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
 
     @Override
     public void onStop() {
-        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
-            MinecraftServer server = ServerUtils.getServer(fakePlayer);
+            MinecraftServer server = ServerUtils.getServer(this.fakePlayer);
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (Loggers.PATHFINDING.isSubscribed(player)) {
-                    PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(fakePlayer.getId(), List.of()));
+                    PlayerUtils.sendNetworkPacket(player, FakePlayerPathfinderS2CPacket.of(this.fakePlayer.getId(), List.of()));
                 }
             }
         }
-        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) fakePlayer).getActionPack();
+        EntityPlayerActionPack actionPack = ((ServerPlayerInterface) this.fakePlayer).getActionPack();
         actionPack.setForward(0F);
         actionPack.setSneaking(false);
     }
@@ -324,14 +322,9 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         return !optional.map(blockPos -> blockPos.equals(BlockPos.containing(this.nodes.getLast()))).orElse(true);
     }
 
-    private EntityPlayerMPFake getFakePlayer() {
-        return this.fakePlayerSupplier.get();
-    }
-
     @Override
     public boolean isMoving() {
-        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        EntityPlayerActionPack actionPack = PlayerUtils.getActionPack(fakePlayer);
+        EntityPlayerActionPack actionPack = PlayerUtils.getActionPack(this.fakePlayer);
         return ((EntityPlayerActionPackAccessor) actionPack).getForward() != 0F;
     }
 

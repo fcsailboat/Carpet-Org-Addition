@@ -23,7 +23,8 @@ public class FakePlayerActionManager {
 
     public FakePlayerActionManager(EntityPlayerMPFake fakePlayer) {
         this.fakePlayer = fakePlayer;
-        this.action = new StopAction(this.fakePlayer);
+        this.action = new StopAction(ServerUtils.getServer(fakePlayer));
+        this.action.setFakePlayer(fakePlayer);
     }
 
     public void tick() {
@@ -75,9 +76,12 @@ public class FakePlayerActionManager {
     public void setAction(@NonNull AbstractPlayerAction action) {
         this.action.onStop();
         this.action = action;
+        if (this.action.equalFakePlayer(null)) {
+            this.action.setFakePlayer(this.fakePlayer);
+        }
     }
 
     public void stop() {
-        this.setAction(new StopAction(this.fakePlayer));
+        this.setAction(new StopAction(ServerUtils.getServer(this.fakePlayer)));
     }
 }

@@ -83,22 +83,22 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     private PlayerStorageInventory inventory;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("librarian");
 
-    protected LibrarianTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, long startTime) {
-        super(fakePlayer);
+    protected LibrarianTradeFindAction(MinecraftServer server, BlockPos lecternPos, long startTime) {
+        super(server);
         this.lecternPos = lecternPos;
         this.startTime = startTime;
     }
 
-    public static LibrarianTradeFindAction of(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, Holder.Reference<Enchantment> enchantment, int level, int price, long startTime) {
-        return new LibrarianSpecificTradeFindAction(fakePlayer, lecternPos, enchantment, level, price, startTime);
+    public static LibrarianTradeFindAction of(MinecraftServer server, BlockPos lecternPos, Holder.Reference<Enchantment> enchantment, int level, int price, long startTime) {
+        return new LibrarianSpecificTradeFindAction(server, lecternPos, enchantment, level, price, startTime);
     }
 
-    public static LibrarianTradeFindAction of(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, PriceLevel priceLevel, long startTime) {
-        return new LibrarianAnyTradeFindAction(fakePlayer, lecternPos, startTime, priceLevel);
+    public static LibrarianTradeFindAction of(MinecraftServer server, BlockPos lecternPos, PriceLevel priceLevel, long startTime) {
+        return new LibrarianAnyTradeFindAction(server, lecternPos, startTime, priceLevel);
     }
 
-    public static LibrarianTradeFindAction of(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, BlockPos from, BlockPos to, PriceLevel priceLevel, long startTime) {
-        return new LibrarianMissingTradeFindAction(fakePlayer, lecternPos, from, to, priceLevel, startTime);
+    public static LibrarianTradeFindAction of(MinecraftServer server, BlockPos lecternPos, BlockPos from, BlockPos to, PriceLevel priceLevel, long startTime) {
+        return new LibrarianMissingTradeFindAction(server, lecternPos, from, to, priceLevel, startTime);
     }
 
     @Override
@@ -133,10 +133,9 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             } else {
                 this.outOfStockTicks++;
                 if (this.outOfStockTicks >= 100L && !this.outOfStockNoticeSent) {
-                    MinecraftServer server = ServerUtils.getServer(fakePlayer);
-                    MessageUtils.sendEmptyMessage(server);
-                    MessageUtils.sendMessage(server, KEY.then("pause").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
-                    MessageUtils.sendMessage(server, KEY.then("reason").translate(KEY
+                    MessageUtils.sendEmptyMessage(this.server);
+                    MessageUtils.sendMessage(this.server, KEY.then("pause").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
+                    MessageUtils.sendMessage(this.server, KEY.then("reason").translate(KEY
                             .then("reason")
                             .then("lectern")
                             .builder()
@@ -159,13 +158,12 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         Villager villager = optional.get();
         this.prevVillager = villager;
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        MinecraftServer server = ServerUtils.getServer(fakePlayer);
         if (villager.getVillagerXp() != 0 && !this.lockedNoticeSent) {
             Component head = KEY.then("unfeasible").translate(fakePlayer.getDisplayName(), this.getDisplayName());
-            MessageUtils.sendEmptyMessage(server);
-            MessageUtils.sendMessage(server, head);
+            MessageUtils.sendEmptyMessage(this.server);
+            MessageUtils.sendMessage(this.server, head);
             LocalizationKey reason = KEY.then("reason");
-            MessageUtils.sendMessage(server, reason
+            MessageUtils.sendMessage(this.server, reason
                     .translate(reason
                             .then("locked")
                             .builder()
@@ -222,12 +220,11 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         villager.mobInteract(fakePlayer, InteractionHand.MAIN_HAND);
         boolean trade = this.tryLockTrade(fakePlayer, villager.getOffers());
         LocalizationKey key = this.getLocalizationKey().then("complete");
-        MinecraftServer server = ServerUtils.getServer(fakePlayer);
-        MessageUtils.sendEmptyMessage(server);
+        MessageUtils.sendEmptyMessage(this.server);
         for (TradeMatch tradeMatch : tradeMatches) {
             Component name = EnchantmentUtils.getName(tradeMatch.enchantment(), tradeMatch.level());
-            long tick = ServerUtils.getCurrentGameTick(server) - this.startTime;
-            MessageUtils.sendMessage(server, key
+            long tick = ServerUtils.getCurrentGameTick(this.server) - this.startTime;
+            MessageUtils.sendMessage(this.server, key
                     .builder(fakePlayer.getDisplayName(), name)
                     .setHover(new TextJoiner()
                             .newline(key
@@ -239,7 +236,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                             .join())
                     .build());
             Int2IntMap.Entry range = getPriceBounds(tradeMatch.enchantment(), tradeMatch.level());
-            MessageUtils.sendMessage(server, key
+            MessageUtils.sendMessage(this.server, key
                     .then("price")
                     .translate(key
                             .then("price")
@@ -274,7 +271,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                         this.inventory.hasMaterial(new ItemIdentity(costA), costA.getCount(), false)
                         && this.inventory.hasMaterial(new ItemIdentity(costB), costB.getCount(), false)
                 ) {
-                    TradeAction action = new TradeAction(fakePlayer, i, false);
+                    TradeAction action = new TradeAction(this.server, i, false);
                     // 交易一次以锁定交易
                     return action.tradeOnce(controller);
                 }
@@ -291,8 +288,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         list.add(key.translate(fakePlayer.getDisplayName()));
         this.appendInfo(list, key);
         list.add(key.then("count").translate(this.refreshCount));
-        MinecraftServer server = ServerUtils.getServer(fakePlayer);
-        list.add(key.then("time").translate(CommonTexts.tickToTime(ServerUtils.getCurrentGameTick(server) - this.startTime)));
+        list.add(key.then("time").translate(CommonTexts.tickToTime(ServerUtils.getCurrentGameTick(this.server) - this.startTime)));
         return list;
     }
 
@@ -324,9 +320,10 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     }
 
     @Override
-    protected void onAssignPlayer() {
-        this.caches = ServerComponentCoordinator.of(ServerUtils.getServer(this.getFakePlayer())).getLibrarianVillagerPoiCache();
-        this.inventory = PlayerStorageInventory.of(this.getFakePlayer());
+    protected void onAssignPlayer(EntityPlayerMPFake fakePlayer) {
+        // 不再构造方法中初始化以避免递归调用
+        this.caches = ServerComponentCoordinator.of(this.server).getLibrarianVillagerPoiCache();
+        this.inventory = PlayerStorageInventory.of(fakePlayer);
     }
 
     @Override
@@ -361,8 +358,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         private final int minLevel;
         private final int maxPrice;
 
-        protected LibrarianSpecificTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, Holder.Reference<Enchantment> enchantment, int level, int price, long startTime) {
-            super(fakePlayer, lecternPos, startTime);
+        protected LibrarianSpecificTradeFindAction(MinecraftServer server, BlockPos lecternPos, Holder.Reference<Enchantment> enchantment, int level, int price, long startTime) {
+            super(server, lecternPos, startTime);
             this.enchantment = enchantment;
             this.minLevel = level == -1 ? enchantment.value().getMaxLevel() : level;
             this.maxPrice = price == -1 ? Integer.MAX_VALUE : price;
@@ -427,8 +424,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
     public static class LibrarianAnyTradeFindAction extends LibrarianTradeFindAction {
         private final PriceLevel priceLevel;
 
-        protected LibrarianAnyTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, long startTime, PriceLevel priceLevel) {
-            super(fakePlayer, lecternPos, startTime);
+        protected LibrarianAnyTradeFindAction(MinecraftServer server, BlockPos lecternPos, long startTime, PriceLevel priceLevel) {
+            super(server, lecternPos, startTime);
             this.priceLevel = priceLevel;
         }
 
@@ -484,8 +481,8 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         private boolean noMissingNoticeSent = false;
         private long callsUntilNoMissingRecheck = 60L;
 
-        protected LibrarianMissingTradeFindAction(@Nullable EntityPlayerMPFake fakePlayer, BlockPos lecternPos, BlockPos from, BlockPos to, PriceLevel priceLevel, long startTime) {
-            super(fakePlayer, lecternPos, startTime);
+        protected LibrarianMissingTradeFindAction(MinecraftServer server, BlockPos lecternPos, BlockPos from, BlockPos to, PriceLevel priceLevel, long startTime) {
+            super(server, lecternPos, startTime);
             this.from = from;
             this.to = to;
             this.priceLevel = priceLevel;
@@ -496,13 +493,12 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             this.callsUntilNoMissingRecheck--;
             if (this.callsUntilNoMissingRecheck == 0L) {
                 if (!this.noMissingNoticeSent) {
-                    MinecraftServer server = ServerUtils.getServer(fakePlayer);
-                    if (this.getMissingEnchantments(ServerUtils.getWorld(fakePlayer), server).isEmpty()) {
+                    if (this.getMissingEnchantments(ServerUtils.getWorld(fakePlayer), this.server).isEmpty()) {
                         Component head = KEY.then("unfeasible").translate(fakePlayer.getDisplayName(), this.getDisplayName());
-                        MessageUtils.sendEmptyMessage(server);
-                        MessageUtils.sendMessage(server, head);
+                        MessageUtils.sendEmptyMessage(this.server);
+                        MessageUtils.sendMessage(this.server, head);
                         LocalizationKey reason = KEY.then("reason");
-                        MessageUtils.sendMessage(server, reason
+                        MessageUtils.sendMessage(this.server, reason
                                 .translate(reason
                                         .then("no_missing")
                                         .builder()
@@ -536,10 +532,9 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         @Override
         protected void appendInfo(List<Component> list, LocalizationKey key) {
             EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-            MinecraftServer server = ServerUtils.getServer(fakePlayer);
             ServerLevel world = ServerUtils.getWorld(fakePlayer);
             TextBuilder builder = key.then("enchantment").then("missing").builder(CommonTexts.blockPos(this.from), CommonTexts.blockPos(this.to));
-            List<Holder<Enchantment>> missing = getMissingEnchantments(world, server);
+            List<Holder<Enchantment>> missing = getMissingEnchantments(world, this.server);
             if (!missing.isEmpty()) {
                 TextJoiner joiner = new TextJoiner();
                 missing.forEach(holder -> joiner.newline(EnchantmentUtils.getName(holder)));

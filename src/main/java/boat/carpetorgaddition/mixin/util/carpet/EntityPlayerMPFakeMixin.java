@@ -128,7 +128,7 @@ public class EntityPlayerMPFakeMixin implements FakePlayerGameExitMarker {
     private void kill(Component reason, CallbackInfo ci) {
         FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.of(this.self);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        actionManager.getAction().onFakePlayerLogout();
+        actionManager.getAction().onFakePlayerLogout(this.self);
         actionManager.stop();
     }
 

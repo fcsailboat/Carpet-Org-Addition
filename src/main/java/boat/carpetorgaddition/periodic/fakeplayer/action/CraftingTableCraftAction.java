@@ -6,8 +6,8 @@ import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
-import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.item.ItemStack;
@@ -20,8 +20,8 @@ import java.util.Objects;
 public class CraftingTableCraftAction extends AbstractCraftAction {
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("craft");
 
-    public CraftingTableCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
-        super(fakePlayer, predicates);
+    public CraftingTableCraftAction(MinecraftServer server, ItemStackPredicate[] predicates) {
+        super(server, predicates);
     }
 
     @Override

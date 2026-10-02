@@ -125,13 +125,13 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         this.file = new WorldFormat(ServerUtils.getServer(fakePlayer), PlayerSerializationManager.PLAYER_DATA).file(this.name, "json");
     }
 
-    private FakePlayerSerializer(File file) throws IOException {
+    private FakePlayerSerializer(MinecraftServer server, File file) throws IOException {
         JsonObject json = IOUtils.readJson(file);
         String name = IOUtils.getFileNameWithoutExtension(file);
-        this(json, name, file);
+        this(server, json, name, file);
     }
 
-    public FakePlayerSerializer(JsonObject oldJson, String name, @Nullable File file) {
+    public FakePlayerSerializer(MinecraftServer server, JsonObject oldJson, String name, @Nullable File file) {
         int version = DataUpdater.getVersion(oldJson);
         FakePlayerSerializerDataUpdater dataUpdater = FakePlayerSerializerDataUpdater.getInstance();
         // 需要重新保存吗？这可能会提高下一次读取文件的效率，但是会导致配置文件与低版本不兼容
@@ -168,9 +168,9 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         // 假玩家动作，自动合成自动交易等
         if (json.has(PlayerSerializationManager.SCRIPT_ACTION)) {
             JsonObject scriptJson = json.get(PlayerSerializationManager.SCRIPT_ACTION).getAsJsonObject();
-            this.scriptAction = new FakePlayerActionSerializer(scriptJson);
+            this.scriptAction = new FakePlayerActionSerializer(server, scriptJson);
         } else {
-            this.scriptAction = FakePlayerActionSerializer.NO_ACTION;
+            this.scriptAction = new FakePlayerActionSerializer(server);
         }
         // 玩家组
         if (json.has("group")) {
@@ -202,8 +202,8 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
         this.file = file;
     }
 
-    public static FakePlayerSerializer loadFromFile(File file) throws IOException {
-        return new FakePlayerSerializer(file);
+    public static FakePlayerSerializer loadFromFile(MinecraftServer server, File file) throws IOException {
+        return new FakePlayerSerializer(server, file);
     }
 
     public void save() {

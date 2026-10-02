@@ -872,7 +872,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         FakePlayerResidents players = coordinator.getSavedFakePlayer();
-        Set<FakePlayerSerializer> set = players.get(time);
+        Set<FakePlayerSerializer> set = players.get(server, time);
         if (set.isEmpty()) {
             return 0;
         }

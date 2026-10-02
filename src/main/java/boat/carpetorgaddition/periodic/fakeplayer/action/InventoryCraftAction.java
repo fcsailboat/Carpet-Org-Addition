@@ -7,6 +7,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
@@ -14,8 +15,8 @@ import org.jspecify.annotations.NonNull;
 import java.util.List;
 
 public class InventoryCraftAction extends AbstractCraftAction {
-    public InventoryCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
-        super(fakePlayer, predicates);
+    public InventoryCraftAction(MinecraftServer server, ItemStackPredicate[] predicates) {
+        super(server, predicates);
     }
 
     @Override
@@ -106,9 +107,9 @@ public class InventoryCraftAction extends AbstractCraftAction {
     }
 
     @Override
-    public void onFakePlayerLogout() {
-        this.getFakePlayerNullable().ifPresent(fakePlayer -> this.getScreenHandler().removed(fakePlayer));
+    public void onFakePlayerLogout(EntityPlayerMPFake fakePlayer) {
+        this.getScreenHandler().removed(fakePlayer);
         // 如果假玩家是从其他动作切换到物品栏合成的，则上一次动作可能有物品残留
-        super.onFakePlayerLogout();
+        super.onFakePlayerLogout(fakePlayer);
     }
 }

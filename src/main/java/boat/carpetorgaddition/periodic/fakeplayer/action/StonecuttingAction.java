@@ -51,8 +51,8 @@ public class StonecuttingAction extends AbstractPlayerAction {
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("stonecutting");
     private int nextTimeMergeEmptyShulkerBox = 40;
 
-    public StonecuttingAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, int button) {
-        super(fakePlayer);
+    public StonecuttingAction(MinecraftServer server, ItemStackPredicate predicate, int button) {
+        super(server);
         this.predicate = predicate;
         this.button = button;
     }
@@ -114,8 +114,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 } else {
                     // 切石机未输出物品，可能是配方指定有误
                     this.stop();
-                    MinecraftServer server = ServerUtils.getServer(fakePlayer);
-                    MessageUtils.sendMessage(server, KEY.then("error").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
+                    MessageUtils.sendMessage(this.server, KEY.then("error").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
                     return;
                 }
             } else {
@@ -261,8 +260,8 @@ public class StonecuttingAction extends AbstractPlayerAction {
     }
 
     @Override
-    public void onFakePlayerLogout() {
-        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
+    public void onFakePlayerLogout(EntityPlayerMPFake fakePlayer) {
+        PlayerUtils.closeScreen(fakePlayer);
     }
 
     @Override

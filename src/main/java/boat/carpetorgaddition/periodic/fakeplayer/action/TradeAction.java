@@ -7,7 +7,6 @@ import boat.carpetorgaddition.mixin.accessor.MerchantScreenHandlerAccessor;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -53,8 +52,8 @@ public class TradeAction extends AbstractPlayerAction {
     public static final int TRADE_WAIT_TIME = 1;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("trade");
 
-    public TradeAction(EntityPlayerMPFake fakePlayer, int index, boolean voidTrade) {
-        super(fakePlayer);
+    public TradeAction(MinecraftServer server, int index, boolean voidTrade) {
+        super(server);
         this.index = index;
         this.voidTrade = voidTrade;
         this.timer.setValue(TRADE_WAIT_TIME);
@@ -91,8 +90,7 @@ public class TradeAction extends AbstractPlayerAction {
             }
             // 判断按钮索引是否越界
             if (controller.getMenu().getOffers().size() <= this.index) {
-                MinecraftServer server = ServerUtils.getServer(fakePlayer);
-                MessageUtils.sendMessage(server, KEY.then("error").translate(fakePlayer.getDisplayName()));
+                MessageUtils.sendMessage(this.server, KEY.then("error").translate(fakePlayer.getDisplayName()));
                 this.stop();
                 return;
             }
@@ -279,8 +277,8 @@ public class TradeAction extends AbstractPlayerAction {
     }
 
     @Override
-    public void onFakePlayerLogout() {
-        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
+    public void onFakePlayerLogout(EntityPlayerMPFake fakePlayer) {
+        PlayerUtils.closeScreen(fakePlayer);
     }
 
     @Override

@@ -14,6 +14,7 @@ import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -45,8 +46,8 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
      */
     private int nextTimeMergeEmptyShulkerBox = 40;
 
-    public AbstractCraftAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate[] predicates) {
-        super(fakePlayer);
+    public AbstractCraftAction(MinecraftServer server, ItemStackPredicate[] predicates) {
+        super(server);
         int size = this.getCraftGridSize();
         if (predicates.length != size) {
             throw new IllegalArgumentException();
@@ -130,7 +131,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
                     // 如果输出槽没有物品，认为前面的合成操作有误，停止合成
                     this.stop();
                     LocalizationKey key = this.getLocalizationKey();
-                    MessageUtils.sendMessage(this.getServer(), key.then("error").translate(controller.getFakePlayer().getDisplayName(), this.getDisplayName()));
+                    MessageUtils.sendMessage(this.server, key.then("error").translate(controller.getFakePlayer().getDisplayName(), this.getDisplayName()));
                     return;
                 }
             } else {
@@ -283,14 +284,14 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         }
         CraftingInput input = CraftingInput.of(widthHeight, widthHeight, list);
         Level world = ServerUtils.getWorld(fakePlayer);
-        Optional<RecipeHolder<CraftingRecipe>> optional = ServerUtils.getServer(fakePlayer).getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, world);
+        Optional<RecipeHolder<CraftingRecipe>> optional = this.server.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, world);
         return optional.map(recipe -> recipe.value().assemble(input)).orElse(ItemStack.EMPTY);
     }
 
     @Override
-    public void onFakePlayerLogout() {
+    public void onFakePlayerLogout(EntityPlayerMPFake fakePlayer) {
         // 在假玩家退出游戏前关闭工作台，使合成方格中的物品回到玩家物品栏，
-        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
+        PlayerUtils.closeScreen(fakePlayer);
     }
 
     @Override

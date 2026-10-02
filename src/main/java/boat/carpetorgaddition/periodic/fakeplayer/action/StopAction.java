@@ -2,9 +2,9 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,8 @@ import java.util.List;
 public final class StopAction extends AbstractPlayerAction {
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("stop");
 
-    public StopAction(EntityPlayerMPFake fakePlayer) {
-        super(fakePlayer);
+    public StopAction(MinecraftServer server) {
+        super(server);
     }
 
     @Override

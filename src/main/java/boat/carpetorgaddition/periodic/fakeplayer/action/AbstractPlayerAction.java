@@ -21,27 +21,23 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public abstract class AbstractPlayerAction {
-    // TODO 移除成员
+    protected final MinecraftServer server;
     @Nullable
     private EntityPlayerMPFake fakePlayer;
     private boolean isPlayerChanged = false;
 
-    public AbstractPlayerAction(@Nullable EntityPlayerMPFake fakePlayer) {
-        this.fakePlayer = fakePlayer;
-        if (this.fakePlayer != null) {
-            this.isPlayerChanged = true;
-        }
+    public AbstractPlayerAction(MinecraftServer server) {
+        this.server = server;
     }
 
     public final void execute() {
+        Objects.requireNonNull(this.fakePlayer);
         if (this.isPlayerChanged) {
-            this.onAssignPlayer();
+            this.onAssignPlayer(this.fakePlayer);
             this.isPlayerChanged = false;
         }
-        Objects.requireNonNull(this.fakePlayer);
         if (this.isValid()) {
             this.tick();
         } else {
@@ -109,37 +105,29 @@ public abstract class AbstractPlayerAction {
         }
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(this.fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        actionManager.setAction(new StopAction(this.fakePlayer));
+        actionManager.setAction(new StopAction(this.server));
     }
 
     @NonNull
     @Contract(pure = true)
-    protected EntityPlayerMPFake getFakePlayer() {
+    protected final EntityPlayerMPFake getFakePlayer() {
         return Objects.requireNonNull(this.fakePlayer);
     }
 
-    protected Optional<EntityPlayerMPFake> getFakePlayerNullable() {
-        return Optional.ofNullable(this.fakePlayer);
-    }
-
-    public boolean equalFakePlayer(@Nullable EntityPlayerMPFake fakePlayer) {
+    public final boolean equalFakePlayer(@Nullable EntityPlayerMPFake fakePlayer) {
         return Objects.equals(this.fakePlayer, fakePlayer);
     }
 
     @Contract("null -> fail")
-    public void setFakePlayer(EntityPlayerMPFake fakePlayer) {
+    public final void setFakePlayer(EntityPlayerMPFake fakePlayer) {
         if (fakePlayer == null) {
             throw new IllegalArgumentException();
         }
         this.fakePlayer = fakePlayer;
-        this.onAssignPlayer();
+        this.onAssignPlayer(fakePlayer);
     }
 
-    protected MinecraftServer getServer() {
-        return ServerUtils.getServer(this.getFakePlayer());
-    }
-
-    public void clearFakePlayer() {
+    public final void clearFakePlayer() {
         this.fakePlayer = null;
         this.onClearPlayer();
     }
@@ -147,7 +135,7 @@ public abstract class AbstractPlayerAction {
     /**
      * 当玩家被赋值时调用
      */
-    protected void onAssignPlayer() {
+    protected void onAssignPlayer(EntityPlayerMPFake fakePlayer) {
     }
 
     /**
@@ -159,7 +147,7 @@ public abstract class AbstractPlayerAction {
     /**
      * 当玩家退出游戏时调用，用于提前关闭GUI
      */
-    public void onFakePlayerLogout() {
+    public void onFakePlayerLogout(EntityPlayerMPFake fakePlayer) {
         // 假玩家退出游戏时，会先将玩家实体标记为已删除再关闭GUI，这会导致GUI中存放的物品无法回到玩家物品栏
     }
 

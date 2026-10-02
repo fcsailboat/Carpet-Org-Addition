@@ -3,33 +3,38 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
+import boat.carpetorgaddition.util.ServerUtils;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
 public class FakePlayerActionSerializer {
     private final AbstractPlayerAction action;
-    public static final FakePlayerActionSerializer NO_ACTION = new FakePlayerActionSerializer();
+    private final MinecraftServer server;
 
-    private FakePlayerActionSerializer() {
-        this.action = new StopAction(null);
+    public FakePlayerActionSerializer(MinecraftServer server) {
+        this.action = new StopAction(server);
+        this.server = server;
     }
 
     public FakePlayerActionSerializer(EntityPlayerMPFake fakePlayer) {
         FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         this.action = actionManager.getAction();
+        this.server = ServerUtils.getServer(fakePlayer);
     }
 
-    public FakePlayerActionSerializer(JsonObject json) {
+    public FakePlayerActionSerializer(MinecraftServer server, JsonObject json) {
+        this.server = server;
         for (ActionSerializeType value : ActionSerializeType.values()) {
             String serializedName = value.getSerializedName();
             if (json.has(serializedName)) {
                 JsonObject actionJson = json.getAsJsonObject(serializedName);
-                AbstractPlayerAction deserialize = value.deserialize(actionJson);
+                AbstractPlayerAction deserialize = value.deserialize(server, actionJson);
                 if (deserialize.isValid()) {
                     this.action = deserialize;
                     return;
@@ -37,14 +42,14 @@ public class FakePlayerActionSerializer {
                 break;
             }
         }
-        this.action = new StopAction(null);
+        this.action = new StopAction(server);
     }
 
     /**
      * 让假玩家开始执行动作
      */
     public void startAction(@NonNull EntityPlayerMPFake fakePlayer) {
-        if (this == NO_ACTION || this.action.isStop()) {
+        if (this.action.isStop()) {
             return;
         }
         if (this.action.equalFakePlayer(null)) {
@@ -72,7 +77,7 @@ public class FakePlayerActionSerializer {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         if (this.action.isHidden() && !CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
-            StopAction stopAction = new StopAction(null);
+            StopAction stopAction = new StopAction(this.server);
             json.add(stopAction.getActionSerializeType().getSerializedName(), stopAction.toJson());
         } else {
             json.add(this.action.getActionSerializeType().getSerializedName(), this.action.toJson());

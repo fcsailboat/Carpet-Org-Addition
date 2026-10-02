@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +43,8 @@ public class EnchantingAction extends AbstractPlayerAction {
     private static final int OUTPUT = 2;
     private static final LocalizationKey KEY = PlayerActionCommand.KEY.then("enchanting");
 
-    public EnchantingAction(@Nullable EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, Holder.Reference<Enchantment> enchantment) {
-        super(fakePlayer);
+    public EnchantingAction(MinecraftServer server, ItemStackPredicate predicate, Holder.Reference<Enchantment> enchantment) {
+        super(server);
         this.predicate = predicate;
         this.enchantment = enchantment;
     }
