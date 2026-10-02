@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.EnchantmentUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.SpawnerBlock;
@@ -23,9 +24,9 @@ public abstract class SpawnerBlockMixin extends BaseEntityBlock {
 
     @Inject(method = "spawnAfterBreak", at = @At("HEAD"), cancellable = true)
     // 使用精准采集工具挖掘时不会掉落经验
-    private void onStacksDropped(BlockState state, ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience, CallbackInfo ci) {
+    private void onStacksDropped(BlockState state, ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience, Entity breaker, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.CAN_MINE_SPAWNER.value() && EnchantmentUtils.hasSilkTouch(tool)) {
-            super.spawnAfterBreak(state, level, pos, tool, dropExperience);
+            super.spawnAfterBreak(state, level, pos, tool, dropExperience, breaker);
             ci.cancel();
         }
     }
