@@ -634,7 +634,7 @@ public class XpTransferCommand extends AbstractServerCommand {
 
         public void addExperience(int experience) {
             this.experienceProgress = this.experienceProgress + (float) experience / (float) this.getNextLevelExperience();
-            this.totalExperience = Mth.clamp(this.totalExperience + experience, 0, Integer.MAX_VALUE);
+            this.totalExperience = Math.clamp(this.totalExperience + experience, 0, Integer.MAX_VALUE);
             while (this.experienceProgress < 0.0F) {
                 float f = this.experienceProgress * (float) this.getNextLevelExperience();
                 if (this.experienceLevel > 0) {

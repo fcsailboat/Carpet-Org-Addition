@@ -3,7 +3,6 @@ package boat.carpetorgaddition.periodic.task;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 @SuppressWarnings("unused")
@@ -31,7 +30,7 @@ public class DrawParticleLineTask extends ServerTask {
     public void tick() {
         // 每一个游戏刻内需要绘制的距离
         double tickDistance = Math.sqrt(distance) / 20;
-        tickDistance = tickDistance * Mth.clamp(1, tickDistance / 15, 6);
+        tickDistance = tickDistance * Math.clamp(1, tickDistance / 15, 6);
         double sum = 0;
         // 每次绘制0.5格，直到总距离达到每一个游戏刻内需要绘制的距离
         while (sum < tickDistance) {

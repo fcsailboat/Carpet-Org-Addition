@@ -188,6 +188,11 @@ public class ServerUtils {
         world.playSound(null, player.getX(), player.getY(), player.getZ(), soundEvent, soundCategory, 1F, 1F);
     }
 
+    public static void playSound(ServerPlayer player, Holder<SoundEvent> soundEvent, SoundSource soundCategory) {
+        Level world = getWorld(player);
+        world.playSound(null, player.getX(), player.getY(), player.getZ(), soundEvent, soundCategory, 1F, 1F);
+    }
+
     /**
      * @return 两个世界的坐标是否可以互相转换
      */
