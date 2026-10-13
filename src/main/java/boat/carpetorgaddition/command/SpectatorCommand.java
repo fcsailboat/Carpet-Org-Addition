@@ -8,6 +8,7 @@ import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
+import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -47,10 +48,10 @@ public class SpectatorCommand extends AbstractServerCommand {
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
                 .requires(source -> CarpetOrgAdditionSettings.COMMAND_SPECTATOR.value().hasPermission(source))
-                .executes(context -> setGameMode(context, false))
+                .executes(context -> setGameMode(context, true))
                 .then(Commands.literal("player")
                         .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
-                                .executes(context -> setGameMode(context, true))))
+                                .executes(context -> setGameMode(context, false))))
                 .then(Commands.literal("teleport")
                         .then(Commands.literal("dimension")
                                 .then(Commands.argument("dimension", DimensionArgument.dimension())
@@ -74,12 +75,14 @@ public class SpectatorCommand extends AbstractServerCommand {
     }
 
     // 更改游戏模式
-    private int setGameMode(CommandContext<CommandSourceStack> context, boolean fake) throws CommandSyntaxException {
-        // TODO fake为true时目标玩家也不能是自己
-        ServerPlayer player = fake ? CommandUtils.getArgumentFakePlayer(context) : CommandUtils.getSourcePlayer(context);
+    private int setGameMode(CommandContext<CommandSourceStack> context, boolean self) throws CommandSyntaxException {
+        ServerPlayer player = self ? CommandUtils.getSourcePlayer(context) : CommandUtils.getArgumentPlayer(context);
+        if (!self && player != CommandUtils.getSourcePlayer(context)) {
+            CommandUtils.requireFakePlayer(player);
+        }
         // 如果玩家当前是旁观模式，就切换到生存模式，否则切换到旁观模式
         GameType gameMode = player.isSpectator() ? GameType.SURVIVAL : GameType.SPECTATOR;
-        if (!fake) {
+        if (!(player instanceof EntityPlayerMPFake)) {
             MinecraftServer server = ServerUtils.getServer(player);
             if (player.isSpectator()) {
                 this.loadAndTeleportPlayer(server, player);
@@ -88,7 +91,9 @@ public class SpectatorCommand extends AbstractServerCommand {
             }
         }
         player.setGameMode(gameMode);
-        if (fake && player.isSpectator()) {
+        if (player instanceof EntityPlayerMPFake && player.isSpectator()) {
+            // 避免假玩家切换到旁观模式时下移
+            // https://bugs.mojang.com/browse/MC-146582
             player.setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0));
         }
         // 发送命令反馈

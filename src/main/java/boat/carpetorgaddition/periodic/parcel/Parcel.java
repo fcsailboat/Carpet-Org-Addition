@@ -582,7 +582,7 @@ public class Parcel implements Comparable<Parcel> {
     }
 
     private Container getParcels() {
-        return InventoryUtils.removeEmpty(this.parcels);
+        return InventoryUtils.stream(this.parcels).filter(InventoryUtils::nonEmpty).collect(InventoryUtils.toInventory());
     }
 
     /**

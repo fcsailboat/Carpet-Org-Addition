@@ -423,13 +423,6 @@ public class InventoryUtils {
     }
 
     /**
-     * @return 指定物品是否是食物
-     */
-    public static boolean isFoodItem(ItemStack itemStack) {
-        return itemStack.has(DataComponents.FOOD);
-    }
-
-    /**
      * 获取玩家盔甲的序数
      */
     public static int getPlayerArmorOrdinal(ItemStack itemStack) {
@@ -448,6 +441,13 @@ public class InventoryUtils {
             case FEET -> 3;
             default -> -1;
         };
+    }
+
+    /**
+     * @return 指定物品是否是食物
+     */
+    public static boolean isFoodItem(ItemStack itemStack) {
+        return itemStack.has(DataComponents.FOOD);
     }
 
     /**
@@ -476,13 +476,6 @@ public class InventoryUtils {
             return component.copyTag().get("GcaClear") != null;
         }
         return false;
-    }
-
-    /**
-     * 将物品栏中的非空气物品放入一个新物品栏中
-     */
-    public static Container removeEmpty(Container container) {
-        return InventoryUtils.stream(container).filter(InventoryUtils::nonEmpty).collect(toInventory());
     }
 
     /**

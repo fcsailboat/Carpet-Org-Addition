@@ -80,8 +80,7 @@ public class IOUtils {
      */
     @NullMarked
     public static void write(File file, JsonObject json) throws IOException {
-        String jsonString = GSON.toJson(json, JsonObject.class);
-        write(file, jsonString);
+        write(file, GSON.toJson(json, JsonObject.class));
     }
 
     /**
@@ -206,6 +205,7 @@ public class IOUtils {
      *
      * @param elements 一个字符串数组，数组中只要有一个元素不存在于json中方法就返回false
      */
+    @Deprecated
     public static boolean jsonHasElement(JsonObject json, String... elements) {
         for (String element : elements) {
             if (json.has(element)) {
