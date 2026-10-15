@@ -167,12 +167,11 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                                                 .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
                                                                         .suggests(suggestMixPrice(true))
                                                                         .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price")))))))
-                                        .then(anyEnchantmentNode))
-                        ))
-                .then(Commands.literal("enchanting")
-                        .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
-                                .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
-                                        .executes(this::setEnchanting)))));
+                                        .then(anyEnchantmentNode)))
+                        .then(Commands.literal("enchanting")
+                                .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
+                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                                .executes(this::setEnchanting))))));
     }
 
     public static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
