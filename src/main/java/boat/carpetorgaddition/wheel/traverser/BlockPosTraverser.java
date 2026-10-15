@@ -88,57 +88,69 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
         };
     }
 
-    /**
-     * 类对象是不可变的，因此不需要考虑并发修改的问题
-     */
-    @NonNull
     @Override
-    public Iterator<BlockPos> iterator() {
-        return new Iterator<>() {
-            /**
-             * 当前迭代次数
-             */
-            private long iterations = 0;
-            /**
-             * 最大迭代次数
-             */
-            private final long maxIterations = BlockPosTraverser.this.size();
-            private final int startX = minX;
-            private final int startY = minY;
-            private final int startZ = minZ;
-            private final int finalX = maxX;
-            private final int finalY = maxY;
-            // 迭代器当前遍历到的位置
-            private int currentX = startX;
-            private int currentY = startY;
-            private int currentZ = startZ;
+    public @NonNull TraverseCursor<BlockPos> getCursor() {
+        return new Cursor(this);
+    }
 
-            @Override
-            public boolean hasNext() {
-                // 当前方块坐标是否在选区内
-                return this.iterations < maxIterations;
-            }
+    private static class Cursor implements TraverseCursor<BlockPos> {
+        /**
+         * 当前迭代次数
+         */
+        private long processedCount = 0;
+        /**
+         * 最大迭代次数
+         */
+        private final long totalCount;
+        private final int startX;
+        private final int startY;
+        private final int endX;
+        private final int endY;
+        private int nextX;
+        private int nextY;
+        private int nextZ;
 
-            @Override
-            public BlockPos next() {
-                if (!hasNext()) {
-                    // 超出选区抛出异常
-                    throw new NoSuchElementException();
-                }
-                BlockPos blockPos = new BlockPos(this.currentX, this.currentY, this.currentZ);
-                this.iterations++;
-                this.currentX++;
-                // X轴遍历到了最后，X重置，Y递增，Z轴不变
-                if (this.currentX > this.finalX) {
-                    this.currentX = this.startX;
-                    this.currentY++;
-                    if (this.currentY > this.finalY) {
-                        this.currentY = this.startY;
-                        this.currentZ++;
-                    }
-                }
-                return blockPos;
+        public Cursor(BlockPosTraverser traverser) {
+            this.totalCount = traverser.size();
+            this.startX = traverser.minX;
+            this.startY = traverser.minY;
+            this.endX = traverser.maxX;
+            this.endY = traverser.maxY;
+            this.nextX = this.startX;
+            this.nextY = this.startY;
+            this.nextZ = traverser.minZ;
+        }
+
+        @Override
+        public Step advance(long timeSlice) {
+            // 当前方块坐标是否在选区内
+            return this.processedCount < totalCount ? Step.ELEMENT : Step.DONE;
+        }
+
+        @Override
+        public BlockPos take() {
+            if (this.processedCount >= this.totalCount) {
+                // 超出选区抛出异常
+                throw new NoSuchElementException();
             }
-        };
+            BlockPos blockPos = new BlockPos(this.nextX, this.nextY, this.nextZ);
+            this.processedCount++;
+            this.nextX++;
+            // X轴遍历到了最后，X重置，Y递增，Z轴不变
+            if (this.nextX > this.endX) {
+                this.nextX = this.startX;
+                this.nextY++;
+                if (this.nextY > this.endY) {
+                    this.nextY = this.startY;
+                    this.nextZ++;
+                }
+            }
+            return blockPos;
+        }
+
+        @Override
+        public long getProcessedCount() {
+            return this.processedCount;
+        }
     }
 }

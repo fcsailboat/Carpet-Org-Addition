@@ -17,7 +17,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
+public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
     private final Level world;
     @Nullable
     private final Predicate<BlockState> paletteMatcher;
@@ -47,19 +47,18 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
     }
 
     @Override
-    public QuickBlockPosTraverser.@NonNull QuickBlockPosIterator iterator() {
-        return new QuickBlockPosIterator(this.world, this.from, this.to, this.paletteMatcher);
+    public @NonNull TraverseCursor<BlockPos> getCursor() {
+        return new Cursor(this.world, this.from, this.to, this.paletteMatcher);
     }
 
-    public class QuickBlockPosIterator implements Iterator<Optional<BlockPos>> {
+    private class Cursor implements TraverseCursor<BlockPos> {
         @Nullable
         private final Predicate<BlockState> paletteMatcher;
-        private final Iterator<Optional<ChunkAccess>> iterator;
+        private final Iterator<Optional<ChunkAccess>> chunkIt;
         /**
          * 已经遍历过的方块数量，包含空气
          */
-        private long count = 0L;
-        private boolean timeout = false;
+        private long processedCount = 0L;
         private ChunkAccess currentChunk;
         private BlockPos next = null;
         private int sectionIndex;
@@ -68,27 +67,25 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
         private int y;
         private int z;
 
-        private QuickBlockPosIterator(Level world, BlockPos from, BlockPos to, @Nullable Predicate<BlockState> paletteMatcher) {
+        private Cursor(Level world, BlockPos from, BlockPos to, @Nullable Predicate<BlockState> paletteMatcher) {
             ChunkTraverser traverser = new ChunkTraverser(world, from, to);
             this.paletteMatcher = paletteMatcher;
-            this.iterator = traverser.iterator();
+            this.chunkIt = traverser.iterator();
         }
 
         @Override
-        public boolean hasNext() {
+        public Step advance(long timeSlice) {
             if (this.next != null) {
-                return true;
+                return Step.ELEMENT;
             }
-            this.timeout = false;
             long l = System.currentTimeMillis();
             while (true) {
-                if (System.currentTimeMillis() - l >= 25) {
-                    this.timeout = true;
-                    return true;
+                if (System.currentTimeMillis() - l >= timeSlice) {
+                    return Step.PAUSED;
                 }
                 if (this.sections == null) {
-                    while (this.iterator.hasNext()) {
-                        Optional<ChunkAccess> optional = this.iterator.next();
+                    while (this.chunkIt.hasNext()) {
+                        Optional<ChunkAccess> optional = this.chunkIt.next();
                         if (optional.isEmpty()) {
                             continue;
                         }
@@ -101,7 +98,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
                     }
                 }
                 if (this.sections == null) {
-                    return false;
+                    return Step.DONE;
                 }
                 BlockPos blockPos = this.findNoAirBlockPos(this.sections);
                 if (blockPos == null) {
@@ -109,8 +106,18 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
                     continue;
                 }
                 this.next = blockPos;
-                return true;
+                return Step.ELEMENT;
             }
+        }
+
+        @Override
+        public BlockPos take() {
+            if (this.next == null) {
+                throw new NoSuchElementException();
+            }
+            BlockPos result = this.next;
+            this.next = null;
+            return result;
         }
 
         private BlockPos findNoAirBlockPos(LevelChunkSection[] sections) {
@@ -124,9 +131,9 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
                 if (this.shouldSkip(section, height)) {
                     this.sectionIndex++;
                     if (contains(chunkPos)) {
-                        this.count += 16L * height * 16L;
+                        this.processedCount += 16L * height * 16L;
                     } else if (intersects(chunkPos)) {
-                        this.count += getOverlapBlockCount(chunkPos) * (long) height;
+                        this.processedCount += getOverlapBlockCount(chunkPos) * (long) height;
                     }
                     continue;
                 }
@@ -167,7 +174,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
                 );
                 boolean contains = QuickBlockPosTraverser.this.contains(blockPos);
                 if (contains) {
-                    this.count++;
+                    this.processedCount++;
                 }
                 this.x++;
                 if (this.x >= 16) {
@@ -187,20 +194,8 @@ public class QuickBlockPosTraverser extends WorldTraverser<Optional<BlockPos>> {
         }
 
         @Override
-        public Optional<BlockPos> next() {
-            if (this.timeout) {
-                return Optional.empty();
-            }
-            if (this.next == null) {
-                throw new NoSuchElementException();
-            }
-            BlockPos result = this.next;
-            this.next = null;
-            return Optional.of(result);
-        }
-
-        public long getCount() {
-            return this.count;
+        public long getProcessedCount() {
+            return this.processedCount;
         }
     }
 }

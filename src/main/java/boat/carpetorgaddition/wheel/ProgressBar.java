@@ -16,7 +16,7 @@ public class ProgressBar {
     }
 
     public void setProgress(long current) {
-        this.progress = Math.min((double) current / (this.end - 0.0), 1);
+        this.progress = Math.min((double) current / (this.end - 0.0), 1.0);
     }
 
     public void setCompleted() {

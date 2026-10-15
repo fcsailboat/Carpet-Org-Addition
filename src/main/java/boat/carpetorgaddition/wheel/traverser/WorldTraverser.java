@@ -6,7 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.NonNull;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 public abstract class WorldTraverser<T> implements Iterable<T> {
@@ -164,6 +166,38 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
      */
     public BlockPos getMinBlockPos() {
         return this.from;
+    }
+
+    @NonNull
+    public abstract TraverseCursor<T> getCursor();
+
+    @Override
+    public @NonNull Iterator<T> iterator() {
+        return new Iterator<>() {
+            private final TraverseCursor<T> cursor = WorldTraverser.this.getCursor();
+
+            @Override
+            public boolean hasNext() {
+                while (true) {
+                    TraverseCursor.Step step = this.cursor.advance(Long.MAX_VALUE);
+                    switch (step) {
+                        case ELEMENT -> {
+                            return true;
+                        }
+                        case PAUSED -> {
+                        }
+                        case DONE -> {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public T next() {
+                return this.cursor.take();
+            }
+        };
     }
 
     @Override

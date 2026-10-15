@@ -7,7 +7,6 @@ import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import boat.carpetorgaddition.wheel.traverser.EntityTraverser;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -76,8 +75,7 @@ public class EnchantingAction extends AbstractPlayerAction {
             BlockPos blockPos = blockHitResult.getBlockPos();
             BlockState blockState = world.getBlockState(blockPos);
             if (blockState.getBlock() instanceof AnvilBlock && blockState.is(BlockTags.ANVIL)) {
-                EntityTraverser<FallingBlockEntity> traverser = new EntityTraverser<>(world, blockPos, blockPos.above(3), FallingBlockEntity.class);
-                if (traverser.isEmpty()) {
+                if (!ServerUtils.hasEntityIn(world, blockPos, blockPos.above(3), FallingBlockEntity.class)) {
                     PlayerUtils.use(fakePlayer);
                 }
             }

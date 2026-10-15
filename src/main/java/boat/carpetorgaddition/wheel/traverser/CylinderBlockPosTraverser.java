@@ -135,32 +135,50 @@ public class CylinderBlockPosTraverser extends BlockPosTraverser {
     }
 
     @Override
-    @NonNull
-    public Iterator<BlockPos> iterator() {
-        return new Iterator<>() {
-            private final Iterator<BlockPos> iterator = CylinderBlockPosTraverser.super.iterator();
+    public @NonNull TraverseCursor<BlockPos> getCursor() {
+        return new TraverseCursor<>() {
+            private final TraverseCursor<BlockPos> cursor = CylinderBlockPosTraverser.super.getCursor();
             private BlockPos next;
+            private long processedCount = 0L;
 
             @Override
-            public boolean hasNext() {
-                if (this.next == null) {
-                    while (this.iterator.hasNext()) {
-                        BlockPos next = this.iterator.next();
-                        if (contains(next)) {
-                            this.next = next;
-                            return true;
+            public Step advance(long timeSlice) {
+                long start = System.currentTimeMillis();
+                while (true) {
+                    if (System.currentTimeMillis() - start >= timeSlice) {
+                        return Step.PAUSED;
+                    }
+                    long remainingMillis = timeSlice - (System.currentTimeMillis() - start);
+                    if (remainingMillis <= 0L) {
+                        return Step.PAUSED;
+                    }
+                    Step step = this.cursor.advance(remainingMillis);
+                    switch (step) {
+                        case ELEMENT -> {
+                            BlockPos candidate = this.cursor.take();
+                            if (contains(candidate)) {
+                                this.processedCount++;
+                                this.next = candidate;
+                                return Step.ELEMENT;
+                            }
+                        }
+                        case PAUSED, DONE -> {
+                            return step;
                         }
                     }
-                    return false;
                 }
-                return true;
             }
 
             @Override
-            public BlockPos next() {
+            public BlockPos take() {
                 BlockPos result = this.next;
                 this.next = null;
                 return result;
+            }
+
+            @Override
+            public long getProcessedCount() {
+                return this.processedCount;
             }
         };
     }

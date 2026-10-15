@@ -29,10 +29,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityEvent;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.fox.Fox;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -47,6 +44,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
@@ -657,5 +655,12 @@ public class ServerUtils {
     public static <T extends Entity> List<T> getEntities(ServerLevel world, BlockPos from, BlockPos to, Class<T> type) {
         AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
         return world.getEntitiesOfClass(type, aabb);
+    }
+
+    public static <T extends Entity> boolean hasEntityIn(ServerLevel world, BlockPos from, BlockPos to, Class<T> type) {
+        AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
+        ArrayList<T> result = new ArrayList<>();
+        world.getEntities(EntityTypeTest.forClass(type), aabb, EntitySelector.NO_SPECTATORS, result, 1);
+        return !result.isEmpty();
     }
 }

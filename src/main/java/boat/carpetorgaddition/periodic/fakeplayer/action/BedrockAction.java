@@ -15,7 +15,6 @@ import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.CylinderBlockPosTraverser;
-import boat.carpetorgaddition.wheel.traverser.EntityTraverser;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -978,10 +977,10 @@ public class BedrockAction extends AbstractPlayerAction {
 
     private boolean hasFallingSand(int range, BlockPos blockPos) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        Level world = ServerUtils.getWorld(fakePlayer);
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
         BlockPos from = new BlockPos(blockPos.getX() - range, blockPos.getY(), blockPos.getZ() - range);
         BlockPos to = new BlockPos(blockPos.getX() + range, ServerUtils.getMaxArchitectureAltitude(world), blockPos.getZ() + range);
-        return new EntityTraverser<>(world, from, to, FallingBlockEntity.class).isPresent();
+        return ServerUtils.hasEntityIn(world, from, to, FallingBlockEntity.class);
     }
 
     /**

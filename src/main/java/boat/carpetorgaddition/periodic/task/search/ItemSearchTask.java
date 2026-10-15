@@ -17,6 +17,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.traverser.BlockEntityTraverser;
+import boat.carpetorgaddition.wheel.traverser.TraverseCursor;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -50,7 +51,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private final Level world;
     private final BlockEntityTraverser blockEntities;
     private Iterator<Entity> entitySearchIterator;
-    private BlockEntityTraverser.Cursor cursor;
+    private TraverseCursor<BlockEntity> cursor;
     private FindState findState;
     private int count;
     private boolean shulkerBox;
@@ -90,10 +91,11 @@ public class ItemSearchTask extends ServerSearchTask {
         }
     }
 
+    // TODO 添加进度条
     // 从容器查找
     private void searchFromContainer() {
         if (this.cursor == null) {
-            this.cursor = blockEntities.cursor();
+            this.cursor = blockEntities.getCursor();
         }
         while (true) {
             this.checkCancelled();
