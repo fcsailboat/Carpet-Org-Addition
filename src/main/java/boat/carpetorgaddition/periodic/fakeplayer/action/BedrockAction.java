@@ -249,7 +249,7 @@ public class BedrockAction extends AbstractPlayerAction {
                         .setGrayItalic()
                         .build();
                 MessageUtils.sendMessage(server, second);
-                ServerUtils.forEachPlayer(server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
+                ServerUtils.forEachPlayer(server, player -> SoundEvents.ANVIL.placeSound().ifPresent(sound -> ServerUtils.playSound(player, sound, SoundSource.PLAYERS)));
             }
         }
         this.executeWorkTick();
