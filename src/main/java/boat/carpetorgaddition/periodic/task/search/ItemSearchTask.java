@@ -7,6 +7,7 @@ import boat.carpetorgaddition.mixin.accessor.AbstractHorseEntityAccessor;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
@@ -131,7 +132,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private void searchFromEntity() {
         AABB box = blockEntities.toBox();
         if (this.entitySearchIterator == null) {
-            this.entitySearchIterator = this.world.getEntitiesOfClass(Entity.class, box).iterator();
+            this.entitySearchIterator = ServerUtils.getEntities(this.world, box, Entity.class).iterator();
         }
         while (this.entitySearchIterator.hasNext()) {
             this.checkCancelled();
@@ -139,6 +140,9 @@ public class ItemSearchTask extends ServerSearchTask {
                 return;
             }
             Entity entity = this.entitySearchIterator.next();
+            if (entity.isRemoved()) {
+                continue;
+            }
             switch (entity) {
                 // 掉落物
                 case ItemEntity itemEntity -> {
@@ -156,7 +160,7 @@ public class ItemSearchTask extends ServerSearchTask {
                 case ItemFrame itemFrame -> {
                     ItemStack itemStack = itemFrame.getItem();
                     if (!itemStack.isEmpty()) {
-                        ImmutableInventory inventory = new ImmutableInventory(itemStack);
+                        ImmutableInventory inventory = ImmutableInventory.of(itemStack);
                         this.count(inventory, itemFrame.blockPosition(), itemFrame.getName());
                     }
                 }
@@ -167,17 +171,13 @@ public class ItemSearchTask extends ServerSearchTask {
                 }
                 // 驴，骡和羊驼
                 case AbstractChestedHorse donkey when donkey.hasChest() -> {
-                    ArrayList<ItemStack> list = new ArrayList<>();
                     AbstractHorseEntityAccessor accessor = (AbstractHorseEntityAccessor) donkey;
                     SimpleContainer inventory = accessor.getDonkeyInventory();
-                    for (int i = 0; i < inventory.getContainerSize(); i++) {
-                        list.add(inventory.getItem(i));
-                    }
-                    this.count(new ImmutableInventory(list), donkey.blockPosition(), donkey.getName());
+                    this.count(inventory, donkey.blockPosition(), donkey.getName());
                 }
                 // 悦灵
                 case Allay allay -> {
-                    ImmutableInventory inventory = new ImmutableInventory(allay.getMainHandItem());
+                    ImmutableInventory inventory = ImmutableInventory.of(allay.getMainHandItem());
                     this.count(inventory, allay.blockPosition(), allay.getName());
                 }
                 default -> {

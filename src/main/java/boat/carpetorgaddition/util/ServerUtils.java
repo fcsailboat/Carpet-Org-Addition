@@ -652,12 +652,16 @@ public class ServerUtils {
         server.schedule(new TickTask(server.getTickCount(), runnable));
     }
 
-    public static <T extends Entity> List<T> getEntities(ServerLevel world, BlockPos from, BlockPos to, Class<T> type) {
+    public static <T extends Entity> List<T> getEntities(Level world, BlockPos from, BlockPos to, Class<T> type) {
         AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
+        return getEntities(world, aabb, type);
+    }
+
+    public static <T extends Entity> List<T> getEntities(Level world, AABB aabb, Class<T> type) {
         return world.getEntitiesOfClass(type, aabb);
     }
 
-    public static <T extends Entity> boolean hasEntityIn(ServerLevel world, BlockPos from, BlockPos to, Class<T> type) {
+    public static <T extends Entity> boolean hasEntityIn(Level world, BlockPos from, BlockPos to, Class<T> type) {
         AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
         ArrayList<T> result = new ArrayList<>();
         world.getEntities(EntityTypeTest.forClass(type), aabb, EntitySelector.NO_SPECTATORS, result, 1);

@@ -217,12 +217,12 @@ public class InventoryUtils {
      */
     public static ImmutableInventory getInventory(ItemStack shulkerBox) {
         if (isNonOrEmptyContainer(shulkerBox)) {
-            return ImmutableInventory.EMPTY;
+            return ImmutableInventory.empty();
         }
         ItemContainerContents component = shulkerBox.get(DataComponents.CONTAINER);
         // 因为有空潜影盒的判断，shulkerBox.get(DataComponentTypes.CONTAINER)不会返回null
         //noinspection DataFlowIssue
-        return new ImmutableInventory(component.nonEmptyItemCopyStream().toList());
+        return ImmutableInventory.of(component.nonEmptyItemCopyStream().toList());
     }
 
 
