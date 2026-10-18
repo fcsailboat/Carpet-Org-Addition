@@ -72,7 +72,7 @@ public class BlockEntityTraverser extends WorldTraverser<BlockEntity> {
         }
 
         @Override
-        public BlockEntity take() {
+        public @NonNull BlockEntity take() {
             BlockEntity blockEntity = this.next;
             this.next = null;
             return blockEntity;

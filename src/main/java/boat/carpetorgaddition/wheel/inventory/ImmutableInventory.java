@@ -18,12 +18,12 @@ public abstract sealed class ImmutableInventory implements Container permits
         ImmutableInventory.Empty,
         ImmutableInventory.MultiStack,
         ImmutableInventory.SingleStack {
+
     /**
      * 空物品栏
      */
-
     public static ImmutableInventory empty() {
-        return Empty.EMPTY;
+        return Empty.INSTANCE;
     }
 
     public static ImmutableInventory of(ItemStack itemStack) {
@@ -156,7 +156,7 @@ public abstract sealed class ImmutableInventory implements Container permits
     }
 
     private static final class Empty extends ImmutableInventory {
-        private static final Empty EMPTY = new Empty();
+        private static final Empty INSTANCE = new Empty();
 
         private Empty() {
         }

@@ -8,3 +8,4 @@ accessible field net/minecraft/server/PlayerAdvancements player Lnet/minecraft/s
 accessible field net/minecraft/world/inventory/ItemCombinerMenu access Lnet/minecraft/world/inventory/ContainerLevelAccess;
 accessible field net/minecraft/server/commands/SpectateCommand ERROR_SELF Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;
 accessible field net/minecraft/server/commands/SpectateCommand ERROR_NOT_SPECTATOR Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;
+accessible field net/minecraft/world/level/block/entity/BrushableBlockEntity lootTable Lnet/minecraft/resources/ResourceKey;

@@ -111,7 +111,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
         }
 
         @Override
-        public BlockPos take() {
+        public @NonNull BlockPos take() {
             if (this.next == null) {
                 throw new NoSuchElementException();
             }

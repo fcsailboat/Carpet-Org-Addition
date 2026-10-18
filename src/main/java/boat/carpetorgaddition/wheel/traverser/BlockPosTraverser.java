@@ -128,7 +128,7 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
         }
 
         @Override
-        public BlockPos take() {
+        public @NonNull BlockPos take() {
             if (this.processedCount >= this.totalCount) {
                 // 超出选区抛出异常
                 throw new NoSuchElementException();

@@ -39,8 +39,7 @@ import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
@@ -108,13 +107,34 @@ public class ItemSearchTask extends ServerSearchTask {
                 case ELEMENT -> {
                     BlockEntity blockEntity = this.cursor.take();
                     BlockPos blockPos = blockEntity.getBlockPos();
-                    if (blockEntity instanceof Container inventory) {
-                        // 获取容器名称
-                        Component containerName
-                                = inventory instanceof BaseContainerBlockEntity lockableContainer
-                                ? lockableContainer.getName()
-                                : this.world.getBlockState(blockPos).getBlock().getName();
-                        this.count(inventory, blockPos, containerName);
+                    Component blockName = this.world.getBlockState(blockPos).getBlock().getName();
+                    switch (blockEntity) {
+                        // 容器
+                        case Container inventory -> {
+                            // 获取容器名称
+                            Component containerName = inventory instanceof BaseContainerBlockEntity baseContainer
+                                    ? baseContainer.getName()
+                                    : blockName;
+                            this.count(inventory, blockPos, containerName);
+                        }
+                        // 可疑的沙子，可疑的沙砾
+                        case BrushableBlockEntity brushable -> {
+                            if (brushable.lootTable == null) {
+                                this.count(ImmutableInventory.of(brushable.getItem()), blockPos, blockName);
+                            }
+                        }
+                        // 讲台
+                        case LecternBlockEntity lectern -> {
+                            ImmutableInventory inventory = ImmutableInventory.of(lectern.getBook());
+                            this.count(inventory, blockPos, blockName);
+                        }
+                        // 营火、灵魂营火
+                        case CampfireBlockEntity campfire -> {
+                            ImmutableInventory inventory = ImmutableInventory.of(campfire.getItems());
+                            this.count(inventory, blockPos, blockName);
+                        }
+                        default -> {
+                        }
                     }
                 }
                 case PAUSED -> {

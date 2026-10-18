@@ -51,7 +51,7 @@ public class ChunkTraverser extends WorldTraverser<Optional<ChunkAccess>> {
         }
 
         @Override
-        public Optional<ChunkAccess> take() {
+        public @NonNull Optional<ChunkAccess> take() {
             if (this.currentZ > end.z()) {
                 throw new NoSuchElementException();
             }

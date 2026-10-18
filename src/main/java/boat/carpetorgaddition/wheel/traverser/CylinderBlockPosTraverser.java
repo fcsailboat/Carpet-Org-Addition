@@ -170,7 +170,7 @@ public class CylinderBlockPosTraverser extends BlockPosTraverser {
             }
 
             @Override
-            public BlockPos take() {
+            public @NonNull BlockPos take() {
                 BlockPos result = this.next;
                 this.next = null;
                 return result;
