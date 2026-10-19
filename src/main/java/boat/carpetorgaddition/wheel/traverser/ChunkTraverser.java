@@ -9,9 +9,8 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.jspecify.annotations.NonNull;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
-public class ChunkTraverser extends WorldTraverser<Optional<ChunkAccess>> {
+public class ChunkTraverser extends WorldTraverser<ChunkAccess> {
     private final Level world;
 
     public ChunkTraverser(Level world, BlockPos from, BlockPos to) {
@@ -20,11 +19,11 @@ public class ChunkTraverser extends WorldTraverser<Optional<ChunkAccess>> {
     }
 
     @Override
-    public @NonNull TraverseCursor<Optional<ChunkAccess>> getCursor() {
+    public @NonNull TraverseCursor<ChunkAccess> getCursor() {
         return new Cursor(this.world, this.from, this.to);
     }
 
-    private static class Cursor implements TraverseCursor<Optional<ChunkAccess>> {
+    private static class Cursor implements TraverseCursor<ChunkAccess> {
         private final ChunkPos start;
         private final ChunkPos end;
         @NonNull
@@ -51,18 +50,21 @@ public class ChunkTraverser extends WorldTraverser<Optional<ChunkAccess>> {
         }
 
         @Override
-        public @NonNull Optional<ChunkAccess> take() {
+        public @NonNull ChunkAccess take() {
             if (this.currentZ > end.z()) {
                 throw new NoSuchElementException();
             }
             this.processedCount++;
             ChunkAccess chunk = this.world.getChunk(this.currentX, this.currentZ, ChunkStatus.FULL, true);
+            if (chunk == null) {
+                throw new IllegalStateException("Chunk at (%s, %s) was null despite loadOrGenerate=true".formatted(this.currentX, this.currentZ));
+            }
             this.currentX++;
             if (currentX > end.x()) {
                 this.currentX = start.x();
                 this.currentZ++;
             }
-            return Optional.ofNullable(chunk);
+            return chunk;
         }
 
         @Override

@@ -14,7 +14,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
@@ -54,7 +53,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
     private class Cursor implements TraverseCursor<BlockPos> {
         @Nullable
         private final Predicate<BlockState> paletteMatcher;
-        private final Iterator<Optional<ChunkAccess>> chunkIt;
+        private final Iterator<ChunkAccess> chunkIt;
         /**
          * 已经遍历过的方块数量，包含空气
          */
@@ -84,17 +83,12 @@ public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
                     return Step.PAUSED;
                 }
                 if (this.sections == null) {
-                    while (this.chunkIt.hasNext()) {
-                        Optional<ChunkAccess> optional = this.chunkIt.next();
-                        if (optional.isEmpty()) {
-                            continue;
-                        }
-                        ChunkAccess access = optional.get();
-                        this.currentChunk = access;
-                        this.sections = access.getSections();
+                    if (this.chunkIt.hasNext()) {
+                        ChunkAccess chunkAccess = this.chunkIt.next();
+                        this.currentChunk = chunkAccess;
+                        this.sections = chunkAccess.getSections();
                         this.sectionIndex = 0;
                         this.resetPos();
-                        break;
                     }
                 }
                 if (this.sections == null) {

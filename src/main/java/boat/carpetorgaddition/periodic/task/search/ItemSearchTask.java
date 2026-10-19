@@ -9,6 +9,7 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
+import boat.carpetorgaddition.wheel.ProgressBar;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import boat.carpetorgaddition.wheel.page.PageManager;
@@ -59,6 +60,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private final ArrayList<Result> results = new ArrayList<>();
     private final PagedCollection pagedCollection;
     private boolean cancelled = false;
+    private final ProgressBar progressBar;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("item");
 
     public ItemSearchTask(Level world, ItemStackPredicate predicate, BlockEntityTraverser blockEntities, CommandSourceStack source, ServerPlayer player) {
@@ -69,6 +71,7 @@ public class ItemSearchTask extends ServerSearchTask {
         this.predicate = predicate;
         MinecraftServer server = source.getServer();
         PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
+        this.progressBar = new ProgressBar((long) blockEntities.length() * blockEntities.width() * blockEntities.height());
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 
@@ -80,7 +83,11 @@ public class ItemSearchTask extends ServerSearchTask {
         this.checkCancelled();
         while (this.isTimeRemaining()) {
             switch (this.findState) {
-                case BLOCK -> searchFromContainer();
+                case BLOCK -> {
+                    searchFromContainer();
+                    Component progress = KEY.then("progress").translate(this.predicate.getDisplayName(), this.progressBar.getDisplay());
+                    MessageUtils.sendMessageToHud(this.player, progress);
+                }
                 case ENTITY -> searchFromEntity();
                 case SORT -> sort();
                 case FEEDBACK -> feedback();
@@ -91,7 +98,6 @@ public class ItemSearchTask extends ServerSearchTask {
         }
     }
 
-    // TODO 添加进度条
     // 从容器查找
     private void searchFromContainer() {
         if (this.cursor == null) {
@@ -136,12 +142,15 @@ public class ItemSearchTask extends ServerSearchTask {
                         default -> {
                         }
                     }
+                    this.progressBar.setProgress(this.cursor.getProcessedCount());
                 }
                 case PAUSED -> {
+                    this.progressBar.setProgress(this.cursor.getProcessedCount());
                     return;
                 }
                 case DONE -> {
                     this.findState = FindState.ENTITY;
+                    this.progressBar.setCompleted();
                     return;
                 }
             }

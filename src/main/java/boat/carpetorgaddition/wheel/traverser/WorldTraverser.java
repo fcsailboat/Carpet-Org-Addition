@@ -144,6 +144,10 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
         return Math.max(overlapMax - overlapMin + 1, 0);
     }
 
+    public boolean isCompleteHeight(Level world) {
+        return this.minY == ServerUtils.getMinArchitectureAltitude(world) && this.maxY == ServerUtils.getMaxArchitectureAltitude(world);
+    }
+
     /**
      * @return 随机获取一个方块坐标
      */
