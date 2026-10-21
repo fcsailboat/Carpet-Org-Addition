@@ -129,7 +129,7 @@ public class CarpetOrgAdditionClientRegister {
      */
     private static void registerRenderer() {
         // 注册路径点渲染器
-        HudElementRegistry.addFirst(ServerUtils.ofIdentifier("waypoint"), (graphics, deltaTracker) -> WaypointRenderer.getInstance().extractRenderState(graphics, deltaTracker));
+        HudElementRegistry.addFirst(ServerUtils.ofIdentifier("waypoint"), (graphics) -> WaypointRenderer.getInstance().extractRenderState(graphics));
         LevelRenderEvents.COLLECT_SUBMITS.register(WorldComponentRenderer::render);
         LibrarianCommodityTooltip.init();
     }
