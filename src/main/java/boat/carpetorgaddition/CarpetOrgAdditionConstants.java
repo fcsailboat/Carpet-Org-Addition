@@ -39,6 +39,7 @@ public class CarpetOrgAdditionConstants {
     /**
      * 模组名称小写
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static final String COMPACT_MOD_NAME_LOWER_CASE = "carpetorgaddition";
     private static String language = null;

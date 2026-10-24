@@ -4,7 +4,6 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.CarpetServer;
-import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
@@ -102,11 +101,6 @@ public class ServerUtils {
      */
     public static Optional<ServerPlayer> getPlayer(MinecraftServer server, String name) {
         return Optional.ofNullable(server.getPlayerList().getPlayerByName(name));
-    }
-
-    @Deprecated
-    public static Optional<ServerPlayer> getPlayer(MinecraftServer server, GameProfile gameProfile) {
-        return getPlayer(server, gameProfile.name());
     }
 
     public static ResourceKey<Level> getWorldKey(Identifier id) {

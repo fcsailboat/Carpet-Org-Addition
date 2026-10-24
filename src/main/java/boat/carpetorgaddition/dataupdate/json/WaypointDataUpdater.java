@@ -1,6 +1,5 @@
 package boat.carpetorgaddition.dataupdate.json;
 
-import boat.carpetorgaddition.util.IOUtils;
 import com.google.gson.JsonObject;
 
 public final class WaypointDataUpdater extends DataUpdater {
@@ -23,7 +22,7 @@ public final class WaypointDataUpdater extends DataUpdater {
             String creator = oldJson.get("creator").getAsString();
             String illustrate = oldJson.has("illustrate") ? oldJson.get("illustrate").getAsString() : "";
             JsonObject anotherPos = new JsonObject();
-            if (IOUtils.jsonHasElement(oldJson, "another_x", "another_y", "another_z")) {
+            if (oldJson.has("another_x") && oldJson.has("another_y") && oldJson.has("another_z")) {
                 int anotherX = oldJson.get("another_x").getAsInt();
                 int anotherY = oldJson.get("another_y").getAsInt();
                 int anotherZ = oldJson.get("another_z").getAsInt();

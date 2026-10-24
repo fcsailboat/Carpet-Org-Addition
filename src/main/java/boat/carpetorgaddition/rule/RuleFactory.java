@@ -22,11 +22,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class RuleFactory {
-    @Deprecated(forRemoval = true)
-    public static <T> Builder<T> of(Class<T> type, String rule, T value) {
-        return new Builder<>(type, rule, value);
-    }
-
     public static Builder<Integer> of(String rule, int value) {
         return new Builder<>(Integer.class, rule, value);
     }

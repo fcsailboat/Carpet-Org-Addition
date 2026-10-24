@@ -73,7 +73,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PlayerManagerCommand extends AbstractServerCommand {
-    private static final String SAFEAFK_PROPERTIES = "safeafk.properties";
+    private static final String SAFE_AFK_PROPERTIES = "safeafk.properties";
     public static final LocalizationKey KEY = LocalizationKeys.COMMAND.then("playerManager");
     public static final LocalizationKey GROUP = KEY.then("group");
     public static final LocalizationKey GROUP_LIST = GROUP.then("list");
@@ -585,7 +585,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private void saveSafeAfkThreshold(CommandContext<CommandSourceStack> context, float threshold, EntityPlayerMPFake fakePlayer) throws IOException {
         String playerName = PlayerUtils.getName(fakePlayer);
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), null);
-        File file = worldFormat.file(SAFEAFK_PROPERTIES);
+        File file = worldFormat.file(SAFE_AFK_PROPERTIES);
         // 文件存在或者文件成功创建
         if (file.isFile() || file.createNewFile()) {
             Properties properties = new Properties();
@@ -615,7 +615,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     public static void loadSafeAfk(ServerPlayer player) {
         if (player instanceof EntityPlayerMPFake) {
             WorldFormat worldFormat = new WorldFormat(ServerUtils.getServer(player), null);
-            File file = worldFormat.file(SAFEAFK_PROPERTIES);
+            File file = worldFormat.file(SAFE_AFK_PROPERTIES);
             // 文件必须存在
             if (file.isFile()) {
                 Properties properties = new Properties();

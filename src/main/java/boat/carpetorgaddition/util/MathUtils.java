@@ -219,14 +219,6 @@ public class MathUtils {
     }
 
     /**
-     * 将一个浮点数格式化为保留两位小数的字符串
-     */
-    @Deprecated
-    public static String numberToTwoDecimalString(double number) {
-        return String.format("%.2f", number);
-    }
-
-    /**
      * @param value 将一个浮点数格式化为保留最多两位小数的字符串
      */
     public static String formatToMaxTwoDecimals(double value) {

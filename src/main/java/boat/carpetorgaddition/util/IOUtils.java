@@ -25,6 +25,7 @@ public class IOUtils {
     /**
      * 模组配置文件路径
      */
+    @SuppressWarnings("deprecation")
     public static final Path CONFIGURE_DIRECTORY = CarpetOrgAdditionConstants.getConfigDirectory().resolve(CarpetOrgAdditionConstants.COMPACT_MOD_NAME_LOWER_CASE);
     /**
      * 不能包含在文件名中的字符
@@ -201,22 +202,6 @@ public class IOUtils {
     }
 
     /**
-     * json对象中是否包含指定元素
-     *
-     * @param elements 一个字符串数组，数组中只要有一个元素不存在于json中方法就返回false
-     */
-    @Deprecated
-    public static boolean jsonHasElement(JsonObject json, String... elements) {
-        for (String element : elements) {
-            if (json.has(element)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * 文件名称是否无效
      */
     public static boolean isInvalidFileName(String fileName) {
@@ -253,17 +238,6 @@ public class IOUtils {
         String name = file.getName();
         int i = name.lastIndexOf(".");
         return i == -1 ? name : name.substring(0, i);
-    }
-
-    /**
-     * 删除文件扩展名
-     */
-    @Deprecated(forRemoval = true)
-    public static String removeJsonExtension(String fileName) {
-        if (fileName.endsWith(JSON_EXTENSION)) {
-            return fileName.substring(0, fileName.lastIndexOf("."));
-        }
-        return fileName;
     }
 
     public static String removeExtension(File file) {
@@ -306,17 +280,6 @@ public class IOUtils {
         } catch (IOException e) {
             throw new FileOperationException("Unable to delete file %s".formatted(file.toString()), e);
         }
-    }
-
-    /**
-     * 删除一个文件
-     */
-    @Deprecated(forRemoval = true)
-    public static void removeFile(File file) {
-        if (file.delete()) {
-            return;
-        }
-        throw new FileOperationException("Unable to delete file %s".formatted(file.toString()));
     }
 
     /**
