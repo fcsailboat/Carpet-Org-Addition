@@ -14,6 +14,7 @@ import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import com.google.common.primitives.Ints;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -72,7 +73,7 @@ public class CustomClickEvents {
                 String playerName = optional.get();
                 TextBuilder builder = TextBuilder.of("UUID");
                 builder.setHover(uuid.toString());
-                sendQueryPlayerNameFeekback(player, builder.build(), playerName);
+                sendQueryPlayerNameFeedback(player, builder.build(), playerName);
             } else {
                 // 本地不存在，从Mojang API获取
                 GameProfileCache.QUERY_PLAYER_NAME_THREAD_POOL.submit(() -> queryPlayerName(context.getServer(), player, uuid));
@@ -92,12 +93,43 @@ public class CustomClickEvents {
         int page = reader.getIntOrThrow(CustomClickKeys.PAGE_NUMBER);
         PageManager manager = ServerComponentCoordinator.of(context.getServer()).getPageManager();
         Optional<PagedCollection> optional = manager.get(id);
-        if (optional.isPresent()) {
-            PagedCollection collection = optional.get();
-            collection.print(page, true);
-        } else {
+        if (optional.isEmpty()) {
             throw CommandUtils.createException(LocalizationKeys.Operation.Page.NON_EXISTENT.translate());
         }
+        PagedCollection collection = optional.get();
+        collection.print(page, true);
+    });
+    /// 打开页面跳转对话框
+    public static final Identifier OPEN_CHANGE_PAGE_DIALOG = register("open_change_page_dialog", context -> {
+        NbtReader reader = context.getReader();
+        int id = reader.getIntOrThrow(CustomClickKeys.ID);
+        MinecraftServer server = context.getServer();
+        ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
+        PageManager manager = coordinator.getPageManager();
+        Optional<PagedCollection> optional = manager.get(id);
+        if (optional.isEmpty()) {
+            throw CommandUtils.createException(LocalizationKeys.Operation.Page.NON_EXISTENT.translate());
+        }
+        DialogProvider dialogProvider = coordinator.getDialogProvider();
+        Dialog dialog = dialogProvider.getChancePageDialog(id);
+        PlayerUtils.openDialog(context.getPlayer(), dialog);
+    });
+    /// 页面跳转
+    public static final Identifier CHANGE_PAGE = register("change_page", context -> {
+        NbtReader reader = context.getReader();
+        int id = reader.getIntOrThrow(CustomClickKeys.ID);
+        String pageNumber = reader.getString(CustomClickKeys.PAGE_NUMBER);
+        Integer page = Ints.tryParse(pageNumber);
+        if (page == null || page <= 0) {
+            throw CommandUtils.createException(LocalizationKeys.Operation.Page.UNABLE_TO_PARSE.translate(pageNumber));
+        }
+        PageManager manager = ServerComponentCoordinator.of(context.getServer()).getPageManager();
+        Optional<PagedCollection> optional = manager.get(id);
+        if (optional.isEmpty()) {
+            throw CommandUtils.createException(LocalizationKeys.Operation.Page.NON_EXISTENT.translate());
+        }
+        PagedCollection collection = optional.get();
+        collection.print(page, true);
     });
 
     /**
@@ -118,10 +150,10 @@ public class CustomClickEvents {
         GameProfileCache cache = GameProfileCache.getInstance();
         cache.put(uuid, name);
         // 在服务器线程发送命令反馈
-        server.execute(() -> sendQueryPlayerNameFeekback(player, displayUuid, name));
+        server.execute(() -> sendQueryPlayerNameFeedback(player, displayUuid, name));
     }
 
-    private static void sendQueryPlayerNameFeekback(ServerPlayer player, Component uuid, String playerName) {
+    private static void sendQueryPlayerNameFeedback(ServerPlayer player, Component uuid, String playerName) {
         Component name = TextBuilder.of(playerName).setCopyToClipboard(playerName).setColor(ChatFormatting.GRAY).build();
         MessageUtils.sendMessage(player, LocalizationKeys.Operation.QueryPlayerName.SUCCESS.translate(uuid, name));
     }
