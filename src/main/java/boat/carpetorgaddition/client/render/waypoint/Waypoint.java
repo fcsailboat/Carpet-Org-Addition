@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.floats.Float2FloatMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.pipeline.RenderPipelines;
+import net.minecraft.client.gui.GuiPipeline;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.data.AtlasIds;
@@ -118,7 +118,7 @@ public abstract class Waypoint {
         int alpha = (int) (this.getRenderAlpha() * 255);
         ColorValue color = ColorValue.fromRgb(CommonColors.WHITE, alpha);
         int argb = color.toArgb();
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, 0, 0, widthHeight, widthHeight, argb);
+        graphics.blitSprite(GuiPipeline.TEXTURED, this.sprite, 0, 0, widthHeight, widthHeight, argb);
         graphics.pose().popMatrix();
         if (this.isWatching(width, height, entry)) {
             renderText(graphics, offset);

@@ -22,7 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
-import oshi.SystemInfo;
+import oshi.ffm.SystemInfo;
 import oshi.hardware.GlobalMemory;
 
 import java.io.File;

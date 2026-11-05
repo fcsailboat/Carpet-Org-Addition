@@ -29,22 +29,22 @@ public class VillagerScreenHandler extends AbstractContainerMenu implements Unav
             for (int j = 0; j < 3; ++j) {
                 if (i == 2 && j == 2) {
                     // 添加不可用的槽位
-                    this.addSlot(new DisabledSlot(inventory, j + i * 3, 62 + j * 18, 17 + i * 18));
+                    this.addSlot(new DisabledSlot(inventory, j + i * 3, 62 + j * 18, 17 + i * 18, Slot.Section.CONTAINER));
                     // 添加普通槽位
                 } else {
-                    this.addSlot(new Slot(inventory, j + i * 3, 62 + j * 18, 17 + i * 18));
+                    this.addSlot(new Slot(inventory, j + i * 3, 62 + j * 18, 17 + i * 18, Slot.Section.CONTAINER));
                 }
             }
         }
         // 添加玩家非快捷栏的物品栏槽位
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18, Slot.Section.INVENTORY));
             }
         }
         // 添加快捷栏槽位
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 142));
+            this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 142, Slot.Section.HOTBAR));
         }
     }
 

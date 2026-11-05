@@ -65,10 +65,10 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
                 // 如果槽位id大于玩家物品栏的大小，添加不可用槽位
                 if (index >= SIZE) {
                     // 添加不可用槽位
-                    this.addSlot(new DisabledSlot(this.inventory, index, 8 + j * 18, 18 + i * 18));
+                    this.addSlot(new DisabledSlot(this.inventory, index, 8 + j * 18, 18 + i * 18, Slot.Section.CONTAINER));
                 } else {
                     // 添加普通槽位
-                    this.addSlot(new Slot(this.inventory, getIndex(index), 8 + j * 18, 18 + i * 18));
+                    this.addSlot(new Slot(this.inventory, getIndex(index), 8 + j * 18, 18 + i * 18, Slot.Section.CONTAINER));
                 }
                 index++;
             }
@@ -82,7 +82,7 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
         int index = 0;
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.addSlot(new Slot(inventory, index + 9, 8 + j * 18, 103 + i * 18 + 36));
+                this.addSlot(new Slot(inventory, index + 9, 8 + j * 18, 103 + i * 18 + 36, Slot.Section.CONTAINER));
                 index++;
             }
         }
@@ -93,7 +93,7 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
      */
     private void addHotSlot(Inventory inventory) {
         for (int index = 0; index < 9; ++index) {
-            this.addSlot(new Slot(inventory, index, 8 + index * 18, 161 + 36));
+            this.addSlot(new Slot(inventory, index, 8 + index * 18, 161 + 36, Slot.Section.HOTBAR));
         }
     }
 

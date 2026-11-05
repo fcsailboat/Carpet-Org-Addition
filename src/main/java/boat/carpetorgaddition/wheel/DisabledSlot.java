@@ -10,8 +10,8 @@ import org.jspecify.annotations.NonNull;
  * 不能向其中拿取和放置物品的槽位
  */
 public class DisabledSlot extends Slot {
-    public DisabledSlot(Container inventory, int index, int x, int y) {
-        super(inventory, index, x, y);
+    public DisabledSlot(Container inventory, int index, int x, int y, Section section) {
+        super(inventory, index, x, y, section);
     }
 
     // 设置不能向槽位中放入物品

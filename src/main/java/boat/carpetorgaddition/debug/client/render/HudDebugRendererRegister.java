@@ -11,12 +11,15 @@ import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.Counter;
 import boat.carpetorgaddition.wheel.SimpleCounter;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.inventory.SlotWidget;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -48,6 +51,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -175,7 +179,6 @@ public class HudDebugRendererRegister {
         // 渲染当前HUD信息
         renders.put(ServerUtils.ofIdentifier("hud_information_display"), (context) -> {
             if (DebugSettings.HUDInformationDisplay.get()) {
-                Minecraft client = ClientUtils.getClient();
                 Screen screen = ClientUtils.getCurrentScreen();
                 if (screen == null) {
                     return;
@@ -184,8 +187,8 @@ public class HudDebugRendererRegister {
                 String name = screen.getClass().getSimpleName();
                 list.add("类名：" + name);
                 MouseHandler mouse = ClientUtils.getMouse();
-                double mouseX = mouse.xpos();
-                double mouseY = mouse.ypos();
+                double mouseX = mouse.xpos;
+                double mouseY = mouse.ypos;
                 list.add("鼠标X：" + (int) mouseX);
                 list.add("鼠标Y：" + (int) mouseY);
                 if (screen instanceof AbstractContainerScreen<?> handledScreen) {
@@ -199,12 +202,9 @@ public class HudDebugRendererRegister {
                         list.add("屏幕类型id：null");
                     }
                     HandledScreenAccessor accessor = (HandledScreenAccessor) handledScreen;
-                    Window window = client.getWindow();
-                    Slot slot = accessor.invokerGetSlotAt(
-                            mouseX * (double) window.getGuiScaledWidth() / (double) window.getScreenWidth(),
-                            mouseY * (double) window.getGuiScaledHeight() / (double) window.getScreenHeight()
-                    );
-                    if (slot != null) {
+                    SlotWidget slotWidget = accessor.invokerGetSlotAt();
+                    if (slotWidget != null) {
+                        Slot slot = slotWidget.slot();
                         list.add("槽位索引：" + slot.index);
                         list.add("槽位物品栏：" + slot.container.getClass().getSimpleName());
                     }
@@ -238,11 +238,11 @@ public class HudDebugRendererRegister {
         ScreenEvents.AFTER_INIT.register((_, screen, _, _) -> {
             if (DebugSettings.HUDInformationDisplay.get() && screen instanceof AbstractContainerScreen<?> handledScreen) {
                 NonNullList<Slot> slots = handledScreen.getMenu().slots;
-                slots.forEach(slot -> ((ScreenAccessor) screen).putDrawable((context) -> {
+                slots.forEach(slot -> ((ScreenAccessor) screen).putDrawable((Widget) (graphics) -> {
                     HandledScreenAccessor accessor = (HandledScreenAccessor) handledScreen;
                     int x = accessor.getX();
                     int y = accessor.getY();
-                    context.text(
+                    graphics.text(
                             screen.getFont(),
                             String.valueOf(slot.index),
                             slot.x + x + 1,
@@ -282,5 +282,26 @@ public class HudDebugRendererRegister {
     @Contract("-> !null")
     private static IntegratedServer getServer() {
         return ClientUtils.getServer();
+    }
+
+    @FunctionalInterface
+    public interface Widget extends GuiEventListener, Renderable, NarratableEntry {
+        @Override
+        default void setFocused(boolean focused) {
+        }
+
+        @Override
+        default boolean isFocused() {
+            return false;
+        }
+
+        @Override
+        default @NonNull NarrationPriority narrationPriority() {
+            return NarrationPriority.NONE;
+        }
+
+        @Override
+        default void updateNarration(@NonNull NarrationElementOutput output) {
+        }
     }
 }
