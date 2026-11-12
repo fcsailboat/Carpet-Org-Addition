@@ -68,7 +68,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -301,11 +300,13 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             MinecraftServer server = context.getSource().getServer();
             ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
-            Stream<String> stream = manager.listGrouped()
+            manager.listGrouped()
                     .keySet()
                     .stream()
-                    .map(StringArgumentType::escapeIfRequired);
-            return SharedSuggestionProvider.suggest(stream, builder);
+                    .map(StringArgumentType::escapeIfRequired)
+                    .filter(str -> str.toLowerCase(Locale.ROOT).contains(builder.getRemainingLowerCase()))
+                    .forEach(builder::suggest);
+            return builder.buildFuture();
         };
     }
 
@@ -322,7 +323,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                     .toList();
             StringReader reader = new StringReader(builder.getInput());
             reader.setCursor(builder.getStart());
-            // 输入... group add ...命令时，如果玩家本来就在某个组中，则命令建议中不显示该组，remove命令同理
+            // 输入... group add ...命令时，如果玩家本来就在某个组中，则命令建议中不显示该组，remove子命令同理
             Optional<Set<String>> optional = manager.get(name).map(FakePlayerSerializer::getGroups);
             if (optional.stream().flatMap(Set::stream).noneMatch(reader.getRemaining()::equals)) {
                 CommandUtils.suggestQuotedIfRequired(reader).forEach(builder::suggest);
@@ -345,13 +346,14 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
             String name = StringArgumentType.getString(context, "name");
-            Stream<String> stream = manager.listGrouped().keySet().stream();
             Optional<FakePlayerSerializer> optional = manager.get(name);
-            if (optional.isPresent()) {
-                Predicate<String> predicate = group -> optional.get().getGroups().contains(group);
-                stream = stream.filter(predicate);
-            }
-            return SharedSuggestionProvider.suggest(stream.map(StringArgumentType::escapeIfRequired), builder);
+            manager.listGrouped().keySet()
+                    .stream()
+                    .filter(group -> optional.map(serializer -> serializer.getGroups().contains(group)).orElse(false))
+                    .map(StringArgumentType::escapeIfRequired)
+                    .filter(str -> str.toLowerCase(Locale.ROOT).contains(builder.getRemainingLowerCase()))
+                    .forEach(builder::suggest);
+            return builder.buildFuture();
         };
     }
 

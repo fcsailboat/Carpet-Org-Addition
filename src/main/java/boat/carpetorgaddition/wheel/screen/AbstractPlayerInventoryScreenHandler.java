@@ -76,7 +76,7 @@ public abstract class AbstractPlayerInventoryScreenHandler<T extends Container> 
     }
 
     /**
-     * 添加当前玩家物品栏槽位（GUi下版部分）
+     * 添加当前玩家物品栏槽位（GUI下半部分）
      */
     private void addPlayerInventorySlot(Inventory inventory) {
         int index = 0;
