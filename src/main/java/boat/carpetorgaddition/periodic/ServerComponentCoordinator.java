@@ -9,6 +9,7 @@ import boat.carpetorgaddition.rule.CustomRuleValueManager;
 import boat.carpetorgaddition.rule.RuleConfig;
 import boat.carpetorgaddition.wheel.inventory.FabricPlayerAccessManager;
 import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
+import boat.carpetorgaddition.wheel.mixin.PeriodicTaskManagerInterface;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;

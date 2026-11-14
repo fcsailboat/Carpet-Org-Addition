@@ -27,6 +27,7 @@ public class FinderByNameCommand extends AbstractClientCommand {
 
     @Override
     public void register(String name) {
+        // TODO 添加交易查找支持
         this.dispatcher.register(ClientCommands.literal(name)
                 .then(ClientCommands.literal("item")
                         .then(ClientCommands.argument("item", new ClientObjectArgumentType.ClientItemArgumentType(true))

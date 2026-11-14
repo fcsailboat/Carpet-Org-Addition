@@ -14,6 +14,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -38,8 +39,8 @@ public class PlantAction extends AbstractPlayerAction {
     private BlockExcavator excavator;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("plant");
 
-    public PlantAction(EntityPlayerMPFake fakePlayer) {
-        super(fakePlayer);
+    public PlantAction(MinecraftServer server) {
+        super(server);
     }
 
     @Override
@@ -335,8 +336,7 @@ public class PlantAction extends AbstractPlayerAction {
     }
 
     @Override
-    protected void onAssignPlayer() {
-        EntityPlayerMPFake fakePlayer = this.getFakePlayer();
+    protected void onAssignPlayer(EntityPlayerMPFake fakePlayer) {
         this.inventory = PlayerStorageInventory.of(fakePlayer);
         this.excavator = PlayerComponentCoordinator.of(fakePlayer).getBlockExcavator();
     }

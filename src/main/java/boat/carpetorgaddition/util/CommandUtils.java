@@ -6,11 +6,13 @@ import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.CommandHelper;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -30,6 +32,13 @@ import java.util.*;
 
 public class CommandUtils {
     public static final String PLAYER = "player";
+    public static final SuggestionProvider<CommandSourceStack> SUGGEST_QUOTED_IF_REQUIRED = (_, builder) -> {
+        StringReader reader = new StringReader(builder.getInput());
+        reader.setCursor(builder.getStart());
+        List<String> suggested = suggestQuotedIfRequired(reader);
+        suggested.forEach(builder::suggest);
+        return builder.buildFuture();
+    };
 
     private CommandUtils() {
     }
@@ -208,6 +217,7 @@ public class CommandUtils {
     /**
      * 从字符串解析一个UUID
      */
+    @SuppressWarnings("unused")
     public static UUID parseUuidFromString(String uuid) throws CommandSyntaxException {
         try {
             return UUID.fromString(uuid);
@@ -266,6 +276,24 @@ public class CommandUtils {
             }
         }
         return Optional.empty();
+    }
+
+    public static List<String> suggestQuotedIfRequired(StringReader reader) {
+        // 不考虑转义字符
+        String input = reader.getRemaining();
+        if (input.startsWith("\"") && input.endsWith("\"")) {
+            if (input.length() == 1) {
+                return List.of("\"\"");
+            }
+            return List.of();
+        }
+        boolean shouldQuote = input.chars().anyMatch(value -> !StringReader.isAllowedInUnquotedString((char) value));
+        if (shouldQuote) {
+            String prefix = input.startsWith("\"") ? "" : "\"";
+            String suffix = input.endsWith("\"") ? "" : "\"";
+            return List.of(prefix + input + suffix);
+        }
+        return List.of();
     }
 
     @FunctionalInterface

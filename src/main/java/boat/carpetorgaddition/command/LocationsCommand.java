@@ -99,7 +99,7 @@ public class LocationsCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取路径点名称和位置对象
         String name = StringArgumentType.getString(context, "name");
-        if (IOUtils.isValidFileName(name)) {
+        if (IOUtils.isInvalidFileName(name)) {
             throw CommandUtils.createException(LocalizationKeys.File.INVALID_NAME.translate());
         }
         if (blockPos == null) {

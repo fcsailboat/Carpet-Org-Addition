@@ -4,12 +4,12 @@ import boat.carpetorgaddition.network.s2c.BackgroundSpriteSyncS2CPacket;
 import boat.carpetorgaddition.network.s2c.OldPlayerInventoryScreenSyncS2CPacket;
 import boat.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
 import boat.carpetorgaddition.network.s2c.WithButtonScreenSyncS2CPacket;
-import boat.carpetorgaddition.periodic.PeriodicTaskManagerInterface;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.util.PlayerUtils;
+import boat.carpetorgaddition.wheel.mixin.PeriodicTaskManagerInterface;
 import boat.carpetorgaddition.wheel.screen.AbstractPlayerInventoryScreenHandler;
-import boat.carpetorgaddition.wheel.screen.BackgroundSpriteSyncServer;
-import boat.carpetorgaddition.wheel.screen.UnavailableSlotSyncInterface;
+import boat.carpetorgaddition.wheel.screen.BackgroundSpriteAccessor;
+import boat.carpetorgaddition.wheel.screen.UnavailableSlotRange;
 import boat.carpetorgaddition.wheel.screen.WithButtonPlayerInventoryScreenHandler;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -65,13 +65,13 @@ public class ServerPlayerEntityMixin implements PeriodicTaskManagerInterface {
     @Inject(method = "openMenu", at = @At(value = "RETURN", ordinal = 2))
     private void openHandledScreen(MenuProvider provider, CallbackInfoReturnable<OptionalInt> cir, @Local(name = "menu") AbstractContainerMenu menu) {
         // 同步不可用槽位
-        if (menu instanceof UnavailableSlotSyncInterface unavailable) {
+        if (menu instanceof UnavailableSlotRange unavailable) {
             PlayerUtils.sendNetworkPacket(this.self, new UnavailableSlotSyncS2CPacket(menu.containerId, unavailable.from(), unavailable.to()));
         } else if (menu instanceof WithButtonPlayerInventoryScreenHandler) {
             PlayerUtils.sendNetworkPacket(this.self, new WithButtonScreenSyncS2CPacket(menu.containerId));
         }
         // 同步槽位背景纹理
-        if (menu instanceof BackgroundSpriteSyncServer background) {
+        if (menu instanceof BackgroundSpriteAccessor background) {
             background.getBackgroundSprite().forEach((index, identifier) ->
                     ServerPlayNetworking.send(this.self, new BackgroundSpriteSyncS2CPacket(menu.containerId, index, identifier)));
         }

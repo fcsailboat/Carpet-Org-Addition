@@ -4,8 +4,6 @@ import com.google.gson.JsonObject;
 
 public abstract class DataUpdater {
     public static final String DATA_VERSION = "data_version";
-    @Deprecated(forRemoval = true)
-    public static final int VERSION = 3;
     public static final int ZERO = 0;
     public static final DataUpdater UNCHANGED = new UnchangedDataUpdater();
 

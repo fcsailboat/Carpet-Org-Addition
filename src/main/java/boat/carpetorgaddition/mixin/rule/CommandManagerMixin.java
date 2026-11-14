@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Commands.class)
 public class CommandManagerMixin {
+    // TODO 添加新选项控制非玩家命令是否显示
     @Inject(method = "performCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;executeCommandInContext(Lnet/minecraft/commands/CommandSourceStack;Ljava/util/function/Consumer;)V"))
     private void recordCommand(ParseResults<CommandSourceStack> command, String commandString, CallbackInfo ci) {
         if (CarpetOrgAdditionSettings.RECORD_PLAYER_COMMAND.value()) {

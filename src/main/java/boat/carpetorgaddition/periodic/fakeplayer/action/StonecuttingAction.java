@@ -51,8 +51,8 @@ public class StonecuttingAction extends AbstractPlayerAction {
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("stonecutting");
     private int nextTimeMergeEmptyShulkerBox = 40;
 
-    public StonecuttingAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, int button) {
-        super(fakePlayer);
+    public StonecuttingAction(MinecraftServer server, ItemStackPredicate predicate, int button) {
+        super(server);
         this.predicate = predicate;
         this.button = button;
     }
@@ -114,8 +114,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 } else {
                     // 切石机未输出物品，可能是配方指定有误
                     this.stop();
-                    MinecraftServer server = ServerUtils.getServer(fakePlayer);
-                    MessageUtils.sendMessage(server, KEY.then("error").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
+                    MessageUtils.sendMessage(this.server, KEY.then("error").translate(fakePlayer.getDisplayName(), this.getDisplayName()));
                     return;
                 }
             } else {
@@ -181,7 +180,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 int index = stackedNonEmptyShulkerIndex.getInt(i);
                 ItemStack itemStack = controller.getSlot(index).getItem();
                 // 仅在合成结束时合并一次空潜影盒，可能导致在合并潜影盒之前，空潜影盒把空槽位占满，进而导致无法从堆叠的非空潜影盒中取物，但不考虑这种情况
-                ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, this.predicate);
+                ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, this.predicate);
                 if (content.isEmpty()) {
                     continue;
                 }
@@ -194,9 +193,9 @@ public class StonecuttingAction extends AbstractPlayerAction {
     }
 
     private boolean takeItemFromShulkerBox(MenuController<StonecutterMenu> controller, ItemStack shulker) {
-        if (InventoryUtils.isOperableSulkerBox(shulker)) {
+        if (InventoryUtils.isOperableShulkerBox(shulker)) {
             // 从潜影盒中查找指定物品
-            ItemStack content = InventoryUtils.pickItemFromShulkerBox(shulker, this.predicate);
+            ItemStack content = InventoryUtils.takeItemFromShulkerBox(shulker, this.predicate);
             if (content.isEmpty()) {
                 return false;
             }
@@ -261,8 +260,8 @@ public class StonecuttingAction extends AbstractPlayerAction {
     }
 
     @Override
-    public void onFakePlayerLogout() {
-        this.getFakePlayerNullable().ifPresent(PlayerUtils::closeScreen);
+    public void onFakePlayerLogout(EntityPlayerMPFake fakePlayer) {
+        PlayerUtils.closeScreen(fakePlayer);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.util;
 
-import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
+import boat.carpetorgaddition.wheel.mixin.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -76,7 +76,7 @@ public class EnchantmentUtils {
         return Enchantment.getFullname(holder, level);
     }
 
-    public static int getMaxLevel(Holder.Reference<Enchantment> enchantment) {
+    public static int getMaxLevel(Holder<Enchantment> enchantment) {
         return enchantment.value().getMaxLevel();
     }
 
@@ -107,18 +107,6 @@ public class EnchantmentUtils {
         for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
             if (entry.getKey().is(enchantment)) {
                 return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean hasBookEnchantment(ItemStack itemStack, ResourceKey<Enchantment> enchantment) {
-        if (itemStack.is(Items.ENCHANTED_BOOK)) {
-            ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
-            for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-                if (entry.getKey().is(enchantment)) {
-                    return true;
-                }
             }
         }
         return false;

@@ -6,10 +6,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Map;
 
 public class BlockEntityTraverser extends WorldTraverser<BlockEntity> {
     private final Level world;
@@ -24,76 +25,22 @@ public class BlockEntityTraverser extends WorldTraverser<BlockEntity> {
         this.world = world;
     }
 
-    // TODO 类需要重新设计
-    @Deprecated
     @Override
-    public @NonNull Iterator<BlockEntity> iterator() {
-        return new Itr();
+    public @NonNull TraverseCursor<BlockEntity> getCursor() {
+        return new Cursor(this.world, this.from, this.to);
     }
 
-    private class Itr implements Iterator<BlockEntity> {
+    private class Cursor implements TraverseCursor<BlockEntity> {
         private BlockEntity next;
         private Iterator<BlockEntity> current;
-        private boolean alreadyNext = false;
-        private final Iterator<Optional<ChunkAccess>> chunkIterator;
+        private LevelChunk currentChunk;
+        private int currentChunkBlockEntityTotal;
+        private int currentChunkBlockEntityVisitedCount;
+        /// 已经遍历过的方块总数，包含方块实体，也包含普通方块
+        private long processedCount = 0L;
+        private final Iterator<ChunkAccess> chunkIterator;
 
-        private Itr() {
-            ChunkTraverser traverser = new ChunkTraverser(world, from, to);
-            this.chunkIterator = traverser.iterator();
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (this.alreadyNext) {
-                return this.next != null;
-            }
-            this.alreadyNext = true;
-            // this.current != null用来在this.chunkIterator.hasNext()耗尽时处理未完成的迭代器
-            while (this.current != null || this.chunkIterator.hasNext()) {
-                if (this.current == null) {
-                    Optional<LevelChunk> optional = this.chunkIterator.next()
-                            .filter(chunk -> chunk instanceof LevelChunk)
-                            .map(chunk -> (LevelChunk) chunk);
-                    // 区块可能未加载
-                    if (optional.isEmpty()) {
-                        continue;
-                    }
-                    this.current = optional.get().getBlockEntities().values().iterator();
-                }
-                while (this.current.hasNext()) {
-                    BlockEntity blockEntity = this.current.next();
-                    if (BlockEntityTraverser.this.contains(blockEntity.getBlockPos())) {
-                        this.next = blockEntity;
-                        return true;
-                    }
-                }
-                this.current = null;
-            }
-            return false;
-        }
-
-        @Override
-        public BlockEntity next() {
-            if (!this.hasNext()) {
-                throw new NoSuchElementException();
-            }
-            this.alreadyNext = false;
-            BlockEntity blockEntity = this.next;
-            this.next = null;
-            return blockEntity;
-        }
-    }
-
-    public Cursor cursor() {
-        return new CursorImpl(this.world, this.from, this.to);
-    }
-
-    private class CursorImpl implements Cursor {
-        private BlockEntity next;
-        private Iterator<BlockEntity> current;
-        private final Iterator<Optional<ChunkAccess>> chunkIterator;
-
-        private CursorImpl(Level world, BlockPos from, BlockPos to) {
+        private Cursor(Level world, BlockPos from, BlockPos to) {
             ChunkTraverser traverser = new ChunkTraverser(world, from, to);
             this.chunkIterator = traverser.iterator();
         }
@@ -103,51 +50,85 @@ public class BlockEntityTraverser extends WorldTraverser<BlockEntity> {
             if (this.next != null) {
                 return Step.ELEMENT;
             }
-            // this.current != null用来在this.chunkIterator.hasNext()耗尽时处理未完成的迭代器
             long start = System.currentTimeMillis();
             while (this.current != null || this.chunkIterator.hasNext()) {
                 if (System.currentTimeMillis() - start > timeSliceMillis) {
                     return Step.PAUSED;
                 }
                 if (this.current == null) {
-                    Optional<LevelChunk> optional = this.chunkIterator.next()
-                            .filter(chunk -> chunk instanceof LevelChunk)
-                            .map(chunk -> (LevelChunk) chunk);
-                    // 区块可能未加载
-                    if (optional.isEmpty()) {
+                    ChunkAccess chunkAccess = this.chunkIterator.next();
+                    if (chunkAccess instanceof LevelChunk chunk) {
+                        Map<BlockPos, BlockEntity> entities = chunk.getBlockEntities();
+                        if (entities.isEmpty()) {
+                            this.addChunkToProcessedBlockCount(chunk);
+                            continue;
+                        }
+                        Collection<BlockEntity> blockEntities;
+                        if (contains(chunk.getPos()) && isCompleteHeight(world)) {
+                            blockEntities = entities.values();
+                        } else if (intersects(chunk.getPos())) {
+                            blockEntities = entities.entrySet()
+                                    .stream()
+                                    .filter(entry -> contains(entry.getKey()))
+                                    .map(Map.Entry::getValue)
+                                    .toList();
+                            if (blockEntities.isEmpty()) {
+                                this.addChunkToProcessedBlockCount(chunk);
+                                continue;
+                            }
+                        } else {
+                            this.addChunkToProcessedBlockCount(chunk);
+                            continue;
+                        }
+                        this.current = blockEntities.iterator();
+                        this.currentChunkBlockEntityTotal = blockEntities.size();
+                        this.currentChunk = chunk;
+                    } else {
+                        this.addChunkToProcessedBlockCount(chunkAccess);
                         continue;
                     }
-                    this.current = optional.get().getBlockEntities().values().iterator();
                 }
-                while (this.current.hasNext()) {
+                if (this.current.hasNext()) {
                     BlockEntity blockEntity = this.current.next();
-                    if (contains(blockEntity.getBlockPos())) {
-                        this.next = blockEntity;
-                        return Step.ELEMENT;
-                    }
+                    this.currentChunkBlockEntityVisitedCount++;
+                    this.next = blockEntity;
+                    return Step.ELEMENT;
                 }
                 this.current = null;
+                this.addChunkToProcessedBlockCount(this.getProcessedCount(this.currentChunk));
+                this.currentChunk = null;
+                this.currentChunkBlockEntityTotal = 0;
+                this.currentChunkBlockEntityVisitedCount = 0;
             }
             return Step.DONE;
         }
 
+        private void addChunkToProcessedBlockCount(@NonNull ChunkAccess chunk) {
+            this.addChunkToProcessedBlockCount((long) getOverlapBlockCount(chunk.getPos()) * height());
+        }
+
+        private void addChunkToProcessedBlockCount(long count) {
+            this.processedCount += count;
+        }
+
         @Override
-        public BlockEntity take() {
+        public @NonNull BlockEntity take() {
             BlockEntity blockEntity = this.next;
             this.next = null;
             return blockEntity;
         }
-    }
 
-    public interface Cursor {
-        Step advance(long timeSlice);
+        private long getProcessedCount(@Nullable ChunkAccess chunk) {
+            if (chunk == null || this.currentChunkBlockEntityTotal == 0L) {
+                return 0L;
+            }
+            long chunkBlockTotal = (long) getOverlapBlockCount(chunk.getPos()) * height();
+            return Math.round(((double) this.currentChunkBlockEntityVisitedCount / this.currentChunkBlockEntityTotal) * chunkBlockTotal);
+        }
 
-        BlockEntity take();
-    }
-
-    public enum Step {
-        ELEMENT,
-        PAUSED,
-        DONE
+        @Override
+        public long getProcessedCount() {
+            return this.processedCount + this.getProcessedCount(this.currentChunk);
+        }
     }
 }

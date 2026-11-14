@@ -14,6 +14,7 @@ import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.predicate.BlockStatePredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.QuickBlockPosTraverser;
+import boat.carpetorgaddition.wheel.traverser.TraverseCursor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -28,7 +29,7 @@ public class BlockSearchTask extends ServerSearchTask {
     protected final ServerLevel world;
     private final QuickBlockPosTraverser traverser;
     protected final BlockPos sourcePos;
-    private QuickBlockPosTraverser.QuickBlockPosIterator iterator;
+    private TraverseCursor<BlockPos> iterator;
     private FindState findState;
     private final BlockStatePredicate predicate;
     /**
@@ -87,26 +88,36 @@ public class BlockSearchTask extends ServerSearchTask {
     // 查找方块
     private void searchBlock() {
         if (this.iterator == null) {
-            this.iterator = this.traverser.iterator();
+            this.iterator = this.traverser.getCursor();
         }
-        while (this.iterator.hasNext()) {
+        while (true) {
             this.checkCancelled();
             if (this.isTimeExpired()) {
                 return;
             }
-            Optional<BlockPos> optional = this.iterator.next();
-            if (optional.isPresent() && this.blockPosCache.contains(optional.get())) {
-                continue;
-            }
-            try {
-                optional.ifPresent(this::iterate);
-                this.progressBar.setProgress(this.iterator.getCount());
-            } catch (ForceReturnException e) {
-                return;
+            switch (this.iterator.advance(25L)) {
+                case ELEMENT -> {
+                    BlockPos blockPos = this.iterator.take();
+                    if (!this.blockPosCache.contains(blockPos)) {
+                        try {
+                            this.iterate(blockPos);
+                        } catch (ForceReturnException e) {
+                            return;
+                        }
+                    }
+                    this.progressBar.setProgress(this.iterator.getProcessedCount());
+                }
+                case PAUSED -> {
+                    this.progressBar.setProgress(this.iterator.getProcessedCount());
+                    return;
+                }
+                case DONE -> {
+                    this.findState = FindState.SORT;
+                    this.progressBar.setCompleted();
+                    return;
+                }
             }
         }
-        this.findState = FindState.SORT;
-        this.progressBar.setCompleted();
     }
 
     private void iterate(BlockPos begin) {

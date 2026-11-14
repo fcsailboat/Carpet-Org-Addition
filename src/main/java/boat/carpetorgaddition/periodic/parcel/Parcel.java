@@ -98,7 +98,7 @@ public class Parcel implements Comparable<Parcel> {
         this.sender = sender;
         this.recipient = recipient;
         this.uuid = uuid;
-        this.parcels = new ImmutableInventory(parcel);
+        this.parcels = ImmutableInventory.of(parcel);
         this.id = id;
         this.time = time;
         this.worldFormat = new WorldFormat(server, EXPRESS);
@@ -582,7 +582,7 @@ public class Parcel implements Comparable<Parcel> {
     }
 
     private Container getParcels() {
-        return InventoryUtils.removeEmpty(this.parcels);
+        return InventoryUtils.stream(this.parcels).filter(InventoryUtils::nonEmpty).collect(InventoryUtils.toInventory());
     }
 
     /**

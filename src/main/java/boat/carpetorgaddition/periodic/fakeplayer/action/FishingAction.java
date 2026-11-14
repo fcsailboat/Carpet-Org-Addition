@@ -5,9 +5,9 @@ import boat.carpetorgaddition.mixin.accessor.FishingBobberEntityAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
-import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -22,8 +22,8 @@ public class FishingAction extends AbstractPlayerAction {
     private int timer = 0;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("fishing");
 
-    public FishingAction(EntityPlayerMPFake fakePlayer) {
-        super(fakePlayer);
+    public FishingAction(MinecraftServer server) {
+        super(server);
     }
 
     @Override

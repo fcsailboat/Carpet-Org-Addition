@@ -4,8 +4,8 @@ import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.periodic.FakePlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.FakePlayerGameExitMarker;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
+import boat.carpetorgaddition.wheel.mixin.FakePlayerGameExitMarker;
 import carpet.patches.EntityPlayerMPFake;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -128,7 +128,7 @@ public class EntityPlayerMPFakeMixin implements FakePlayerGameExitMarker {
     private void kill(Component reason, CallbackInfo ci) {
         FakePlayerComponentCoordinator coordinator = FakePlayerComponentCoordinator.of(this.self);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
-        actionManager.getAction().onFakePlayerLogout();
+        actionManager.getAction().onFakePlayerLogout(this.self);
         actionManager.stop();
     }
 

@@ -15,7 +15,6 @@ import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.CylinderBlockPosTraverser;
-import boat.carpetorgaddition.wheel.traverser.EntityTraverser;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -150,8 +149,8 @@ public class BedrockAction extends AbstractPlayerAction {
      */
     private static final boolean ALLOW_TELEPORT = true;
 
-    private BedrockAction(EntityPlayerMPFake fakePlayer, BlockPosTraverser traverser, BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) {
-        super(fakePlayer);
+    private BedrockAction(MinecraftServer server, BlockPosTraverser traverser, BedrockRegionType regionType, boolean ai, boolean timedMaterialRecycling) {
+        super(server);
         this.traverser = traverser;
         this.regionType = regionType;
         this.ai = ai;
@@ -161,12 +160,12 @@ public class BedrockAction extends AbstractPlayerAction {
         this.minY = traverser.getMinY();
     }
 
-    public BedrockAction(EntityPlayerMPFake fakePlayer, BlockPos from, BlockPos to, boolean ai, boolean timedMaterialRecycling) {
-        this(fakePlayer, new BlockPosTraverser(from, to), BedrockRegionType.CUBOID, ai, timedMaterialRecycling);
+    public BedrockAction(MinecraftServer server, BlockPos from, BlockPos to, boolean ai, boolean timedMaterialRecycling) {
+        this(server, new BlockPosTraverser(from, to), BedrockRegionType.CUBOID, ai, timedMaterialRecycling);
     }
 
-    public BedrockAction(EntityPlayerMPFake fakePlayer, BlockPos center, int radius, int height, boolean ai, boolean timedMaterialRecycling) {
-        this(fakePlayer, new CylinderBlockPosTraverser(center, radius, height), BedrockRegionType.CYLINDER, ai, timedMaterialRecycling);
+    public BedrockAction(MinecraftServer server, BlockPos center, int radius, int height, boolean ai, boolean timedMaterialRecycling) {
+        this(server, new CylinderBlockPosTraverser(center, radius, height), BedrockRegionType.CYLINDER, ai, timedMaterialRecycling);
     }
 
     @Override
@@ -237,9 +236,8 @@ public class BedrockAction extends AbstractPlayerAction {
                     .builder(fakePlayer.getDisplayName(), minute)
                     .setGrayItalic()
                     .build();
-            MinecraftServer server = this.getServer();
-            MessageUtils.sendEmptyMessage(server);
-            MessageUtils.sendMessage(server, first);
+            MessageUtils.sendEmptyMessage(this.server);
+            MessageUtils.sendMessage(this.server, first);
             if (remaining == 0L) {
                 PlayerUtils.exitGame(fakePlayer);
                 return;
@@ -248,8 +246,8 @@ public class BedrockAction extends AbstractPlayerAction {
                         .builder(remaining)
                         .setGrayItalic()
                         .build();
-                MessageUtils.sendMessage(server, second);
-                ServerUtils.forEachPlayer(server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
+                MessageUtils.sendMessage(this.server, second);
+                ServerUtils.forEachRealPlayer(this.server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
             }
         }
         this.executeWorkTick();
@@ -600,7 +598,7 @@ public class BedrockAction extends AbstractPlayerAction {
         }
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
             return list.stream()
-                    .filter(InventoryUtils::isOperableSulkerBox)
+                    .filter(InventoryUtils::isOperableShulkerBox)
                     .map(ContainerComponentInventory::new)
                     .anyMatch(inventory -> hasMaterial(inventory, pistonCount, levelCount));
         }
@@ -979,10 +977,10 @@ public class BedrockAction extends AbstractPlayerAction {
 
     private boolean hasFallingSand(int range, BlockPos blockPos) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        Level world = ServerUtils.getWorld(fakePlayer);
+        ServerLevel world = ServerUtils.getWorld(fakePlayer);
         BlockPos from = new BlockPos(blockPos.getX() - range, blockPos.getY(), blockPos.getZ() - range);
         BlockPos to = new BlockPos(blockPos.getX() + range, ServerUtils.getMaxArchitectureAltitude(world), blockPos.getZ() + range);
-        return new EntityTraverser<>(world, from, to, FallingBlockEntity.class).isPresent();
+        return ServerUtils.hasEntityIn(world, from, to, FallingBlockEntity.class);
     }
 
     /**
@@ -1351,11 +1349,11 @@ public class BedrockAction extends AbstractPlayerAction {
     }
 
     @Override
-    protected void onAssignPlayer() {
-        this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this::getMovingTarget);
-        this.inventory = PlayerStorageInventory.of(this.getFakePlayer());
-        this.excavator = PlayerComponentCoordinator.of(this.getFakePlayer()).getBlockExcavator();
-        this.initialPosition = ServerUtils.getFootPos(this.getFakePlayer());
+    protected void onAssignPlayer(EntityPlayerMPFake fakePlayer) {
+        this.pathfinder = FakePlayerPathfinder.of(fakePlayer, this::getMovingTarget);
+        this.inventory = PlayerStorageInventory.of(fakePlayer);
+        this.excavator = PlayerComponentCoordinator.of(fakePlayer).getBlockExcavator();
+        this.initialPosition = ServerUtils.getFootPos(fakePlayer);
     }
 
     @Override
