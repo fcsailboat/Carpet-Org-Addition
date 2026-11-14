@@ -23,6 +23,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.commands.suggestions.ServerOnlyCustomSuggestion;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,13 +40,13 @@ import java.util.function.Supplier;
 @NullMarked
 public class CommandUtils {
     public static final String PLAYER = "player";
-    public static final SuggestionProvider<CommandSourceStack> SUGGEST_QUOTED_IF_REQUIRED = (_, builder) -> {
+    public static final SuggestionProvider<CommandSourceStack> SUGGEST_QUOTED_IF_REQUIRED = ((ServerOnlyCustomSuggestion) (_, _, builder) -> {
         StringReader reader = new StringReader(builder.getInput());
         reader.setCursor(builder.getStart());
         List<String> suggested = suggestQuotedIfRequired(reader);
         suggested.forEach(builder::suggest);
         return builder.buildFuture();
-    };
+    }).toBrigadier();
 
     private CommandUtils() {
     }

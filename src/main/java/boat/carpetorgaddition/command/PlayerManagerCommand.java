@@ -35,9 +35,6 @@ import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -309,8 +306,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private SuggestionProvider<CommandSourceStack> suggestAddableGroupNames() {
-        return (context, builder) -> {
-            MinecraftServer server = context.getSource().getServer();
+        return ((ServerOnlyCustomSuggestion) (server, context, builder) -> {
             ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
             String name = StringArgument.getString(context, "name");
@@ -335,7 +331,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                         .forEach(builder::suggest);
             }
             return builder.buildFuture();
-        };
+        }).toBrigadier();
     }
 
     private SuggestionProvider<CommandSourceStack> suggestRemovableGroupNames() {
