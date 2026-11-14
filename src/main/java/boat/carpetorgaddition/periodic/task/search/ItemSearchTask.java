@@ -7,7 +7,9 @@ import boat.carpetorgaddition.mixin.accessor.AbstractHorseEntityAccessor;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
+import boat.carpetorgaddition.wheel.ProgressBar;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.inventory.ImmutableInventory;
 import boat.carpetorgaddition.wheel.page.PageManager;
@@ -17,6 +19,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.traverser.BlockEntityTraverser;
+import boat.carpetorgaddition.wheel.traverser.TraverseCursor;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -37,8 +40,7 @@ import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
@@ -50,7 +52,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private final Level world;
     private final BlockEntityTraverser blockEntities;
     private Iterator<Entity> entitySearchIterator;
-    private BlockEntityTraverser.Cursor cursor;
+    private TraverseCursor<BlockEntity> cursor;
     private FindState findState;
     private int count;
     private boolean shulkerBox;
@@ -58,6 +60,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private final ArrayList<Result> results = new ArrayList<>();
     private final PagedCollection pagedCollection;
     private boolean cancelled = false;
+    private final ProgressBar progressBar;
     public static final LocalizationKey KEY = FinderCommand.KEY.then("item");
 
     public ItemSearchTask(Level world, ItemStackPredicate predicate, BlockEntityTraverser blockEntities, CommandSourceStack source, ServerPlayer player) {
@@ -68,6 +71,7 @@ public class ItemSearchTask extends ServerSearchTask {
         this.predicate = predicate;
         MinecraftServer server = source.getServer();
         PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
+        this.progressBar = new ProgressBar((long) blockEntities.length() * blockEntities.width() * blockEntities.height());
         this.pagedCollection = pageManager.newPagedCollection(this.source);
     }
 
@@ -79,7 +83,11 @@ public class ItemSearchTask extends ServerSearchTask {
         this.checkCancelled();
         while (this.isTimeRemaining()) {
             switch (this.findState) {
-                case BLOCK -> searchFromContainer();
+                case BLOCK -> {
+                    searchFromContainer();
+                    Component progress = KEY.then("progress").translate(this.predicate.getDisplayName(), this.progressBar.getDisplay());
+                    MessageUtils.sendMessageToHud(this.player, progress);
+                }
                 case ENTITY -> searchFromEntity();
                 case SORT -> sort();
                 case FEEDBACK -> feedback();
@@ -93,7 +101,7 @@ public class ItemSearchTask extends ServerSearchTask {
     // 从容器查找
     private void searchFromContainer() {
         if (this.cursor == null) {
-            this.cursor = blockEntities.cursor();
+            this.cursor = blockEntities.getCursor();
         }
         while (true) {
             this.checkCancelled();
@@ -105,20 +113,44 @@ public class ItemSearchTask extends ServerSearchTask {
                 case ELEMENT -> {
                     BlockEntity blockEntity = this.cursor.take();
                     BlockPos blockPos = blockEntity.getBlockPos();
-                    if (blockEntity instanceof Container inventory) {
-                        // 获取容器名称
-                        Component containerName
-                                = inventory instanceof BaseContainerBlockEntity lockableContainer
-                                ? lockableContainer.getName()
-                                : this.world.getBlockState(blockPos).getBlock().getName();
-                        this.count(inventory, blockPos, containerName);
+                    Component blockName = this.world.getBlockState(blockPos).getBlock().getName();
+                    switch (blockEntity) {
+                        // 容器
+                        case Container inventory -> {
+                            // 获取容器名称
+                            Component containerName = inventory instanceof BaseContainerBlockEntity baseContainer
+                                    ? baseContainer.getName()
+                                    : blockName;
+                            this.count(inventory, blockPos, containerName);
+                        }
+                        // 可疑的沙子，可疑的沙砾
+                        case BrushableBlockEntity brushable -> {
+                            if (brushable.lootTable == null) {
+                                this.count(ImmutableInventory.of(brushable.getItem()), blockPos, blockName);
+                            }
+                        }
+                        // 讲台
+                        case LecternBlockEntity lectern -> {
+                            ImmutableInventory inventory = ImmutableInventory.of(lectern.getBook());
+                            this.count(inventory, blockPos, blockName);
+                        }
+                        // 营火、灵魂营火
+                        case CampfireBlockEntity campfire -> {
+                            ImmutableInventory inventory = ImmutableInventory.of(campfire.getItems());
+                            this.count(inventory, blockPos, blockName);
+                        }
+                        default -> {
+                        }
                     }
+                    this.progressBar.setProgress(this.cursor.getProcessedCount());
                 }
                 case PAUSED -> {
+                    this.progressBar.setProgress(this.cursor.getProcessedCount());
                     return;
                 }
                 case DONE -> {
                     this.findState = FindState.ENTITY;
+                    this.progressBar.setCompleted();
                     return;
                 }
             }
@@ -129,7 +161,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private void searchFromEntity() {
         AABB box = blockEntities.toBox();
         if (this.entitySearchIterator == null) {
-            this.entitySearchIterator = this.world.getEntitiesOfClass(Entity.class, box).iterator();
+            this.entitySearchIterator = ServerUtils.getEntities(this.world, box, Entity.class).iterator();
         }
         while (this.entitySearchIterator.hasNext()) {
             this.checkCancelled();
@@ -137,6 +169,9 @@ public class ItemSearchTask extends ServerSearchTask {
                 return;
             }
             Entity entity = this.entitySearchIterator.next();
+            if (entity.isRemoved()) {
+                continue;
+            }
             switch (entity) {
                 // 掉落物
                 case ItemEntity itemEntity -> {
@@ -154,7 +189,7 @@ public class ItemSearchTask extends ServerSearchTask {
                 case ItemFrame itemFrame -> {
                     ItemStack itemStack = itemFrame.getItem();
                     if (!itemStack.isEmpty()) {
-                        ImmutableInventory inventory = new ImmutableInventory(itemStack);
+                        ImmutableInventory inventory = ImmutableInventory.of(itemStack);
                         this.count(inventory, itemFrame.blockPosition(), itemFrame.getName());
                     }
                 }
@@ -165,17 +200,13 @@ public class ItemSearchTask extends ServerSearchTask {
                 }
                 // 驴，骡和羊驼
                 case AbstractChestedHorse donkey when donkey.hasChest() -> {
-                    ArrayList<ItemStack> list = new ArrayList<>();
                     AbstractHorseEntityAccessor accessor = (AbstractHorseEntityAccessor) donkey;
                     SimpleContainer inventory = accessor.getDonkeyInventory();
-                    for (int i = 0; i < inventory.getContainerSize(); i++) {
-                        list.add(inventory.getItem(i));
-                    }
-                    this.count(new ImmutableInventory(list), donkey.blockPosition(), donkey.getName());
+                    this.count(inventory, donkey.blockPosition(), donkey.getName());
                 }
                 // 悦灵
                 case Allay allay -> {
-                    ImmutableInventory inventory = new ImmutableInventory(allay.getMainHandItem());
+                    ImmutableInventory inventory = ImmutableInventory.of(allay.getMainHandItem());
                     this.count(inventory, allay.blockPosition(), allay.getName());
                 }
                 default -> {

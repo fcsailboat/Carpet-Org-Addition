@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.wheel;
+package boat.carpetorgaddition.wheel.mixin;
 
 public interface FakePlayerGameExitMarker {
     void carpet_Org_Addition$markExitingTheGame();

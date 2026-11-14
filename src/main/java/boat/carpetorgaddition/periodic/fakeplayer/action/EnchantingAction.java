@@ -7,10 +7,10 @@ import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import boat.carpetorgaddition.wheel.traverser.EntityTraverser;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -24,8 +24,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,8 @@ public class EnchantingAction extends AbstractPlayerAction {
     private static final int OUTPUT = 2;
     private static final LocalizationKey KEY = PlayerActionCommand.KEY.then("enchanting");
 
-    public EnchantingAction(@Nullable EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, Holder.Reference<Enchantment> enchantment) {
-        super(fakePlayer);
+    public EnchantingAction(MinecraftServer server, ItemStackPredicate predicate, Holder.Reference<Enchantment> enchantment) {
+        super(server);
         this.predicate = predicate;
         this.enchantment = enchantment;
     }
@@ -69,14 +70,16 @@ public class EnchantingAction extends AbstractPlayerAction {
 
     public static void openAnvilMenu(EntityPlayerMPFake fakePlayer) {
         ServerLevel world = ServerUtils.getWorld(fakePlayer);
-        PlayerUtils.getHitResult(fakePlayer)
-                .filter(hitResult -> hitResult instanceof BlockHitResult)
-                .map(hitResult -> (BlockHitResult) hitResult)
-                .map(BlockHitResult::getBlockPos)
-                .filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof AnvilBlock)
-                .filter(blockPos -> world.getBlockState(blockPos).is(BlockTags.ANVIL))
-                .filter(blockPos -> new EntityTraverser<>(world, blockPos, blockPos.above(3), FallingBlockEntity.class).isEmpty())
-                .ifPresent(_ -> PlayerUtils.use(fakePlayer));
+        HitResult hitResult = PlayerUtils.getHitResult(fakePlayer);
+        if (hitResult instanceof BlockHitResult blockHitResult) {
+            BlockPos blockPos = blockHitResult.getBlockPos();
+            BlockState blockState = world.getBlockState(blockPos);
+            if (blockState.getBlock() instanceof AnvilBlock && blockState.is(BlockTags.ANVIL)) {
+                if (!ServerUtils.hasEntityIn(world, blockPos, blockPos.above(3), FallingBlockEntity.class)) {
+                    PlayerUtils.use(fakePlayer);
+                }
+            }
+        }
     }
 
     private void enchanting(MenuController<AnvilMenu> controller, MinecraftServer server) {
@@ -190,7 +193,7 @@ public class EnchantingAction extends AbstractPlayerAction {
         if (CarpetOrgAdditionSettings.FAKE_PLAYER_SHULKER_BOX_ITEM_HANDLING.value()) {
             for (ItemStack itemStack : inventory) {
                 if (InventoryUtils.isShulkerBoxItem(itemStack)) {
-                    ItemStack content = InventoryUtils.tryPickItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, predicate, 1);
+                    ItemStack content = InventoryUtils.tryTakeItemFromStackedNonEmptyShulkerBox(fakePlayer, itemStack, predicate, 1);
                     if (content.isEmpty()) {
                         continue;
                     }

@@ -12,11 +12,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@NullMarked
 public class MessageUtils {
     private MessageUtils() {
     }
@@ -64,6 +66,7 @@ public class MessageUtils {
      * @param message 发送文本消息的内容
      */
     public static void sendMessage(CommandSourceStack source, Component message) {
+        // TODO 是否受到发送命令反馈游戏规则影响
         source.sendSystemMessage(message);
         writeLog(source.getTextName(), message.getString());
     }
@@ -176,7 +179,12 @@ public class MessageUtils {
     }
 
     public static void sendEmptyMessage(CommandSourceStack source) {
-        sendEmptyMessage(source.getPlayer());
+        ServerPlayer player = source.getPlayer();
+        if (player != null) {
+            sendEmptyMessage(player);
+        } else {
+            sendMessage(source, TextBuilder.empty());
+        }
     }
 
     public static void sendEmptyMessage(CommandContext<CommandSourceStack> context) {

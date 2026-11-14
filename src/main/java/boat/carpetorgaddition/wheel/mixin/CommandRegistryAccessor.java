@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.wheel;
+package boat.carpetorgaddition.wheel.mixin;
 
 import net.minecraft.commands.CommandBuildContext;
 

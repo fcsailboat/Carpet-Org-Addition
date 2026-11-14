@@ -5,6 +5,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.action.CraftingTableCraftAction;
 import boat.carpetorgaddition.periodic.fakeplayer.action.FakePlayerActionManager;
 import boat.carpetorgaddition.periodic.fakeplayer.action.InventoryCraftAction;
+import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,7 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import org.jspecify.annotations.NonNull;
 
-public class CraftingSetRecipeScreenHandler extends CraftingMenu implements UnavailableSlotSyncInterface {
+public class CraftingSetRecipeScreenHandler extends CraftingMenu implements UnavailableSlotRange {
     /**
      * 一个假玩家对象，类中所有操作都是围绕这个假玩家进行的
      */
@@ -76,7 +77,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingMenu implements Unav
             for (int i = 0; i < predicates.length; i++) {
                 predicates[i] = new ItemStackPredicate(items[i]);
             }
-            actionManager.setAction(new CraftingTableCraftAction(this.fakePlayer, predicates));
+            actionManager.setAction(new CraftingTableCraftAction(ServerUtils.getServer(this.fakePlayer), predicates));
         }
     }
 
@@ -98,7 +99,7 @@ public class CraftingSetRecipeScreenHandler extends CraftingMenu implements Unav
         for (int index = 0; index < 4; index++) {
             predicates[index] = new ItemStackPredicate(items[indices[index]]);
         }
-        return new InventoryCraftAction(this.fakePlayer, predicates);
+        return new InventoryCraftAction(ServerUtils.getServer(fakePlayer), predicates);
     }
 
     @Override

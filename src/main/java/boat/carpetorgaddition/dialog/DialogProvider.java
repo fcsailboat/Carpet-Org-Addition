@@ -2,10 +2,13 @@ package boat.carpetorgaddition.dialog;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.dialog.builder.*;
+import boat.carpetorgaddition.network.event.ActionSource;
+import boat.carpetorgaddition.network.event.CustomClickAction;
 import boat.carpetorgaddition.network.event.CustomClickEvents;
 import boat.carpetorgaddition.network.event.CustomClickKeys;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
+import boat.carpetorgaddition.wheel.nbt.NbtWriter;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -103,6 +106,25 @@ public class DialogProvider {
 
     public Dialog getDialog(Identifier key) {
         return Objects.requireNonNull(dialogs.get(key).get(), () -> "Unknown dialog: " + key);
+    }
+
+    public Dialog getChancePageDialog(int id) {
+        NbtWriter writer = new NbtWriter(server, CustomClickAction.CURRENT_VERSION);
+        writer.putActionSource(ActionSource.DIALOG);
+        writer.putInt("id", id);
+        return MultiActionDialogBuilder.of(LocalizationKeys.Dialog.Title.CHANGE_PAGE.translate())
+                .addInput(
+                        TextInputBuilder.of(CustomClickKeys.PAGE_NUMBER)
+                                .setMaxLength(10)
+                                .setLabel(LocalizationKeys.Dialog.Textbox.PAGE_NUMBER.translate())
+                                .build()
+                )
+                .addActionButton(
+                        ActionButtonBuilder.of(LocalizationKeys.Button.JUMP_TO_PAGE.translate())
+                                .setCustomClickAction(this.server, CustomClickEvents.CHANGE_PAGE, writer.toNbt())
+                                .build()
+                )
+                .build();
     }
 
     public Dialog createErrorNoticeDialog(CommandSyntaxException exception) {

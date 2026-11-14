@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.wheel.screen;
+package boat.carpetorgaddition.wheel.mixin;
 
 import net.minecraft.resources.Identifier;
 

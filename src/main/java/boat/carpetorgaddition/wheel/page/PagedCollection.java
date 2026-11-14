@@ -74,7 +74,13 @@ public class PagedCollection implements Iterable<Page> {
             joiner.append(TextBuilder.of(this.totalPages()).setColor(ChatFormatting.GOLD).build());
             joiner.append("]");
             Component percentage = CommonTexts.percentage((pagination / (double) this.totalPages()));
-            list.add(TextBuilder.of(joiner.join()).setHover(percentage));
+            NbtWriter writer = new NbtWriter(this.server, CustomClickAction.CURRENT_VERSION);
+            writer.putInt(CustomClickKeys.ID, this.id);
+            Component progress = TextBuilder.of(joiner.join())
+                    .setHover(percentage)
+                    .setCustomEvent(CustomClickEvents.OPEN_CHANGE_PAGE_DIALOG, writer)
+                    .build();
+            list.add(progress);
             list.add(" ");
             list.add(this.nextPageButton(pagination));
             list.add(TextBuilder.of("======").setColor(ChatFormatting.DARK_GRAY));

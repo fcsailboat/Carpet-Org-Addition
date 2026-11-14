@@ -3,9 +3,9 @@ package boat.carpetorgaddition.mixin.network;
 import boat.carpetorgaddition.network.s2c.UnavailableSlotSyncS2CPacket;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory;
-import boat.carpetorgaddition.wheel.screen.OldVersionPlayerInventoryScreenClientSide;
-import boat.carpetorgaddition.wheel.screen.UnavailableSlotClientSide;
-import boat.carpetorgaddition.wheel.screen.WithButtonScreenClientSide;
+import boat.carpetorgaddition.wheel.mixin.OldVersionPlayerInventoryScreenClientSide;
+import boat.carpetorgaddition.wheel.mixin.UnavailableSlotClientSide;
+import boat.carpetorgaddition.wheel.mixin.WithButtonScreenClientSide;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -33,7 +33,7 @@ public class ScreenHandlerMixin implements UnavailableSlotClientSide, WithButton
 
     @Inject(method = "clicked", at = @At("HEAD"), cancellable = true)
     private void onSlotClick(int slotIndex, int buttonNum, ContainerInput containerInput, Player player, CallbackInfo ci) {
-        if (MathUtils.isInRange(this.from, this.to, slotIndex) || (this.withButtonMenu && WithButtonPlayerInventory.BUTTON_INDEX_LIST.contains(slotIndex))) {
+        if ((this.to > this.from && MathUtils.isInRange(this.from, this.to, slotIndex)) || (this.withButtonMenu && WithButtonPlayerInventory.BUTTON_INDEX_LIST.contains(slotIndex))) {
             ci.cancel();
         }
     }

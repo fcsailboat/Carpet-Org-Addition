@@ -4,12 +4,14 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.CarpetServer;
-import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -27,10 +29,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityEvent;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.fox.Fox;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enderman;
@@ -46,11 +45,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NullMarked;
@@ -58,10 +57,7 @@ import org.jspecify.annotations.NullMarked;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
@@ -107,11 +103,6 @@ public class ServerUtils {
      */
     public static Optional<ServerPlayer> getPlayer(MinecraftServer server, String name) {
         return Optional.ofNullable(server.getPlayerList().getPlayerByName(name));
-    }
-
-    @Deprecated
-    public static Optional<ServerPlayer> getPlayer(MinecraftServer server, GameProfile gameProfile) {
-        return getPlayer(server, gameProfile.name());
     }
 
     public static ResourceKey<Level> getWorldKey(Identifier id) {
@@ -350,10 +341,6 @@ public class ServerUtils {
 
     public static ServerLevel getWorld(MinecraftServer server, ResourceKey<Level> key) {
         return Objects.requireNonNull(server.getLevel(key));
-    }
-
-    public static BlockState getBlockState(MinecraftServer server, GlobalPos globalPos) {
-        return Objects.requireNonNull(server.getLevel(globalPos.dimension())).getBlockState(globalPos.pos());
     }
 
     public static MinecraftServer getServer(ServerPlayer player) {
@@ -656,7 +643,7 @@ public class ServerUtils {
     /**
      * @return 服务器是否停止运行
      */
-    public static boolean isStoping(MinecraftServer server) {
+    public static boolean isStopping(MinecraftServer server) {
         // server.stopped没有被volatile修饰，它可能不是线程安全的
         return !server.isRunning();
     }
@@ -674,19 +661,19 @@ public class ServerUtils {
         server.schedule(new TickTask(server.getTickCount(), runnable));
     }
 
-    public static boolean areEqual(BlockState first, BlockState second) {
-        if (first.equals(second)) {
-            return true;
-        }
-        if (first.is(second.getBlock()) && first.getProperties().size() == second.getProperties().size()) {
-            for (Property<?> property : first.getProperties()) {
-                if (first.getOptionalValue(property).equals(second.getOptionalValue(property))) {
-                    continue;
-                }
-                return false;
-            }
-            return true;
-        }
-        return false;
+    public static <T extends Entity> List<T> getEntities(Level world, BlockPos from, BlockPos to, Class<T> type) {
+        AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
+        return getEntities(world, aabb, type);
+    }
+
+    public static <T extends Entity> List<T> getEntities(Level world, AABB aabb, Class<T> type) {
+        return world.getEntitiesOfClass(type, aabb);
+    }
+
+    public static <T extends Entity> boolean hasEntityIn(Level world, BlockPos from, BlockPos to, Class<T> type) {
+        AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
+        ArrayList<T> result = new ArrayList<>();
+        world.getEntities(EntityTypeTest.forClass(type), aabb, EntitySelector.NO_SPECTATORS, result, 1);
+        return !result.isEmpty();
     }
 }

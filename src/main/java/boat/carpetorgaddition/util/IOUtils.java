@@ -3,8 +3,9 @@ package boat.carpetorgaddition.util;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.exception.FileOperationException;
-import com.google.gson.*;
-import org.jetbrains.annotations.Contract;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.jspecify.annotations.NullMarked;
 
 import java.io.*;
@@ -16,7 +17,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 
 public class IOUtils {
     public static final String JSON_EXTENSION = ".json";
@@ -25,6 +25,7 @@ public class IOUtils {
     /**
      * 模组配置文件路径
      */
+    @SuppressWarnings("deprecation")
     public static final Path CONFIGURE_DIRECTORY = CarpetOrgAdditionConstants.getConfigDirectory().resolve(CarpetOrgAdditionConstants.COMPACT_MOD_NAME_LOWER_CASE);
     /**
      * 不能包含在文件名中的字符
@@ -80,8 +81,7 @@ public class IOUtils {
      */
     @NullMarked
     public static void write(File file, JsonObject json) throws IOException {
-        String jsonString = GSON.toJson(json, JsonObject.class);
-        write(file, jsonString);
+        write(file, GSON.toJson(json, JsonObject.class));
     }
 
     /**
@@ -202,24 +202,9 @@ public class IOUtils {
     }
 
     /**
-     * json对象中是否包含指定元素
-     *
-     * @param elements 一个字符串数组，数组中只要有一个元素不存在于json中方法就返回false
+     * 文件名称是否无效
      */
-    public static boolean jsonHasElement(JsonObject json, String... elements) {
-        for (String element : elements) {
-            if (json.has(element)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 检查文件名称是否有效
-     */
-    public static boolean isValidFileName(String fileName) {
+    public static boolean isInvalidFileName(String fileName) {
         // 不允许以“.”开头，因为这样的文件名可能被视为隐藏文件
         if (fileName.startsWith(".")) {
             return true;
@@ -247,78 +232,12 @@ public class IOUtils {
     }
 
     /**
-     * 根据键获取json中对应的值，如果不存在，返回默认值
-     *
-     * @param defaultValue 如果为获取到值，返回默认值
-     * @param type         返回值的类型
-     */
-    @Contract(value = "_,_,!null,_ -> !null")
-    public static <T> T getJsonElement(JsonObject json, String key, T defaultValue, Class<T> type) {
-        JsonElement element = json.get(key);
-        if (element == null) {
-            return defaultValue;
-        }
-        // 布尔值
-        if (type == boolean.class || type == Boolean.class) {
-            return type.cast(element.getAsBoolean());
-        }
-        // 整数
-        if (type == byte.class || type == Byte.class) {
-            return type.cast(element.getAsByte());
-        }
-        if (type == short.class || type == Short.class) {
-            return type.cast(element.getAsShort());
-        }
-        if (type == int.class || type == Integer.class) {
-            return type.cast(element.getAsInt());
-        }
-        if (type == long.class || type == Long.class) {
-            return type.cast(element.getAsLong());
-        }
-        // 浮点数
-        if (type == float.class || type == Float.class) {
-            return type.cast(element.getAsFloat());
-        }
-        if (type == double.class || type == Double.class) {
-            return type.cast(element.getAsDouble());
-        }
-        // 字符串
-        if (type == String.class) {
-            return type.cast(element.getAsString());
-        }
-        // jsonObject
-        if (JsonObject.class.isAssignableFrom(type)) {
-            return type.cast(element.getAsJsonObject());
-        }
-        // JsonArray
-        if (JsonArray.class.isAssignableFrom(type)) {
-            return type.cast(element.getAsJsonArray());
-        }
-        throw new IllegalArgumentException();
-    }
-
-    public static <T> Optional<T> getJsonElement(JsonObject json, String key, Class<T> type) {
-        return Optional.ofNullable(getJsonElement(json, key, null, type));
-    }
-
-    /**
      * 获取不带扩展名的文件名
      */
     public static String getFileNameWithoutExtension(File file) {
         String name = file.getName();
         int i = name.lastIndexOf(".");
         return i == -1 ? name : name.substring(0, i);
-    }
-
-    /**
-     * 删除文件扩展名
-     */
-    @Deprecated(forRemoval = true)
-    public static String removeJsonExtension(String fileName) {
-        if (fileName.endsWith(JSON_EXTENSION)) {
-            return fileName.substring(0, fileName.lastIndexOf("."));
-        }
-        return fileName;
     }
 
     public static String removeExtension(File file) {
@@ -361,17 +280,6 @@ public class IOUtils {
         } catch (IOException e) {
             throw new FileOperationException("Unable to delete file %s".formatted(file.toString()), e);
         }
-    }
-
-    /**
-     * 删除一个文件
-     */
-    @Deprecated(forRemoval = true)
-    public static void removeFile(File file) {
-        if (file.delete()) {
-            return;
-        }
-        throw new FileOperationException("Unable to delete file %s".formatted(file.toString()));
     }
 
     /**

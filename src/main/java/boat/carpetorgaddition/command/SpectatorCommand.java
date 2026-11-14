@@ -8,6 +8,7 @@ import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.WorldFormat;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
+import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -20,6 +21,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.commands.SpectateCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -46,9 +48,10 @@ public class SpectatorCommand extends AbstractServerCommand {
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
                 .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_SPECTATOR::value))
-                .executes(context -> setGameMode(context, false))
-                .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
-                        .executes(context -> setGameMode(context, true)))
+                .executes(context -> setGameMode(context, true))
+                .then(Commands.literal("player")
+                        .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
+                                .executes(context -> setGameMode(context, false))))
                 .then(Commands.literal("teleport")
                         .then(Commands.literal("dimension")
                                 .then(Commands.argument("dimension", DimensionArgument.dimension())
@@ -60,33 +63,39 @@ public class SpectatorCommand extends AbstractServerCommand {
                                         .executes(this::tpToEntity)))
                         .then(Commands.literal("location")
                                 .then(Commands.argument("location", Vec3Argument.vec3())
-                                        .executes(this::tpToLocation)))));
+                                        .executes(this::tpToLocation))))
+                .then(Commands.literal("tp")
+                        .then(Commands.argument("location", Vec3Argument.vec3())
+                                .executes(this::tpToLocation))
+                        .then(Commands.argument("entity", EntityArgument.entity())
+                                .executes(this::tpToEntity)))
+                .then(Commands.literal("spectate")
+                        .then(Commands.argument("target", EntityArgument.entity())
+                                .executes(this::spectateEntity))));
     }
 
     // 更改游戏模式
-    private int setGameMode(CommandContext<CommandSourceStack> context, boolean isFakePlayer) throws CommandSyntaxException {
-        ServerPlayer player = isFakePlayer
-                ? CommandUtils.getArgumentFakePlayer(context)
-                : CommandUtils.getSourcePlayer(context);
+    private int setGameMode(CommandContext<CommandSourceStack> context, boolean self) throws CommandSyntaxException {
+        ServerPlayer player = self ? CommandUtils.getSourcePlayer(context) : CommandUtils.getArgumentPlayer(context);
+        if (!self && player != CommandUtils.getSourcePlayer(context)) {
+            CommandUtils.requireFakePlayer(player);
+        }
         // 如果玩家当前是旁观模式，就切换到生存模式，否则切换到旁观模式
-        GameType gameMode;
-        if (player.isSpectator()) {
-            gameMode = GameType.SURVIVAL;
-            if (!isFakePlayer) {
-                // 假玩家切换游戏模式不需要回到原位置
-                this.loadAndTeleportPlayer(ServerUtils.getServer(player), player);
-            }
-        } else {
-            gameMode = GameType.SPECTATOR;
-            if (isFakePlayer) {
-                // 让假玩家切换旁观模式时向上移动0.2格
-                // Mojang真的修复MC-146582了吗？（https://bugs.mojang.com/browse/MC-146582）
-                player.teleportRelative(0.0, 0.2, 0.0);
+        GameType gameMode = player.isSpectator() ? GameType.SURVIVAL : GameType.SPECTATOR;
+        if (!(player instanceof EntityPlayerMPFake)) {
+            MinecraftServer server = ServerUtils.getServer(player);
+            if (player.isSpectator()) {
+                this.loadAndTeleportPlayer(server, player);
             } else {
-                savePlayerPos(ServerUtils.getServer(player), player);
+                this.savePlayerPos(server, player);
             }
         }
         player.setGameMode(gameMode);
+        if (player instanceof EntityPlayerMPFake && player.isSpectator()) {
+            // 避免假玩家切换到旁观模式时下移
+            // https://bugs.mojang.com/browse/MC-146582
+            player.setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0));
+        }
         // 发送命令反馈
         Component text = gameMode.getLongDisplayName();
         MessageUtils.sendMessageToHud(player, LocalizationKey.literal("commands.gamemode.success.self").translate(text));
@@ -166,6 +175,20 @@ public class SpectatorCommand extends AbstractServerCommand {
                         formatFloat(location.z())
                 )
         );
+        return 1;
+    }
+
+    private int spectateEntity(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Entity entity = EntityArgument.getEntity(context, "target");
+        ServerPlayer player = CommandUtils.getSourcePlayer(context);
+        if (entity == player) {
+            throw SpectateCommand.ERROR_SELF.create();
+        }
+        if (player.isSpectator()) {
+            player.setCamera(entity);
+        } else {
+            throw SpectateCommand.ERROR_NOT_SPECTATOR.create(player.getDisplayName());
+        }
         return 1;
     }
 

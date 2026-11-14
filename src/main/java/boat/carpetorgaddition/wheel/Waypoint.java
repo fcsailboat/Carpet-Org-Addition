@@ -94,15 +94,15 @@ public class Waypoint {
         int z = pos.get("z").getAsInt();
         BlockPos blockPos = new BlockPos(x, y, z);
         // 路径点的维度
-        String dimension = IOUtils.jsonHasElement(json, "dimension") ? json.get("dimension").getAsString() : ServerUtils.OVERWORLD;
+        String dimension = json.has("dimension") ? json.get("dimension").getAsString() : ServerUtils.OVERWORLD;
         // 路径点的创建者
-        String creator = IOUtils.jsonHasElement(json, "creator") ? json.get("creator").getAsString() : "#none";
+        String creator = json.has("creator") ? json.get("creator").getAsString() : "#none";
         ServerLevel world = ServerUtils.getWorld(server, dimension);
         Waypoint waypoint = new Waypoint(blockPos, name, world, creator, server);
         // 添加路径点的另一个坐标
         if (json.has("another_pos")) {
             JsonObject anotherPos = json.get("another_pos").getAsJsonObject();
-            if (IOUtils.jsonHasElement(anotherPos, "x", "y", "z")) {
+            if (anotherPos.has("x") && anotherPos.has("y") && anotherPos.has("z")) {
                 int anotherX = anotherPos.get("x").getAsInt();
                 int anotherY = anotherPos.get("y").getAsInt();
                 int anotherZ = anotherPos.get("z").getAsInt();

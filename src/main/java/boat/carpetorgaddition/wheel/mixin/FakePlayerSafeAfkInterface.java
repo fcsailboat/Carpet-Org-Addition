@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.periodic.fakeplayer;
+package boat.carpetorgaddition.wheel.mixin;
 
 import boat.carpetorgaddition.command.PlayerManagerCommand;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;

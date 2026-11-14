@@ -1,4 +1,4 @@
-package boat.carpetorgaddition.wheel.screen;
+package boat.carpetorgaddition.wheel.mixin;
 
 public interface WithButtonScreenClientSide {
     void carpet_Org_Addition$setWithButton();

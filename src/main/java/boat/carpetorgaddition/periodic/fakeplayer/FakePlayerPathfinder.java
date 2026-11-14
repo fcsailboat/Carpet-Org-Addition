@@ -10,11 +10,8 @@ import java.util.function.Supplier;
 public interface FakePlayerPathfinder {
     FakePlayerPathfinder EMPTY = DummyPathfinder.EMPTY;
 
-    /**
-     * @param fakePlayer 当前假玩家的提供者，用于确保玩家在切换维度后还能正常运行
-     */
-    static FakePlayerPathfinder of(Supplier<EntityPlayerMPFake> fakePlayer, Supplier<Optional<BlockPos>> supplier) {
-        return new GeneralPathfinder(fakePlayer, supplier);
+    static FakePlayerPathfinder of(EntityPlayerMPFake fakePlayer, Supplier<Optional<BlockPos>> target) {
+        return new GeneralPathfinder(fakePlayer, target);
     }
 
     /**

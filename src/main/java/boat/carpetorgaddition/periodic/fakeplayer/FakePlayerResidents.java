@@ -47,7 +47,7 @@ public class FakePlayerResidents {
                 .flatMap(file -> {
                     try {
                         JsonObject json = IOUtils.readJson(file);
-                        return Optional.of(this.listSerializer(json));
+                        return Optional.of(this.listSerializer(server, json));
                     } catch (IOException | RuntimeException e) {
                         CarpetOrgAddition.LOGGER.warn("Failed to load fake player resident data from file: {}", file.getAbsolutePath(), e);
                         return Optional.empty();
@@ -65,7 +65,7 @@ public class FakePlayerResidents {
         this.players.remove(fakePlayer.getUUID());
     }
 
-    public Set<FakePlayerSerializer> get(@Nullable String time) {
+    public Set<FakePlayerSerializer> get(MinecraftServer server, @Nullable String time) {
         if (time == null) {
             return Objects.requireNonNullElseGet(this.previous, Set::of);
         }
@@ -73,7 +73,7 @@ public class FakePlayerResidents {
         if (file.isFile()) {
             try {
                 JsonObject json = IOUtils.readJson(file);
-                return new HashSet<>(this.listSerializer(json));
+                return new HashSet<>(this.listSerializer(server, json));
             } catch (IOException | RuntimeException e) {
                 CarpetOrgAddition.LOGGER.warn("Failed to load fake player resident data from file: {}", file.getAbsolutePath(), e);
                 return Set.of();
@@ -82,12 +82,12 @@ public class FakePlayerResidents {
         return Set.of();
     }
 
-    private List<FakePlayerSerializer> listSerializer(JsonObject json) {
+    private List<FakePlayerSerializer> listSerializer(MinecraftServer server, JsonObject json) {
         return json.getAsJsonObject("players")
                 .entrySet()
                 .stream()
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().getAsJsonObject()))
-                .map(entry -> new FakePlayerSerializer(entry.getValue(), entry.getKey(), null))
+                .map(entry -> new FakePlayerSerializer(server, entry.getValue(), entry.getKey(), null))
                 .toList();
     }
 

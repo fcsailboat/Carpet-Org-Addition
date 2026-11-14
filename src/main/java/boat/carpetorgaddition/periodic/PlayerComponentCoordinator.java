@@ -3,6 +3,7 @@ package boat.carpetorgaddition.periodic;
 import boat.carpetorgaddition.periodic.navigator.NavigatorManager;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.WithButtonPlayerInventory;
+import boat.carpetorgaddition.wheel.mixin.PeriodicTaskManagerInterface;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;

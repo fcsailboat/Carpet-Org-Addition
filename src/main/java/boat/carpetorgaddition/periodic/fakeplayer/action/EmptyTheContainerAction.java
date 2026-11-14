@@ -9,6 +9,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -23,8 +24,8 @@ public class EmptyTheContainerAction extends AbstractPlayerAction {
     private final ItemStackPredicate predicate;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("clean");
 
-    public EmptyTheContainerAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate) {
-        super(fakePlayer);
+    public EmptyTheContainerAction(MinecraftServer server, ItemStackPredicate predicate) {
+        super(server);
         this.predicate = predicate;
     }
 
