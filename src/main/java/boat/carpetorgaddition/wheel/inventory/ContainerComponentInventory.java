@@ -50,7 +50,7 @@ public class ContainerComponentInventory extends SimpleContainer implements Comp
      * @return 从潜影盒中获取指定物品
      */
     @CheckReturnValue
-    public ItemStack pinkStack(Predicate<ItemStack> predicate) {
+    public ItemStack takeStack(Predicate<ItemStack> predicate) {
         for (int i = 0; i < this.getContainerSize(); i++) {
             ItemStack stack = this.getItem(i);
             if (predicate.test(stack)) {
@@ -66,7 +66,7 @@ public class ContainerComponentInventory extends SimpleContainer implements Comp
      * @return 从潜影盒中获取指定数量的物品
      */
     @CheckReturnValue
-    public ItemStack pinkStack(Predicate<ItemStack> predicate, int count) {
+    public ItemStack takeStack(Predicate<ItemStack> predicate, int count) {
         for (int i = 0; i < this.getContainerSize(); i++) {
             ItemStack stack = this.getItem(i);
             if (predicate.test(stack)) {

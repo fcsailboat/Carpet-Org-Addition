@@ -3,6 +3,7 @@ package boat.carpetorgaddition.wheel;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
@@ -109,8 +110,9 @@ public class ItemStackStatistics {
 
     public Component getCountText() {
         ArrayList<Component> list = new ArrayList<>();
-        for (Item item : this.counter) {
-            Component itemCount = itemCount(this.counter.getCount(item), item.getDefaultMaxStackSize());
+        for (Object2IntMap.Entry<Item> entry : this.counter.entrySet()) {
+            Item item = entry.getKey();
+            Component itemCount = itemCount(entry.getIntValue(), item.getDefaultMaxStackSize());
             if (this.nestingItem.contains(item)) {
                 TextBuilder builder = TextBuilder.fromCombined(ServerUtils.getName(item), " ", itemCount);
                 builder.setItalic();

@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.wheel.predicate;
 
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
+import boat.carpetorgaddition.wheel.mixin.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -212,32 +212,10 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
     }
 
     /**
-     * 将命令参数转换为对应物品
-     */
-    @Deprecated(forRemoval = true)
-    public Item asItem() {
-        if (this.isEmpty()) {
-            return Items.AIR;
-        }
-        if (this.isConvertible()) {
-            return BuiltInRegistries.ITEM.getValue(Identifier.parse(this.input));
-        }
-        throw new UnsupportedOperationException(this.input + " cannot be converted to item");
-    }
-
-    /**
      * 获取input转换而来的物品
      */
     public Optional<Item> getConvert() {
         return Optional.ofNullable(this.convert);
-    }
-
-    /**
-     * @return {@code input}字符串是否可以转换为物品
-     */
-    @Deprecated(forRemoval = true)
-    public boolean isConvertible() {
-        return !(this.input.startsWith("#") || this.input.startsWith("*") || this.input.matches(".*\\[.*]"));
     }
 
     @Override

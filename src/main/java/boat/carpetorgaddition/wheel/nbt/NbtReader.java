@@ -103,7 +103,7 @@ public class NbtReader {
     }
 
     public ImmutableInventory getInventory(String key) {
-        return this.getInventoryNullable(key).orElse(ImmutableInventory.EMPTY);
+        return this.getInventoryNullable(key).orElse(ImmutableInventory.empty());
     }
 
     public Optional<ImmutableInventory> getInventoryNullable(String key) {
@@ -111,7 +111,7 @@ public class NbtReader {
         if (optional.isEmpty()) {
             return Optional.empty();
         }
-        return optional.map(ImmutableInventory::new);
+        return optional.map(ImmutableInventory::of);
     }
 
     public int getVersion() {

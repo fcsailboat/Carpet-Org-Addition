@@ -37,6 +37,7 @@ public final class LocalizationKeys {
         public static class Page {
             public static final LocalizationKey INVALID_INDEX = PAGE.then("invalid_index");
             public static final LocalizationKey NON_EXISTENT = PAGE.then("non_existent");
+            public static final LocalizationKey UNABLE_TO_PARSE = PAGE.then("unable_to_parse");
         }
 
         public static class Error {
@@ -163,6 +164,7 @@ public final class LocalizationKeys {
         public static final LocalizationKey BACK = BUTTON.then("back");
         public static final LocalizationKey CONFIRM = BUTTON.then("confirm");
         public static final LocalizationKey CLOSE = BUTTON.then("close");
+        public static final LocalizationKey JUMP_TO_PAGE = BUTTON.then("jump_to_page");
         public static final LocalizationKey PREV_PAGE = BUTTON.then("prev_page");
         public static final LocalizationKey NEXT_PAGE = BUTTON.then("next_page");
         public static final LocalizationKey HOTBAR = BUTTON.then("hotbar");
@@ -233,10 +235,12 @@ public final class LocalizationKeys {
             public static final LocalizationKey OPEN_INVENTORY = TITLE.then("open_inventory");
             public static final LocalizationKey QUERY_PLAYER_NAME = TITLE.then("query_player_name");
             public static final LocalizationKey ERROR = TITLE.then("error");
+            public static final LocalizationKey CHANGE_PAGE = TITLE.then("change_page");
         }
 
         public static class Textbox {
             public static final LocalizationKey UUID = TEXTBOX.then("uuid");
+            public static final LocalizationKey PAGE_NUMBER = TEXTBOX.then("page_number");
         }
     }
 

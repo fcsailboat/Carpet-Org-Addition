@@ -34,7 +34,7 @@ public class FakePlayerSpawner {
      */
     public static final ScopedValue<Optional<ServerPlayer>> SUMMONER = ScopedValue.newInstance();
     /**
-     * 假玩家是否可以重复召唤
+     * 假玩家是否不能重复召唤
      */
     public static final ScopedValue<Boolean> DEDUPLICATE = ScopedValue.newInstance();
     /**

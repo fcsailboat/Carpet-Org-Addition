@@ -8,6 +8,7 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 
@@ -28,8 +29,8 @@ public class FillTheContainerAction extends AbstractPlayerAction {
     private final boolean moreContainer;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("fill");
 
-    public FillTheContainerAction(EntityPlayerMPFake fakePlayer, ItemStackPredicate predicate, boolean dropOther, boolean moreContainer) {
-        super(fakePlayer);
+    public FillTheContainerAction(MinecraftServer server, ItemStackPredicate predicate, boolean dropOther, boolean moreContainer) {
+        super(server);
         this.predicate = predicate;
         this.dropOther = dropOther;
         this.moreContainer = moreContainer;

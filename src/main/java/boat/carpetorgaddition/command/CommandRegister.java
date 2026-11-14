@@ -25,8 +25,6 @@ public class CommandRegister {
         register(new KillMeCommand(dispatcher, access));
         // 路径点管理器命令
         register(new LocationsCommand(dispatcher, access));
-        // 绘制粒子线命令
-        // ParticleLineCommand.register(dispatcher);
         // 假玩家动作命令
         register(new PlayerActionCommand(dispatcher, access));
         // 规则搜索命令

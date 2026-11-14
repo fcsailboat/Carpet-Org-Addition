@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
 
-public class VillagerScreenHandler extends AbstractContainerMenu implements UnavailableSlotSyncInterface {
+public class VillagerScreenHandler extends AbstractContainerMenu implements UnavailableSlotRange {
     // 物品栏的大小
     private static final int SIZE = 8;
     private final Villager villagerEntity;

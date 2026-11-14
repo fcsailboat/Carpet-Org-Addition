@@ -24,24 +24,22 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class GotoAction extends AbstractPlayerAction {
-    private final FakePlayerPathfinder pathfinder;
+    private FakePlayerPathfinder pathfinder;
     private final TargetType targetType;
     private final Component displayName;
     private final Supplier<Optional<BlockPos>> target;
     public static final LocalizationKey KEY = PlayerActionCommand.KEY.then("goto");
 
-    public GotoAction(@NonNull EntityPlayerMPFake fakePlayer, BlockPos blockPos) {
-        super(fakePlayer);
+    public GotoAction(MinecraftServer server, BlockPos blockPos) {
+        super(server);
         this.target = () -> Optional.of(blockPos);
-        this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this.target);
         this.targetType = TargetType.BLOCK;
         this.displayName = CommonTexts.blockPos(blockPos);
     }
 
-    public GotoAction(@NonNull EntityPlayerMPFake fakePlayer, Entity entity) {
-        super(fakePlayer);
+    public GotoAction(MinecraftServer server, Entity entity) {
+        super(server);
         this.target = new EntityTracker(this::getFakePlayer, ServerUtils.getWorld(entity), entity);
-        this.pathfinder = FakePlayerPathfinder.of(this::getFakePlayer, this.target);
         this.targetType = TargetType.ENTITY;
         this.displayName = entity.getDisplayName();
     }
@@ -90,6 +88,16 @@ public class GotoAction extends AbstractPlayerAction {
     public ActionSerializeType getActionSerializeType() {
         // 不序列化
         return ActionSerializeType.STOP;
+    }
+
+    @Override
+    protected void onAssignPlayer(EntityPlayerMPFake fakePlayer) {
+        this.pathfinder = FakePlayerPathfinder.of(fakePlayer, this.target);
+    }
+
+    @Override
+    protected void onClearPlayer() {
+        this.pathfinder = FakePlayerPathfinder.EMPTY;
     }
 
     @Override

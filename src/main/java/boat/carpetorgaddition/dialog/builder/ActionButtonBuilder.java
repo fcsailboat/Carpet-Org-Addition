@@ -3,6 +3,7 @@ package boat.carpetorgaddition.dialog.builder;
 import boat.carpetorgaddition.network.event.ActionSource;
 import boat.carpetorgaddition.network.event.CustomClickAction;
 import boat.carpetorgaddition.wheel.nbt.NbtWriter;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -62,6 +63,11 @@ public class ActionButtonBuilder {
         NbtWriter writer = new NbtWriter(server, CustomClickAction.CURRENT_VERSION);
         writer.putActionSource(ActionSource.DIALOG);
         this.action = new CustomAll(id, Optional.of(writer.toNbt()));
+        return this;
+    }
+
+    public ActionButtonBuilder setCustomClickAction(MinecraftServer server, Identifier id, @Nullable CompoundTag nbt) {
+        this.action = new CustomAll(id, Optional.ofNullable(nbt));
         return this;
     }
 
