@@ -2,6 +2,7 @@ package boat.carpetorgaddition.command;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.mixin.accessor.carpet.SettingsManagerAccessor;
+import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
@@ -9,11 +10,11 @@ import carpet.CarpetServer;
 import carpet.api.settings.CarpetRule;
 import carpet.api.settings.RuleHelper;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.StringArgument;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -27,14 +28,14 @@ public class RuleSearchCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_RULE_SEARCH.value().hasPermission(source))
-                .then(Commands.argument("rule", StringArgumentType.greedyString())
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_RULE_SEARCH::value))
+                .then(Commands.argument("rule", StringArgument.greedyString())
                         .executes(this::listRule)));
     }
 
     // 列出符合条件的规则
     private int listRule(CommandContext<CommandSourceStack> context) {
-        String filter = StringArgumentType.getString(context, "rule");
+        String filter = StringArgument.getString(context, "rule");
         if (filter.matches("\".*\"")) {
             filter = filter.substring(1, filter.length() - 1);
         }

@@ -8,7 +8,6 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -16,6 +15,7 @@ import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.StringArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
@@ -29,11 +29,11 @@ import net.minecraft.world.phys.Vec3;
 public class ParticleLineCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("particleLine")
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_PARTICLE_LINE.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_PARTICLE_LINE::value))
                 .then(Commands.argument("from", Vec3Argument.vec3())
                         .then(Commands.argument("to", Vec3Argument.vec3())
                                 .executes(context -> draw(context, false)))
-                        .then(Commands.argument("uuid", StringArgumentType.string())
+                        .then(Commands.argument("uuid", StringArgument.string())
                                 .executes(context -> draw(context, true)))));
     }
 
@@ -46,7 +46,7 @@ public class ParticleLineCommand {
         Vec3 to;
         CommandSourceStack source = context.getSource();
         if (isUuid) {
-            String uuid = StringArgumentType.getString(context, "uuid");
+            String uuid = StringArgument.getString(context, "uuid");
             Entity entity = ServerUtils.getEntity(source.getServer(), CommandUtils.parseUuidFromString(uuid)).orElseThrow(EntityArgument.NO_ENTITIES_FOUND::create);
             to = new Vec3(entity.getX(), entity.getY(0.618), entity.getZ());
         } else {

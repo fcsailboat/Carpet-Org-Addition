@@ -22,18 +22,19 @@ import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.QuickBlockPosTraverser;
 import boat.carpetorgaddition.wheel.traverser.WorldTraverser;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.IntegerArgument;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
+import net.minecraft.commands.suggestions.ServerOnlyCustomSuggestion;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -44,8 +45,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
-
-import java.util.function.Predicate;
+import org.jspecify.annotations.NullMarked;
 
 public class FinderCommand extends AbstractServerCommand {
     /**
@@ -84,14 +84,14 @@ public class FinderCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_FINDER.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_FINDER::value))
                 .then(Commands.literal("block")
                         .requires(PermissionManager.register(FINDER_BLOCK, PermissionLevel.PASS))
-                        .then(Commands.argument("blockState", BlockPredicateArgument.blockPredicate(this.access))
+                        .then(Commands.argument("blockState", BlockPredicateArgument.blockPredicate())
                                 .executes(context -> blockFinder(context, 64))
-                                .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                .then(Commands.argument("radius", IntegerArgument.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> blockFinder(context, IntegerArgumentType.getInteger(context, "radius"))))
+                                        .executes(context -> blockFinder(context, IntegerArgument.getInteger(context, "radius"))))
                                 .then(Commands.literal("from")
                                         .then(Commands.argument("from", BlockPosArgument.blockPos())
                                                 .then(Commands.literal("to")
@@ -99,11 +99,11 @@ public class FinderCommand extends AbstractServerCommand {
                                                                 .executes(this::areaBlockSearch)))))))
                 .then(Commands.literal("item")
                         .requires(PermissionManager.register(FINDER_ITEM, PermissionLevel.PASS))
-                        .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
+                        .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate())
                                 .executes(context -> searchItem(context, 64))
-                                .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                .then(Commands.argument("radius", IntegerArgument.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "radius"))))
+                                        .executes(context -> searchItem(context, IntegerArgument.getInteger(context, "radius"))))
                                 .then(Commands.literal("from")
                                         .then(Commands.argument("from", BlockPosArgument.blockPos())
                                                 .then(Commands.literal("to")
@@ -115,26 +115,28 @@ public class FinderCommand extends AbstractServerCommand {
                 .then(Commands.literal("trade")
                         .requires(PermissionManager.register("finder.trade", PermissionLevel.PASS))
                         .then(Commands.literal("item")
-                                .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
+                                .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate())
                                         .executes(context -> searchTradeItem(context, 64))
-                                        .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                        .then(Commands.argument("radius", IntegerArgument.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
-                                                .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "radius"))))))
+                                                .executes(context -> searchTradeItem(context, IntegerArgument.getInteger(context, "radius"))))))
                         .then(Commands.literal("enchanted_book")
-                                .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                .then(Commands.argument("enchantment", ResourceArgument.resource(Registries.ENCHANTMENT))
                                         .executes(context -> searchEnchantedBookTrade(context, 64))
-                                        .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
+                                        .then(Commands.argument("radius", IntegerArgument.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
-                                                .executes(context -> searchEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "radius")))))))
+                                                .executes(context -> searchEnchantedBookTrade(context, IntegerArgument.getInteger(context, "radius")))))))
                 .then(Commands.literal("worldEater")
-                        .requires(((Predicate<CommandSourceStack>) _ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
-                                .and(PermissionManager.registerHiddenCommand("finder.worldEater", PermissionLevel.PASS)))
+                        .requires(CommandUtils.requireCombination(
+                                CommandUtils.requireCondition(CarpetOrgAdditionConstants::isEnableHiddenFunction),
+                                PermissionManager.registerHiddenCommand("finder.worldEater", PermissionLevel.PASS))
+                        )
                         .then(Commands.argument("from", BlockPosArgument.blockPos())
                                 .then(Commands.argument("to", BlockPosArgument.blockPos())
                                         .executes(this::mayAffectWorldEater))))
                 .then(Commands.literal("xp")
                         // 需要解决如何从未知名称的玩家中提取经验的问题
-                        .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
+                        .requires(CommandUtils.requireCondition(CarpetOrgAdditionConstants::isEnableHiddenFunction))
                         .then(Commands.literal("from")
                                 .then(Commands.literal("offline_player")
                                         .executes(this::searchExperienceFromOfflinePlayer))))
@@ -142,8 +144,9 @@ public class FinderCommand extends AbstractServerCommand {
                         .executes(this::stop)));
     }
 
+    @NullMarked
     private SuggestionProvider<CommandSourceStack> suggestionDefaultDistance() {
-        return (_, builder) -> SharedSuggestionProvider.suggest(SUGGESTED_RADIUS, builder);
+        return ((ServerOnlyCustomSuggestion) (_, _, builder) -> SuggestionContext.suggest(SUGGESTED_RADIUS, builder)).toBrigadier();
     }
 
     /**
@@ -208,7 +211,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 获取命令执行时的方块坐标
         final BlockPos sourceBlockPos = player.blockPosition();
         ServerLevel world = ServerUtils.getWorld(player);
-        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, this.access.lookupOrThrow(Registries.BLOCK), "blockState");
+        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, world.holderLookup(Registries.BLOCK), "blockState");
         QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(world, sourceBlockPos, radius, predicate.getPaletteMatcher());
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
@@ -246,13 +249,14 @@ public class FinderCommand extends AbstractServerCommand {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         BlockPos from = BlockPosArgument.getBlockPos(context, "from");
         BlockPos to = BlockPosArgument.getBlockPos(context, "to");
-        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, this.access.lookupOrThrow(Registries.BLOCK), "blockState");
+        ServerLevel world = ServerUtils.getWorld(player);
+        BlockStatePredicate predicate = BlockStatePredicate.ofPredicate(context, world.holderLookup(Registries.BLOCK), "blockState");
         // 计算要查找的区域
-        QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(ServerUtils.getWorld(player), from, to, predicate.getPaletteMatcher());
+        QuickBlockPosTraverser traverser = new QuickBlockPosTraverser(world, from, to, predicate.getPaletteMatcher());
         this.checkBoxSize(traverser);
         // 添加查找任务
         CommandSourceStack source = context.getSource();
-        BlockSearchTask task = new BlockSearchTask(ServerUtils.getWorld(player), player.blockPosition(), traverser, source, predicate, player);
+        BlockSearchTask task = new BlockSearchTask(world, player.blockPosition(), traverser, source, predicate, player);
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;

@@ -14,13 +14,13 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.StringArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
@@ -54,7 +54,7 @@ public class NavigatorCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_NAVIGATE.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_NAVIGATE::value))
                 .then(Commands.literal("entity")
                         .then(Commands.argument("entity", EntityArgument.entity())
                                 .executes(context -> navigateToEntity(context, false, "entity"))
@@ -66,8 +66,8 @@ public class NavigatorCommand extends AbstractServerCommand {
                                 .then(Commands.literal("continue")
                                         .executes(context -> navigateToEntity(context, true, "player")))))
                 .then(Commands.literal("waypoint")
-                        .requires(source -> CarpetOrgAdditionSettings.COMMAND_LOCATIONS.value().hasPermission(source))
-                        .then(Commands.argument("waypoint", StringArgumentType.string())
+                        .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_LOCATIONS::value))
+                        .then(Commands.argument("waypoint", StringArgument.string())
                                 .suggests(LocationsCommand.suggestion())
                                 .executes(this::navigateToWaypoint)))
                 .then(Commands.literal("stop")
@@ -108,7 +108,7 @@ public class NavigatorCommand extends AbstractServerCommand {
     private int navigateToWaypoint(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         MinecraftServer server = context.getSource().getServer();
-        String waypointArgument = StringArgumentType.getString(context, "waypoint");
+        String waypointArgument = StringArgument.getString(context, "waypoint");
         try {
             Waypoint waypoint = Waypoint.load(server, waypointArgument);
             PlayerComponentCoordinator.of(player).getNavigatorManager().setNavigator(waypoint);

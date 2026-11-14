@@ -27,7 +27,7 @@ public class ItemShadowingCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_ITEM_SHADOWING.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_ITEM_SHADOWING::value))
                 .executes(this::itemShadowing));
     }
 

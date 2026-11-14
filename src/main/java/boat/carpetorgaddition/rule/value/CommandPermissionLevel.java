@@ -25,14 +25,13 @@ public final class CommandPermissionLevel {
     }
 
     public static CommandPermissionLevel of(String option) {
-        String lowerCase = option.toLowerCase(Locale.ROOT);
-        return LEVELS.computeIfAbsent(lowerCase, _ -> switch (lowerCase) {
-            case "true", "0" -> new CommandPermissionLevel(lowerCase, 0);
-            case "false" -> new CommandPermissionLevel(lowerCase, Integer.MAX_VALUE);
-            case "1" -> new CommandPermissionLevel(lowerCase, 1);
-            case "ops", "2" -> new CommandPermissionLevel(lowerCase, 2);
-            case "3" -> new CommandPermissionLevel(lowerCase, 3);
-            case "4" -> new CommandPermissionLevel(lowerCase, 4);
+        return LEVELS.computeIfAbsent(option.toLowerCase(Locale.ROOT), key -> switch (key) {
+            case "true", "0" -> new CommandPermissionLevel(key, 0);
+            case "false" -> new CommandPermissionLevel(key, Integer.MAX_VALUE);
+            case "1" -> new CommandPermissionLevel(key, 1);
+            case "ops", "2" -> new CommandPermissionLevel(key, 2);
+            case "3" -> new CommandPermissionLevel(key, 3);
+            case "4" -> new CommandPermissionLevel(key, 4);
             default -> throw new IllegalArgumentException("Invalid command permission level: " + option);
         });
     }

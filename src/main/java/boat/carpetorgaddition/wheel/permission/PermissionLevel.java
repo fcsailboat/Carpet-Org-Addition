@@ -1,11 +1,12 @@
 package boat.carpetorgaddition.wheel.permission;
 
 import boat.carpetorgaddition.util.CommandUtils;
-import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.PermissionSet;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 
-public enum PermissionLevel implements Predicate<CommandSourceStack> {
+public enum PermissionLevel implements Predicate<PermissionSet> {
     /**
      * 允许任何玩家执行
      */
@@ -32,11 +33,10 @@ public enum PermissionLevel implements Predicate<CommandSourceStack> {
     REJECT;
 
     @Override
-    public boolean test(CommandSourceStack source) {
+    public boolean test(PermissionSet source) {
         return switch (this) {
             case REJECT -> false;
-            case MODERATORS, OPS, ADMINS, OWNERS ->
-                    source.permissions().hasPermission(CommandUtils.parsePermission(this.ordinal()));
+            case MODERATORS, OPS, ADMINS, OWNERS -> source.hasPermission(CommandUtils.parsePermission(this.ordinal()));
             case PASS -> true;
         };
     }
@@ -67,7 +67,8 @@ public enum PermissionLevel implements Predicate<CommandSourceStack> {
             case "ops", "2" -> OPS;
             case "3" -> ADMINS;
             case "4" -> OWNERS;
-            default -> throw new IllegalArgumentException();
+            default ->
+                    throw new IllegalArgumentException("Unknown permission level: '" + value + "', expected one of " + Arrays.toString(listPermission()));
         };
     }
 }

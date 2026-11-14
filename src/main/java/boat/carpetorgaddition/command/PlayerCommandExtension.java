@@ -37,19 +37,19 @@ public class PlayerCommandExtension {
     public static RequiredArgumentBuilder<CommandSourceStack, ?> register(RequiredArgumentBuilder<CommandSourceStack, ?> builder) {
         return builder
                 .then(Commands.literal("inventory")
-                        .requires(OpenPlayerInventoryCommandOption::isEnable)
+                        .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.PLAYER_COMMAND_OPEN_PLAYER_INVENTORY::value))
                         .executes(context -> openInventory(context, PlayerInventoryType.INVENTORY)))
                 .then(Commands.literal("enderChest")
-                        .requires(OpenPlayerInventoryCommandOption::isEnable)
+                        .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.PLAYER_COMMAND_OPEN_PLAYER_INVENTORY::value))
                         .executes(context -> openInventory(context, PlayerInventoryType.ENDER_CHEST)))
                 .then(Commands.literal("teleport")
-                        .requires(source -> CarpetOrgAdditionSettings.PLAYER_COMMAND_TELEPORT_FAKE_PLAYER.value().hasPermission(source))
+                        .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.PLAYER_COMMAND_TELEPORT_FAKE_PLAYER::value))
                         .executes(PlayerCommandExtension::fakePlayerTeleport))
                 .then(Commands.literal("mannequin")
-                        .requires(source -> CarpetOrgAdditionSettings.PLAYER_COMMAND_SUMMON_MANNEQUIN.value().hasPermission(source))
+                        .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.PLAYER_COMMAND_SUMMON_MANNEQUIN::value))
                         .executes(PlayerCommandExtension::summonMannequin))
                 .then(Commands.literal("esc")
-                        .requires(_ -> CarpetOrgAdditionSettings.PLAYER_COMMAND_CLOSE_SCREEN.value())
+                        .requires(CommandUtils.requireCondition(CarpetOrgAdditionSettings.PLAYER_COMMAND_CLOSE_SCREEN::value))
                         .executes(PlayerCommandExtension::closeScreen));
     }
 

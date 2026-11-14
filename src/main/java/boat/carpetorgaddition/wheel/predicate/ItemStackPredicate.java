@@ -1,7 +1,6 @@
 package boat.carpetorgaddition.wheel.predicate;
 
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.CommandRegistryAccessor;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -13,8 +12,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.IdentifierException;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.ParseContext;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument.Result;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -139,11 +138,10 @@ public class ItemStackPredicate implements Predicate<ItemStack>, Comparable<Item
         if (optional.isEmpty()) {
             throw new IllegalStateException("Server not initialized");
         }
-        CommandRegistryAccessor accessor = (CommandRegistryAccessor) optional.get().getCommands();
-        CommandBuildContext access = accessor.carpet_Org_Addition$getAccess();
         try {
             StringReader reader = new StringReader(input);
-            Result predicate = ItemPredicateArgument.itemPredicate(access).parse(reader);
+            ParseContext context = ParseContext.of(optional.get().createCommandSourceStack());
+            Result predicate = ItemPredicateArgument.itemPredicate().parse(reader, context);
             return new ItemStackPredicate(predicate, input);
         } catch (CommandSyntaxException e) {
             throw new RuntimeException(e);

@@ -13,7 +13,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.client.multiplayer.ClientSuggestionContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -132,7 +132,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
      */
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof SharedSuggestionProvider) {
+        if (context.getSource() instanceof ClientSuggestionContext) {
             String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
             String[] split = this.splitArguments(remaining);
             if (this.patternMatching && (split.length > 1 || remaining.endsWith(" "))) {

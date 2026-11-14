@@ -7,10 +7,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.multiplayer.ClientSuggestionContext;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.core.BlockPos;
 
 import java.util.Collection;
@@ -61,11 +62,11 @@ public class ClientBlockPosArgumentType implements ArgumentType<BlockPos> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof SharedSuggestionProvider) {
+        if (context.getSource() instanceof ClientSuggestionContext) {
             String string = builder.getRemaining();
-            Collection<SharedSuggestionProvider.TextCoordinates> collection;
-            collection = ((SharedSuggestionProvider) context.getSource()).getRelevantCoordinates();
-            return SharedSuggestionProvider.suggestCoordinates(string, collection, builder, Commands.createValidator(this::parse));
+            Collection<ClientSuggestionContext.TextCoordinates> collection;
+            collection = ((ClientSuggestionContext) context.getSource()).relevantCoordinates();
+            return SuggestionContext.suggestCoordinates(string, collection, builder, Commands.createValidator(this::parse));
         } else {
             return Suggestions.empty();
         }

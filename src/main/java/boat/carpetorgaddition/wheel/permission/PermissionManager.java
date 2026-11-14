@@ -8,7 +8,9 @@ import boat.carpetorgaddition.wheel.WorldFormat;
 import carpet.utils.CommandHelper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.permissions.PermissionProviderCheck;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;
@@ -23,17 +25,17 @@ public class PermissionManager {
     private static final String PERMISSION_JSON = "permission.json";
     private static final int CURRENT_VERSION = 3;
 
-    public static CommandPermission register(String node, PermissionLevel level) {
+    public static PermissionProviderCheck<CommandSourceStack> register(String node, PermissionLevel level) {
         CommandPermission permission = new CommandPermission(level);
         PERMISSIONS.put(node, permission);
-        return permission;
+        return new PermissionProviderCheck<>(permission);
     }
 
-    public static CommandPermission registerHiddenCommand(String node, PermissionLevel level) {
+    public static PermissionProviderCheck<CommandSourceStack> registerHiddenCommand(String node, PermissionLevel level) {
         if (CarpetOrgAdditionConstants.isEnableHiddenFunction()) {
             return register(node, level);
         }
-        return new CommandPermission(level);
+        return new PermissionProviderCheck<>(new CommandPermission(level));
     }
 
     /**

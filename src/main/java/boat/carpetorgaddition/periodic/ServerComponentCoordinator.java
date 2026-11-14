@@ -7,6 +7,7 @@ import boat.carpetorgaddition.periodic.parcel.ParcelManager;
 import boat.carpetorgaddition.periodic.task.ServerTaskManager;
 import boat.carpetorgaddition.rule.CustomRuleValueManager;
 import boat.carpetorgaddition.rule.RuleConfig;
+import boat.carpetorgaddition.wheel.Lazy;
 import boat.carpetorgaddition.wheel.inventory.FabricPlayerAccessManager;
 import boat.carpetorgaddition.wheel.misc.LibrarianVillagerPoiCache;
 import boat.carpetorgaddition.wheel.page.PageManager;
@@ -40,7 +41,7 @@ public class ServerComponentCoordinator {
     private final FabricPlayerAccessManager accessManager;
     private final RuleConfig ruleConfig;
     private final DialogProvider dialogProvider;
-    private final FakePlayerResidents fakePlayerResidents;
+    private final Lazy<FakePlayerResidents> fakePlayerResidents;
     private final LibrarianVillagerPoiCache librarianVillagerPoiCache;
     public static final ScopedValue<MinecraftServer> SERVER_INSTANCE = ScopedValue.newInstance();
 
@@ -53,7 +54,7 @@ public class ServerComponentCoordinator {
         this.accessManager = new FabricPlayerAccessManager(server);
         this.ruleConfig = new RuleConfig(server);
         this.dialogProvider = new DialogProvider(server);
-        this.fakePlayerResidents = new FakePlayerResidents(server);
+        this.fakePlayerResidents = Lazy.of(() -> new FakePlayerResidents(server));
         this.librarianVillagerPoiCache = new LibrarianVillagerPoiCache();
     }
 
@@ -72,7 +73,7 @@ public class ServerComponentCoordinator {
      */
     public void onServerStarted() {
         this.playerSerializationManager.init();
-        this.fakePlayerResidents.cleanupFiles();
+        this.fakePlayerResidents.get().cleanupFiles();
         this.customRuleValueManager.load();
         this.playerSerializationManager.autoLogin();
     }
@@ -118,7 +119,7 @@ public class ServerComponentCoordinator {
     }
 
     public FakePlayerResidents getSavedFakePlayer() {
-        return this.fakePlayerResidents;
+        return this.fakePlayerResidents.get();
     }
 
     public LibrarianVillagerPoiCache getLibrarianVillagerPoiCache() {
@@ -128,6 +129,6 @@ public class ServerComponentCoordinator {
     private void onServerSave() {
         this.customRuleValueManager.onServerSave();
         this.playerSerializationManager.onServerSave();
-        this.fakePlayerResidents.onServerSave();
+        this.fakePlayerResidents.get().onServerSave();
     }
 }

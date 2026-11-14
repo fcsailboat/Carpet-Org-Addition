@@ -26,7 +26,7 @@ public class CreeperCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_CREEPER.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_CREEPER::value))
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(this::creeperExplosion)));
     }

@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.util;
 
+import boat.carpetorgaddition.rule.value.CommandPermissionLevel;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import boat.carpetorgaddition.wheel.text.TextJoiner;
@@ -12,6 +13,10 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -19,15 +24,17 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.Permission;
-import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.server.permissions.*;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.NullMarked;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Supplier;
 
+@NullMarked
 public class CommandUtils {
     public static final String PLAYER = "player";
 
@@ -115,7 +122,7 @@ public class CommandUtils {
     }
 
     public static boolean isSelfOrFakePlayer(ServerPlayer player, CommandSourceStack source) {
-        return isSpecifiedOrFakePlayer(player, source.getPlayer());
+        return isSpecifiedOrFakePlayer(player, Objects.requireNonNull(source.getPlayer()));
     }
 
     /**
@@ -266,6 +273,80 @@ public class CommandUtils {
             }
         }
         return Optional.empty();
+    }
+
+    public static PermissionProviderCheck<CommandSourceStack> requirePermissionLevel(Supplier<CommandPermissionLevel> supplier) {
+        return new PermissionProviderCheck<>(new OptionPermissionCheck(supplier));
+    }
+
+    public static PermissionProviderCheck<CommandSourceStack> requireCondition(Supplier<Boolean> supplier) {
+        return new PermissionProviderCheck<>(new BooleanPermissionCheck(supplier));
+    }
+
+    public static PermissionProviderCheck<CommandSourceStack> requireCombination(PermissionProviderCheck<CommandSourceStack> first, PermissionProviderCheck<CommandSourceStack> second) {
+        return Commands.hasPermission(new CombinationPermissionCheck(first.test(), second.test()));
+    }
+
+    private record OptionPermissionCheck(Supplier<CommandPermissionLevel> levelSuppler) implements PermissionCheck {
+        private static final MapCodec<OptionPermissionCheck> CODEC = Codec.STRING
+                .fieldOf("level")
+                .flatXmap(
+                        option -> {
+                            try {
+                                CommandPermissionLevel level = CommandPermissionLevel.of(option);
+                                return DataResult.success(new OptionPermissionCheck(() -> level));
+                            } catch (IllegalArgumentException e) {
+                                return DataResult.error(e::getMessage);
+                            }
+                        },
+                        check -> DataResult.success(check.levelSuppler.get().toString())
+                );
+
+        @Override
+        public boolean check(PermissionSet source) {
+            return this.levelSuppler.get().hasPermission(source);
+        }
+
+        @Override
+        public MapCodec<? extends PermissionCheck> codec() {
+            return CODEC;
+        }
+    }
+
+    private record BooleanPermissionCheck(Supplier<Boolean> booleanSupplier) implements PermissionCheck {
+        private static final MapCodec<BooleanPermissionCheck> CODEC = Codec.BOOL
+                .fieldOf("value")
+                .xmap(bool -> new BooleanPermissionCheck(() -> bool), check -> check.booleanSupplier().get());
+
+        @Override
+        public boolean check(PermissionSet source) {
+            return this.booleanSupplier.get();
+        }
+
+        @Override
+        public MapCodec<? extends PermissionCheck> codec() {
+            return CODEC;
+        }
+    }
+
+    private record CombinationPermissionCheck(PermissionCheck first, PermissionCheck second) implements PermissionCheck {
+        private static final MapCodec<CombinationPermissionCheck> CODEC = RecordCodecBuilder.mapCodec(
+                (instance) -> instance.group(
+                                PermissionCheck.CODEC.fieldOf("first")
+                                        .forGetter(CombinationPermissionCheck::first),
+                                PermissionCheck.CODEC.fieldOf("second")
+                                        .forGetter(CombinationPermissionCheck::second))
+                        .apply(instance, CombinationPermissionCheck::new));
+
+        @Override
+        public boolean check(PermissionSet source) {
+            return this.first().check(source) && this.second().check(source);
+        }
+
+        @Override
+        public MapCodec<? extends PermissionCheck> codec() {
+            return CODEC;
+        }
     }
 
     @FunctionalInterface

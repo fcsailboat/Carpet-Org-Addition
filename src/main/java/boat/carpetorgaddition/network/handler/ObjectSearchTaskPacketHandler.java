@@ -82,7 +82,7 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
             case BLOCK -> PermissionManager.getPermission(FinderCommand.FINDER_BLOCK);
             default -> null;
         };
-        if (permission == null || permission.test(source)) {
+        if (permission == null || permission.check(source.permissions())) {
             return;
         }
         throw CommandUtils.createException(LocalizationKeys.Operation.INSUFFICIENT_PERMISSIONS.translate());

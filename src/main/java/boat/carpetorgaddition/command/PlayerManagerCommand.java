@@ -30,9 +30,6 @@ import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -41,12 +38,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandPermissionLevels;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.TimeArgument;
+import net.minecraft.commands.arguments.*;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.suggestions.ServerOnlyCustomSuggestion;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -86,14 +84,14 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         // 延迟登录节点
-        RequiredArgumentBuilder<CommandSourceStack, Integer> loginNode = Commands.argument("delayed", IntegerArgumentType.integer(1));
+        RequiredArgumentBuilder<CommandSourceStack, Integer> loginNode = Commands.argument("delayed", IntegerArgument.integer(1));
         for (TimeUnit unit : TimeUnit.values()) {
             // 添加时间单位
             loginNode.then(Commands.literal(unit.getName())
                     .executes(context -> addDelayedLoginTask(context, unit)));
         }
         // 延迟登出节点
-        RequiredArgumentBuilder<CommandSourceStack, Integer> logoutNode = Commands.argument("delayed", IntegerArgumentType.integer(1));
+        RequiredArgumentBuilder<CommandSourceStack, Integer> logoutNode = Commands.argument("delayed", IntegerArgument.integer(1));
         for (TimeUnit unit : TimeUnit.values()) {
             logoutNode.then(Commands.literal(unit.getName())
                     .executes(context -> addDelayedLogoutTask(context, unit)));
@@ -105,70 +103,70 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             startupNode.then(Commands.literal(action.toString())
                     .executes(context -> this.addStartupFunction(context, action, 1))
                     .then(Commands.argument("delay", TimeArgument.time(1))
-                            .suggests((_, builder) -> SharedSuggestionProvider.suggest(times, builder))
-                            .executes(context -> this.addStartupFunction(context, action, IntegerArgumentType.getInteger(context, "delay"))))
+                            .suggests(((ServerOnlyCustomSuggestion) (_, _, builder) -> SuggestionContext.suggest(times, builder)).toBrigadier())
+                            .executes(context -> this.addStartupFunction(context, action, IntegerArgument.getInteger(context, "delay"))))
                     .then(Commands.literal("clear")
                             .executes(context -> this.addStartupFunction(context, action, -1))));
         }
         startupNode.then(Commands.literal("run")
-                .then(Commands.argument("command", StringArgumentType.string())
-                        .suggests((context, builder) -> {
-                            String playerName = StringArgumentType.getString(context, "name");
-                            FakePlayerSerializer serializer = getFakePlayerSerializer(context, playerName);
+                .then(Commands.argument("command", StringArgument.string())
+                        .suggests(((ServerOnlyCustomSuggestion) (server, context, builder) -> {
+                            String playerName = StringArgument.getString(context, "name");
+                            FakePlayerSerializer serializer = getFakePlayerSerializer(server, playerName);
                             List<String> list = serializer.listCommandStartupFunction().stream()
                                     .map(StringArgumentType::escapeIfRequired)
                                     .toList();
-                            return SharedSuggestionProvider.suggest(list, builder);
-                        })
+                            return SuggestionContext.suggest(list, builder);
+                        }).toBrigadier())
                         .executes(context -> this.addStartupRunCommandFunction(context, 1))
                         .then(Commands.argument("delay", TimeArgument.time(1))
-                                .suggests((_, builder) -> SharedSuggestionProvider.suggest(times, builder))
-                                .executes(context -> this.addStartupRunCommandFunction(context, IntegerArgumentType.getInteger(context, "delay"))))
+                                .suggests(((ServerOnlyCustomSuggestion) (_, _, builder) -> SuggestionContext.suggest(times, builder)).toBrigadier())
+                                .executes(context -> this.addStartupRunCommandFunction(context, IntegerArgument.getInteger(context, "delay"))))
                         .then(Commands.literal("clear")
                                 .executes(context -> this.addStartupRunCommandFunction(context, -1)))));
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_PLAYER_MANAGER.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_PLAYER_MANAGER::value))
                 .then(Commands.literal("save")
                         .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                 .executes(context -> savePlayerData(context, false))
-                                .then(Commands.argument("comment", StringArgumentType.string())
+                                .then(Commands.argument("comment", StringArgument.string())
                                         .executes(context -> savePlayerData(context, true)))))
                 .then(Commands.literal("spawn")
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .suggests(playerSuggests())
                                 .executes(this::spawnPlayer)))
                 .then(Commands.literal("kill")
                         .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                 .executes(this::killPlayer)))
                 .then(Commands.literal("modify")
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .suggests(playerSuggests())
                                 .then(Commands.literal("comment")
-                                        .then(Commands.argument("comment", StringArgumentType.string())
+                                        .then(Commands.argument("comment", StringArgument.string())
                                                 .executes(this::setComment)))
                                 .then(Commands.literal("resave")
                                         .executes(this::modifyPlayer))
                                 .then(startupNode)
                                 .then(Commands.literal("autologin")
                                         .requires(PermissionManager.register("playerManager.autologin", PermissionLevel.PASS))
-                                        .then(Commands.argument("autologin", BoolArgumentType.bool())
+                                        .then(Commands.argument("autologin", BooleanArgument.bool())
                                                 .executes(context -> this.setAutoLogin(context, false))))))
                 .then(Commands.literal("group")
                         .then(Commands.literal("add")
-                                .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("name", StringArgument.string())
                                         .suggests(playerSuggests())
-                                        .then(Commands.argument("group", StringArgumentType.string())
+                                        .then(Commands.argument("group", StringArgument.string())
                                                 .suggests(groupSuggests(true))
                                                 .executes(this::addToGroup))))
                         .then(Commands.literal("remove")
-                                .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("name", StringArgument.string())
                                         .suggests(playerSuggests())
-                                        .then(Commands.argument("group", StringArgumentType.string())
+                                        .then(Commands.argument("group", StringArgument.string())
                                                 .suggests(groupSuggests(false))
                                                 .executes(this::removeFromGroup))))
                         .then(Commands.literal("list")
                                 .then(Commands.literal("group")
-                                        .then(Commands.argument("group", StringArgumentType.string())
+                                        .then(Commands.argument("group", StringArgument.string())
                                                 .suggests(allGroupSuggests())
                                                 .executes(this::listGroup)))
                                 .then(Commands.literal("ungrouped")
@@ -176,48 +174,48 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                                 .then(Commands.literal("all")
                                         .executes(this::listAll)))
                         .then(Commands.literal("spawn")
-                                .then(Commands.argument("group", StringArgumentType.string())
+                                .then(Commands.argument("group", StringArgument.string())
                                         .suggests(allGroupSuggests())
                                         .executes(this::spawnGroupPlayer)))
                         .then(Commands.literal("kill")
-                                .then(Commands.argument("group", StringArgumentType.string())
+                                .then(Commands.argument("group", StringArgument.string())
                                         .suggests(allGroupSuggests())
                                         .executes(this::killGroupPlayer))))
                 .then(Commands.literal("reload")
                         .executes(this::reload))
                 .then(Commands.literal("autologin")
                         .requires(PermissionManager.register("playerManager.autologin", PermissionLevel.PASS))
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .suggests(playerSuggests())
-                                .then(Commands.argument("autologin", BoolArgumentType.bool())
+                                .then(Commands.argument("autologin", BooleanArgument.bool())
                                         .executes(context -> this.setAutoLogin(context, true)))))
                 .then(Commands.literal("list")
                         .executes(this::list)
-                        .then(Commands.argument("filter", StringArgumentType.string())
+                        .then(Commands.argument("filter", StringArgument.string())
                                 .executes(this::listWithFilter)))
                 .then(Commands.literal("remove")
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .suggests(playerSuggests())
                                 .executes(this::remove)))
                 .then(Commands.literal("schedule")
                         .then(Commands.literal("relogin")
                                 .requires(PermissionManager.register("playerManager.schedule.relogin", PermissionLevel.PASS))
-                                .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("name", StringArgument.string())
                                         .suggests(reLoginTaskSuggests())
-                                        .then(Commands.argument("interval", IntegerArgumentType.integer(1))
-                                                .suggests((_, builder) -> SharedSuggestionProvider.suggest(new String[]{"1", "3", "5"}, builder))
+                                        .then(Commands.argument("interval", IntegerArgument.integer(1))
+                                                .suggests(((ServerOnlyCustomSuggestion) (_, _, builder) -> SuggestionContext.suggest(new String[]{"1", "3", "5"}, builder)).toBrigadier())
                                                 .executes(this::setReLogin))
                                         .then(Commands.literal("stop")
                                                 .executes(this::stopReLogin))))
                         .then(Commands.literal("login")
-                                .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("name", StringArgument.string())
                                         .suggests(playerSuggests())
                                         .then(loginNode)))
                         .then(Commands.literal("logout")
                                 .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                         .then(logoutNode)))
                         .then(Commands.literal("cancel")
-                                .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("name", StringArgument.string())
                                         .suggests(cancelSuggests())
                                         .executes(this::cancelScheduleTask)))
                         .then(Commands.literal("list")
@@ -226,24 +224,24 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                         .then(Commands.literal("set")
                                 .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                         .executes(context -> safeAfk(context, 5F, false))
-                                        .then(Commands.argument("threshold", FloatArgumentType.floatArg())
-                                                .executes(context -> safeAfk(context, FloatArgumentType.getFloat(context, "threshold"), false))
-                                                .then(Commands.argument("save", BoolArgumentType.bool())
-                                                        .executes(context -> safeAfk(context, FloatArgumentType.getFloat(context, "threshold"), BoolArgumentType.getBool(context, "save")))))))
+                                        .then(Commands.argument("threshold", FloatArgument.floatArg())
+                                                .executes(context -> safeAfk(context, FloatArgument.getFloat(context, "threshold"), false))
+                                                .then(Commands.argument("save", BooleanArgument.bool())
+                                                        .executes(context -> safeAfk(context, FloatArgument.getFloat(context, "threshold"), BooleanArgument.getBool(context, "save")))))))
                         .then(Commands.literal("list")
                                 .executes(this::listSafeAfk))
                         .then(Commands.literal("cancel")
                                 .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                         .executes(context -> cancelSafeAfk(context, false))
-                                        .then(Commands.argument("save", BoolArgumentType.bool())
+                                        .then(Commands.argument("save", BooleanArgument.bool())
                                                 .executes(context -> cancelSafeAfk(context, true)))))
                         .then(Commands.literal("query")
                                 .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
                                         .executes(this::querySafeAfk))))
                 .then(Commands.literal("batch")
-                        .then(Commands.argument("prefix", StringArgumentType.word())
-                                .then(Commands.argument("start", IntegerArgumentType.integer(1))
-                                        .then(Commands.argument("end", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
+                        .then(Commands.argument("prefix", StringArgument.word())
+                                .then(Commands.argument("start", IntegerArgument.integer(1))
+                                        .then(Commands.argument("end", IntegerArgument.integer(1, Integer.MAX_VALUE))
                                                 .then(Commands.literal("spawn")
                                                         .executes(context -> batchSpawn(context, false))
                                                         .then(Commands.argument("at", Vec3Argument.vec3())
@@ -258,58 +256,54 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                                                                 .executes(context -> batchTrial(context, true))))))))
                 .then(Commands.literal("respawn")
                         .executes(context -> respawnResident(context, null))
-                        .then(Commands.argument("time", StringArgumentType.string())
+                        .then(Commands.argument("time", StringArgument.string())
                                 .suggests(respawnPlayerSuggests())
-                                .executes(context -> respawnResident(context, StringArgumentType.getString(context, "time"))))));
+                                .executes(context -> respawnResident(context, StringArgument.getString(context, "time"))))));
     }
 
     // cancel子命令自动补全
     @NonNull
     private SuggestionProvider<CommandSourceStack> cancelSuggests() {
-        return (context, builder) -> {
-            MinecraftServer server = context.getSource().getServer();
+        return ((ServerOnlyCustomSuggestion) (server, _, builder) -> {
             ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
             Stream<String> stream = manager.stream(PlayerScheduleTask.class).map(PlayerScheduleTask::getPlayerName);
-            return SharedSuggestionProvider.suggest(stream, builder);
-        };
+            return SuggestionContext.suggest(stream, builder);
+        }).toBrigadier();
     }
 
     // 自动补全玩家名
     private SuggestionProvider<CommandSourceStack> playerSuggests() {
-        return (context, builder) -> {
-            MinecraftServer server = context.getSource().getServer();
+        return ((ServerOnlyCustomSuggestion) (server, _, builder) -> {
             ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             Stream<String> stream = coordinator.getPlayerSerializationManager()
                     .listAll()
                     .stream()
                     .map(FakePlayerSerializer::getName)
                     .map(StringArgumentType::escapeIfRequired);
-            return SharedSuggestionProvider.suggest(stream, builder);
-        };
+            return SuggestionContext.suggest(stream, builder);
+        }).toBrigadier();
     }
 
     private SuggestionProvider<CommandSourceStack> allGroupSuggests() {
-        return (context, builder) -> {
-            MinecraftServer server = context.getSource().getServer();
+        return ((ServerOnlyCustomSuggestion) (server, _, builder) -> {
             ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
             Stream<String> stream = manager.listGrouped()
                     .keySet()
                     .stream()
                     .map(StringArgumentType::escapeIfRequired);
-            return SharedSuggestionProvider.suggest(stream, builder);
-        };
+            return SuggestionContext.suggest(stream, builder);
+        }).toBrigadier();
     }
 
     /**
      * @param add 如果为{@code true}，表示当前正在输入{@code add}子命令，否则当前正在输入{@code remove}子命令
      */
     private SuggestionProvider<CommandSourceStack> groupSuggests(boolean add) {
-        return (context, builder) -> {
-            MinecraftServer server = context.getSource().getServer();
+        return ((ServerOnlyCustomSuggestion) (server, context, builder) -> {
             ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
-            String name = StringArgumentType.getString(context, "name");
+            String name = StringArgument.getString(context, "name");
             Stream<String> stream = manager.listGrouped().keySet().stream();
             Optional<FakePlayerSerializer> optional = manager.get(name);
             if (optional.isPresent()) {
@@ -317,15 +311,14 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 Predicate<String> predicate = group -> optional.get().getGroups().contains(group);
                 stream = stream.filter(add ? predicate.negate() : predicate);
             }
-            return SharedSuggestionProvider.suggest(stream.map(StringArgumentType::escapeIfRequired), builder);
-        };
+            return SuggestionContext.suggest(stream.map(StringArgumentType::escapeIfRequired), builder);
+        }).toBrigadier();
     }
 
     // relogin子命令自动补全
     @NonNull
     private SuggestionProvider<CommandSourceStack> reLoginTaskSuggests() {
-        return (context, builder) -> {
-            MinecraftServer server = context.getSource().getServer();
+        return ((ServerOnlyCustomSuggestion) (server, _, builder) -> {
             ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
             // 所有正在周期性上下线的玩家
             List<String> taskList = manager.stream(ReLoginTask.class).map(ReLoginTask::getPlayerName).toList();
@@ -338,23 +331,21 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             HashSet<String> players = new HashSet<>();
             players.addAll(taskList);
             players.addAll(onlineList);
-            return SharedSuggestionProvider.suggest(players.stream(), builder);
-        };
+            return SuggestionContext.suggest(players.stream(), builder);
+        }).toBrigadier();
     }
 
     private SuggestionProvider<CommandSourceStack> respawnPlayerSuggests() {
-        return (context, builder) -> {
-            CommandSourceStack source = context.getSource();
-            MinecraftServer server = ServerUtils.getServer(source);
+        return ((ServerOnlyCustomSuggestion) (server, _, builder) -> {
             ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
             FakePlayerResidents players = coordinator.getSavedFakePlayer();
             Stream<String> stream = players.listFileTime().stream().map(StringArgumentType::escapeIfRequired);
-            return SharedSuggestionProvider.suggest(stream, builder);
-        };
+            return SuggestionContext.suggest(stream, builder);
+        }).toBrigadier();
     }
 
     private int listGroup(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String group = StringArgumentType.getString(context, "group");
+        String group = StringArgument.getString(context, "group");
         MinecraftServer server = context.getSource().getServer();
         ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
@@ -415,8 +406,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int addToGroup(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
-        String group = StringArgumentType.getString(context, "group");
+        String name = StringArgument.getString(context, "name");
+        String group = StringArgument.getString(context, "group");
         LocalizationKey key = GROUP.then("add");
         if (group.isEmpty()) {
             throw CommandUtils.createException(key.then("empty").translate());
@@ -431,8 +422,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int removeFromGroup(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
-        String group = StringArgumentType.getString(context, "group");
+        String name = StringArgument.getString(context, "name");
+        String group = StringArgument.getString(context, "group");
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
         LocalizationKey key = GROUP.then("remove");
         if (serializer.removeFromGroup(group)) {
@@ -444,7 +435,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int spawnGroupPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String group = StringArgumentType.getString(context, "group");
+        String group = StringArgument.getString(context, "group");
         MinecraftServer server = context.getSource().getServer();
         PlayerSerializationManager manager = ServerComponentCoordinator.of(server).getPlayerSerializationManager();
         List<FakePlayerSerializer> list = manager.listGroup(group);
@@ -461,7 +452,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int killGroupPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String group = StringArgumentType.getString(context, "group");
+        String group = StringArgument.getString(context, "group");
         MinecraftServer server = context.getSource().getServer();
         PlayerSerializationManager manager = ServerComponentCoordinator.of(server).getPlayerSerializationManager();
         List<FakePlayerSerializer> list = manager.listGroup(group);
@@ -697,7 +688,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     private int listWithFilter(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
-        String filter = StringArgumentType.getString(context, "filter");
+        String filter = StringArgument.getString(context, "filter");
         PlayerSerializationManager manager = getSerializationManager(server);
         List<Supplier<Component>> list = manager.listAll().stream()
                 .filter(serializer -> serializer.match(filter))
@@ -726,9 +717,9 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 设置注释
     private int setComment(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         // 修改注释
-        String comment = StringArgumentType.getString(context, "comment");
+        String comment = StringArgument.getString(context, "comment");
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
         serializer.setComment(comment);
         LocalizationKey key = KEY.then("comment");
@@ -745,8 +736,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 设置自动登录
     private int setAutoLogin(CommandContext<CommandSourceStack> context, boolean displayWarning) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
-        boolean autologin = BoolArgumentType.getBool(context, "autologin");
+        String name = StringArgument.getString(context, "name");
+        boolean autologin = BooleanArgument.getBool(context, "autologin");
         LocalizationKey key = KEY.then("autologin");
         if (displayWarning) {
             String command = CommonCommands.playerManagerAutologin(name, autologin);
@@ -784,7 +775,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             MessageUtils.sendMessage(context, key.then("file_already_exist").translate(clickResave));
             return 0;
         } else {
-            String comment = hasComment ? StringArgumentType.getString(context, "comment") : "";
+            String comment = hasComment ? StringArgument.getString(context, "comment") : "";
             if (CarpetOrgAdditionSettings.PLAYER_MANAGER_FORCE_COMMENT.value() && comment.isBlank()) {
                 throw CommandUtils.createException(LocalizationKeys.Rule.Message.PLAYER_MANAGER_FORCE_COMMENT.translate());
             }
@@ -801,7 +792,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 修改玩家数据
     private int modifyPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         EntityPlayerMPFake fakePlayer = CommandUtils.getFakePlayer(server, name);
@@ -813,7 +804,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 生成假玩家
     private int spawnPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         try {
             // 生成假玩家
             FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
@@ -838,7 +829,11 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private FakePlayerSerializer getFakePlayerSerializer(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
-        PlayerSerializationManager manager = getSerializationManager(context);
+        return getFakePlayerSerializer(context.getSource().getServer(), name);
+    }
+
+    private FakePlayerSerializer getFakePlayerSerializer(MinecraftServer server, String name) throws CommandSyntaxException {
+        PlayerSerializationManager manager = getSerializationManager(server);
         Optional<FakePlayerSerializer> optional = manager.get(name);
         if (optional.isEmpty()) {
             throw CommandUtils.createException(KEY.then("cannot_find_file").translate(name));
@@ -848,7 +843,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 删除玩家信息
     private int remove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         PlayerSerializationManager manager = getSerializationManager(context);
         Optional<FakePlayerSerializer> optional = manager.get(name);
         LocalizationKey key = KEY.then("delete");
@@ -882,7 +877,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int addStartupFunction(CommandContext<CommandSourceStack> context, FakePlayerStartupAction action, int delay) throws CommandSyntaxException {
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
         serializer.addStartupFunction(action, delay);
         return delay;
@@ -894,7 +889,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         if (server.isDedicatedServer()) {
             this.validateMultiPlayerUsability(context, source);
         }
-        String command = StringArgumentType.getString(context, "command");
+        String command = StringArgument.getString(context, "command");
         FakePlayerStartupAction action = FakePlayerStartupAction.CommandAction.of(command);
         return this.addStartupFunction(context, action, delay);
     }
@@ -902,12 +897,12 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private void validateMultiPlayerUsability(CommandContext<CommandSourceStack> context, CommandSourceStack source) throws CommandSyntaxException {
         LocalizationKey key = STARTUP.then("run");
         if (GlobalConfigs.isAllowMpPlayerStartupCmd()) {
-            if (Commands.LEVEL_OWNERS.check(source.permissions())) {
+            if (CommandPermissionLevels.LEVEL_OWNERS.check(source.permissions())) {
                 return;
             }
             throw CommandUtils.createException(key.then("permission").translate());
         }
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
         File file = serializer.getFile();
         TextBuilder builder = key.then("multiplayer").builder();
@@ -922,8 +917,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         // 强制启用内存泄漏修复
         if (fixMemoryLeak(context)) {
             // 获取目标假玩家名
-            String name = StringArgumentType.getString(context, "name");
-            int interval = IntegerArgumentType.getInteger(context, "interval");
+            String name = StringArgument.getString(context, "name");
+            int interval = IntegerArgument.getInteger(context, "interval");
             MinecraftServer server = context.getSource().getServer();
             ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
             // 如果任务存在，修改任务，否则添加任务
@@ -974,8 +969,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     }
 
     private int batchSpawn(CommandContext<CommandSourceStack> context, boolean at, Consumer<EntityPlayerMPFake> callback) throws CommandSyntaxException {
-        int start = IntegerArgumentType.getInteger(context, "start");
-        int end = IntegerArgumentType.getInteger(context, "end");
+        int start = IntegerArgument.getInteger(context, "start");
+        int end = IntegerArgument.getInteger(context, "end");
         // 交换最大最小值，玩家可能将end和start参数反向输入
         int temp = Math.min(start, end);
         end = Math.max(start, end);
@@ -1013,7 +1008,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                     .setCallback(callback);
         }
         // 为假玩家名添加前缀，这不仅仅是为了让名称更统一，也是为了在一定程度上阻止玩家使用其他真玩家的名称召唤假玩家
-        String prefix = StringArgumentType.getString(context, "prefix");
+        String prefix = StringArgument.getString(context, "prefix");
         List<String> list = batchPlayerList(prefix, start, end);
         LocalizationKey key = BATCH.then("name_too_long");
         if (PlayerUtils.playerNameTooLong(list.getFirst())) {
@@ -1042,12 +1037,12 @@ public class PlayerManagerCommand extends AbstractServerCommand {
      * 批量下线玩家
      */
     private int batchKill(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        int start = IntegerArgumentType.getInteger(context, "start");
-        int end = IntegerArgumentType.getInteger(context, "end");
+        int start = IntegerArgument.getInteger(context, "start");
+        int end = IntegerArgument.getInteger(context, "end");
         int temp = Math.min(start, end);
         end = Math.max(start, end);
         start = temp;
-        String prefix = StringArgumentType.getString(context, "prefix");
+        String prefix = StringArgument.getString(context, "prefix");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
@@ -1085,12 +1080,12 @@ public class PlayerManagerCommand extends AbstractServerCommand {
      * 批量控制玩家丢弃物品
      */
     private int batchDrop(CommandContext<CommandSourceStack> context) {
-        int start = IntegerArgumentType.getInteger(context, "start");
-        int end = IntegerArgumentType.getInteger(context, "end");
+        int start = IntegerArgument.getInteger(context, "start");
+        int end = IntegerArgument.getInteger(context, "end");
         int temp = Math.min(start, end);
         end = Math.max(start, end);
         start = temp;
-        String prefix = StringArgumentType.getString(context, "prefix");
+        String prefix = StringArgument.getString(context, "prefix");
         prefix = getPrefix(prefix);
         MinecraftServer server = context.getSource().getServer();
         int count = 0;
@@ -1126,7 +1121,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     // 停止重新上线下线
     private int stopReLogin(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         // 获取目标假玩家名
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         MinecraftServer server = ServerUtils.getServer(context.getSource());
         ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         Optional<ReLoginTask> optional = manager.stream(ReLoginTask.class)
@@ -1144,7 +1139,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         Optional<DelayedLoginTask> optional = taskManager.stream(DelayedLoginTask.class)
                 .filter(task -> Objects.equals(name, task.getPlayerName()))
                 .findFirst();
@@ -1205,7 +1200,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int cancelScheduleTask(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = ServerUtils.getServer(context.getSource());
         ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         // 获取符合条件的任务列表
         List<PlayerScheduleTask> list = manager.stream(PlayerScheduleTask.class)
                 .filter(task -> Objects.equals(task.getPlayerName(), name))
@@ -1277,7 +1272,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
         // 将游戏刻转化为对应单位
         private long getDelayed(CommandContext<CommandSourceStack> context) {
-            int delayed = IntegerArgumentType.getInteger(context, "delayed");
+            int delayed = IntegerArgument.getInteger(context, "delayed");
             return switch (this) {
                 case TICK -> delayed;
                 case SECOND -> delayed * 20L;

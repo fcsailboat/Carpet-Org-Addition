@@ -11,7 +11,6 @@ import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
-import boat.carpetorgaddition.wheel.permission.CommandPermission;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
@@ -23,34 +22,30 @@ import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.commands.arguments.*;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument.Result;
+import net.minecraft.commands.suggestions.ServerOnlyCustomSuggestion;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionProviderCheck;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -58,13 +53,12 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PlayerActionCommand extends AbstractServerCommand {
-    private static final CommandPermission AI_PERMISSION = PermissionManager.registerHiddenCommand("playerAction.player.bedrock.ai", PermissionLevel.PASS);
+    private static final PermissionProviderCheck<CommandSourceStack> AI_PERMISSION = PermissionManager.registerHiddenCommand("playerAction.player.bedrock.ai", PermissionLevel.PASS);
     public static final LocalizationKey KEY = LocalizationKeys.COMMAND.then("playerAction");
 
     public PlayerActionCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext access) {
@@ -74,66 +68,66 @@ public class PlayerActionCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_PLAYER_ACTION::value))
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(thenSorting())
                         .then(Commands.literal("empty")
                                 .executes(context -> setEmptyTheContainer(context, true))
-                                .then(Commands.argument("filter", ItemPredicateArgument.itemPredicate(this.access))
+                                .then(Commands.argument("filter", ItemPredicateArgument.itemPredicate())
                                         .executes(context -> setEmptyTheContainer(context, false))))
                         .then(Commands.literal("fill")
                                 .executes(context -> setFillTheContainer(context, true, true, false))
-                                .then(Commands.argument("filter", ItemPredicateArgument.itemPredicate(this.access))
+                                .then(Commands.argument("filter", ItemPredicateArgument.itemPredicate())
                                         .executes(context -> setFillTheContainer(context, false, true, false))
-                                        .then(Commands.argument(FillTheContainerAction.DROP_OTHER, BoolArgumentType.bool())
-                                                .executes(context -> setFillTheContainer(context, false, BoolArgumentType.getBool(context, FillTheContainerAction.DROP_OTHER), false))
-                                                .then(Commands.argument(FillTheContainerAction.MORE_CONTAINER, BoolArgumentType.bool())
-                                                        .executes(context -> setFillTheContainer(context, false, BoolArgumentType.getBool(context, FillTheContainerAction.DROP_OTHER), BoolArgumentType.getBool(context, FillTheContainerAction.MORE_CONTAINER)))))))
+                                        .then(Commands.argument(FillTheContainerAction.DROP_OTHER, BooleanArgument.bool())
+                                                .executes(context -> setFillTheContainer(context, false, BooleanArgument.getBool(context, FillTheContainerAction.DROP_OTHER), false))
+                                                .then(Commands.argument(FillTheContainerAction.MORE_CONTAINER, BooleanArgument.bool())
+                                                        .executes(context -> setFillTheContainer(context, false, BooleanArgument.getBool(context, FillTheContainerAction.DROP_OTHER), BooleanArgument.getBool(context, FillTheContainerAction.MORE_CONTAINER)))))))
                         .then(Commands.literal("stop")
                                 .executes(this::setStop))
                         .then(Commands.literal("craft")
                                 .then(Commands.literal("one")
-                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
+                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate())
                                                 .executes(this::setOneCraft)))
                                 .then(Commands.literal("nine")
-                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
+                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate())
                                                 .executes(this::setNineCraft)))
                                 .then(Commands.literal("four")
-                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
+                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate())
                                                 .executes(this::setFourCraft)))
                                 .then(Commands.literal("crafting_table")
-                                        .then(registerItemPredicateNode(9, this.access, this::setCraftingTableCraft)))
+                                        .then(registerItemPredicateNode(9, this::setCraftingTableCraft)))
                                 .then(Commands.literal("inventory")
-                                        .then(registerItemPredicateNode(4, this.access, this::setInventoryCraft)))
+                                        .then(registerItemPredicateNode(4, this::setInventoryCraft)))
                                 .then(Commands.literal("gui")
                                         .executes(this::openFakePlayerCraftGui)))
                         .then(Commands.literal("trade")
-                                .then(Commands.argument("index", IntegerArgumentType.integer(1))
+                                .then(Commands.argument("index", IntegerArgument.integer(1))
                                         .executes(context -> setTrade(context, false))
                                         .then(Commands.literal("void_trade")
                                                 .executes(context -> setTrade(context, true)))))
                         .then(Commands.literal("info")
                                 .executes(this::getAction))
                         .then(Commands.literal("rename")
-                                .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
-                                        .then(Commands.argument("name", StringArgumentType.string())
+                                .then(Commands.argument("item", ItemPredicateArgument.itemPredicate())
+                                        .then(Commands.argument("name", StringArgument.string())
                                                 .executes(this::setRename))))
                         .then(Commands.literal("stonecutting")
                                 .then(Commands.literal("item")
-                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate(this.access))
-                                                .then(Commands.argument("button", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("item", ItemPredicateArgument.itemPredicate())
+                                                .then(Commands.argument("button", IntegerArgument.integer(1))
                                                         .executes(this::setStonecutting))))
                                 .then(Commands.literal("gui")
                                         .executes(this::useGuiSetStonecutting)))
                         .then(Commands.literal("fishing")
                                 .executes(this::setFishing))
                         .then(Commands.literal("plant")
-                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
+                                .requires(CommandUtils.requireCondition(CarpetOrgAdditionConstants::isEnableHiddenFunction))
                                 .executes(this::setPlant))
                         .then(register(Commands.literal("bedrock")
-                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())))
+                                .requires(CommandUtils.requireCondition(CarpetOrgAdditionConstants::isEnableHiddenFunction))))
                         .then(Commands.literal("goto")
-                                .requires(_ -> CarpetOrgAdditionConstants.isEnableHiddenFunction())
+                                .requires(CommandUtils.requireCondition(CarpetOrgAdditionConstants::isEnableHiddenFunction))
                                 .then(Commands.literal("block")
                                         .then(Commands.argument("target", BlockPosArgument.blockPos())
                                                 .executes(this::setGotoBlockPos)))
@@ -141,47 +135,49 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                         .then(Commands.argument("target", EntityArgument.entity())
                                                 .executes(this::setGotoEntity))))
                         .then(Commands.literal("raise")
-                                .requires(_ -> CarpetOrgAddition.isDebugMode())
+                                .requires(CommandUtils.requireCondition(CarpetOrgAddition::isDebugMode))
                                 .executes(context -> this.raise(context, null))
-                                .then(Commands.argument("message", StringArgumentType.string())
-                                        .executes(context -> this.raise(context, StringArgumentType.getString(context, "message")))))
+                                .then(Commands.argument("message", StringArgument.string())
+                                        .executes(context -> this.raise(context, StringArgument.getString(context, "message")))))
                         .then(Commands.literal("librarian")
                                 .then(Commands.argument("jobSite", BlockPosArgument.blockPos())
-                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                        .then(Commands.argument("enchantment", ResourceArgument.resource(Registries.ENCHANTMENT))
                                                 .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
-                                                .then(Commands.argument("level", IntegerArgumentType.integer(1))
-                                                        .suggests(PlayerActionCommand::suggestEnchantmentLevel)
-                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                .then(Commands.argument("level", IntegerArgument.integer(1))
+                                                        .suggests(suggestEnchantmentLevel())
+                                                        .then(Commands.argument("price", IntegerArgument.integer(1, 64))
                                                                 .suggests(suggestMixPrice(false))
-                                                                .executes(context -> this.setLibrarianTradeFind(context, IntegerArgumentType.getInteger(context, "level"), IntegerArgumentType.getInteger(context, "price")))))
+                                                                .executes(context -> this.setLibrarianTradeFind(context, IntegerArgument.getInteger(context, "level"), IntegerArgument.getInteger(context, "price")))))
                                                 .then(Commands.literal("max")
                                                         .executes(context -> this.setLibrarianTradeFind(context, -1, 64))
-                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1, 64))
+                                                        .then(Commands.argument("price", IntegerArgument.integer(1, 64))
                                                                 .suggests(suggestMixPrice(true))
-                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgumentType.getInteger(context, "price"))))))))
+                                                                .executes(context -> this.setLibrarianTradeFind(context, -1, IntegerArgument.getInteger(context, "price"))))))))
                         .then(Commands.literal("enchanting")
-                                .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
-                                        .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
+                                .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate())
+                                        .then(Commands.argument("enchantment", ResourceArgument.resource(Registries.ENCHANTMENT))
                                                 .executes(this::setEnchanting))))));
     }
 
     private static SuggestionProvider<CommandSourceStack> suggestMixPrice(boolean maxLevel) {
-        return (context, builder) -> {
+        return ((ServerOnlyCustomSuggestion) (_, context, builder) -> {
             Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
-            int level = maxLevel ? holder.value().getMaxLevel() : IntegerArgumentType.getInteger(context, "level");
+            int level = maxLevel ? holder.value().getMaxLevel() : IntegerArgument.getInteger(context, "level");
             Int2IntMap.Entry range = LibrarianTradeFindAction.getPriceRange(holder, level);
             int min = range.getIntKey();
             if (min > 64) {
-                return null;
+                return builder.buildFuture();
             }
-            return SharedSuggestionProvider.suggest(Stream.of(min).map(String::valueOf), builder);
-        };
+            return SuggestionContext.suggest(Stream.of(min).map(String::valueOf), builder);
+        }).toBrigadier();
     }
 
-    private static CompletableFuture<Suggestions> suggestEnchantmentLevel(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) throws CommandSyntaxException {
-        Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
-        int maxLevel = holder.value().getMaxLevel();
-        return SharedSuggestionProvider.suggest(IntStream.rangeClosed(1, maxLevel).mapToObj(Integer::toString), builder);
+    private static SuggestionProvider<CommandSourceStack> suggestEnchantmentLevel() {
+        return ((ServerOnlyCustomSuggestion) (_, context, builder) -> {
+            Holder.Reference<Enchantment> holder = ResourceArgument.getEnchantment(context, "enchantment");
+            int maxLevel = holder.value().getMaxLevel();
+            return SuggestionContext.suggest(IntStream.rangeClosed(1, maxLevel).mapToObj(Integer::toString), builder);
+        }).toBrigadier();
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> thenSorting() {
@@ -190,7 +186,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         int max = GlobalConfigs.getPlayerActionMaxSortingItemCount();
         for (int i = max; i >= 0; i--) {
             final int count = i + 1;
-            var argument = Commands.argument("item" + count, ItemPredicateArgument.itemPredicate(this.access));
+            var argument = Commands.argument("item" + count, ItemPredicateArgument.itemPredicate());
             if (result != null) {
                 if (i < max - 1) {
                     argument = argument.then(Commands.literal("or").then(result));
@@ -209,16 +205,16 @@ public class PlayerActionCommand extends AbstractServerCommand {
         for (BedrockAction.BedrockRegionType value : BedrockAction.BedrockRegionType.values()) {
             node.then(Commands.literal(value.name().toLowerCase(Locale.ROOT))
                     .then(register(value).apply(
-                            Commands.argument("ai", BoolArgumentType.bool())
+                            Commands.argument("ai", BooleanArgument.bool())
                                     .requires(AI_PERMISSION)
                                     .executes(context -> {
-                                        boolean ai = BoolArgumentType.getBool(context, "ai");
+                                        boolean ai = BooleanArgument.getBool(context, "ai");
                                         return setBreakBedrock(context, value, ai, false);
                                     })
-                                    .then(Commands.argument("timedMaterialRecycling", BoolArgumentType.bool())
+                                    .then(Commands.argument("timedMaterialRecycling", BooleanArgument.bool())
                                             .executes(context -> {
-                                                boolean ai = BoolArgumentType.getBool(context, "ai");
-                                                boolean timedMaterialRecycling = BoolArgumentType.getBool(context, "timedMaterialRecycling");
+                                                boolean ai = BooleanArgument.getBool(context, "ai");
+                                                boolean timedMaterialRecycling = BooleanArgument.getBool(context, "timedMaterialRecycling");
                                                 return setBreakBedrock(context, value, ai, timedMaterialRecycling);
                                             })))));
         }
@@ -235,22 +231,18 @@ public class PlayerActionCommand extends AbstractServerCommand {
                                     .then(argument));
             case CYLINDER -> argument ->
                     Commands.argument("center", BlockPosArgument.blockPos())
-                            .then(Commands.argument("radius", IntegerArgumentType.integer(1, 1024))
-                                    .then(Commands.argument("height", IntegerArgumentType.integer(1, 1024))
+                            .then(Commands.argument("radius", IntegerArgument.integer(1, 1024))
+                                    .then(Commands.argument("height", IntegerArgument.integer(1, 1024))
                                             .executes(command)
                                             .then(argument)));
         };
     }
 
     // 注册物品谓词节点
-    private RequiredArgumentBuilder<CommandSourceStack, Result> registerItemPredicateNode(
-            int maxValue,
-            CommandBuildContext access,
-            Command<CommandSourceStack> function
-    ) {
+    private RequiredArgumentBuilder<CommandSourceStack, Result> registerItemPredicateNode(int maxValue, Command<CommandSourceStack> function) {
         RequiredArgumentBuilder<CommandSourceStack, Result> result = null;
         for (int i = maxValue; i >= 1; i--) {
-            var nobe = Commands.argument("item" + i, ItemPredicateArgument.itemPredicate(access));
+            var nobe = Commands.argument("item" + i, ItemPredicateArgument.itemPredicate());
             if (result == null) {
                 result = nobe.executes(function);
             } else {
@@ -374,7 +366,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         // 获取按钮的索引，减去1
-        int index = IntegerArgumentType.getInteger(context, "index") - 1;
+        int index = IntegerArgument.getInteger(context, "index") - 1;
         actionManager.setAction(new TradeAction(fakePlayer, index, voidTrade));
         return 1;
     }
@@ -386,7 +378,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         // 获取当前要操作的物品和要重命名的字符串
         ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
-        String newName = StringArgumentType.getString(context, "name");
+        String newName = StringArgument.getString(context, "name");
         actionManager.setAction(new RenameAction(fakePlayer, predicate, newName));
         return 1;
     }
@@ -397,7 +389,7 @@ public class PlayerActionCommand extends AbstractServerCommand {
         FakePlayerComponentCoordinator coordinator = PlayerComponentCoordinator.of(fakePlayer);
         FakePlayerActionManager actionManager = coordinator.getFakePlayerActionManager();
         // 获取要切割的物品和按钮的索引
-        int buttonIndex = IntegerArgumentType.getInteger(context, "button") - 1;
+        int buttonIndex = IntegerArgument.getInteger(context, "button") - 1;
         ItemStackPredicate predicate = ItemStackPredicate.of(context, "item");
         actionManager.setAction(new StonecuttingAction(fakePlayer, predicate, buttonIndex));
         return 1;
@@ -450,8 +442,8 @@ public class PlayerActionCommand extends AbstractServerCommand {
                 }
                 case CYLINDER -> {
                     BlockPos center = BlockPosArgument.getBlockPos(context, "center");
-                    int radius = IntegerArgumentType.getInteger(context, "radius");
-                    int height = IntegerArgumentType.getInteger(context, "height");
+                    int radius = IntegerArgument.getInteger(context, "radius");
+                    int height = IntegerArgument.getInteger(context, "height");
                     yield new BedrockAction(fakePlayer, center, radius, height, ai, timedMaterialRecycling);
                 }
             };

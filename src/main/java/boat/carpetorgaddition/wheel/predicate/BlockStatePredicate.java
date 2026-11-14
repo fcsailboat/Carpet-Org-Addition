@@ -95,12 +95,7 @@ public class BlockStatePredicate implements BiPredicate<Level, BlockPos> {
             if (commandNode.getNode() instanceof ArgumentCommandNode<?, ?> node && Objects.equals(node.getName(), arguments)) {
                 StringRange range = commandNode.getRange();
                 String content = context.getInput().substring(range.getStart(), range.getEnd());
-                Predicate<BlockInWorld> argument;
-                try {
-                    argument = BlockPredicateArgument.getBlockPredicate(context, arguments);
-                } catch (CommandSyntaxException e) {
-                    throw new IllegalArgumentException(e);
-                }
+                Predicate<BlockInWorld> argument = BlockPredicateArgument.getBlockPredicate(context, arguments);
                 BiPredicate<Level, BlockPos> biPredicate = (world, blockPos) -> argument.test(new BlockInWorld(world, blockPos, true));
                 Block block = tryConvert(content);
                 Predicate<BlockState> paletteMatcher;

@@ -12,7 +12,6 @@ import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.Int2FloatMap;
@@ -21,6 +20,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.IntegerArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -43,7 +43,7 @@ public class XpTransferCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_XP_TRANSFER.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_XP_TRANSFER::value))
                 .then(Commands.argument("from", EntityArgument.player())
                         .then(Commands.argument("to", EntityArgument.player())
                                 .then(Commands.literal("all")
@@ -51,16 +51,16 @@ public class XpTransferCommand extends AbstractServerCommand {
                                 .then(Commands.literal("half")
                                         .executes(this::transferHalf))
                                 .then(Commands.literal("points")
-                                        .then(Commands.argument("number", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("number", IntegerArgument.integer(1))
                                                 .executes(this::transferSpecifyPoint)))
                                 .then(Commands.literal("level")
-                                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("level", IntegerArgument.integer(1))
                                                 .executes(this::transferSpecifyLevel)))
                                 .then(Commands.literal("upgrade")
-                                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("level", IntegerArgument.integer(1))
                                                 .executes(this::transferUpgrade)))
                                 .then(Commands.literal("upgradeto")
-                                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("level", IntegerArgument.integer(1))
                                                 .executes(this::transferUpgradeTo))))));
     }
 
@@ -145,7 +145,7 @@ public class XpTransferCommand extends AbstractServerCommand {
      * 转移指定数量的经验
      */
     private int transferSpecifyPoint(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        int count = IntegerArgumentType.getInteger(context, "number");
+        int count = IntegerArgument.getInteger(context, "number");
         return this.transfer(context, BigInteger.valueOf(count));
     }
 
@@ -153,7 +153,7 @@ public class XpTransferCommand extends AbstractServerCommand {
      * 转移从0级升级到指定等级所需的经验
      */
     private int transferSpecifyLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        int level = IntegerArgumentType.getInteger(context, "level");
+        int level = IntegerArgument.getInteger(context, "level");
         BigInteger count;
         try {
             count = ExperienceTransfer.calculateTotalExperience(level, 0);
@@ -168,7 +168,7 @@ public class XpTransferCommand extends AbstractServerCommand {
      */
     private int transferUpgrade(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         int level = getToPlayer(context).experienceLevel;
-        int upgrade = level + IntegerArgumentType.getInteger(context, "level");
+        int upgrade = level + IntegerArgument.getInteger(context, "level");
         BigInteger count;
         try {
             count = ExperienceTransfer.calculateUpgradeExperience(level, upgrade);
@@ -183,7 +183,7 @@ public class XpTransferCommand extends AbstractServerCommand {
      */
     private int transferUpgradeTo(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         int level = getToPlayer(context).experienceLevel;
-        int upgrade = IntegerArgumentType.getInteger(context, "level");
+        int upgrade = IntegerArgument.getInteger(context, "level");
         BigInteger count;
         try {
             count = ExperienceTransfer.calculateUpgradeExperience(level, upgrade);

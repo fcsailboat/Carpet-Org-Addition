@@ -21,16 +21,19 @@ import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.api.settings.CarpetRule;
 import carpet.utils.CommandHelper;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandPermissionLevels;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.BooleanArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.StringArgument;
+import net.minecraft.commands.suggestions.ServerOnlyCustomSuggestion;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dialog.Dialog;
@@ -52,34 +55,38 @@ public class OrangeCommand extends AbstractServerCommand {
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
                 .then(Commands.literal("permission")
-                        .requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
-                        .then(Commands.argument("node", StringArgumentType.string())
+                        .requires(Commands.hasPermission(CommandPermissionLevels.LEVEL_OWNERS))
+                        .then(Commands.argument("node", StringArgument.string())
                                 .suggests(suggestsNode())
-                                .then(Commands.argument("level", StringArgumentType.string())
-                                        .suggests((_, builder) -> SharedSuggestionProvider.suggest(PermissionLevel.listPermission(), builder))
+                                .then(Commands.argument("level", StringArgument.string())
+                                        .suggests(((ServerOnlyCustomSuggestion) (_, _, builder) -> SuggestionContext.suggest(PermissionLevel.listPermission(), builder)).toBrigadier())
                                         .executes(this::setLevel))))
                 .then(Commands.literal("version")
                         .executes(this::version))
                 .then(Commands.literal("ruleself")
                         .then(Commands.argument(CommandUtils.PLAYER, EntityArgument.player())
-                                .then(Commands.argument("rule", StringArgumentType.string())
+                                .then(Commands.argument("rule", StringArgument.string())
                                         .suggests(suggestRule())
                                         .executes(this::infoRuleSelf)
-                                        .then(Commands.argument("value", BoolArgumentType.bool())
+                                        .then(Commands.argument("value", BooleanArgument.bool())
                                                 .executes(this::setRuleSelf)))))
                 .then(Commands.literal("dialog")
                         .executes(this::openDialog)));
     }
 
     private @NonNull SuggestionProvider<CommandSourceStack> suggestRule() {
-        return (_, builder) -> SharedSuggestionProvider.suggest(CustomRuleValueManager.NAME_TO_RULES.values().stream().map(CarpetRule::name), builder);
+        return ((ServerOnlyCustomSuggestion) (_, _, builder) -> SuggestionContext.suggest(
+                CustomRuleValueManager.NAME_TO_RULES.values()
+                        .stream()
+                        .map(CarpetRule::name),
+                builder)).toBrigadier();
     }
 
     private SuggestionProvider<CommandSourceStack> suggestsNode() {
-        return (_, builder) -> SharedSuggestionProvider.suggest(
+        return ((ServerOnlyCustomSuggestion) (_, _, builder) -> SuggestionContext.suggest(
                 PermissionManager.listNode().stream().map(StringArgumentType::escapeIfRequired),
                 builder
-        );
+        )).toBrigadier();
     }
 
     private int openDialog(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -93,14 +100,14 @@ public class OrangeCommand extends AbstractServerCommand {
 
     // 设置子命令权限
     private int setLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        CommandPermission permission = PermissionManager.getPermission(StringArgumentType.getString(context, "node"));
+        CommandPermission permission = PermissionManager.getPermission(StringArgument.getString(context, "node"));
         LocalizationKey key = KEY.then("permission");
         if (permission == null) {
             throw CommandUtils.createException(key.then("invalid_node").translate());
         }
         PermissionLevel level;
         try {
-            level = PermissionLevel.fromString(StringArgumentType.getString(context, "level"));
+            level = PermissionLevel.fromString(StringArgument.getString(context, "level"));
         } catch (IllegalArgumentException e) {
             throw CommandUtils.createException(key.then("invalid_value").translate(), e);
         }
@@ -134,14 +141,14 @@ public class OrangeCommand extends AbstractServerCommand {
         if (CommandUtils.isSelfOrFakePlayer(player, context)) {
             MinecraftServer server = ServerUtils.getServer(player);
             CustomRuleValueManager customRuleValueManager = ServerComponentCoordinator.of(server).getCustomRuleValueManager();
-            String ruleString = StringArgumentType.getString(context, "rule");
+            String ruleString = StringArgument.getString(context, "rule");
             Optional<CustomRuleEntry> optional = CustomRuleValueManager.get(ruleString);
             if (optional.isEmpty()) {
                 throw CommandUtils.createException(RULESELF.then("failed").translate());
             }
             CustomRuleEntry entry = optional.get();
             CustomRuleControl<?> control = entry.getControl();
-            boolean value = BoolArgumentType.getBool(context, "value");
+            boolean value = BooleanArgument.getBool(context, "value");
             customRuleValueManager.setEnabled(player, ruleString, value);
             Component ruleName = RuleUtils.simpleTranslationName(entry.getRule());
             Component playerName = (player == CommandUtils.getSourcePlayer(context) ? LocalizationKeys.Misc.SELF.translate() : player.getDisplayName());
@@ -166,7 +173,7 @@ public class OrangeCommand extends AbstractServerCommand {
         if (CommandUtils.isSelfOrFakePlayer(player, context)) {
             MinecraftServer server = ServerUtils.getServer(player);
             CustomRuleValueManager valueManager = ServerComponentCoordinator.of(server).getCustomRuleValueManager();
-            String ruleString = StringArgumentType.getString(context, "rule");
+            String ruleString = StringArgument.getString(context, "rule");
             Optional<CustomRuleEntry> optional = CustomRuleValueManager.get(ruleString);
             if (optional.isEmpty()) {
                 throw CommandUtils.createException(RULESELF.then("failed").translate());

@@ -10,12 +10,12 @@ import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import com.mojang.blaze3d.Blaze3D;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.StringArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -57,7 +57,7 @@ public class RuntimeCommand extends AbstractServerCommand {
                                         .executes(this::spawnWanderingTraders))))
                 .then(Commands.literal("test")
                         .then(Commands.literal("io")
-                                .then(Commands.argument("content", StringArgumentType.greedyString())
+                                .then(Commands.argument("content", StringArgument.greedyString())
                                         .executes(this::writeContent)))));
     }
 
@@ -138,7 +138,7 @@ public class RuntimeCommand extends AbstractServerCommand {
         MinecraftServer server = context.getSource().getServer();
         WorldFormat worldFormat = new WorldFormat(server, "debug", "io");
         File file = worldFormat.file("FileWriteTest.txt");
-        String content = StringArgumentType.getString(context, "content");
+        String content = StringArgument.getString(context, "content");
         try {
             IOUtils.write(file, content);
         } catch (IOException e) {

@@ -20,7 +20,6 @@ import boat.carpetorgaddition.wheel.text.TextJoiner;
 import carpet.patches.EntityPlayerMPFake;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -28,11 +27,15 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.ServerPlayerSuggestionContext;
 import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.commands.arguments.IntegerArgument;
+import net.minecraft.commands.suggestions.ServerOnlyCustomSuggestion;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionProviderCheck;
 import net.minecraft.world.SimpleContainer;
 
 import java.io.IOException;
@@ -43,7 +46,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class MailCommand extends AbstractServerCommand {
-    private final Predicate<CommandSourceStack> intercept = PermissionManager.register("mail.intercept", PermissionLevel.OPS);
+    private final PermissionProviderCheck<CommandSourceStack> intercept = PermissionManager.register("mail.intercept", PermissionLevel.OPS);
     public static final LocalizationKey KEY = LocalizationKeys.COMMAND.then("mail");
     public static final LocalizationKey SEND = KEY.then("send");
     public static final LocalizationKey COLLECT = KEY.then("collect");
@@ -59,21 +62,21 @@ public class MailCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_MAIL.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_MAIL::value))
                 .then(Commands.literal("send")
                         .then(Commands.argument(CommandUtils.PLAYER, GameProfileArgument.gameProfile())
                                 .executes(this::send)))
                 .then(Commands.literal("collect")
-                        .then(Commands.argument("id", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("id", IntegerArgument.integer(1))
                                 .suggests(collectSuggests(true))
                                 .executes(this::collect)))
                 .then(Commands.literal("recall")
-                        .then(Commands.argument("id", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("id", IntegerArgument.integer(1))
                                 .suggests(collectSuggests(false))
                                 .executes(this::recall)))
                 .then(Commands.literal("intercept")
                         .requires(intercept)
-                        .then(Commands.argument("id", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("id", IntegerArgument.integer(1))
                                 .suggests(interceptSuggests())
                                 .executes(this::intercept)))
                 .then(Commands.literal("list")
@@ -82,46 +85,43 @@ public class MailCommand extends AbstractServerCommand {
                         .then(Commands.argument(CommandUtils.PLAYER, GameProfileArgument.gameProfile())
                                 .executes(this::sendMultipleParcel)))
                 .then(Commands.literal("override")
-                        .requires(_ -> CarpetOrgAddition.isDebugMode())
+                        .requires(CommandUtils.requireCondition(CarpetOrgAddition::isDebugMode))
                         .executes(this::override)));
     }
 
     // 自动补全快递单号
     private SuggestionProvider<CommandSourceStack> collectSuggests(boolean recipient) {
-        return (context, builder) -> {
-            CommandSourceStack source = context.getSource();
-            MinecraftServer server = ServerUtils.getServer(source);
-            ServerPlayer player = source.getPlayer();
-            if (player == null) {
-                return SharedSuggestionProvider.suggest(List.of(), builder);
+        return ((ServerOnlyCustomSuggestion) (server, context, builder) -> {
+            if (context.getSource() instanceof ServerPlayerSuggestionContext source) {
+                ServerPlayer player = (ServerPlayer) source.entity();
+                ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
+                ParcelManager manager = coordinator.getParcelManager();
+                // 获取所有发送给自己的快递（或所有自己发送的快递）
+                List<String> list = manager.stream()
+                        .filter(parcel -> recipient ? parcel.isRecipient(player) : parcel.isSender(player))
+                        .map(parcel -> Integer.toString(parcel.getId()))
+                        .toList();
+                return SuggestionContext.suggest(list, builder);
+            } else {
+                return SuggestionContext.suggest(List.of(), builder);
             }
-            ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
-            ParcelManager manager = coordinator.getParcelManager();
-            // 获取所有发送给自己的快递（或所有自己发送的快递）
-            List<String> list = manager.stream()
-                    .filter(parcel -> recipient ? parcel.isRecipient(player) : parcel.isSender(player))
-                    .map(parcel -> Integer.toString(parcel.getId()))
-                    .toList();
-            return SharedSuggestionProvider.suggest(list, builder);
-        };
+        }).toBrigadier();
     }
 
     // 自动补全快递单号
     private SuggestionProvider<CommandSourceStack> interceptSuggests() {
-        return (context, builder) -> {
-            CommandSourceStack source = context.getSource();
-            MinecraftServer server = ServerUtils.getServer(source);
-            ServerPlayer player = source.getPlayer();
-            if (player == null) {
-                return SharedSuggestionProvider.suggest(List.of(), builder);
+        return ((ServerOnlyCustomSuggestion) (server, context, builder) -> {
+            if (context.getSource() instanceof ServerPlayerSuggestionContext) {
+                ParcelManager manager = ServerComponentCoordinator.of(server).getParcelManager();
+                // 获取所有发送的快递
+                List<String> list = manager.stream()
+                        .map(parcel -> Integer.toString(parcel.getId()))
+                        .toList();
+                return SuggestionContext.suggest(list, builder);
+            } else {
+                return SuggestionContext.suggest(List.of(), builder);
             }
-            ParcelManager manager = ServerComponentCoordinator.of(server).getParcelManager();
-            // 获取所有发送的快递
-            List<String> list = manager.stream()
-                    .map(parcel -> Integer.toString(parcel.getId()))
-                    .toList();
-            return SharedSuggestionProvider.suggest(list, builder);
-        };
+        }).toBrigadier();
     }
 
     // 发送快递
@@ -293,7 +293,7 @@ public class MailCommand extends AbstractServerCommand {
         MinecraftServer server = ServerUtils.getServer(context.getSource());
         ParcelManager manager = ServerComponentCoordinator.of(server).getParcelManager();
         // 获取快递单号
-        int id = IntegerArgumentType.getInteger(context, "id");
+        int id = IntegerArgument.getInteger(context, "id");
         // 查找指定单号的快递
         Optional<Parcel> optional = manager.binarySearch(id);
         if (optional.isEmpty()) {

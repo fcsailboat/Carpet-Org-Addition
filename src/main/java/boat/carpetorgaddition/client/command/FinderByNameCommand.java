@@ -7,14 +7,14 @@ import boat.carpetorgaddition.network.codec.ObjectSearchTaskCodecs;
 import boat.carpetorgaddition.util.CommandUtils;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.IntegerArgument;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -31,22 +31,22 @@ public class FinderByNameCommand extends AbstractClientCommand {
                 .then(ClientCommands.literal("item")
                         .then(ClientCommands.argument("item", new ClientObjectArgumentType.ClientItemArgumentType(true))
                                 .executes(context -> searchItem(context, 64))
-                                .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                .then(ClientCommands.argument("radius", IntegerArgument.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "radius"))))
+                                        .executes(context -> searchItem(context, IntegerArgument.getInteger(context, "radius"))))
                                 .then(ClientCommands.literal("from")
                                         .then(ClientCommands.literal("offline_player")
                                                 .executes(this::searchItem)))))
                 .then(ClientCommands.literal("block")
                         .then(ClientCommands.argument("block", new ClientObjectArgumentType.ClientBlockArgumentType(true))
                                 .executes(context -> searchBlock(context, 64))
-                                .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                .then(ClientCommands.argument("radius", IntegerArgument.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> searchBlock(context, IntegerArgumentType.getInteger(context, "radius")))))));
+                                        .executes(context -> searchBlock(context, IntegerArgument.getInteger(context, "radius")))))));
     }
 
     private SuggestionProvider<FabricClientCommandSource> suggestionDefaultDistance() {
-        return (_, builder) -> SharedSuggestionProvider.suggest(FinderCommand.SUGGESTED_RADIUS, builder);
+        return (_, builder) -> SuggestionContext.suggest(FinderCommand.SUGGESTED_RADIUS, builder);
     }
 
     private int searchItem(CommandContext<FabricClientCommandSource> context, int radius) {

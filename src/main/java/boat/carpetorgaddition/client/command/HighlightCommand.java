@@ -9,7 +9,6 @@ import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -18,7 +17,8 @@ import net.fabricmc.loader.api.ObjectShare;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.IntegerArgument;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
@@ -47,9 +47,9 @@ public class HighlightCommand extends AbstractClientCommand {
         this.dispatcher.register(ClientCommands.literal(name)
                 .then(ClientCommands.argument("blockPos", ClientBlockPosArgumentType.blockPos())
                         .executes(context -> highlight(context, 60 * 20L, !CarpetOrgAdditionClient.CLEAR_WAYPOINT.isUnbound()))
-                        .then(ClientCommands.argument("second", IntegerArgumentType.integer(1))
-                                .suggests((_, builder) -> SharedSuggestionProvider.suggest(new String[]{"30", "60", "120"}, builder))
-                                .executes(context -> highlight(context, IntegerArgumentType.getInteger(context, "second") * 20L, false)))
+                        .then(ClientCommands.argument("second", IntegerArgument.integer(1))
+                                .suggests((_, builder) -> SuggestionContext.suggest(new String[]{"30", "60", "120"}, builder))
+                                .executes(context -> highlight(context, IntegerArgument.getInteger(context, "second") * 20L, false)))
                         .then(ClientCommands.literal("continue")
                                 .executes(context -> highlight(context, 1L, true))))
                 .then(ClientCommands.literal("clear")

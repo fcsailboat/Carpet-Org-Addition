@@ -20,8 +20,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.StringArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.suggestions.ServerOnlyCustomSuggestion;
+import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -46,33 +48,33 @@ public class LocationsCommand extends AbstractServerCommand {
     @Override
     public void register(String name) {
         this.dispatcher.register(Commands.literal(name)
-                .requires(source -> CarpetOrgAdditionSettings.COMMAND_LOCATIONS.value().hasPermission(source))
+                .requires(CommandUtils.requirePermissionLevel(CarpetOrgAdditionSettings.COMMAND_LOCATIONS::value))
                 .then(Commands.literal("add")
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .executes(context -> addWayPoint(context, null))
                                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                         .executes(context -> addWayPoint(context, BlockPosArgument.getBlockPos(context, "pos"))))))
                 .then(Commands.literal("list")
                         .executes(context -> listWayPoint(context, null))
-                        .then(Commands.argument("filter", StringArgumentType.string())
-                                .executes(context -> listWayPoint(context, StringArgumentType.getString(context, "filter")))))
+                        .then(Commands.argument("filter", StringArgument.string())
+                                .executes(context -> listWayPoint(context, StringArgument.getString(context, "filter")))))
                 .then(Commands.literal("supplement")
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .suggests(suggestion())
                                 .then(Commands.literal("comment")
                                         .executes(context -> addIllustrateText(context, null))
-                                        .then(Commands.argument("comment", StringArgumentType.string())
-                                                .executes(context -> addIllustrateText(context, StringArgumentType.getString(context, "comment")))))
+                                        .then(Commands.argument("comment", StringArgument.string())
+                                                .executes(context -> addIllustrateText(context, StringArgument.getString(context, "comment")))))
                                 .then(Commands.literal("another_pos")
                                         .executes(context -> addAnotherPos(context, null))
                                         .then(Commands.argument("anotherPos", BlockPosArgument.blockPos())
                                                 .executes(context -> addAnotherPos(context, BlockPosArgument.getBlockPos(context, "anotherPos")))))))
                 .then(Commands.literal("remove")
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .suggests(suggestion())
                                 .executes(this::deleteWayPoint)))
                 .then(Commands.literal("set")
-                        .then(Commands.argument("name", StringArgumentType.string())
+                        .then(Commands.argument("name", StringArgument.string())
                                 .suggests(suggestion())
                                 .executes(context -> setWayPoint(context, null))
                                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
@@ -83,22 +85,22 @@ public class LocationsCommand extends AbstractServerCommand {
 
     // 用来自动补全路径点名称
     public static SuggestionProvider<CommandSourceStack> suggestion() {
-        return (context, builder) -> {
-            WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), Waypoint.WAYPOINT);
-            return SharedSuggestionProvider.suggest(worldFormat.listFiles()
+        return ((ServerOnlyCustomSuggestion) (server, _, builder) -> {
+            WorldFormat worldFormat = new WorldFormat(server, Waypoint.WAYPOINT);
+            return SuggestionContext.suggest(worldFormat.listFiles()
                     .stream()
                     .map(File::getName)
                     .filter(name -> name.endsWith(IOUtils.JSON_EXTENSION))
                     .map(s -> IOUtils.removeExtension(s, IOUtils.JSON_EXTENSION))
                     .map(StringArgumentType::escapeIfRequired), builder);
-        };
+        }).toBrigadier();
     }
 
     // 添加路径点
     private int addWayPoint(CommandContext<CommandSourceStack> context, @Nullable BlockPos blockPos) throws CommandSyntaxException {
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
         // 获取路径点名称和位置对象
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         if (IOUtils.isValidFileName(name)) {
             throw CommandUtils.createException(LocalizationKeys.File.INVALID_NAME.translate());
         }
@@ -172,7 +174,7 @@ public class LocationsCommand extends AbstractServerCommand {
         CommandSourceStack source = context.getSource();
         MinecraftServer server = context.getSource().getServer();
         // 获取路径点的名称
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         LocalizationKey key = KEY.then("comment");
         try {
             // 从本地文件中读取路径点对象
@@ -210,7 +212,7 @@ public class LocationsCommand extends AbstractServerCommand {
         }
         MinecraftServer server = context.getSource().getServer();
         // 路径点的名称
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         LocalizationKey key = KEY.then("another").then("add");
         try {
             // 从文件中读取路径点对象
@@ -236,7 +238,7 @@ public class LocationsCommand extends AbstractServerCommand {
     private int deleteWayPoint(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         //获取路径点文件名
-        String name = StringArgumentType.getString(context, "name");
+        String name = StringArgument.getString(context, "name");
         //获取路径点文件对象
         WorldFormat worldFormat = new WorldFormat(context.getSource().getServer(), Waypoint.WAYPOINT);
         // 获取路径点文件的对象
@@ -260,7 +262,7 @@ public class LocationsCommand extends AbstractServerCommand {
         if (blockPos == null) {
             blockPos = player.blockPosition();
         }
-        String fileName = StringArgumentType.getString(context, "name");
+        String fileName = StringArgument.getString(context, "name");
         LocalizationKey key = KEY.then("modify");
         try {
             Waypoint waypoint = Waypoint.load(context.getSource().getServer(), fileName);

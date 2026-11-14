@@ -124,7 +124,6 @@
     "rule.shulkerboxstackable.compat.lithium.LithiumStackListMixin",
     "rule.villagervoidtrading.MerchantMixin",
     "rule.villagervoidtrading.TradeOfferMixin",
-    "util.CommandRegistryAccessMixin",
     "util.MinecraftClientMixin",
     "util.MinecraftServerMixin",
     "util.PlayerListMixin",
