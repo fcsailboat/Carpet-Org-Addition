@@ -9,8 +9,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.multiplayer.ClientSuggestionContext;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
+import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.commands.suggestions.SuggestionContext;
 import net.minecraft.core.BlockPos;
 
@@ -45,11 +45,11 @@ public class ClientBlockPosArgumentType implements ArgumentType<BlockPos> {
                 return new BlockPos(x, y, z);
             } else {
                 reader.setCursor(i);
-                throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
+                throw WorldCoordinates.ERROR_NOT_COMPLETE_3D.createWithContext(reader);
             }
         } else {
             reader.setCursor(i);
-            throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
+            throw WorldCoordinates.ERROR_NOT_COMPLETE_3D.createWithContext(reader);
         }
     }
 

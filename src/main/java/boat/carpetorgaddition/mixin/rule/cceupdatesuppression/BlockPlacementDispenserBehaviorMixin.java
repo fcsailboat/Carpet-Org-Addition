@@ -6,7 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.dispenser.ShulkerBoxDispenseBehavior;
+import net.minecraft.core.dispenser.PlaceBlockDispenseBehavior;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.BlockItem;
@@ -15,7 +15,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(ShulkerBoxDispenseBehavior.class)
+@Mixin(PlaceBlockDispenseBehavior.class)
 public class BlockPlacementDispenserBehaviorMixin {
     // 更新抑制潜影盒在被发射器放置时移除自定义名称
     @WrapOperation(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BlockItem;place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;"))
