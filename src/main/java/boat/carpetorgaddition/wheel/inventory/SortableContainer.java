@@ -2,21 +2,21 @@ package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.exception.InfiniteLoopException;
 import boat.carpetorgaddition.util.InventoryUtils;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public interface SortableContainer extends Container {
     /**
      * 整理物品栏
      */
     default void sort() {
+        int size = this.getContainerSize();
         // 记录所有未被锁定的槽位
-        ArrayList<Integer> list = new ArrayList<>();
+        IntList list = new IntArrayList(size);
         // 合并相同的物品
-        for (int index = 0; index < this.getContainerSize(); index++) {
+        for (int index = 0; index < size; index++) {
             if (this.isValidSlot(index)) {
                 list.add(index);
                 ItemStack itemStack = this.getItem(index);
@@ -31,7 +31,7 @@ public interface SortableContainer extends Container {
         sort(list);
     }
 
-    private void sort(List<Integer> list) {
+    private void sort(IntList list) {
         if (list.isEmpty()) {
             return;
         }
@@ -42,21 +42,21 @@ public interface SortableContainer extends Container {
         while (start < end) {
             // 程序是否陷入了死循环
             boolean infiniteLoop = true;
-            while (end > start && InventoryUtils.compare(pivot, this.getItem(list.get(end))) <= 0) {
+            while (end > start && InventoryUtils.compare(pivot, this.getItem(list.getInt(end))) <= 0) {
                 end--;
                 infiniteLoop = false;
             }
-            while (end > start && InventoryUtils.compare(pivot, this.getItem(list.get(start))) >= 0) {
+            while (end > start && InventoryUtils.compare(pivot, this.getItem(list.getInt(start))) >= 0) {
                 start++;
                 infiniteLoop = false;
             }
             if (infiniteLoop) {
                 throw new InfiniteLoopException("Trapped in an infinite loop while sorting items");
             }
-            this.swap(list.get(start), list.get(end));
+            this.swap(list.getInt(start), list.getInt(end));
         }
         // 基准物品归位
-        this.swap(list.getFirst(), list.get(start));
+        this.swap(list.getFirst(), list.getInt(start));
         sort(list.subList(0, start));
         sort(list.subList(start + 1, list.size()));
     }

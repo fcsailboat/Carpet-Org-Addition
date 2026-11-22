@@ -1,12 +1,12 @@
 package boat.carpetorgaddition.wheel.inventory;
 
+import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
-import java.util.Optional;
 
 public enum PlayerInventoryType {
     INVENTORY(LocalizationKeys.Misc.INVENTORY.translate()),
@@ -25,7 +25,7 @@ public enum PlayerInventoryType {
             PlayerInventoryType value = PlayerInventoryType.valueOf(type.toUpperCase(Locale.ROOT));
             return DataResult.success(value);
         } catch (IllegalArgumentException e) {
-            return DataResult.error(() -> Optional.ofNullable(e.getMessage()).orElse(e.getClass().getSimpleName()));
+            return DataResult.error(() -> CommandUtils.getExceptionString(e));
         }
     }
 

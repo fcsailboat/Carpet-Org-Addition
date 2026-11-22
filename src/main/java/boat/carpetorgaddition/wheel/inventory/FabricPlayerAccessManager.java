@@ -36,7 +36,7 @@ public class FabricPlayerAccessManager {
      * 上次处理队列的时间
      */
     private volatile long lastProcessingTime = System.currentTimeMillis();
-    private static final long MAX_TICK_TACK_TIME = 25L;
+    private static final long TICK_PROCESSING_BUDGET_MS = 25L;
     private static final long HEALTH_CHECK_TIMEOUT_MS = 8000L;
     private static final long AWAIT_TIMEOUT_MS = 1000L;
 
@@ -59,13 +59,13 @@ public class FabricPlayerAccessManager {
         return this.accessors.computeIfAbsent(entry, profile -> new FabricPlayerAccessor(this.server, profile, this));
     }
 
-    public FabricPlayerAccessor getOrCreateBlocking(NameAndId gameProfile, BooleanSupplier interrupt) {
+    public FabricPlayerAccessor getOrCreateBlocking(NameAndId nameAndId, BooleanSupplier interrupt) {
         boolean upgrading = AbstractOfflinePlayerSearchTask.UPGRADING.orElse(false);
-        return this.accessors.computeIfAbsent(gameProfile, _ -> {
+        return this.accessors.computeIfAbsent(nameAndId, _ -> {
             // 在多个线程调用构造方法存在并发问题
             Supplier<FabricPlayerAccessor> supplier = () ->
                     ScopedValue.where(AbstractOfflinePlayerSearchTask.UPGRADING, upgrading).call(
-                            () -> new FabricPlayerAccessor(this.server, gameProfile, this)
+                            () -> new FabricPlayerAccessor(this.server, nameAndId, this)
                     );
             FabricPlayerAccessorEntry entry = new FabricPlayerAccessorEntry(supplier, interrupt);
             this.queue.add(entry);
@@ -85,8 +85,12 @@ public class FabricPlayerAccessManager {
                     if (first != null) {
                         return first;
                     }
-                    //noinspection ResultOfMethodCallIgnored
-                    condition.await(AWAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                    try {
+                        //noinspection ResultOfMethodCallIgnored
+                        condition.await(AWAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        throw new CancellationException("Thread interrupted");
+                    }
                     if (ServerUtils.isRunning(this.server)) {
                         FabricPlayerAccessor second = entry.getAccessor();
                         if (second != null) {
@@ -95,15 +99,12 @@ public class FabricPlayerAccessManager {
                         // 长时间没有任务被处理，可能发生了阻塞
                         long time = System.currentTimeMillis() - this.lastProcessingTime;
                         if (time > HEALTH_CHECK_TIMEOUT_MS) {
-                            throw new IllegalStateException("FabricPlayerAccessManager blocked " + time + "ms, queue size:" + this.queue.size() + ", profile:" + gameProfile);
+                            throw new IllegalStateException("FabricPlayerAccessManager blocked " + time + " ms, queue size: " + this.queue.size() + ", profile: " + nameAndId);
                         }
                     } else {
                         throw new IllegalStateException("The server has been shut down");
                     }
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException(e);
             } finally {
                 lock.unlock();
             }
@@ -114,7 +115,7 @@ public class FabricPlayerAccessManager {
         long time = System.currentTimeMillis();
         while (true) {
             // 将剩余任务推迟到下一个游戏刻执行
-            if (System.currentTimeMillis() - time > MAX_TICK_TACK_TIME) {
+            if (System.currentTimeMillis() - time > TICK_PROCESSING_BUDGET_MS) {
                 return;
             }
             FabricPlayerAccessorEntry entry = this.queue.poll();
