@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.animal.fox.Fox;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -167,7 +167,7 @@ public class WorldUtils {
             case Player _ -> SoundEvents.PLAYER_TELEPORT;
             case Fox _ -> SoundEvents.FOX_TELEPORT;
             case Shulker _ -> SoundEvents.SHULKER_TELEPORT;
-            case EnderMan _ -> SoundEvents.ENDERMAN_TELEPORT;
+            case Enderman _ -> SoundEvents.ENDERMAN_TELEPORT;
             default -> SoundEvents.CHORUS_FRUIT_TELEPORT;
         };
         playSound(world, pos, soundEvent, entity.getSoundSource());
