@@ -1,8 +1,10 @@
 package boat.carpetorgaddition.wheel.common;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys.Dimension;
@@ -50,7 +52,7 @@ public class CommonTexts {
         TextJoiner joiner = new TextJoiner();
         joiner.append(
                 TextBuilder.of(simpleBlockPos(blockPos))
-                        .setCopyToClipboard(ServerUtils.toPosString(blockPos))
+                        .setCopyToClipboard(WorldUtils.toPosString(blockPos))
                         .build()
         );
         switch (CarpetOrgAdditionSettings.CAN_HIGHLIGHT_BLOCK_POS.value()) {
@@ -187,7 +189,7 @@ public class CommonTexts {
      * @return 如果是原版的3个维度，返回本Mod翻译后的名称，否则自己返回维度ID
      */
     public static Component dimension(Level world) {
-        String dimension = ServerUtils.getIdAsString(world);
+        String dimension = IdentityUtils.getIdAsString(world);
         return switch (dimension) {
             case ServerUtils.OVERWORLD -> Dimension.OVERWORLD.translate();
             case ServerUtils.THE_NETHER -> Dimension.THE_NETHER.translate();

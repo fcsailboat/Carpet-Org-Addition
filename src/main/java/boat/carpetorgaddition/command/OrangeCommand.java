@@ -124,7 +124,7 @@ public class OrangeCommand extends AbstractServerCommand {
         Component version = TextBuilder.of(CarpetOrgAdditionConstants.VERSION)
                 .setHover(CarpetOrgAdditionConstants.BUILD_TIMESTAMP)
                 .build();
-        MessageUtils.sendMessage(context, KEY.then("version").translate(name, version));
+        MessageUtils.sendMessage(context.getSource(), KEY.then("version").translate(name, version));
         return 1;
     }
 
@@ -173,12 +173,12 @@ public class OrangeCommand extends AbstractServerCommand {
             }
             CustomRuleEntry entry = optional.get();
             CustomRuleControl<?> control = entry.getControl();
-            MessageUtils.sendEmptyMessage(context);
+            MessageUtils.sendEmptyMessage(context.getSource());
             LocalizationKey key = RULESELF.then("info");
-            MessageUtils.sendMessage(context, key.then("player").translate(player.getDisplayName()));
+            MessageUtils.sendMessage(context.getSource(), key.then("player").translate(player.getDisplayName()));
             boolean enabled = valueManager.isEnabled(player, ruleString);
             Component displayName = RuleUtils.simpleTranslationName(entry.getRule());
-            MessageUtils.sendMessage(context, key.then("rule").translate(displayName));
+            MessageUtils.sendMessage(context.getSource(), key.then("rule").translate(displayName));
             TextBuilder builder = TextBuilder.of(key.then("enable").translate(CommonTexts.getBoolean(enabled)));
             if (!control.allowCustomSwitch()) {
                 builder.setHover(RULESELF.then("invalid").translate());

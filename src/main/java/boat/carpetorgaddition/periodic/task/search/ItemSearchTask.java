@@ -7,7 +7,7 @@ import boat.carpetorgaddition.mixin.accessor.AbstractHorseEntityAccessor;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.ItemStackStatistics;
 import boat.carpetorgaddition.wheel.ProgressBar;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
@@ -161,7 +161,7 @@ public class ItemSearchTask extends ServerSearchTask {
     private void searchFromEntity() {
         AABB box = blockEntities.toBox();
         if (this.entitySearchIterator == null) {
-            this.entitySearchIterator = ServerUtils.getEntities(this.world, box, Entity.class).iterator();
+            this.entitySearchIterator = WorldUtils.getEntities(this.world, box, Entity.class).iterator();
         }
         while (this.entitySearchIterator.hasNext()) {
             this.checkCancelled();

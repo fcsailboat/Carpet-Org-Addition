@@ -273,7 +273,7 @@ public class FinderCommand extends AbstractServerCommand {
         BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, radius);
         this.checkBoxSize(traverser);
         CommandSourceStack source = context.getSource();
-        TradeItemSearchTask task = new TradeItemSearchTask(world, traverser, sourcePos, predicate, source, player);
+        TradeItemSearchTask task = new TradeItemSearchTask(world, traverser.toBox(), sourcePos, predicate, source, player);
         // 向任务管理器添加任务
         MinecraftServer server = ServerUtils.getServer(source);
         ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
@@ -297,7 +297,7 @@ public class FinderCommand extends AbstractServerCommand {
         // 查找范围
         BlockPosTraverser traverser = new BlockPosTraverser(world, sourcePos, radius);
         this.checkBoxSize(traverser);
-        TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser, sourcePos, source, predicate, player);
+        TradeEnchantedBookSearchTask task = new TradeEnchantedBookSearchTask(world, traverser.toBox(), sourcePos, source, predicate, player);
         // 向任务管理器添加任务
         ServerComponentCoordinator.of(server).getServerTaskManager().addTask(task, player);
         return 1;

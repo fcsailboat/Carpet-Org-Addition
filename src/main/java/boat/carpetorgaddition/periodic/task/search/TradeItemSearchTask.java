@@ -6,7 +6,6 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 
@@ -23,8 +23,8 @@ public class TradeItemSearchTask extends AbstractTradeSearchTask {
     private final Component treadName;
     private static final LocalizationKey KEY = TRADE.then("item");
 
-    public TradeItemSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, ItemStackPredicate predicate, CommandSourceStack source, ServerPlayer player) {
-        super(world, blockPosTraverser, sourcePos, source, player);
+    public TradeItemSearchTask(Level world, AABB box, BlockPos sourcePos, ItemStackPredicate predicate, CommandSourceStack source, ServerPlayer player) {
+        super(world, box, sourcePos, source, player);
         this.predicate = predicate;
         this.treadName = predicate.getDisplayName();
     }

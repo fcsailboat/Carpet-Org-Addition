@@ -308,14 +308,14 @@ public class Parcel implements Comparable<Parcel> {
      * 播放物品拾取音效
      */
     public static void playItemPickupSound(@NonNull ServerPlayer player) {
-        ServerUtils.playSound(player, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS);
+        WorldUtils.playSound(player, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS);
     }
 
     /**
      * 播放经验球拾取音效
      */
     public static void playXpOrbPickupSound(@NonNull ServerPlayer player) {
-        ServerUtils.playSound(player, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS);
+        WorldUtils.playSound(player, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS);
     }
 
     /**
@@ -491,7 +491,7 @@ public class Parcel implements Comparable<Parcel> {
         Container inventory = this.getParcels();
         int size = inventory.getContainerSize();
         if (size == 0) {
-            return TextBuilder.of(ServerUtils.getName(Items.AIR)).build();
+            return TextBuilder.of(IdentityUtils.getName(Items.AIR)).build();
         }
         ItemStack first = inventory.getItem(0);
         boolean exactlyTheSame = true;
@@ -511,7 +511,7 @@ public class Parcel implements Comparable<Parcel> {
                 return LocalizationKeys.Item.ITEM.builder().setItalic().setHover(this.getItemList()).build();
             }
         }
-        Component name = ServerUtils.getName(first.getItem());
+        Component name = IdentityUtils.getName(first.getItem());
         // 物品栏中所有物品类型都相同
         if (exactlyTheSame) {
             // 物品组件也完全相同
@@ -534,7 +534,7 @@ public class Parcel implements Comparable<Parcel> {
         }
         TextJoiner joiner = new TextJoiner();
         for (Item item : counter) {
-            joiner.newline(new TextJoiner().append(ServerUtils.getName(item)).append("*").append(counter.getCount(item)).join());
+            joiner.newline(new TextJoiner().append(IdentityUtils.getName(item)).append("*").append(counter.getCount(item)).join());
         }
         return joiner.join();
     }

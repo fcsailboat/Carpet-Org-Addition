@@ -38,8 +38,8 @@ public class CarpetOrgAdditionClient implements ClientModInitializer {
                     "南溟苦旅霜欺鬓，小劫随身笑倚风。",
                     "倦看聚散寻常事，归来独卧雨声中。"
             );
-            // 这并非出自《CS:GO》，而是他学Java时写的一个数字炸弹，语法瑕疵是有意为之
-            case "qweryyuoskv" -> List.of("The bomb been planted!");
+            // 这并非出自《CS:GO》，而是他学Java时写的一个数字炸弹
+            case "qweryyuoskv" -> List.of("The bomb has been planted!");
             case "zhaixianyu" -> List.of("Why don't you ever take advice?");
             default -> List.of();
         };

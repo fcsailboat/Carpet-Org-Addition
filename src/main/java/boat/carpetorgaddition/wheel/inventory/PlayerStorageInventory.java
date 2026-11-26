@@ -1,9 +1,9 @@
 package boat.carpetorgaddition.wheel.inventory;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
+import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.util.InventoryUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.ItemIdentity;
 import boat.carpetorgaddition.wheel.screen.QuickShulkerScreenHandler;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -131,7 +131,7 @@ public class PlayerStorageInventory implements PlayerDecomposedContainer, Sortab
     public void drop(int index) {
         ItemStack itemStack = this.getItem(index);
         this.setItem(index, ItemStack.EMPTY);
-        ServerUtils.drop(this.player, itemStack);
+        EntityUtils.drop(this.player, itemStack);
     }
 
     /**

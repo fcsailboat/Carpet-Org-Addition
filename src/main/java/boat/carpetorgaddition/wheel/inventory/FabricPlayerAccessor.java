@@ -21,6 +21,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class FabricPlayerAccessor {
     private final FakePlayer fabricPlayer;
@@ -44,6 +45,7 @@ public class FabricPlayerAccessor {
 
     /**
      * @see PlayerList#placeNewPlayer(Connection, ServerPlayer, CommonListenerCookie)
+     * @see net.minecraft.server.network.config.PrepareSpawnTask#start(Consumer)
      */
     @SuppressWarnings("deprecation")
     private void initFakePlayer(MinecraftServer server) {

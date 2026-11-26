@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.wheel.traverser;
 
 import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -35,10 +35,10 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
     public WorldTraverser(Level world, BlockPos sourcePos, int range) {
         this(
                 sourcePos.getX() - range,
-                ServerUtils.getMinArchitectureAltitude(world),
+                WorldUtils.getMinArchitectureAltitude(world),
                 sourcePos.getZ() - range,
                 sourcePos.getX() + range,
-                ServerUtils.getMaxArchitectureAltitude(world),
+                WorldUtils.getMaxArchitectureAltitude(world),
                 sourcePos.getZ() + range
         );
     }
@@ -145,7 +145,7 @@ public abstract class WorldTraverser<T> implements Iterable<T> {
     }
 
     public boolean isCompleteHeight(Level world) {
-        return this.minY == ServerUtils.getMinArchitectureAltitude(world) && this.maxY == ServerUtils.getMaxArchitectureAltitude(world);
+        return this.minY == WorldUtils.getMinArchitectureAltitude(world) && this.maxY == WorldUtils.getMaxArchitectureAltitude(world);
     }
 
     /**

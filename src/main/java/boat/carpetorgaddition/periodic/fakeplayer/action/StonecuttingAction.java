@@ -3,10 +3,7 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
-import boat.carpetorgaddition.util.InventoryUtils;
-import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
@@ -72,7 +69,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
             }
             // 丢弃合成输出
             for (ItemStack itemStack : inventory) {
-                ServerUtils.drop(fakePlayer, itemStack);
+                EntityUtils.drop(fakePlayer, itemStack);
             }
         }
     }
@@ -222,7 +219,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
         LocalizationKey key = this.getInfoLocalizationKey();
         list.add(key.translate(
                         fakePlayer.getDisplayName(),
-                        ServerUtils.getName(Items.STONECUTTER),
+                IdentityUtils.getName(Items.STONECUTTER),
                         this.predicate.getDisplayName(),
                         this.getRecipeResult(world)
                 )
@@ -236,7 +233,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                     AbstractPlayerAction.getWithCountHoverText(screenHandler.getSlot(1).getItem())));
         } else {
             // 假玩家没有打开切石机
-            list.add(key.then("no_stonecutter").translate(fakePlayer.getDisplayName(), ServerUtils.getName(Items.STONECUTTER)));
+            list.add(key.then("no_stonecutter").translate(fakePlayer.getDisplayName(), IdentityUtils.getName(Items.STONECUTTER)));
         }
         return list;
     }
@@ -256,7 +253,7 @@ public class StonecuttingAction extends AbstractPlayerAction {
                 .map(RecipeHolder::value)
                 .map(recipe -> recipe.assemble(new SingleRecipeInput(itemStack)))
                 .orElse(ItemStack.EMPTY);
-        return ServerUtils.getDefaultName(result);
+        return IdentityUtils.getDefaultName(result);
     }
 
     @Override

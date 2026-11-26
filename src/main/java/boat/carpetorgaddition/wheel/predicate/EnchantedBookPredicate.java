@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.wheel.predicate;
 
 import boat.carpetorgaddition.util.EnchantmentUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -19,7 +19,7 @@ public class EnchantedBookPredicate implements Predicate<ItemStack> {
 
     public EnchantedBookPredicate(MinecraftServer server, Holder<Enchantment> enchantment) {
         this.enchantment = enchantment;
-        this.id = ServerUtils.getId(server, this.enchantment)
+        this.id = IdentityUtils.getId(server, this.enchantment)
                 .map(Identifier::toString)
                 .orElse("<unregistered>");
     }

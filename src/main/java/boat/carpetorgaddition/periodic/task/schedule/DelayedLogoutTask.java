@@ -7,7 +7,6 @@ import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import carpet.patches.EntityPlayerMPFake;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -59,9 +58,9 @@ public class DelayedLogoutTask extends PlayerScheduleTask {
     }
 
     @Override
-    public void onCancel(CommandContext<CommandSourceStack> context) {
+    public void onCancel(CommandSourceStack source) {
         this.markRemove();
-        MessageUtils.sendMessage(context, KEY.then("cancel").translate(this.fakePlayer.getDisplayName(), this.getDisplayTime()));
+        MessageUtils.sendMessage(source, KEY.then("cancel").translate(this.fakePlayer.getDisplayName(), this.getDisplayTime()));
     }
 
     private @NonNull Component getDisplayTime() {

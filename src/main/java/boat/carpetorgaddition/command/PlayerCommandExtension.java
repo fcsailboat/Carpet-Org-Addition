@@ -2,10 +2,7 @@ package boat.carpetorgaddition.command;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.rule.value.OpenPlayerInventoryCommandOption;
-import boat.carpetorgaddition.util.CommandUtils;
-import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.GameProfileCache;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryAccessor;
 import boat.carpetorgaddition.wheel.inventory.PlayerInventoryType;
@@ -87,7 +84,7 @@ public class PlayerCommandExtension {
         // 断言指定玩家为假玩家
         CommandUtils.requireFakePlayer(fakePlayer);
         // 传送玩家
-        ServerUtils.teleportIfServerWithEffect(fakePlayer, player);
+        WorldUtils.teleportIfServerWithEffect(fakePlayer, player);
         LocalizationKey key = LocalizationKey.literal("commands.teleport.success.entity.single");
         MessageUtils.sendMessage(context.getSource(), key.translate(fakePlayer.getDisplayName(), player.getDisplayName()));
         return 1;
@@ -102,7 +99,7 @@ public class PlayerCommandExtension {
         String name = getPlayerName(context);
         mannequin.setProfile(ResolvableProfile.createUnresolved(name));
         ServerPlayer player = CommandUtils.getSourcePlayer(context);
-        ServerUtils.teleport(mannequin, player);
+        WorldUtils.teleport(mannequin, player);
         world.addFreshEntity(mannequin);
         return 1;
     }

@@ -1,6 +1,8 @@
 package boat.carpetorgaddition.client.command;
 
 import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType;
+import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientBlockArgumentType;
+import boat.carpetorgaddition.client.command.argument.ClientObjectArgumentType.ClientItemArgumentType;
 import boat.carpetorgaddition.command.FinderCommand;
 import boat.carpetorgaddition.network.c2s.ObjectSearchTaskC2SPacket;
 import boat.carpetorgaddition.network.codec.ObjectSearchTaskCodecs;
@@ -27,10 +29,10 @@ public class FinderByNameCommand extends AbstractClientCommand {
 
     @Override
     public void register(String name) {
-        // TODO 添加交易查找支持
+        // TODO 添加附魔书交易查找支持
         this.dispatcher.register(ClientCommands.literal(name)
                 .then(ClientCommands.literal("item")
-                        .then(ClientCommands.argument("item", new ClientObjectArgumentType.ClientItemArgumentType(true))
+                        .then(ClientCommands.argument("item", new ClientItemArgumentType(true))
                                 .executes(context -> searchItem(context, 64))
                                 .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
@@ -39,11 +41,18 @@ public class FinderByNameCommand extends AbstractClientCommand {
                                         .then(ClientCommands.literal("offline_player")
                                                 .executes(this::searchItem)))))
                 .then(ClientCommands.literal("block")
-                        .then(ClientCommands.argument("block", new ClientObjectArgumentType.ClientBlockArgumentType(true))
+                        .then(ClientCommands.argument("block", new ClientBlockArgumentType(true))
                                 .executes(context -> searchBlock(context, 64))
                                 .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
-                                        .executes(context -> searchBlock(context, IntegerArgumentType.getInteger(context, "radius")))))));
+                                        .executes(context -> searchBlock(context, IntegerArgumentType.getInteger(context, "radius"))))))
+                .then(ClientCommands.literal("trade")
+                        .then(ClientCommands.literal("item")
+                                .then(ClientCommands.argument("item", new ClientItemArgumentType(true))
+                                        .executes(context -> searchTradeItem(context, 64))
+                                        .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                                .suggests(suggestionDefaultDistance())
+                                                .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "range"))))))));
     }
 
     private SuggestionProvider<FabricClientCommandSource> suggestionDefaultDistance() {
@@ -79,6 +88,16 @@ public class FinderByNameCommand extends AbstractClientCommand {
         ObjectSearchTaskCodecs.BlockSearchContext searchContext = new ObjectSearchTaskCodecs.BlockSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.BLOCK_SEARCH_CODEC.encode(searchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.BLOCK, name, json);
+        ClientPlayNetworking.send(packet);
+        return list.size();
+    }
+
+    private int searchTradeItem(CommandContext<FabricClientCommandSource> context, int range) {
+        List<Item> list = getItemList(context);
+        String name = CommandUtils.getArgumentLiteral(context, "item").orElseThrow();
+        ObjectSearchTaskCodecs.TradeItemSearchContext searchContext = new ObjectSearchTaskCodecs.TradeItemSearchContext(range, list);
+        JsonObject json = ObjectSearchTaskCodecs.TRADE_ITEM_SEARCH_CODEC.encode(searchContext);
+        ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.TRADE_ITEM, name, json);
         ClientPlayNetworking.send(packet);
         return list.size();
     }

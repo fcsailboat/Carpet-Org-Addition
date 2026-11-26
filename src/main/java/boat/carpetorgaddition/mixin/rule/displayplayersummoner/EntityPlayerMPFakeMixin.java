@@ -2,9 +2,7 @@ package boat.carpetorgaddition.mixin.rule.displayplayersummoner;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
-import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -57,7 +55,7 @@ public class EntityPlayerMPFakeMixin {
             builder.setGrayItalic();
             MinecraftServer server = ServerUtils.getServer(player);
             ServerLevel world = ServerUtils.getWorld(fakePlayer);
-            BlockPos blockPos = ServerUtils.getBlockPos(fakePlayer);
+            BlockPos blockPos = EntityUtils.getBlockPos(fakePlayer);
             Component hover = new TextJoiner()
                     .append(CommonTexts.dimension(world))
                     .append(": ")
@@ -69,7 +67,7 @@ public class EntityPlayerMPFakeMixin {
                     "{} has summoned {} at {}",
                     PlayerUtils.getName(player),
                     PlayerUtils.getName(fakePlayer),
-                    "%s [%s]".formatted(ServerUtils.getIdAsString(world), blockPos.toShortString())
+                    "%s [%s]".formatted(IdentityUtils.getIdAsString(world), blockPos.toShortString())
             );
         }
     }

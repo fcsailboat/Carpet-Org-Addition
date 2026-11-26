@@ -4,6 +4,7 @@ import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccess
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.core.BlockPos;
@@ -162,7 +163,7 @@ public class AStarPathfinder implements FakePlayerPathfinder {
         SearchNode node;
         while ((node = end.parent) != null) {
             end = node;
-            this.nodes.add(ServerUtils.getBlockBottomCenter(node.blockPos));
+            this.nodes.add(WorldUtils.getBlockBottomCenter(node.blockPos));
         }
     }
 

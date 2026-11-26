@@ -119,7 +119,7 @@ public class LocationsCommand extends AbstractServerCommand {
             // 将路径点写入本地文件
             waypoint.save();
             // 成功添加路径点
-            MessageUtils.sendMessage(context.getSource(), key.then("success").translate(name, ServerUtils.toPosString(blockPos)));
+            MessageUtils.sendMessage(context.getSource(), key.then("success").translate(name, WorldUtils.toPosString(blockPos)));
         } catch (IOException e) {
             CarpetOrgAddition.LOGGER.error("{} encountered an unexpected issue while attempting to write waypoints to the local file: ", PlayerUtils.getName(player), e);
         }
@@ -133,7 +133,7 @@ public class LocationsCommand extends AbstractServerCommand {
         List<File> list = worldFormat.listFiles();
         LocalizationKey key = KEY.then("list").then("empty");
         if (list.isEmpty()) {
-            MessageUtils.sendMessage(context, key.translate());
+            MessageUtils.sendMessage(context.getSource(), key.translate());
             return 0;
         }
         PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
@@ -158,11 +158,11 @@ public class LocationsCommand extends AbstractServerCommand {
             }
         }
         if (messages.isEmpty()) {
-            MessageUtils.sendMessage(context, key.translate());
+            MessageUtils.sendMessage(context.getSource(), key.translate());
             return 0;
         }
         collection.addContent(messages);
-        MessageUtils.sendEmptyMessage(context);
+        MessageUtils.sendEmptyMessage(context.getSource());
         collection.print();
         return count;
     }
@@ -281,7 +281,7 @@ public class LocationsCommand extends AbstractServerCommand {
         BlockPos blockPos = player.blockPosition();
         Level world = ServerUtils.getWorld(player);
         LocalizationKey key = KEY.then("here");
-        Component text = switch (ServerUtils.getIdAsString(world)) {
+        Component text = switch (IdentityUtils.getIdAsString(world)) {
             case ServerUtils.OVERWORLD -> key.then("cross").translate(
                     player.getDisplayName(),
                     LocalizationKeys.Dimension.OVERWORLD.translate(),
@@ -301,7 +301,7 @@ public class LocationsCommand extends AbstractServerCommand {
             );
             default -> key.translate(
                     player.getDisplayName(),
-                    ServerUtils.getIdAsString(world),
+                    IdentityUtils.getIdAsString(world),
                     CommonTexts.blockPos(blockPos, null)
             );
         };

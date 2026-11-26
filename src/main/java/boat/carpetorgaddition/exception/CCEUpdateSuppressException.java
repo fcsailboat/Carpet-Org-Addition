@@ -3,6 +3,7 @@ package boat.carpetorgaddition.exception;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -46,7 +47,7 @@ public class CCEUpdateSuppressException extends ClassCastException {
             // 其它异常
             builder.append("sending a ").append(packet.getClass().getSimpleName()).append(" packet");
         }
-        String worldPos = ServerUtils.toWorldPosString(ServerUtils.getWorld(player), this.triggerPos);
+        String worldPos = WorldUtils.toWorldPosString(ServerUtils.getWorld(player), this.triggerPos);
         builder.append(" at ").append(worldPos);
         CarpetOrgAddition.LOGGER.info(builder.toString());
     }

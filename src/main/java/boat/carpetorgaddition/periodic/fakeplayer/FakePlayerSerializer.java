@@ -113,10 +113,10 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
      */
     public FakePlayerSerializer(EntityPlayerMPFake fakePlayer) {
         this.name = PlayerUtils.getName(fakePlayer);
-        this.playerPos = ServerUtils.getFootPos(fakePlayer);
+        this.playerPos = EntityUtils.getFootPos(fakePlayer);
         this.yaw = fakePlayer.getYRot();
         this.pitch = fakePlayer.getXRot();
-        this.dimension = ServerUtils.getIdAsString(ServerUtils.getWorld(fakePlayer));
+        this.dimension = IdentityUtils.getIdAsString(ServerUtils.getWorld(fakePlayer));
         this.gameMode = fakePlayer.gameMode.getGameModeForPlayer();
         this.flying = fakePlayer.getAbilities().flying;
         this.sneaking = fakePlayer.isShiftKeyDown();
@@ -234,7 +234,7 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
                 .setPosition(this.playerPos)
                 .setYaw(this.yaw)
                 .setPitch(this.pitch)
-                .setWorld(ServerUtils.getWorldKey(this.dimension))
+                .setWorld(WorldUtils.getWorldKey(this.dimension))
                 .setGameMode(gameMode)
                 .setFlying(this.flying)
                 .setSneaking(this.sneaking)
@@ -373,10 +373,10 @@ public class FakePlayerSerializer implements Comparable<FakePlayerSerializer> {
      */
     public void update(EntityPlayerMPFake fakePlayer) {
         this.name = PlayerUtils.getName(fakePlayer);
-        this.playerPos = ServerUtils.getFootPos(fakePlayer);
+        this.playerPos = EntityUtils.getFootPos(fakePlayer);
         this.yaw = fakePlayer.getYRot();
         this.pitch = fakePlayer.getXRot();
-        this.dimension = ServerUtils.getIdAsString(ServerUtils.getWorld(fakePlayer));
+        this.dimension = IdentityUtils.getIdAsString(ServerUtils.getWorld(fakePlayer));
         this.gameMode = fakePlayer.gameMode.getGameModeForPlayer();
         this.flying = fakePlayer.getAbilities().flying;
         this.sneaking = fakePlayer.isShiftKeyDown();

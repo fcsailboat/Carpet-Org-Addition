@@ -2,6 +2,7 @@ package boat.carpetorgaddition.mixin.rule;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -38,7 +39,7 @@ public abstract class ServerPlayerEntityMixin {
             int range = (int) Math.min(thisPlayer.blockInteractionRange() + 1, 8);
             BlockPosTraverser traverser = new BlockPosTraverser(blockPos.offset(-range, -range, -range), blockPos.offset(range, range, range));
             for (BlockPos pos : traverser) {
-                if (ServerUtils.getBlockCenter(blockPos).distanceTo(ServerUtils.getBlockCenter(pos)) > range) {
+                if (WorldUtils.getBlockCenter(blockPos).distanceTo(WorldUtils.getBlockCenter(pos)) > range) {
                     continue;
                 }
                 thisPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, this.level().getBlockState(pos)));

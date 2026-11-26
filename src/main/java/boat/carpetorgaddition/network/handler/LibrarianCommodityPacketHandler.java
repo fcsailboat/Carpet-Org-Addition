@@ -5,6 +5,7 @@ import boat.carpetorgaddition.network.c2s.LibrarianCommodityQueryC2SPacket;
 import boat.carpetorgaddition.network.s2c.LibrarianCommodityResponseS2CPacket;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.misc.LibrarianCommodityEntry;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.common.collect.MapMaker;
@@ -72,10 +73,10 @@ public class LibrarianCommodityPacketHandler implements ServerPlayNetworking.Pla
         double range = 128.0;
         AABB box = new AABB(
                 blockPos.getX() - range,
-                ServerUtils.getMinArchitectureAltitude(world) - 64.0,
+                WorldUtils.getMinArchitectureAltitude(world) - 64.0,
                 blockPos.getZ() - range,
                 blockPos.getX() + range,
-                ServerUtils.getMaxArchitectureAltitude(world) + 64.0,
+                WorldUtils.getMaxArchitectureAltitude(world) + 64.0,
                 blockPos.getZ() + range
         );
         List<Villager> list = world.getEntitiesOfClass(Villager.class, box);
