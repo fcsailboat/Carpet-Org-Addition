@@ -5,6 +5,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.Waypoint;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
@@ -169,7 +170,7 @@ public class NavigatorCommand extends AbstractServerCommand {
         // 设置导航器，维度为玩家当前所在维度
         PlayerComponentCoordinator.of(player).getNavigatorManager().setNavigator(blockPos, world);
         // 发送命令反馈
-        Component pos = CommonTexts.blockPos(blockPos, ServerUtils.getColor(world));
+        Component pos = CommonTexts.blockPos(blockPos, WorldUtils.getColor(world));
         Component name = player.getDisplayName();
         MessageUtils.sendMessage(context, START_NAVIGATION.translate(name, pos));
         return 1;

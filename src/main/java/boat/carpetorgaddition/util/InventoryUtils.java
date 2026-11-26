@@ -20,7 +20,6 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NullUnmarked;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,7 +30,6 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-@NullUnmarked
 public class InventoryUtils {
     /**
      * 物品栏工具类，私有化构造方法
@@ -99,7 +97,7 @@ public class InventoryUtils {
             inventory.add(splitStack);
             if (!splitStack.isEmpty()) {
                 // 丢弃未插入物品栏的潜影盒，但不应该会插入失败
-                ServerUtils.drop(player, splitStack);
+                EntityUtils.drop(player, splitStack);
             }
             return result;
         }
@@ -354,7 +352,7 @@ public class InventoryUtils {
     }
 
     public static int compare(Item left, Item right) {
-        return ServerUtils.getIdAsString(left).compareTo(ServerUtils.getIdAsString(right));
+        return IdentityUtils.getIdAsString(left).compareTo(IdentityUtils.getIdAsString(right));
     }
 
     /**

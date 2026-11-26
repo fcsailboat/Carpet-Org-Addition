@@ -2,6 +2,7 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerPathfinder;
+import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -53,7 +54,7 @@ public class GotoAction extends AbstractPlayerAction {
                 }
                 case ENTITY -> this.target.get().ifPresent(blockPos -> {
                     EntityTracker tracker = (EntityTracker) this.target;
-                    Vec3 pos = ServerUtils.getFootPos(tracker.entity);
+                    Vec3 pos = EntityUtils.getFootPos(tracker.entity);
                     if (blockPos.getBottomCenter().distanceTo(pos) > 3) {
                         tracker.update();
                         pathfinder.pathfinding();

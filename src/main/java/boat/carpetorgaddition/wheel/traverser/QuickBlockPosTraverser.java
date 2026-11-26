@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel.traverser;
 
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
@@ -40,8 +40,8 @@ public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
     }
 
     public QuickBlockPosTraverser clamp(Level world) {
-        int minY = Math.max(this.minY, ServerUtils.getMinArchitectureAltitude(world));
-        int maxY = Math.min(this.maxY, ServerUtils.getMaxArchitectureAltitude(world));
+        int minY = Math.max(this.minY, WorldUtils.getMinArchitectureAltitude(world));
+        int maxY = Math.min(this.maxY, WorldUtils.getMaxArchitectureAltitude(world));
         return new QuickBlockPosTraverser(world, this.minX, minY, this.minZ, this.maxX, maxY, this.maxZ, this.paletteMatcher);
     }
 
@@ -118,7 +118,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
             while (this.sectionIndex < sections.length) {
                 LevelChunkSection section = sections[this.sectionIndex];
                 ChunkPos chunkPos = this.currentChunk.getPos();
-                int minBuildHeight = ServerUtils.getMinArchitectureAltitude(world);
+                int minBuildHeight = WorldUtils.getMinArchitectureAltitude(world);
                 int sectionMinY = minBuildHeight + this.sectionIndex * 16;
                 int sectionMaxY = sectionMinY + 15;
                 int height = getOverlapHeight(sectionMinY, sectionMaxY);
@@ -163,7 +163,7 @@ public class QuickBlockPosTraverser extends WorldTraverser<BlockPos> {
                 ChunkPos chunkPos = this.currentChunk.getPos();
                 BlockPos blockPos = new BlockPos(
                         SectionPos.sectionToBlockCoord(chunkPos.x(), this.x),
-                        ServerUtils.getMinArchitectureAltitude(world) + SectionPos.sectionToBlockCoord(this.sectionIndex, this.y),
+                        WorldUtils.getMinArchitectureAltitude(world) + SectionPos.sectionToBlockCoord(this.sectionIndex, this.y),
                         SectionPos.sectionToBlockCoord(chunkPos.z(), this.z)
                 );
                 boolean contains = QuickBlockPosTraverser.this.contains(blockPos);

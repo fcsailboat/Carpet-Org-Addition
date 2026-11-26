@@ -1,7 +1,10 @@
 package boat.carpetorgaddition.network.s2c;
 
 import boat.carpetorgaddition.network.NetworkPacketRegister;
+import boat.carpetorgaddition.util.EntityUtils;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -55,12 +58,12 @@ public final class WaypointUpdateS2CPacket implements CustomPacketPayload {
 
     public WaypointUpdateS2CPacket(Entity entity) {
         Level world = ServerUtils.getWorld(entity);
-        Identifier id = ServerUtils.getWorldKey(world).identifier();
-        this(ServerUtils.getEyePos(entity), id, entity.getId());
+        Identifier id = WorldUtils.getWorldKey(world).identifier();
+        this(EntityUtils.getEyePos(entity), id, entity.getId());
     }
 
     public WaypointUpdateS2CPacket(BlockPos blockPos, Level world) {
-        this(blockPos.getCenter(), ServerUtils.getId(world), -1);
+        this(blockPos.getCenter(), IdentityUtils.getId(world), -1);
     }
 
     public Vec3 getTarget() {
@@ -68,7 +71,7 @@ public final class WaypointUpdateS2CPacket implements CustomPacketPayload {
     }
 
     public ResourceKey<Level> getWorldKey() {
-        return ServerUtils.getWorldKey(this.worldId);
+        return WorldUtils.getWorldKey(this.worldId);
     }
 
     @SuppressWarnings("unused")

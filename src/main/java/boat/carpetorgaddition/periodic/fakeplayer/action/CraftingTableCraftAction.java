@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.command.PlayerActionCommand;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -56,7 +56,7 @@ public class CraftingTableCraftAction extends AbstractCraftAction {
         joiner.unsetBullet();
         joiner.setIndent(4);
         ItemStack craftOutput = this.getCraftOutput(this.predicates, 3, this.getFakePlayer());
-        Component itemText = craftOutput.isEmpty() ? LocalizationKeys.Item.ITEM.translate() : ServerUtils.getName(craftOutput.getItem());
+        Component itemText = craftOutput.isEmpty() ? LocalizationKeys.Item.ITEM.translate() : IdentityUtils.getName(craftOutput.getItem());
         Component displayName = this.getFakePlayer().getDisplayName();
         LocalizationKey key = this.getInfoLocalizationKey();
         joiner.newline(key.translate(displayName, itemText));
@@ -68,7 +68,7 @@ public class CraftingTableCraftAction extends AbstractCraftAction {
             joiner.enter(() -> this.addCraftGridState(screenHandler, joiner));
         } else {
             // 未打开工作台
-            joiner.newline(key.then("no_crafting_table").translate(displayName, ServerUtils.getName(Items.CRAFTING_TABLE)));
+            joiner.newline(key.then("no_crafting_table").translate(displayName, IdentityUtils.getName(Items.CRAFTING_TABLE)));
         }
         return joiner.collect();
     }

@@ -4,6 +4,7 @@ import boat.carpetorgaddition.command.LocationsCommand;
 import boat.carpetorgaddition.dataupdate.json.DataUpdater;
 import boat.carpetorgaddition.dataupdate.json.WaypointDataUpdater;
 import boat.carpetorgaddition.util.IOUtils;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
@@ -192,7 +193,7 @@ public class Waypoint {
     }
 
     public String getWorldAsString() {
-        return ServerUtils.getIdAsString(this.world);
+        return IdentityUtils.getIdAsString(this.world);
     }
 
     public String getName() {

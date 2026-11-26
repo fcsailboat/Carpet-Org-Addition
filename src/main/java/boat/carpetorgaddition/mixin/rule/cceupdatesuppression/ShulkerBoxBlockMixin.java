@@ -3,7 +3,7 @@ package boat.carpetorgaddition.mixin.rule.cceupdatesuppression;
 import boat.carpetorgaddition.exception.CCEUpdateSuppressException;
 import boat.carpetorgaddition.rule.RuleUtils;
 import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,7 +31,7 @@ public class ShulkerBoxBlockMixin {
             return;
         }
         if (RuleUtils.canUpdateSuppression(getBlockName(level, pos))) {
-            throw new CCEUpdateSuppressException(pos, "CCE Update Suppress triggered on " + ServerUtils.toWorldPosString(level, pos));
+            throw new CCEUpdateSuppressException(pos, "CCE Update Suppress triggered on " + WorldUtils.toWorldPosString(level, pos));
         }
     }
 

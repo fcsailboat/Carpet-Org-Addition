@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel.inventory;
 
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import net.minecraft.ChatFormatting;
@@ -123,7 +123,7 @@ public abstract class AbstractCustomSizeInventory implements Container {
             if (itemStack == PLACEHOLDER) {
                 continue;
             }
-            ServerUtils.drop(player, itemStack);
+            EntityUtils.drop(player, itemStack);
         }
     }
 

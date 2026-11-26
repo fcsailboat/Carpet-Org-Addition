@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel;
 
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -114,11 +114,11 @@ public class ItemStackStatistics {
             Item item = entry.getKey();
             Component itemCount = itemCount(entry.getIntValue(), item.getDefaultMaxStackSize());
             if (this.nestingItem.contains(item)) {
-                TextBuilder builder = TextBuilder.fromCombined(ServerUtils.getName(item), " ", itemCount);
+                TextBuilder builder = TextBuilder.fromCombined(IdentityUtils.getName(item), " ", itemCount);
                 builder.setItalic();
                 list.add(builder.build());
             } else {
-                list.add(TextBuilder.combineAll(ServerUtils.getName(item), " ", itemCount));
+                list.add(TextBuilder.combineAll(IdentityUtils.getName(item), " ", itemCount));
             }
         }
         Component text = TextBuilder.create(this.getSum());

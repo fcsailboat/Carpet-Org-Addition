@@ -5,10 +5,7 @@ import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
-import boat.carpetorgaddition.util.EnchantmentUtils;
-import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.ItemIdentity;
 import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
@@ -108,7 +105,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         if (this.diggingBlock) {
             BlockExcavator blockExcavator = PlayerComponentCoordinator.of(fakePlayer).getBlockExcavator();
             this.inventory.switchToAppropriateTool(world, this.lecternPos);
-            ServerUtils.lookAt(fakePlayer, Vec3.atBottomCenterOf(this.lecternPos));
+            EntityUtils.lookAt(fakePlayer, Vec3.atBottomCenterOf(this.lecternPos));
             if (blockExcavator.mining(this.lecternPos, Direction.DOWN)) {
                 this.diggingBlock = false;
             }
@@ -128,7 +125,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                 PlayerUtils.useItemOn(fakePlayer, hitResult);
                 this.refreshCount++;
                 if (this.prevVillager != null) {
-                    ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(this.prevVillager));
+                    EntityUtils.lookAt(fakePlayer, EntityUtils.getEyePos(this.prevVillager));
                 }
             } else {
                 this.outOfStockTicks++;
@@ -171,7 +168,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
                             .build()));
             this.lockedNoticeSent = true;
         }
-        ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(villager));
+        EntityUtils.lookAt(fakePlayer, EntityUtils.getEyePos(villager));
         List<TradeMatch> tradeMatches = this.findMatchingTrade(fakePlayer, villager);
         if (tradeMatches.isEmpty()) {
             return false;
@@ -513,7 +510,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
             List<TradeMatch> tradeMatches = this.findMatchingOffer(villager, -1, null);
             if (!tradeMatches.isEmpty()) {
                 ServerLevel world = ServerUtils.getWorld(fakePlayer);
-                boolean exclusive = ServerUtils.getEntities(world, this.from, this.to, Villager.class)
+                boolean exclusive = WorldUtils.getEntities(world, this.from, this.to, Villager.class)
                         .stream()
                         .filter(value -> value != villager)
                         .allMatch(value -> tradeMatches.stream().allMatch(tradeMatch -> this.findMatchingOffer(value, -1, tradeMatch.enchantment()).isEmpty()));
@@ -546,7 +543,7 @@ public abstract class LibrarianTradeFindAction extends AbstractPlayerAction {
         }
 
         private List<Holder<Enchantment>> getMissingEnchantments(ServerLevel world, MinecraftServer server) {
-            Set<Holder<Enchantment>> existing = ServerUtils.getEntities(world, this.from, this.to, Villager.class)
+            Set<Holder<Enchantment>> existing = WorldUtils.getEntities(world, this.from, this.to, Villager.class)
                     .stream()
                     .map(AbstractVillager::getOffers)
                     .flatMap(Collection::stream)

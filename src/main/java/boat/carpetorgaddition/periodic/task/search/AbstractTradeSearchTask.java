@@ -5,6 +5,7 @@ import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -69,7 +70,7 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
 
     // 查找周围的村民
     private void searchVillager() {
-        for (AbstractVillager villager : ServerUtils.getEntities(this.world, this.box, AbstractVillager.class)) {
+        for (AbstractVillager villager : WorldUtils.getEntities(this.world, this.box, AbstractVillager.class)) {
             this.checkCancelled();
             // 检查每一只村民交易
             this.searchVillager(villager);
