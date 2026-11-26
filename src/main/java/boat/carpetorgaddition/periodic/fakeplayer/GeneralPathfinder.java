@@ -4,10 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccessor;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
-import boat.carpetorgaddition.util.EntityUtils;
-import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
@@ -100,7 +97,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             this.updateTime--;
         }
         // 是否还没有接近目标
-        boolean farAway = ServerUtils.getBlockBottomCenter(blockPos).distanceTo(pos) > 1.5;
+        boolean farAway = WorldUtils.getBlockBottomCenter(blockPos).distanceTo(pos) > 1.5;
         if (this.updateTime == 0 && farAway) {
             // 更新路径
             this.noRoad = false;

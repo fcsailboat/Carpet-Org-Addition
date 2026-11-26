@@ -2,6 +2,7 @@ package boat.carpetorgaddition.wheel;
 
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -86,7 +87,7 @@ public class FakePlayerSpawner {
     private FakePlayerSpawner(MinecraftServer server, String name) {
         this.server = server;
         this.name = name;
-        this.position = ServerUtils.getBlockBottomCenter(server.getRespawnData().pos());
+        this.position = WorldUtils.getBlockBottomCenter(server.getRespawnData().pos());
         this.dimension = server.overworld().dimension();
         this.gameMode = server.getDefaultGameType();
     }

@@ -6,6 +6,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
 import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
@@ -263,8 +264,8 @@ public class PlantAction extends AbstractPlayerAction {
     private void plant(Level world, ItemStack itemStack, BlockPos farmlandPos, BlockPos cropPos) {
         // 让假玩家看向该位置（这不是必须的）
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        fakePlayer.lookAt(EntityAnchorArgument.Anchor.EYES, ServerUtils.getBlockCenter(cropPos));
-        BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(cropPos), Direction.UP, cropPos, false);
+        fakePlayer.lookAt(EntityAnchorArgument.Anchor.EYES, WorldUtils.getBlockCenter(cropPos));
+        BlockHitResult hitResult = new BlockHitResult(WorldUtils.getBlockCenter(cropPos), Direction.UP, cropPos, false);
         fakePlayer.gameMode.useItemOn(fakePlayer, world, itemStack, InteractionHand.OFF_HAND, hitResult);
         // 摆动手
         EntityUtils.swing(fakePlayer, InteractionHand.OFF_HAND);
@@ -278,7 +279,7 @@ public class PlantAction extends AbstractPlayerAction {
         // 保留一个骨粉是为了更方便的捡起地上的骨粉
         if (this.inventory.replenish(predicate) && (fakePlayer.isCreative() || this.inventory.replenish(1))) {
             ItemStack itemStack = fakePlayer.getMainHandItem();
-            Vec3 centerPos = ServerUtils.getBlockCenter(cropPos);
+            Vec3 centerPos = WorldUtils.getBlockCenter(cropPos);
             // 让假玩家看向该位置（这不是必须的）
             fakePlayer.lookAt(EntityAnchorArgument.Anchor.EYES, centerPos);
             // 使用骨粉

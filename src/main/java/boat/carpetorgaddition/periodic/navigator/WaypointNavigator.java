@@ -60,7 +60,7 @@ public class WaypointNavigator extends Navigator {
             // 玩家和路径点在相同的维度
             Component display = IN.translate(waypoint.getName(), CommonTexts.simpleBlockPos(this.target));
             int distance = MathUtils.getBlockIntegerDistance(playerPos, this.target);
-            Component text = this.getHUDText(ServerUtils.getBlockCenter(this.target), display, distance);
+            Component text = this.getHUDText(WorldUtils.getBlockCenter(this.target), display, distance);
             MessageUtils.sendMessageToHud(this.player, text);
         } else {
             if (this.canMapping(this.secondTarget)) {
@@ -70,7 +70,7 @@ public class WaypointNavigator extends Navigator {
                 builder.setItalic();
                 Component in = IN.translate(waypoint.getName(), builder.build());
                 int distance = MathUtils.getBlockIntegerDistance(playerPos, this.secondTarget);
-                Component text = this.getHUDText(ServerUtils.getBlockCenter(this.secondTarget), in, distance);
+                Component text = this.getHUDText(WorldUtils.getBlockCenter(this.secondTarget), in, distance);
                 MessageUtils.sendMessageToHud(this.player, text);
             } else {
                 // 玩家和路径点在不同维度

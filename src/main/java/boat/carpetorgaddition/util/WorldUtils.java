@@ -180,6 +180,15 @@ public class WorldUtils {
         }
     }
 
+    public static Vec3 getBlockCenter(BlockPos blockPos) {
+        return new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+    }
+
+    public static Vec3 getBlockBottomCenter(BlockPos blockPos) {
+        return new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
+    }
+
+
     /**
      * @return 指定世界是否为主世界
      */

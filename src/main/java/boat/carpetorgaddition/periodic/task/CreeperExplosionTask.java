@@ -2,6 +2,7 @@ package boat.carpetorgaddition.periodic.task;
 
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -54,7 +55,7 @@ public class CreeperExplosionTask extends ServerTask {
         }
         // 将苦力怕传送到随机坐标
         BlockPos randomPos = list.isEmpty() ? playerPos : list.get(MathUtils.randomInt(1, list.size()) - 1);
-        TeleportTransition target = new TeleportTransition(ServerUtils.getWorld(player), ServerUtils.getBlockBottomCenter(randomPos), Vec3.ZERO, 0F, 0F, TeleportTransition.DO_NOTHING);
+        TeleportTransition target = new TeleportTransition(ServerUtils.getWorld(player), WorldUtils.getBlockBottomCenter(randomPos), Vec3.ZERO, 0F, 0F, TeleportTransition.DO_NOTHING);
         return (Creeper) creeper.teleport(target);
     }
 

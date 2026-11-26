@@ -764,7 +764,7 @@ public class BedrockAction extends AbstractPlayerAction {
         }
         this.inventory.replenish(InteractionHand.OFF_HAND, stack -> stack.is(Items.LEVER));
         PlayerUtils.look(fakePlayer, direction.getOpposite());
-        BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(bedrockPos), direction, bedrockPos, false);
+        BlockHitResult hitResult = new BlockHitResult(WorldUtils.getBlockCenter(bedrockPos), direction, bedrockPos, false);
         // 放置拉杆
         interactionManager.useItemOn(fakePlayer, world, fakePlayer.getOffhandItem(), InteractionHand.OFF_HAND, hitResult);
         // 再次单击激活拉杆
@@ -1030,7 +1030,7 @@ public class BedrockAction extends AbstractPlayerAction {
     private void placeBlock(BlockPos blockPos) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         ServerPlayerGameMode interactionManager = fakePlayer.gameMode;
-        fakePlayer.lookAt(EntityAnchorArgument.Anchor.EYES, ServerUtils.getBlockCenter(blockPos));
+        fakePlayer.lookAt(EntityAnchorArgument.Anchor.EYES, WorldUtils.getBlockCenter(blockPos));
         BlockHitResult hitResult = new BlockHitResult(Vec3.upFromBottomCenterOf(blockPos, 1.0), Direction.DOWN, blockPos, false);
         interactionManager.useItemOn(fakePlayer, ServerUtils.getWorld(fakePlayer), fakePlayer.getOffhandItem(), InteractionHand.OFF_HAND, hitResult);
     }
@@ -1040,7 +1040,7 @@ public class BedrockAction extends AbstractPlayerAction {
      */
     private void interactionLever(BlockPos leverPos) {
         ServerPlayerGameMode interactionManager = this.getFakePlayer().gameMode;
-        BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(leverPos), Direction.UP, leverPos, false);
+        BlockHitResult hitResult = new BlockHitResult(WorldUtils.getBlockCenter(leverPos), Direction.UP, leverPos, false);
         InteractionResult result = interactionManager.useItemOn(this.getFakePlayer(), ServerUtils.getWorld(this.getFakePlayer()), this.getFakePlayer().getMainHandItem(), InteractionHand.MAIN_HAND, hitResult);
         if (result.consumesAction()) {
             this.hasAction = true;
