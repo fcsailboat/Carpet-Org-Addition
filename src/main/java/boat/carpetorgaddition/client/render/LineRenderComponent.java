@@ -4,7 +4,7 @@ import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.wheel.ColorValue;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelSubmitContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.phys.Vec3;
@@ -22,7 +22,7 @@ public class LineRenderComponent implements WorldRenderComponent, RgbaSettable {
     }
 
     @Override
-    public void render(LevelRenderContext context) {
+    public void render(LevelSubmitContext context) {
         PoseStack stack = context.poseStack();
         stack.pushPose();
         Camera camera = ClientUtils.getCamera();

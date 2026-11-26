@@ -1,6 +1,7 @@
 package boat.carpetorgaddition.client.render;
 
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelSubmitContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ public class CompositeWorldRenderComponent implements WorldRenderComponent {
     }
 
     @Override
-    public void render(LevelRenderContext context) {
+    public void render(LevelSubmitContext context) {
         this.components.removeIf(WorldRenderComponent::isStopped);
         this.components.forEach(component -> component.render(context));
     }

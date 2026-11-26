@@ -136,7 +136,7 @@ public class LibrarianCommodityTooltip implements HudElement {
         }
         Font font = ClientUtils.getTextRenderer();
         List<ClientTooltipComponent> components = list.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).toList();
-        graphics.tooltip(font, components, width / 2 + 20, height / 2 + 25 - ((offers.size() - 1) * 20), DefaultTooltipPositioner.INSTANCE, null, false);
+        graphics.tooltip(font, components, width / 2 + 20, height / 2 + 25 - ((offers.size() - 1) * 20), DefaultTooltipPositioner.INSTANCE, null, 0);
     }
 
     public void setOffers(LibrarianCommodityEntry offers) {

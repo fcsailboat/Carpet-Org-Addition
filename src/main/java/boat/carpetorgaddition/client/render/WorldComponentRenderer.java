@@ -4,7 +4,7 @@ import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelSubmitContext;
 import net.minecraft.client.Camera;
 import net.minecraft.resources.Identifier;
 
@@ -40,7 +40,7 @@ public class WorldComponentRenderer {
         COMPONENTS.remove(identifier);
     }
 
-    public static void render(LevelRenderContext context) {
+    public static void render(LevelSubmitContext context) {
         if (COMPONENTS.isEmpty()) {
             return;
         }

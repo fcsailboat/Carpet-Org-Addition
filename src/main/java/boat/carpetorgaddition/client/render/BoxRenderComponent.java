@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.client.render;
 
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelSubmitContext;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -15,7 +15,7 @@ public class BoxRenderComponent implements WorldRenderComponent, RgbaSettable {
     }
 
     @Override
-    public void render(LevelRenderContext context) {
+    public void render(LevelSubmitContext context) {
         this.components.forEach(component -> component.render(context));
     }
 

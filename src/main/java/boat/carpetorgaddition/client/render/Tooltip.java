@@ -26,7 +26,7 @@ public class Tooltip {
         int width = client.getWindow().getGuiScaledWidth();
         Font font = ClientUtils.getTextRenderer();
         List<ClientTooltipComponent> components = list.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).toList();
-        context.tooltip(font, components, width / 2 + 7, height / 2 + 27, DefaultTooltipPositioner.INSTANCE, null, false);
+        context.tooltip(font, components, width / 2 + 7, height / 2 + 27, DefaultTooltipPositioner.INSTANCE, null, 0);
     }
 
     public static void drawTooltip(GuiGraphicsExtractor context, Component text) {

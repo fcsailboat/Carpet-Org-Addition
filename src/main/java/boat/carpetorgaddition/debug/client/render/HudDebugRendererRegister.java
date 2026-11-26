@@ -21,6 +21,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.inventory.SlotWidget;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.narration.NarrationTrigger;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -296,8 +297,9 @@ public class HudDebugRendererRegister {
             return false;
         }
 
+        @NonNull
         @Override
-        default @NonNull NarrationPriority narrationPriority() {
+        default NarrationPriority narrationPriority(@NonNull NarrationTrigger narrationTrigger) {
             return NarrationPriority.NONE;
         }
 

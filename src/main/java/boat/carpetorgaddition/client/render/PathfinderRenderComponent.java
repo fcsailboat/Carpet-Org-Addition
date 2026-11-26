@@ -1,7 +1,7 @@
 package boat.carpetorgaddition.client.render;
 
 import boat.carpetorgaddition.client.util.ClientUtils;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelSubmitContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
@@ -29,7 +29,7 @@ public class PathfinderRenderComponent implements WorldRenderComponent {
     }
 
     @Override
-    public void render(LevelRenderContext context) {
+    public void render(LevelSubmitContext context) {
         this.points.forEach(component -> component.render(context));
         this.lines.forEach(component -> component.render(context));
     }
