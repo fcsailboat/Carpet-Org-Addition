@@ -3,7 +3,6 @@ package boat.carpetorgaddition.util;
 import boat.carpetorgaddition.CarpetOrgAddition;
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -46,11 +45,6 @@ public class MessageUtils {
         // TODO 是否受到发送命令反馈游戏规则影响
         source.sendSystemMessage(message);
         writeLog(source.getTextName(), message.getString());
-    }
-
-    @Deprecated
-    public static void sendMessage(CommandContext<CommandSourceStack> context, Component message) {
-        sendMessage(context.getSource(), message);
     }
 
     private static void writeLog(String name, String message) {
@@ -143,11 +137,6 @@ public class MessageUtils {
         } else {
             sendMessage(source, TextBuilder.empty());
         }
-    }
-
-    @Deprecated
-    public static void sendEmptyMessage(CommandContext<CommandSourceStack> context) {
-        sendEmptyMessage(context.getSource());
     }
 
     public static void sendEmptyMessage(MinecraftServer server) {

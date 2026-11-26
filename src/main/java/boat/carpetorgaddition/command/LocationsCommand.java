@@ -133,7 +133,7 @@ public class LocationsCommand extends AbstractServerCommand {
         List<File> list = worldFormat.listFiles();
         LocalizationKey key = KEY.then("list").then("empty");
         if (list.isEmpty()) {
-            MessageUtils.sendMessage(context, key.translate());
+            MessageUtils.sendMessage(context.getSource(), key.translate());
             return 0;
         }
         PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
@@ -158,11 +158,11 @@ public class LocationsCommand extends AbstractServerCommand {
             }
         }
         if (messages.isEmpty()) {
-            MessageUtils.sendMessage(context, key.translate());
+            MessageUtils.sendMessage(context.getSource(), key.translate());
             return 0;
         }
         collection.addContent(messages);
-        MessageUtils.sendEmptyMessage(context);
+        MessageUtils.sendEmptyMessage(context.getSource());
         collection.print();
         return count;
     }

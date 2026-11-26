@@ -115,7 +115,7 @@ public class SpectatorCommand extends AbstractServerCommand {
             WorldUtils.teleport(player, dimension, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
         }
         // 发送命令反馈
-        MessageUtils.sendMessage(context, TELEPORT.then("success").translate(player.getDisplayName(), IdentityUtils.getIdAsString(dimension)));
+        MessageUtils.sendMessage(context.getSource(), TELEPORT.then("success").translate(player.getDisplayName(), IdentityUtils.getIdAsString(dimension)));
         return 1;
     }
 
@@ -129,7 +129,7 @@ public class SpectatorCommand extends AbstractServerCommand {
         WorldUtils.teleport(player, dimension, location.x(), location.y(), location.z(), player.getYRot(), player.getXRot());
         // 发送命令反馈
         MessageUtils.sendMessage(
-                context,
+                context.getSource(),
                 LocalizationKey.literal("commands.teleport.success.location.single").translate(
                         player.getDisplayName(),
                         formatFloat(location.x()),
@@ -149,7 +149,7 @@ public class SpectatorCommand extends AbstractServerCommand {
         WorldUtils.teleport(player, (ServerLevel) ServerUtils.getWorld(entity), entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
         // 发送命令反馈
         MessageUtils.sendMessage(
-                context,
+                context.getSource(),
                 LocalizationKey.literal("commands.teleport.success.entity.single").translate(
                         player.getDisplayName(),
                         entity.getDisplayName()
@@ -167,7 +167,7 @@ public class SpectatorCommand extends AbstractServerCommand {
         WorldUtils.teleport(player, ServerUtils.getWorld(player), location.x(), location.y(), location.z(), player.getYRot(), player.getXRot());
         // 发送命令反馈
         MessageUtils.sendMessage(
-                context,
+                context.getSource(),
                 LocalizationKey.literal("commands.teleport.success.location.single").translate(
                         player.getDisplayName(),
                         formatFloat(location.x()),

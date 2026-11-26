@@ -412,8 +412,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         PagedCollection collection = coordinator.getPageManager().newPagedCollection(context.getSource());
         List<Supplier<Component>> messages = serializers.stream().map(FakePlayerSerializer::line).toList();
         collection.addContent(messages);
-        MessageUtils.sendEmptyMessage(context);
-        MessageUtils.sendMessage(context, GROUP_LIST.translate(group, login, logout));
+        MessageUtils.sendEmptyMessage(context.getSource());
+        MessageUtils.sendMessage(context.getSource(), GROUP_LIST.translate(group, login, logout));
         collection.print();
         return collection.length();
     }
@@ -431,8 +431,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         List<Supplier<Component>> messages = ungrouped.stream().map(FakePlayerSerializer::line).toList();
         PagedCollection collection = coordinator.getPageManager().newPagedCollection(context.getSource());
         collection.addContent(messages);
-        MessageUtils.sendEmptyMessage(context);
-        MessageUtils.sendMessage(context, GROUP_LIST.then("ungrouped").translate());
+        MessageUtils.sendEmptyMessage(context.getSource());
+        MessageUtils.sendMessage(context.getSource(), GROUP_LIST.then("ungrouped").translate());
         collection.print();
         return collection.length();
     }
@@ -444,8 +444,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         List<Supplier<Component>> list = manager.listAll().stream().map(FakePlayerSerializer::line).toList();
         PagedCollection collection = coordinator.getPageManager().newPagedCollection(context.getSource());
         collection.addContent(list);
-        MessageUtils.sendEmptyMessage(context);
-        MessageUtils.sendMessage(context, GROUP_LIST.then("all").translate());
+        MessageUtils.sendEmptyMessage(context.getSource());
+        MessageUtils.sendMessage(context.getSource(), GROUP_LIST.then("all").translate());
         collection.print();
         return collection.length();
     }
@@ -459,7 +459,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         }
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
         if (serializer.addToGroup(group)) {
-            MessageUtils.sendMessage(context, key.translate(serializer.getDisplayName(), group));
+            MessageUtils.sendMessage(context.getSource(), key.translate(serializer.getDisplayName(), group));
         } else {
             throw CommandUtils.createException(key.then("fail").translate());
         }
@@ -472,7 +472,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
         LocalizationKey key = GROUP.then("remove");
         if (serializer.removeFromGroup(group)) {
-            MessageUtils.sendMessage(context, key.translate(serializer.getDisplayName(), group));
+            MessageUtils.sendMessage(context.getSource(), key.translate(serializer.getDisplayName(), group));
         } else {
             throw CommandUtils.createException(key.then("fail").translate());
         }
@@ -521,11 +521,12 @@ public class PlayerManagerCommand extends AbstractServerCommand {
      * 重新加载玩家数据
      */
     private int reload(CommandContext<CommandSourceStack> context) {
-        MinecraftServer server = context.getSource().getServer();
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
         ServerComponentCoordinator coordinator = ServerComponentCoordinator.of(server);
         PlayerSerializationManager manager = coordinator.getPlayerSerializationManager();
         manager.init();
-        MessageUtils.sendMessage(context, KEY.then("reload").translate());
+        MessageUtils.sendMessage(source, KEY.then("reload").translate());
         return 1;
     }
 
@@ -552,7 +553,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         } else {
             String command = CommonCommands.setupSafeAfkPermanentlyChange(fakePlayer, threshold);
             MessageUtils.sendMessage(
-                    context,
+                    context.getSource(),
                     SAFE_AFK.then("set").translate(fakePlayer.getDisplayName(), threshold, CommonTexts.clickRun(command))
             );
         }
@@ -561,7 +562,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 列出所有设置了安全挂机的在线假玩家
     private int listSafeAfk(CommandContext<CommandSourceStack> context) {
-        List<ServerPlayer> list = context.getSource().getServer()
+        CommandSourceStack source = context.getSource();
+        List<ServerPlayer> list = source.getServer()
                 .getPlayerList()
                 .getPlayers()
                 .stream()
@@ -575,12 +577,12 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             if (threshold < 0) {
                 continue;
             }
-            MessageUtils.sendMessage(context, key.then("each").translate(player.getDisplayName(), threshold));
+            MessageUtils.sendMessage(source, key.then("each").translate(player.getDisplayName(), threshold));
             count++;
         }
         // 没有玩家被列出
         if (count == 0) {
-            MessageUtils.sendMessage(context, key.then("empty").translate());
+            MessageUtils.sendMessage(source, key.then("empty").translate());
         }
         return count;
     }
@@ -599,7 +601,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             }
         } else {
             Component command = CommonTexts.clickRun(CommonCommands.cancelSafeAfkPermanentlyChange(fakePlayer));
-            MessageUtils.sendMessage(context, SAFE_AFK.then("remove").translate(fakePlayer.getDisplayName(), command));
+            MessageUtils.sendMessage(context.getSource(), SAFE_AFK.then("remove").translate(fakePlayer.getDisplayName(), command));
         }
         return 1;
     }
@@ -609,7 +611,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
         float threshold = ((FakePlayerSafeAfkInterface) fakePlayer).carpet_Org_Addition$getHealthThreshold();
         LocalizationKey key = SAFE_AFK.then("list").then("each");
-        MessageUtils.sendMessage(context, key.translate(fakePlayer.getDisplayName(), threshold));
+        MessageUtils.sendMessage(context.getSource(), key.translate(fakePlayer.getDisplayName(), threshold));
         return (int) threshold;
     }
 
@@ -628,11 +630,11 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             if (threshold > 0) {
                 // 将玩家安全挂机阈值保存到配置文件
                 properties.setProperty(playerName, String.valueOf(threshold));
-                MessageUtils.sendMessage(context, SAFE_AFK.then("set").then("persistence").translate(fakePlayer.getDisplayName(), threshold));
+                MessageUtils.sendMessage(context.getSource(), SAFE_AFK.then("set").then("persistence").translate(fakePlayer.getDisplayName(), threshold));
             } else {
                 // 将玩家安全挂机阈值从配置文件中删除
                 properties.remove(playerName);
-                MessageUtils.sendMessage(context, SAFE_AFK.then("remove").then("persistence").translate(fakePlayer.getDisplayName()));
+                MessageUtils.sendMessage(context.getSource(), SAFE_AFK.then("remove").then("persistence").translate(fakePlayer.getDisplayName()));
             }
             BufferedWriter writer = IOUtils.toWriter(file);
             try (writer) {
@@ -682,13 +684,14 @@ public class PlayerManagerCommand extends AbstractServerCommand {
 
     // 列出每一个玩家
     private int list(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        MinecraftServer server = context.getSource().getServer();
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
         PlayerSerializationManager manager = getSerializationManager(server);
         Map<@Nullable String, List<FakePlayerSerializer>> map = manager.listAllGroups();
         LocalizationKey listKey = KEY.then("list");
         if (map.isEmpty()) {
             // 没有玩家被列出
-            MessageUtils.sendMessage(context, listKey.then("no_player").translate());
+            MessageUtils.sendMessage(source, listKey.then("no_player").translate());
             return 0;
         }
         if (map.size() == 1) {
@@ -696,15 +699,15 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             Map.Entry<String, List<FakePlayerSerializer>> entry = map.entrySet().iterator().next();
             List<Supplier<Component>> list = entry.getValue().stream().map(FakePlayerSerializer::line).toList();
             PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
-            PagedCollection collection = pageManager.newPagedCollection(context.getSource());
+            PagedCollection collection = pageManager.newPagedCollection(source);
             collection.addContent(list);
-            MessageUtils.sendEmptyMessage(context);
-            MessageUtils.sendMessage(context, GROUP_LIST.then("all").translate());
+            MessageUtils.sendEmptyMessage(source);
+            MessageUtils.sendMessage(source, GROUP_LIST.then("all").translate());
             collection.print();
             return list.size();
         } else {
             ArrayList<Component> list = new ArrayList<>();
-            MessageUtils.sendMessage(context, listKey.then("expand").translate());
+            MessageUtils.sendMessage(source, listKey.then("expand").translate());
             LocalizationKey groupNameKey = GROUP.then("name");
             // 未分组，在倒数第二个展示
             TextBuilder ungrouped = null;
@@ -726,13 +729,14 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             setStyle(builder, manager.size(), CommonCommands.listAllPlayer());
             list.add(builder.build());
             Component message = TextBuilder.joinList(list, TextBuilder.create(" "));
-            MessageUtils.sendMessage(context.getSource(), message);
+            MessageUtils.sendMessage(source, message);
             return list.size();
         }
     }
 
     private int listWithFilter(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        MinecraftServer server = context.getSource().getServer();
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
         String filter = StringArgumentType.getString(context, "filter");
         PlayerSerializationManager manager = getSerializationManager(server);
         List<Supplier<Component>> list = manager.listAll().stream()
@@ -742,14 +746,14 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         LocalizationKey key = KEY.then("list");
         if (list.isEmpty()) {
             // 没有玩家被列出
-            MessageUtils.sendMessage(context, key.then("no_player").translate());
+            MessageUtils.sendMessage(source, key.then("no_player").translate());
             return 0;
         }
         PageManager pageManager = ServerComponentCoordinator.of(server).getPageManager();
-        PagedCollection collection = pageManager.newPagedCollection(context.getSource());
+        PagedCollection collection = pageManager.newPagedCollection(source);
         collection.addContent(list);
-        MessageUtils.sendEmptyMessage(context);
-        MessageUtils.sendMessage(context, key.then("filter").translate(filter));
+        MessageUtils.sendEmptyMessage(source);
+        MessageUtils.sendMessage(source, key.then("filter").translate(filter));
         collection.print();
         return list.size();
     }
@@ -771,10 +775,10 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         // 发送命令反馈
         if (comment.isEmpty()) {
             // 移除注释
-            MessageUtils.sendMessage(context, key.then("remove").translate(serializer.getDisplayName()));
+            MessageUtils.sendMessage(context.getSource(), key.then("remove").translate(serializer.getDisplayName()));
         } else {
             // 修改注释
-            MessageUtils.sendMessage(context, key.then("set").translate(serializer.getDisplayName(), comment));
+            MessageUtils.sendMessage(context.getSource(), key.then("set").translate(serializer.getDisplayName(), comment));
         }
         return 1;
     }
@@ -787,16 +791,16 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         if (displayWarning) {
             String command = CommonCommands.playerManagerAutologin(name, autologin);
             Component component = key.then("warn").builder(command).setGrayItalic().build();
-            MessageUtils.sendMessage(context, component);
+            MessageUtils.sendMessage(context.getSource(), component);
         }
         FakePlayerSerializer serializer = getFakePlayerSerializer(context, name);
         // 设置自动登录
         serializer.setAutologin(autologin);
         // 发送命令反馈
         if (autologin) {
-            MessageUtils.sendMessage(context, key.then("set").translate(serializer.getDisplayName()));
+            MessageUtils.sendMessage(context.getSource(), key.then("set").translate(serializer.getDisplayName()));
         } else {
-            MessageUtils.sendMessage(context, key.then("remove").translate(serializer.getDisplayName()));
+            MessageUtils.sendMessage(context.getSource(), key.then("remove").translate(serializer.getDisplayName()));
         }
         return 1;
     }
@@ -804,7 +808,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     // 保存玩家
     private int savePlayerData(CommandContext<CommandSourceStack> context, boolean hasComment) throws CommandSyntaxException {
         EntityPlayerMPFake fakePlayer = CommandUtils.getArgumentFakePlayer(context);
-        MinecraftServer server = context.getSource().getServer();
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
         PlayerSerializationManager manager = getSerializationManager(server);
         // 玩家数据是否已存在
         String name = PlayerUtils.getName(fakePlayer);
@@ -817,7 +822,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             String command = CommonCommands.playerManagerResave(name);
             // 单击执行命令
             Component clickResave = CommonTexts.clickRun(command);
-            MessageUtils.sendMessage(context, key.then("file_already_exist").translate(clickResave));
+            MessageUtils.sendMessage(source, key.then("file_already_exist").translate(clickResave));
             return 0;
         } else {
             String comment = hasComment ? StringArgumentType.getString(context, "comment") : "";
@@ -830,7 +835,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             }
             manager.add(serializer);
             // 首次保存
-            MessageUtils.sendMessage(context.getSource(), key.translate(fakePlayer.getDisplayName()));
+            MessageUtils.sendMessage(source, key.translate(fakePlayer.getDisplayName()));
             return 1;
         }
     }
@@ -960,7 +965,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             // 获取目标假玩家名
             String name = StringArgumentType.getString(context, "name");
             int interval = IntegerArgumentType.getInteger(context, "interval");
-            MinecraftServer server = context.getSource().getServer();
+            CommandSourceStack source = context.getSource();
+            MinecraftServer server = source.getServer();
             ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
             // 如果任务存在，修改任务，否则添加任务
             Optional<ReLoginTask> optional = manager.stream(ReLoginTask.class)
@@ -976,11 +982,11 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                     // 目标玩家不是假玩家
                     CommandUtils.requireFakePlayer(player);
                 }
-                manager.addTask(new ReLoginTask((EntityPlayerMPFake) player, interval, server, context.getSource()));
+                manager.addTask(new ReLoginTask((EntityPlayerMPFake) player, interval, server, source));
             } else {
                 // 修改周期时间
                 optional.get().setInterval(interval);
-                MessageUtils.sendMessage(context, SCHEDULE.then("relogin").then("modify").translate(name, interval));
+                MessageUtils.sendMessage(source, SCHEDULE.then("relogin").then("modify").translate(name, interval));
             }
             return interval;
         }
@@ -1155,7 +1161,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 .setColor(ChatFormatting.AQUA)
                 .setHover(LocalizationKeys.Button.INPUT.translate(command))
                 .build();
-        MessageUtils.sendMessage(context, SCHEDULE.then("relogin").then("prerequisite").translate(here));
+        MessageUtils.sendMessage(context.getSource(), SCHEDULE.then("relogin").then("prerequisite").translate(here));
         return false;
     }
 
@@ -1163,7 +1169,8 @@ public class PlayerManagerCommand extends AbstractServerCommand {
     private int stopReLogin(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         // 获取目标假玩家名
         String name = StringArgumentType.getString(context, "name");
-        MinecraftServer server = ServerUtils.getServer(context.getSource());
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = ServerUtils.getServer(source);
         ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         Optional<ReLoginTask> optional = manager.stream(ReLoginTask.class)
                 .filter(task -> Objects.equals(task.getPlayerName(), name))
@@ -1171,7 +1178,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         if (optional.isEmpty()) {
             throw CommandUtils.createException(SCHEDULE.then("cancel").then("fail").translate());
         }
-        optional.ifPresent(task -> task.onCancel(context));
+        optional.ifPresent(task -> task.onCancel(source));
         return 1;
     }
 
@@ -1198,7 +1205,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
                 builder.setHover(key.then("online").translate());
             }
             // 发送命令反馈
-            MessageUtils.sendMessage(context, builder.build());
+            MessageUtils.sendMessage(source, builder.build());
         } else {
             // 修改上线时间
             DelayedLoginTask task = optional.get();
@@ -1206,7 +1213,7 @@ public class PlayerManagerCommand extends AbstractServerCommand {
             TextBuilder builder = TextBuilder.of(name);
             builder.setHover(task.getInfo());
             task.setDelayed(tick);
-            MessageUtils.sendMessage(context, SCHEDULE.then("login").then("modify").translate(builder.build(), time));
+            MessageUtils.sendMessage(source, SCHEDULE.then("login").then("modify").translate(builder.build(), time));
         }
         return (int) tick;
     }
@@ -1228,18 +1235,19 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         if (optional.isEmpty()) {
             // 添加延时下线任务
             manager.addTask(new DelayedLogoutTask(server, source, fakePlayer, tick));
-            MessageUtils.sendMessage(context, key.translate(fakePlayer.getDisplayName(), time));
+            MessageUtils.sendMessage(source, key.translate(fakePlayer.getDisplayName(), time));
         } else {
             // 修改退出时间
             optional.get().setDelayed(tick);
-            MessageUtils.sendMessage(context, key.then("modify").translate(fakePlayer.getDisplayName(), time));
+            MessageUtils.sendMessage(source, key.then("modify").translate(fakePlayer.getDisplayName(), time));
         }
         return (int) tick;
     }
 
     // 取消任务
     private int cancelScheduleTask(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        MinecraftServer server = ServerUtils.getServer(context.getSource());
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = ServerUtils.getServer(source);
         ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         String name = StringArgumentType.getString(context, "name");
         // 获取符合条件的任务列表
@@ -1249,19 +1257,20 @@ public class PlayerManagerCommand extends AbstractServerCommand {
         if (list.isEmpty()) {
             throw CommandUtils.createException(SCHEDULE.then("cancel").then("fail").translate());
         }
-        list.forEach(task -> task.onCancel(context));
+        list.forEach(task -> task.onCancel(source));
         return list.size();
     }
 
     // 列出所有任务
     private int listScheduleTask(CommandContext<CommandSourceStack> context) {
-        MinecraftServer server = ServerUtils.getServer(context.getSource());
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = ServerUtils.getServer(source);
         ServerTaskManager manager = ServerComponentCoordinator.of(server).getServerTaskManager();
         List<PlayerScheduleTask> list = manager.stream(PlayerScheduleTask.class).toList();
         if (list.isEmpty()) {
-            MessageUtils.sendMessage(context, SCHEDULE.then("list").then("empty").translate());
+            MessageUtils.sendMessage(source, SCHEDULE.then("list").then("empty").translate());
         } else {
-            list.forEach(task -> task.sendEachMessage(context.getSource()));
+            list.forEach(task -> task.sendEachMessage(source));
         }
         return list.size();
     }

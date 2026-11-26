@@ -98,18 +98,9 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
 
     private void feedback() {
         this.checkCancelled();
-        ArrayList<Object> list = new ArrayList<>();
-        // 村民数量
-        list.add(this.villagerCount);
-        list.add(this.getTradeName());
-        list.add(FinderCommand.VILLAGER);
-        // 总交易选项数量
-        list.add(this.tradeCount);
-        // 消息的翻译键
         MessageUtils.sendEmptyMessage(this.source);
         LocalizationKey key = this.getTradeResultKey();
-        // 发送消息：在周围找到了<交易选项数量>个出售<出售的物品名称>的<村民>或<流浪商人>
-        MessageUtils.sendMessage(this.source, key.translate(list.toArray(Object[]::new)));
+        MessageUtils.sendMessage(this.source, key.translate(this.villagerCount, this.getTradeName(), FinderCommand.VILLAGER, this.tradeCount));
         this.pagedCollection.addContent(this.results);
         CommandUtils.handlingException(this.pagedCollection::print, this.source);
         this.findState = FindState.END;
