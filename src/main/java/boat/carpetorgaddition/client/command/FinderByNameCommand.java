@@ -50,9 +50,9 @@ public class FinderByNameCommand extends AbstractClientCommand {
                         .then(ClientCommands.literal("item")
                                 .then(ClientCommands.argument("item", new ClientItemArgumentType(true))
                                         .executes(context -> searchTradeItem(context, 64))
-                                        .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                        .then(ClientCommands.argument("range", IntegerArgument.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
-                                                .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "range"))))))));
+                                                .executes(context -> searchTradeItem(context, IntegerArgument.getInteger(context, "range"))))))));
     }
 
     private SuggestionProvider<FabricClientCommandSource> suggestionDefaultDistance() {

@@ -2,6 +2,7 @@ package boat.carpetorgaddition.util;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -90,6 +91,11 @@ public class WorldUtils {
      * @param soundCategory 声音类别
      */
     public static void playSound(ServerPlayer player, SoundEvent soundEvent, SoundSource soundCategory) {
+        Level world = player.level();
+        world.playSound(null, player.getX(), player.getY(), player.getZ(), soundEvent, soundCategory, 1F, 1F);
+    }
+
+    public static void playSound(ServerPlayer player, Holder<SoundEvent> soundEvent, SoundSource soundCategory) {
         Level world = player.level();
         world.playSound(null, player.getX(), player.getY(), player.getZ(), soundEvent, soundCategory, 1F, 1F);
     }
