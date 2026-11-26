@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.periodic.fakeplayer.action;
 
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
@@ -53,7 +53,7 @@ public class InventoryCraftAction extends AbstractCraftAction {
         Component name = this.getFakePlayer().getDisplayName();
         // 物品配方
         ItemStack craftOutput = this.getCraftOutput(this.predicates, 2, this.getFakePlayer());
-        Component itemText = craftOutput.isEmpty() ? LocalizationKeys.Item.ITEM.translate() : ServerUtils.getName(craftOutput.getItem());
+        Component itemText = craftOutput.isEmpty() ? LocalizationKeys.Item.ITEM.translate() : IdentityUtils.getName(craftOutput.getItem());
         LocalizationKey key = this.getInfoLocalizationKey();
         joiner.newline(key.translate(name, itemText));
         joiner.enter(() -> this.addCraftRecipe(joiner, craftOutput));

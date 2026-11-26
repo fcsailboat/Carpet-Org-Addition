@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel.traverser;
 
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.HorizontalBlockPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -44,8 +44,8 @@ public class BlockPosTraverser extends WorldTraverser<BlockPos> {
 
     @SuppressWarnings("unused")
     public BlockPosTraverser clamp(Level world) {
-        int minY = Math.max(this.minY, ServerUtils.getMinArchitectureAltitude(world));
-        int maxY = Math.min(this.maxY, ServerUtils.getMaxArchitectureAltitude(world));
+        int minY = Math.max(this.minY, WorldUtils.getMinArchitectureAltitude(world));
+        int maxY = Math.min(this.maxY, WorldUtils.getMaxArchitectureAltitude(world));
         return new BlockPosTraverser(this.minX, minY, this.minZ, this.maxX, maxY, this.maxZ);
     }
 

@@ -1,6 +1,6 @@
 package boat.carpetorgaddition.wheel.misc;
 
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
@@ -31,7 +31,7 @@ public class LibrarianVillagerPoiCache {
      * 根据兴趣点获取村民
      */
     public Optional<Villager> getVillager(ServerLevel world, BlockPos blockPos) {
-        ResourceKey<Level> worldKey = ServerUtils.getWorldKey(world);
+        ResourceKey<Level> worldKey = WorldUtils.getWorldKey(world);
         PoiManager poiManager = world.getPoiManager();
         // 获取目标位置的兴趣点，如果没有兴趣点，则无需查找绑定该工作方块的村民
         Optional<Holder<PoiType>> optional = poiManager.getType(blockPos).filter(type -> type.is(PoiTypes.LIBRARIAN));
@@ -63,10 +63,10 @@ public class LibrarianVillagerPoiCache {
         double range = 128.0;
         AABB box = new AABB(
                 blockPos.getX() - range,
-                ServerUtils.getMinArchitectureAltitude(world) - 64.0,
+                WorldUtils.getMinArchitectureAltitude(world) - 64.0,
                 blockPos.getZ() - range,
                 blockPos.getX() + range,
-                ServerUtils.getMaxArchitectureAltitude(world) + 64.0,
+                WorldUtils.getMaxArchitectureAltitude(world) + 64.0,
                 blockPos.getZ() + range
         );
         List<Villager> list = world.getEntitiesOfClass(Villager.class, box);

@@ -8,11 +8,11 @@ import boat.carpetorgaddition.periodic.fakeplayer.FakePlayerSerializer;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.PlayerUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.FakePlayerSpawner;
 import boat.carpetorgaddition.wheel.mixin.FakePlayerGameExitMarker;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.patches.EntityPlayerMPFake;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -67,7 +67,7 @@ public class ReLoginTask extends PlayerScheduleTask {
                 if (optional.get() instanceof EntityPlayerMPFake fakePlayer) {
                     // 如果假玩家坠入虚空，设置任务为停止
                     ServerLevel world = ServerUtils.getWorld(fakePlayer);
-                    if (fakePlayer.getY() < ServerUtils.getMinArchitectureAltitude(world) - 64) {
+                    if (fakePlayer.getY() < WorldUtils.getMinArchitectureAltitude(world) - 64) {
                         this.stop();
                     }
                     // 让假玩家退出游戏
@@ -114,9 +114,9 @@ public class ReLoginTask extends PlayerScheduleTask {
     }
 
     @Override
-    public void onCancel(CommandContext<CommandSourceStack> context) {
+    public void onCancel(CommandSourceStack source) {
         this.markRemove();
-        MessageUtils.sendMessage(context, KEY.then("stop").translate(this.getPlayerName()));
+        MessageUtils.sendMessage(source, KEY.then("stop").translate(this.getPlayerName()));
         ServerUtils.schedule(this.server, this::loginPlayer);
     }
 

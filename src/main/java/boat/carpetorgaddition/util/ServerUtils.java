@@ -2,64 +2,31 @@ package boat.carpetorgaddition.util;
 
 import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
-import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import carpet.CarpetServer;
-import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.fox.Fox;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.entity.monster.Shulker;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.storage.FileNameDateFormatter;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NullMarked;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
-@NullMarked
 public class ServerUtils {
     /**
      * 当前{@code Minecraft}的NBT数据版本
@@ -71,7 +38,7 @@ public class ServerUtils {
     public static final String SIMPLE_OVERWORLD = "overworld";
     public static final String SIMPLE_THE_NETHER = "the_nether";
     public static final String SIMPLE_THE_END = "the_end";
-    private static final String UNREGISTERED = "[<unregistered>]";
+    public static final String UNREGISTERED = "[<unregistered>]";
 
     private ServerUtils() {
     }
@@ -103,222 +70,12 @@ public class ServerUtils {
         return Optional.ofNullable(server.getPlayerList().getPlayerByName(name));
     }
 
-    public static ResourceKey<Level> getWorldKey(Identifier id) {
-        return ResourceKey.create(Registries.DIMENSION, id);
-    }
-
-    public static ResourceKey<Level> getWorldKey(String worldId) {
-        return getWorldKey(Identifier.parse(worldId));
-    }
-
-    public static ResourceKey<Level> getWorldKey(Level world) {
-        return world.dimension();
-    }
-
     /**
      * @return 当前游戏的NBT数据版本
      */
     @Contract(pure = true)
     public static int getMinecraftDataVersion() {
         return SharedConstants.getCurrentVersion().dataVersion().version();
-    }
-
-    /**
-     * 根据维度获取对应的颜色
-     *
-     * @return 如果是下界，返回红色；如果是末地，返回紫色；如果是主世界或者自定义维度，返回绿色
-     */
-    public static ChatFormatting getColor(Level world) {
-        if (ServerUtils.isTheNether(world)) {
-            return ChatFormatting.RED;
-        }
-        if (ServerUtils.isTheEnd(world)) {
-            return ChatFormatting.DARK_PURPLE;
-        }
-        return ChatFormatting.GREEN;
-    }
-
-    /**
-     * 获取方块坐标的字符串形式
-     *
-     * @param blockPos 要转换为字符串形式的方块位置对象
-     * @return 方块坐标的字符串形式
-     */
-    public static String toPosString(BlockPos blockPos) {
-        return blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ();
-    }
-
-    /**
-     * 将方块坐标转换为字符串形式，坐标前追加维度id
-     */
-    public static String toWorldPosString(Level world, BlockPos blockPos) {
-        return getIdAsString(world) + "[" + toPosString(blockPos) + "]";
-    }
-
-    /**
-     * 在指定位置播放一个音效
-     */
-    public static void playSound(Level world, BlockPos blockPos, SoundEvent soundEvent, SoundSource soundCategory) {
-        world.playSound(null, blockPos, soundEvent, soundCategory, 1F, 1F);
-    }
-
-    public static void playSound(Level world, Vec3 vec3, SoundEvent event, SoundSource source) {
-        world.playSound(null, vec3.x(), vec3.y(), vec3.z(), event, source);
-    }
-
-    /**
-     * 在指定玩家位置播放一个音效
-     *
-     * @param soundEvent    声音时间
-     * @param soundCategory 声音类别
-     */
-    public static void playSound(ServerPlayer player, SoundEvent soundEvent, SoundSource soundCategory) {
-        Level world = getWorld(player);
-        world.playSound(null, player.getX(), player.getY(), player.getZ(), soundEvent, soundCategory, 1F, 1F);
-    }
-
-    /**
-     * @return 两个世界的坐标是否可以互相转换
-     */
-    public static boolean canMappingPos(Level world1, Level world2) {
-        return (isOverworld(world1) && isTheNether(world2)) || (isOverworld(world2) && isTheNether(world1));
-    }
-
-    /**
-     * @return 最大建筑高度
-     */
-    public static int getMaxArchitectureAltitude(Level world) {
-        return world.getMaxY();
-    }
-
-    /**
-     * @return 最小建筑高度
-     */
-    public static int getMinArchitectureAltitude(Level world) {
-        return world.getMinY();
-    }
-
-    /**
-     * 将一个实体传送到目标维度的指定位置
-     *
-     * @param source 要传送的实体
-     * @param world  要传送到目标维度
-     * @param x      目的地X坐标
-     * @param y      目的地Y坐标
-     * @param z      目的地Z坐标
-     * @param yaw    传送后实体的偏航角
-     * @param pitch  传送后实体的俯仰角
-     */
-    public static void teleport(Entity source, ServerLevel world, double x, double y, double z, float yaw, float pitch) {
-        source.teleportTo(world, x, y, z, Set.of(), yaw, pitch, true);
-    }
-
-    /**
-     * 将指定实体传送到目标实体位置
-     *
-     * @param source 要传送的实体
-     * @param target 目标实体
-     */
-    public static void teleport(Entity source, Entity target) {
-        // 不要在客户端传送实体
-        if (target.level() instanceof ServerLevel world) {
-            teleport(source, world, target.getX(), target.getY(), target.getZ(), target.getYRot(), target.getXRot());
-        }
-    }
-
-    public static void teleport(Entity entity, ServerLevel world, Vec3 pos) {
-        teleport(entity, world, pos.x(), pos.y(), pos.z(), entity.getYRot(), entity.getXRot());
-    }
-
-    /**
-     * 将一个实体传送到目标维度的指定位置并显示粒子和播放音效
-     */
-    public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos) {
-        teleportWithEffect(entity, world, pos, entity.getYRot(), entity.getXRot());
-    }
-
-    public static void teleportIfServerWithEffect(Entity entity, Entity target) {
-        if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
-            teleportWithEffect(entity, world, ServerUtils.getFootPos(target), target.getYRot(), target.getXRot());
-        }
-    }
-
-    public static void teleportWithEffect(Entity entity, ServerLevel world, Vec3 pos, float yaw, float pitch) {
-        teleport(entity, world, pos.x(), pos.y(), pos.z(), yaw, pitch);
-        world.broadcastEntityEvent(entity, EntityEvent.TELEPORT);
-        SoundEvent soundEvent = switch (entity) {
-            case Player _ -> SoundEvents.PLAYER_TELEPORT;
-            case Fox _ -> SoundEvents.FOX_TELEPORT;
-            case Shulker _ -> SoundEvents.SHULKER_TELEPORT;
-            case EnderMan _ -> SoundEvents.ENDERMAN_TELEPORT;
-            default -> SoundEvents.CHORUS_FRUIT_TELEPORT;
-        };
-        playSound(world, pos, soundEvent, entity.getSoundSource());
-        entity.resetFallDistance();
-    }
-
-    public static void teleportIfServerWithEffect(Entity entity, Vec3 pos) {
-        if (ServerUtils.getWorld(entity) instanceof ServerLevel world) {
-            teleportWithEffect(entity, world, pos);
-        }
-    }
-
-    /**
-     * 让实体看向指定位置
-     */
-    public static void lookAt(Entity entity, Vec3 pos) {
-        lookAt(entity, EntityAnchorArgument.Anchor.EYES, pos);
-    }
-
-    public static void lookAt(Entity entity, EntityAnchorArgument.Anchor anchor, Vec3 pos) {
-        entity.lookAt(anchor, pos);
-    }
-
-    /**
-     * 丢弃物品
-     */
-    public static Optional<ItemEntity> drop(LivingEntity entity, ItemStack itemStack) {
-        return Optional.ofNullable(entity.drop(itemStack, false, true));
-    }
-
-    /**
-     * 摆动手
-     */
-    public static void swing(LivingEntity entity, InteractionHand hand) {
-        entity.swing(hand, entity instanceof ServerPlayer player && PlayerUtils.isRealPlayer(player));
-    }
-
-    /**
-     * @return 指定世界是否为主世界
-     */
-    public static boolean isOverworld(Level world) {
-        return isOverworld(world.dimension());
-    }
-
-    /**
-     * @return 指定世界是否为下界
-     */
-    public static boolean isTheNether(Level world) {
-        return isTheNether(world.dimension());
-    }
-
-    /**
-     * @return 指定世界是否为末地
-     */
-    public static boolean isTheEnd(Level world) {
-        return isTheEnd(world.dimension());
-    }
-
-    public static boolean isOverworld(ResourceKey<Level> key) {
-        return Level.OVERWORLD.equals(key);
-    }
-
-    public static boolean isTheNether(ResourceKey<Level> key) {
-        return Level.NETHER.equals(key);
-    }
-
-    public static boolean isTheEnd(ResourceKey<Level> key) {
-        return Level.END.equals(key);
     }
 
     /**
@@ -369,222 +126,6 @@ public class ServerUtils {
 
     public static ServerLevel getWorld(CommandSourceStack source) {
         return source.getLevel();
-    }
-
-    public static Level getWorld(BlockEntity blockEntity) {
-        return Objects.requireNonNull(blockEntity.getLevel());
-    }
-
-    public static Vec3 getFootPos(Entity entity) {
-        return entity.position();
-    }
-
-    public static Vec3 getEyePos(Entity entity) {
-        return entity.getEyePosition();
-    }
-
-    public static BlockPos getBlockPos(Entity entity) {
-        return entity.blockPosition();
-    }
-
-    public static Vec3 getBlockCenter(BlockPos blockPos) {
-        return new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-    }
-
-    public static Vec3 getBlockBottomCenter(BlockPos blockPos) {
-        return new Vec3(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
-    }
-
-    public static ChunkPos getChunkPos(Entity entity) {
-        return entity.chunkPosition();
-    }
-
-    public static BlockPos toOverworldBlockPos(BlockPos blockPos) {
-        int x = blockPos.getX() * 8;
-        int z = blockPos.getZ() * 8;
-        return new BlockPos(x, blockPos.getY(), z);
-    }
-
-    public static BlockPos toTheNetherBlockPos(BlockPos blockPos) {
-        int x = (int) Math.round(blockPos.getX() / 8.0);
-        int z = (int) Math.round(blockPos.getZ() / 8.0);
-        return new BlockPos(x, blockPos.getY(), z);
-    }
-
-    public static Component getName(Item item) {
-        return item.components().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
-    }
-
-    public static Component getName(Block block) {
-        return block.getName();
-    }
-
-    public static Component getName(EntityType<?> entityType) {
-        return entityType.getDescription();
-    }
-
-    public static Component getName(Holder<Enchantment> enchantment) {
-        return EnchantmentUtils.getName(enchantment);
-    }
-
-    public static Component getName(MobEffect statusEffect) {
-        return statusEffect.getDisplayName();
-    }
-
-    public static Component getName(RegistryAccess registryAccess, Biome biome) {
-        Registry<Biome> biomes = registryAccess.lookupOrThrow(Registries.BIOME);
-        String key = Objects.requireNonNull(biomes.getKey(biome)).toLanguageKey("biome");
-        return LocalizationKey.literal(key).translate();
-    }
-
-    public static Component getName(GameType gameType) {
-        return gameType.getLongDisplayName();
-    }
-
-    public static Component getName(GameRule<?> gameRule) {
-        String key = gameRule.getDescriptionId();
-        return LocalizationKey.literal(key).translate();
-    }
-
-    public static Component getDefaultName(ItemStack itemStack) {
-        return getName(itemStack.getItem());
-    }
-
-    public static String getNameAsString(Item item) {
-        return getName(item).getString();
-    }
-
-    public static String getNameAsString(Block block) {
-        return getName(block).getString();
-    }
-
-    public static String getNameAsString(EntityType<?> entityType) {
-        return getName(entityType).getString();
-    }
-
-    public static String getNameAsString(Holder<Enchantment> enchantment) {
-        return getName(enchantment).getString();
-    }
-
-    public static String getNameAsString(MobEffect statusEffect) {
-        return getName(statusEffect).getString();
-    }
-
-    public static String getNameAsString(GameType gameType) {
-        return gameType.getLongDisplayName().getString();
-    }
-
-    public static String getNameAsString(GameRule<?> gameRule) {
-        return getName(gameRule).getString();
-    }
-
-    public static String getNameAsString(RegistryAccess registryAccess, Biome biome) {
-        return getName(registryAccess, biome).getString();
-    }
-
-    public static Identifier getId(Item item) {
-        return BuiltInRegistries.ITEM.getKey(item);
-    }
-
-    public static Identifier getId(Block block) {
-        return BuiltInRegistries.BLOCK.getKey(block);
-    }
-
-    public static Identifier getId(Level world) {
-        return world.dimension().identifier();
-    }
-
-    public static Identifier getId(EntityType<?> entityType) {
-        return BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
-    }
-
-    @SuppressWarnings("unused")
-    public static Optional<Identifier> getId(Level world, Holder<Enchantment> enchantment) {
-        return getId(world.registryAccess(), enchantment);
-    }
-
-    public static Optional<Identifier> getId(MinecraftServer server, Holder<Enchantment> enchantment) {
-        return getId(server.registryAccess(), enchantment);
-    }
-
-    public static Optional<Identifier> getId(RegistryAccess registryAccess, Holder<Enchantment> enchantment) {
-        return registryAccess.lookup(Registries.ENCHANTMENT).map(registry -> registry.getKey(enchantment.value()));
-    }
-
-    public static Optional<Identifier> getId(RegistryAccess registryAccess, MobEffect statusEffect) {
-        return registryAccess.lookup(Registries.MOB_EFFECT).map(registry -> registry.getKey(statusEffect));
-    }
-
-    public static Optional<Identifier> getId(RegistryAccess registryAccess, Biome biome) {
-        return registryAccess.lookup(Registries.BIOME).map(registry -> registry.getKey(biome));
-    }
-
-    public static Optional<Identifier> getId(RegistryAccess registryAccess, GameRule<?> gameRule) {
-        return registryAccess.lookup(Registries.GAME_RULE).map(registry -> registry.getKey(gameRule));
-    }
-
-    public static <T> Identifier getId(Holder.Reference<T> holder) {
-        return holder.key().identifier();
-    }
-
-    public static String getIdAsString(Item item) {
-        return getId(item).toString();
-    }
-
-    public static String getIdAsString(Block block) {
-        return getId(block).toString();
-    }
-
-    /**
-     * 获取当前维度的ID
-     *
-     * @param world 当前世界的对象
-     * @return 当前维度的ID
-     */
-    public static String getIdAsString(Level world) {
-        return getId(world).toString();
-    }
-
-    public static String getIdAsString(EntityType<?> entityType) {
-        return getId(entityType).toString();
-    }
-
-    public static String getIdAsString(GameType gameType) {
-        return gameType.getSerializedName();
-    }
-
-    public static String getIdAsString(RegistryAccess registryAccess, Holder<Enchantment> enchantment) {
-        return getId(registryAccess, enchantment).map(Identifier::toString).orElse(UNREGISTERED);
-    }
-
-    public static String getIdAsString(RegistryAccess registryAccess, MobEffect statusEffect) {
-        return getId(registryAccess, statusEffect).map(Identifier::toString).orElse(UNREGISTERED);
-    }
-
-    public static String getIdAsString(RegistryAccess registryAccess, Biome biome) {
-        return getId(registryAccess, biome).map(Identifier::toString).orElse(UNREGISTERED);
-    }
-
-    public static String getIdAsString(RegistryAccess registryAccess, GameRule<?> gameRule) {
-        return getId(registryAccess, gameRule).map(Identifier::toString).orElse(UNREGISTERED);
-    }
-
-    public static <T> String getIdAsString(Holder.Reference<T> holder) {
-        return getId(holder).toString();
-    }
-
-    /**
-     * 将字符串ID转换为物品
-     */
-    public static Item asItem(String id) {
-        return BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
-    }
-
-    /**
-     * 将字符串ID转换为方块
-     */
-    public static Block asBlock(String id) {
-        return BuiltInRegistries.BLOCK.getValue(Identifier.parse(id));
     }
 
     public static boolean isUuidString(String uuid) {
@@ -652,21 +193,5 @@ public class ServerUtils {
 
     public static void schedule(MinecraftServer server, Runnable runnable) {
         server.schedule(new TickTask(server.getTickCount(), runnable));
-    }
-
-    public static <T extends Entity> List<T> getEntities(Level world, BlockPos from, BlockPos to, Class<T> type) {
-        AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
-        return getEntities(world, aabb, type);
-    }
-
-    public static <T extends Entity> List<T> getEntities(Level world, AABB aabb, Class<T> type) {
-        return world.getEntitiesOfClass(type, aabb);
-    }
-
-    public static <T extends Entity> boolean hasEntityIn(Level world, BlockPos from, BlockPos to, Class<T> type) {
-        AABB aabb = new AABB(from.getX(), from.getY(), from.getZ(), to.getX() + 1, to.getY() + 1, to.getZ() + 1);
-        ArrayList<T> result = new ArrayList<>();
-        world.getEntities(EntityTypeTest.forClass(type), aabb, EntitySelector.NO_SPECTATORS, result, 1);
-        return !result.isEmpty();
     }
 }

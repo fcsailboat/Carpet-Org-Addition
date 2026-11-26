@@ -227,7 +227,7 @@ public class BedrockAction extends AbstractPlayerAction {
             long minute = this.nonActionHours / 1200L;
             EntityPlayerMPFake fakePlayer = this.getFakePlayer();
             if (ALLOW_TELEPORT && minute <= 2) {
-                ServerUtils.teleportIfServerWithEffect(fakePlayer, this.initialPosition);
+                WorldUtils.teleportIfServerWithEffect(fakePlayer, this.initialPosition);
                 return;
             }
             long remaining = MAX_NON_ACTION_MINUTE_TIME - minute;
@@ -247,7 +247,7 @@ public class BedrockAction extends AbstractPlayerAction {
                         .setGrayItalic()
                         .build();
                 MessageUtils.sendMessage(this.server, second);
-                ServerUtils.forEachRealPlayer(this.server, player -> ServerUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
+                ServerUtils.forEachRealPlayer(this.server, player -> WorldUtils.playSound(player, SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS));
             }
         }
         this.executeWorkTick();
@@ -285,7 +285,7 @@ public class BedrockAction extends AbstractPlayerAction {
                 .filter(fireball -> fireball.getOwner() != fakePlayer)
                 .toList();
         for (LargeFireball fireball : fireballs) {
-            ServerUtils.lookAt(fakePlayer, ServerUtils.getEyePos(fireball));
+            EntityUtils.lookAt(fakePlayer, EntityUtils.getEyePos(fireball));
             PlayerUtils.attack(fakePlayer);
         }
         return !fireballs.isEmpty();
@@ -296,7 +296,7 @@ public class BedrockAction extends AbstractPlayerAction {
      */
     private boolean fireExtinguishing() {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        BlockPosTraverser traverser = new BlockPosTraverser(ServerUtils.getBlockPos(fakePlayer), 1);
+        BlockPosTraverser traverser = new BlockPosTraverser(EntityUtils.getBlockPos(fakePlayer), 1);
         ServerLevel world = ServerUtils.getWorld(fakePlayer);
         for (BlockPos blockPos : traverser) {
             BlockState blockState = world.getBlockState(blockPos);
@@ -393,8 +393,8 @@ public class BedrockAction extends AbstractPlayerAction {
     @Nullable
     private BlockPos findRecentBedrock(Level world) {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
-        BlockPos playerBlockPos = ServerUtils.getBlockPos(fakePlayer);
-        List<ChunkPos> chunks = MathUtils.surrounding(ServerUtils.getChunkPos(fakePlayer), 2);
+        BlockPos playerBlockPos = EntityUtils.getBlockPos(fakePlayer);
+        List<ChunkPos> chunks = MathUtils.surrounding(EntityUtils.getChunkPos(fakePlayer), 2);
         BlockPos recent = null;
         for (ChunkPos chunkPos : chunks) {
             if (this.bedrockPosCache.containsKey(chunkPos)) {
@@ -979,8 +979,8 @@ public class BedrockAction extends AbstractPlayerAction {
         EntityPlayerMPFake fakePlayer = this.getFakePlayer();
         ServerLevel world = ServerUtils.getWorld(fakePlayer);
         BlockPos from = new BlockPos(blockPos.getX() - range, blockPos.getY(), blockPos.getZ() - range);
-        BlockPos to = new BlockPos(blockPos.getX() + range, ServerUtils.getMaxArchitectureAltitude(world), blockPos.getZ() + range);
-        return ServerUtils.hasEntityIn(world, from, to, FallingBlockEntity.class);
+        BlockPos to = new BlockPos(blockPos.getX() + range, WorldUtils.getMaxArchitectureAltitude(world), blockPos.getZ() + range);
+        return WorldUtils.hasEntityIn(world, from, to, FallingBlockEntity.class);
     }
 
     /**
@@ -1353,7 +1353,7 @@ public class BedrockAction extends AbstractPlayerAction {
         this.pathfinder = FakePlayerPathfinder.of(fakePlayer, this::getMovingTarget);
         this.inventory = PlayerStorageInventory.of(fakePlayer);
         this.excavator = PlayerComponentCoordinator.of(fakePlayer).getBlockExcavator();
-        this.initialPosition = ServerUtils.getFootPos(fakePlayer);
+        this.initialPosition = EntityUtils.getFootPos(fakePlayer);
     }
 
     @Override

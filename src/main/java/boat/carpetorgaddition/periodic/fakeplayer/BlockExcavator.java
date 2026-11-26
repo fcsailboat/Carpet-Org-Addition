@@ -1,5 +1,6 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
+import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -108,7 +109,7 @@ public class BlockExcavator {
         // 更新上次操作时间
         this.player.resetLastActionTime();
         // 摆动手
-        ServerUtils.swing(this.player, InteractionHand.MAIN_HAND);
+        EntityUtils.swing(this.player, InteractionHand.MAIN_HAND);
         return blockBroken;
     }
 

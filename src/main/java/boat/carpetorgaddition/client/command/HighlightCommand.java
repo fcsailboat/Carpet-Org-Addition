@@ -7,7 +7,7 @@ import boat.carpetorgaddition.client.render.waypoint.HighlightWaypoint;
 import boat.carpetorgaddition.client.render.waypoint.Waypoint;
 import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.EntityUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -72,7 +72,7 @@ public class HighlightCommand extends AbstractClientCommand {
                 update = true;
                 // 看向路径点
                 LocalPlayer player = context.getSource().getPlayer();
-                ServerUtils.lookAt(player, vec3d);
+                EntityUtils.lookAt(player, vec3d);
                 break;
             }
         }

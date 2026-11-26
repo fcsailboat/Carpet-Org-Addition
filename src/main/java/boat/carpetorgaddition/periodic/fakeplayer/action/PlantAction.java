@@ -4,6 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.command.PlayerActionCommand;
 import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.periodic.fakeplayer.BlockExcavator;
+import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.inventory.PlayerStorageInventory;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
@@ -266,7 +267,7 @@ public class PlantAction extends AbstractPlayerAction {
         BlockHitResult hitResult = new BlockHitResult(ServerUtils.getBlockCenter(cropPos), Direction.UP, cropPos, false);
         fakePlayer.gameMode.useItemOn(fakePlayer, world, itemStack, InteractionHand.OFF_HAND, hitResult);
         // 摆动手
-        ServerUtils.swing(fakePlayer, InteractionHand.OFF_HAND);
+        EntityUtils.swing(fakePlayer, InteractionHand.OFF_HAND);
     }
 
     // 撒骨粉催熟
@@ -284,7 +285,7 @@ public class PlantAction extends AbstractPlayerAction {
             BlockHitResult hitResult = new BlockHitResult(centerPos, Direction.DOWN, cropPos, true);
             fakePlayer.gameMode.useItemOn(fakePlayer, world, itemStack, InteractionHand.MAIN_HAND, hitResult);
             // 摆动手
-            ServerUtils.swing(fakePlayer, InteractionHand.MAIN_HAND);
+            EntityUtils.swing(fakePlayer, InteractionHand.MAIN_HAND);
         }
     }
 

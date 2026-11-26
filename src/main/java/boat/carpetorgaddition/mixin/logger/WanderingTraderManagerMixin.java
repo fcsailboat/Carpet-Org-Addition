@@ -5,6 +5,7 @@ import boat.carpetorgaddition.logger.LoggerAccessor;
 import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.common.CommonCommands;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.misc.WanderingTraderSpawnData;
@@ -85,7 +86,7 @@ public abstract class WanderingTraderManagerMixin {
                     MessageUtils.sendMessage(player, message);
                 }
                 // 播放音效通知流浪商人生成
-                ServerUtils.playSound(ServerUtils.getWorld(trader), player.blockPosition(), trader.getNotifyTradeSound(), trader.getSoundSource());
+                WorldUtils.playSound(ServerUtils.getWorld(trader), player.blockPosition(), trader.getNotifyTradeSound(), trader.getSoundSource());
             }
         }
     }

@@ -6,7 +6,6 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
 import boat.carpetorgaddition.wheel.text.TextBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -39,11 +38,11 @@ public class DelayedLoginTask extends PlayerScheduleTask {
     }
 
     @Override
-    public void onCancel(CommandContext<CommandSourceStack> context) {
+    public void onCancel(CommandSourceStack source) {
         this.markRemove();
         Component time = getDisplayTime();
         Component displayName = this.serial.getDisplayName();
-        MessageUtils.sendMessage(context, KEY.then("cancel").translate(displayName, time));
+        MessageUtils.sendMessage(source, KEY.then("cancel").translate(displayName, time));
     }
 
     // 获取带有悬停提示的时间

@@ -75,7 +75,7 @@ public class EnchantingAction extends AbstractPlayerAction {
             BlockPos blockPos = blockHitResult.getBlockPos();
             BlockState blockState = world.getBlockState(blockPos);
             if (blockState.getBlock() instanceof AnvilBlock && blockState.is(BlockTags.ANVIL)) {
-                if (!ServerUtils.hasEntityIn(world, blockPos, blockPos.above(3), FallingBlockEntity.class)) {
+                if (!WorldUtils.hasEntityIn(world, blockPos, blockPos.above(3), FallingBlockEntity.class)) {
                     PlayerUtils.use(fakePlayer);
                 }
             }
@@ -221,7 +221,7 @@ public class EnchantingAction extends AbstractPlayerAction {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.addProperty("item", this.predicate.toString());
-        json.addProperty("enchantment", ServerUtils.getIdAsString(this.enchantment));
+        json.addProperty("enchantment", IdentityUtils.getIdAsString(this.enchantment));
         return json;
     }
 
