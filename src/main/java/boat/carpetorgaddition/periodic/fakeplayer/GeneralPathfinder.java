@@ -4,9 +4,7 @@ import boat.carpetorgaddition.CarpetOrgAdditionConstants;
 import boat.carpetorgaddition.logger.Loggers;
 import boat.carpetorgaddition.mixin.accessor.carpet.EntityPlayerActionPackAccessor;
 import boat.carpetorgaddition.network.s2c.FakePlayerPathfinderS2CPacket;
-import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
@@ -93,13 +91,13 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             this.setValid();
         }
         this.previous = blockPos;
-        Vec3 pos = ServerUtils.getFootPos(this.fakePlayer);
+        Vec3 pos = EntityUtils.getFootPos(this.fakePlayer);
         this.directTravelTime--;
         if (this.updateTime > 0) {
             this.updateTime--;
         }
         // 是否还没有接近目标
-        boolean farAway = ServerUtils.getBlockBottomCenter(blockPos).distanceTo(pos) > 1.5;
+        boolean farAway = WorldUtils.getBlockBottomCenter(blockPos).distanceTo(pos) > 1.5;
         if (this.updateTime == 0 && farAway) {
             // 更新路径
             this.noRoad = false;
@@ -201,7 +199,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
         Level world = ServerUtils.getWorld(this.fakePlayer);
         PathNavigationRegion chunkCache = new PathNavigationRegion(world, from, to);
         WalkNodeEvaluator maker = new WalkNodeEvaluator();
-        Vec3 pos = ServerUtils.getFootPos(this.fakePlayer);
+        Vec3 pos = EntityUtils.getFootPos(this.fakePlayer);
         DummyEntity entity = new DummyEntity(world, pos);
         PathFinder navigator = new PathFinder(maker, FOLLOW_RANGE * 16);
         Path path = navigator.findPath(chunkCache, entity, Set.of(optional.get()), FOLLOW_RANGE, 0, 1F);
@@ -231,7 +229,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
     public boolean arrivedAtAnyNode() {
         for (int i = this.currentIndex; i < this.nodes.size(); i++) {
             Vec3 current = this.nodes.get(i);
-            Vec3 pos = ServerUtils.getFootPos(this.fakePlayer);
+            Vec3 pos = EntityUtils.getFootPos(this.fakePlayer);
             if (current.distanceTo(pos) <= 0.5) {
                 if (i > 0) {
                     this.setValid();
@@ -252,7 +250,7 @@ public class GeneralPathfinder implements FakePlayerPathfinder {
             return false;
         }
         for (int i = 0; i < this.currentIndex; i++) {
-            if (this.nodes.get(i).distanceTo(ServerUtils.getFootPos(this.fakePlayer)) < 0.5) {
+            if (this.nodes.get(i).distanceTo(EntityUtils.getFootPos(this.fakePlayer)) < 0.5) {
                 return true;
             }
         }

@@ -1,6 +1,8 @@
 package boat.carpetorgaddition.periodic.fakeplayer;
 
+import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -85,7 +87,7 @@ public class BlockExcavator {
         }
         BlockState blockState = world.getBlockState(blockPos);
         // 让假玩家看向该位置（这不是必须的）
-        this.player.lookAt(EntityAnchorArgument.Anchor.EYES, ServerUtils.getBlockCenter(blockPos));
+        this.player.lookAt(EntityAnchorArgument.Anchor.EYES, WorldUtils.getBlockCenter(blockPos));
         // 获取每次挖掘增加的进度
         float delta = blockState.getDestroyProgress(this.player, world, blockPos);
         // 当前方块是否被破坏
@@ -108,7 +110,7 @@ public class BlockExcavator {
         // 更新上次操作时间
         this.player.resetLastActionTime();
         // 摆动手
-        ServerUtils.swing(this.player, InteractionHand.MAIN_HAND);
+        EntityUtils.swing(this.player, InteractionHand.MAIN_HAND);
         return blockBroken;
     }
 

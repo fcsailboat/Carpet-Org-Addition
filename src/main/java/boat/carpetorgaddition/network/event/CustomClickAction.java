@@ -70,7 +70,7 @@ public class CustomClickAction {
                     Dialog dialog = provider.createErrorNoticeDialog(e);
                     PlayerUtils.openDialog(context.getPlayer(), dialog);
                 }
-                case SIGN -> MessageUtils.sendErrorMessageToHud(context.getSource(), e);
+                case SIGN -> MessageUtils.sendErrorMessageToHudIfPlayer(context.getSource(), e);
                 case UNKNOWN -> {
                     if (CarpetOrgAddition.isDebugMode()) {
                         CarpetOrgAddition.LOGGER.warn("Unexpected problem while executing custom action from unknown source", e);

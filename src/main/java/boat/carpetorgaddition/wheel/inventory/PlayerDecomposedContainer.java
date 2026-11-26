@@ -36,7 +36,7 @@ public interface PlayerDecomposedContainer extends Container {
      * 获取玩家物品栏盔甲部分
      */
     default Container getArmor() {
-        return new ReverseInventroy(new SubInventory(this.getPlayerInventory(), 36, 40)) {
+        return new ReverseInventory(new SubInventory(this.getPlayerInventory(), 36, 40)) {
             @Override
             public void setItem(int slot, @NonNull ItemStack itemStack) {
                 ItemStack oldStack = this.getItem(slot);

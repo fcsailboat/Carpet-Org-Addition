@@ -65,7 +65,7 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
                 ObjectSearchTaskCodecs.TradeItemSearchContext decode = ObjectSearchTaskCodecs.TRADE_ITEM_SEARCH_CODEC.decode(packet.json());
                 BlockPosTraverser traverser = new BlockPosTraverser(world, blockPos, decode.range());
                 ItemStackPredicate predicate = ItemStackPredicate.of(decode.list(), packet.name());
-                yield new TradeItemSearchTask(world, traverser, blockPos, predicate, source, player);
+                yield new TradeItemSearchTask(world, traverser.toBox(), blockPos, predicate, source, player);
             }
             default -> null;
         };

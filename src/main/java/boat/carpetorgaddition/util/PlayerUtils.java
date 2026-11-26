@@ -196,7 +196,7 @@ public class PlayerUtils {
      * @apiNote 此方法不应用于丢弃GUI中的物品，因为这不会触发{@link AbstractContainerMenu#clicked}的行为
      */
     public static void dropCopyItemAndClear(ServerPlayer player, ItemStack itemStack) {
-        ServerUtils.drop(player, itemStack.copyAndClear());
+        EntityUtils.drop(player, itemStack.copyAndClear());
     }
 
     /**
@@ -259,7 +259,7 @@ public class PlayerUtils {
 
     public static List<Entity> listWithinEntityInteractionRange(ServerPlayer player) {
         ServerLevel world = ServerUtils.getWorld(player);
-        Vec3 pos = ServerUtils.getEyePos(player);
+        Vec3 pos = EntityUtils.getEyePos(player);
         double range = getEntityInteractionRange(player);
         AABB aabb = new AABB(
                 pos.x() - range,

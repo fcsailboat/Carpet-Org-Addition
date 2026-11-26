@@ -242,7 +242,7 @@ public class MailCommand extends AbstractServerCommand {
         List<Parcel> list = manager.stream().toList();
         if (list.isEmpty()) {
             // 没有快递被列出
-            MessageUtils.sendMessage(context, LIST.then("empty").translate());
+            MessageUtils.sendMessage(context.getSource(), LIST.then("empty").translate());
             return 0;
         }
         PageManager pageManager = coordinator.getPageManager();

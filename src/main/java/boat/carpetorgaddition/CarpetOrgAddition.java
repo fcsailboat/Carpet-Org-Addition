@@ -98,7 +98,7 @@ public final class CarpetOrgAddition implements ModInitializer {
             if (flippedByCosmicRay) {
                 CarpetOrgAddition.LOGGER.info("Also, if you're seeing this message, it means the boolean was flipped by a cosmic ray");
             } else {
-                // All good. Cosmic rays are slacking off today.
+                // std::cout << "All good. Cosmic rays are slacking off today." << std::endl;
             }
         }
     }

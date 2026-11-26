@@ -61,17 +61,17 @@ public class ItemShadowingCommand extends AbstractServerCommand {
             ImmutableInventory inventory = InventoryUtils.getInventory(itemStack);
             if (inventory.isEmpty()) {
                 CarpetOrgAddition.LOGGER.info("{} created an empty [{}] item shadow at {} | Coordinates: [{}]",
-                        PlayerUtils.getName(player), ServerUtils.getName(itemStack.getItem()).getString(),
-                        ServerUtils.getIdAsString(world), ServerUtils.toPosString(player.blockPosition()));
+                        PlayerUtils.getName(player), IdentityUtils.getName(itemStack.getItem()).getString(),
+                        IdentityUtils.getIdAsString(world), WorldUtils.toPosString(player.blockPosition()));
             } else {
                 CarpetOrgAddition.LOGGER.info("{} created a [{}] item shadow containing {} at {} | Coordinates: [{}]",
-                        PlayerUtils.getName(player), ServerUtils.getName(itemStack.getItem()).getString(),
-                        inventory, ServerUtils.getIdAsString(world), ServerUtils.toPosString(player.blockPosition()));
+                        PlayerUtils.getName(player), IdentityUtils.getName(itemStack.getItem()).getString(),
+                        inventory, IdentityUtils.getIdAsString(world), WorldUtils.toPosString(player.blockPosition()));
             }
         } else {
             CarpetOrgAddition.LOGGER.info("{} created a [{}] item shadow at {} | Coordinates: [{}]",
-                    PlayerUtils.getName(player), ServerUtils.getName(itemStack.getItem()).getString(),
-                    ServerUtils.getIdAsString(world), ServerUtils.toPosString(player.blockPosition()));
+                    PlayerUtils.getName(player), IdentityUtils.getName(itemStack.getItem()).getString(),
+                    IdentityUtils.getIdAsString(world), WorldUtils.toPosString(player.blockPosition()));
         }
     }
 

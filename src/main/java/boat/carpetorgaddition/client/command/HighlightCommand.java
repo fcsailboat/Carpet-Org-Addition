@@ -7,7 +7,8 @@ import boat.carpetorgaddition.client.render.waypoint.HighlightWaypoint;
 import boat.carpetorgaddition.client.render.waypoint.Waypoint;
 import boat.carpetorgaddition.client.render.waypoint.WaypointRenderer;
 import boat.carpetorgaddition.client.util.ClientUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.EntityUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
@@ -59,7 +60,7 @@ public class HighlightCommand extends AbstractClientCommand {
     // 高亮路径点
     private int highlight(CommandContext<FabricClientCommandSource> context, long duration, boolean persistent) {
         BlockPos blockPos = ClientBlockPosArgumentType.getBlockPos(context, "blockPos");
-        Vec3 vec3d = ServerUtils.getBlockCenter(blockPos);
+        Vec3 vec3d = WorldUtils.getBlockCenter(blockPos);
         ClientLevel world = ClientUtils.getWorld();
         WaypointRenderer instance = WaypointRenderer.getInstance();
         List<Waypoint> list = instance.listRenderers(Waypoint.HIGHLIGHT);
@@ -72,7 +73,7 @@ public class HighlightCommand extends AbstractClientCommand {
                 update = true;
                 // 看向路径点
                 LocalPlayer player = context.getSource().getPlayer();
-                ServerUtils.lookAt(player, vec3d);
+                EntityUtils.lookAt(player, vec3d);
                 break;
             }
         }

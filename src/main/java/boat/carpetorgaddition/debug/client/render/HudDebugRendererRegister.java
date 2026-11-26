@@ -7,6 +7,7 @@ import boat.carpetorgaddition.exception.ProductionEnvironmentError;
 import boat.carpetorgaddition.mixin.debug.accessor.ExperienceOrbEntityAccessor;
 import boat.carpetorgaddition.mixin.debug.accessor.HandledScreenAccessor;
 import boat.carpetorgaddition.mixin.debug.accessor.ScreenAccessor;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.Counter;
 import boat.carpetorgaddition.wheel.SimpleCounter;
@@ -165,7 +166,7 @@ public class HudDebugRendererRegister {
                         List<Component> list = new ArrayList<>();
                         for (Item item : counter) {
                             int count = counter.getCount(item);
-                            list.add(TextBuilder.combineAll(ServerUtils.getName(item), "*", count));
+                            list.add(TextBuilder.combineAll(IdentityUtils.getName(item), "*", count));
                         }
                         if (experienceOrbEntityCount != 0) {
                             list.add(TextBuilder.combineAll("经验球实体数量：", experienceOrbEntityCount));

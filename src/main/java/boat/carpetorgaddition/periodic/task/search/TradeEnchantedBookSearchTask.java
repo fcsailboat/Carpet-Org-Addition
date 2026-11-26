@@ -6,7 +6,6 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.predicate.EnchantedBookPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
-import boat.carpetorgaddition.wheel.traverser.BlockPosTraverser;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -17,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +26,8 @@ public class TradeEnchantedBookSearchTask extends AbstractTradeSearchTask {
     private final EnchantedBookPredicate predicate;
     private static final LocalizationKey KEY = TRADE.then("enchanted_book");
 
-    public TradeEnchantedBookSearchTask(Level world, BlockPosTraverser blockPosTraverser, BlockPos sourcePos, CommandSourceStack source, EnchantedBookPredicate predicate, ServerPlayer player) {
-        super(world, blockPosTraverser, sourcePos, source, player);
+    public TradeEnchantedBookSearchTask(Level world, AABB box, BlockPos sourcePos, CommandSourceStack source, EnchantedBookPredicate predicate, ServerPlayer player) {
+        super(world, box, sourcePos, source, player);
         this.predicate = predicate;
     }
 

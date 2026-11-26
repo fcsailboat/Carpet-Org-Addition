@@ -2,10 +2,7 @@ package boat.carpetorgaddition.periodic.fakeplayer.action;
 
 import boat.carpetorgaddition.CarpetOrgAdditionSettings;
 import boat.carpetorgaddition.exception.InfiniteLoopException;
-import boat.carpetorgaddition.util.InventoryUtils;
-import boat.carpetorgaddition.util.MessageUtils;
-import boat.carpetorgaddition.util.PlayerUtils;
-import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.*;
 import boat.carpetorgaddition.wheel.MenuController;
 import boat.carpetorgaddition.wheel.inventory.AutoGrowInventory;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
@@ -74,7 +71,7 @@ public abstract class AbstractCraftAction extends AbstractPlayerAction {
         }
         // 丢弃合成输出
         for (ItemStack itemStack : inventory) {
-            ServerUtils.drop(fakePlayer, itemStack);
+            EntityUtils.drop(fakePlayer, itemStack);
         }
     }
 

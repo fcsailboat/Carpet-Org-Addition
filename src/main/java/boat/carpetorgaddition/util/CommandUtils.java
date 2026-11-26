@@ -132,7 +132,11 @@ public class CommandUtils {
     }
 
     public static boolean isSelfOrFakePlayer(ServerPlayer player, CommandSourceStack source) {
-        return isSpecifiedOrFakePlayer(player, Objects.requireNonNull(source.getPlayer()));
+        ServerPlayer specified = source.getPlayer();
+        if (specified == null) {
+            return false;
+        }
+        return isSpecifiedOrFakePlayer(player, specified);
     }
 
     /**

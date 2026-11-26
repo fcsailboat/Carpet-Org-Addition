@@ -2,6 +2,7 @@ package boat.carpetorgaddition.periodic.navigator;
 
 import boat.carpetorgaddition.command.NavigatorCommand;
 import boat.carpetorgaddition.network.s2c.WaypointUpdateS2CPacket;
+import boat.carpetorgaddition.util.EntityUtils;
 import boat.carpetorgaddition.util.MathUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
@@ -44,7 +45,7 @@ public class EntityNavigator extends Navigator {
         super(player);
         this.entity = Objects.requireNonNull(entity);
         this.isContinue = isContinue;
-        this.prevPos = ServerUtils.getEyePos(entity);
+        this.prevPos = EntityUtils.getEyePos(entity);
         this.prevWorld = ServerUtils.getWorld(entity);
     }
 
@@ -63,7 +64,7 @@ public class EntityNavigator extends Navigator {
             Component in = IN.translate(entity.getName(), CommonTexts.simpleBlockPos(entity.blockPosition()));
             int distance = MathUtils.getBlockIntegerDistance(player.blockPosition(), entity.blockPosition());
             // 添加上下箭头
-            Vec3 eyePos = ServerUtils.getEyePos(this.entity);
+            Vec3 eyePos = EntityUtils.getEyePos(this.entity);
             text = getHUDText(eyePos, in, distance);
         } else {
             Component dimension = CommonTexts.dimension(ServerUtils.getWorld(this.entity));
@@ -72,7 +73,7 @@ public class EntityNavigator extends Navigator {
         }
         MessageUtils.sendMessageToHud(this.player, text);
         this.syncWaypoint(false);
-        this.prevPos = ServerUtils.getEyePos(this.entity);
+        this.prevPos = EntityUtils.getEyePos(this.entity);
         this.prevWorld = ServerUtils.getWorld(this.entity);
     }
 
@@ -83,7 +84,7 @@ public class EntityNavigator extends Navigator {
 
     @Override
     protected boolean updateRequired() {
-        return !(this.prevPos.equals(ServerUtils.getEyePos(this.entity)) && this.prevWorld.equals(ServerUtils.getWorld(this.entity)));
+        return !(this.prevPos.equals(EntityUtils.getEyePos(this.entity)) && this.prevWorld.equals(ServerUtils.getWorld(this.entity)));
     }
 
     /**

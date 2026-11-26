@@ -73,12 +73,13 @@ public class RuntimeCommand extends AbstractServerCommand {
         Component used = displayMemory(usedSize);
         Component total = displayMemory(runtime.totalMemory());
         Component max = displayMemory(runtime.maxMemory());
-        MessageUtils.sendEmptyMessage(context);
+        CommandSourceStack source = context.getSource();
+        MessageUtils.sendEmptyMessage(source);
         LocalizationKey key = MEMORY.then("jvm");
-        MessageUtils.sendMessage(context, key.translate());
-        MessageUtils.sendMessage(context, key.then("used").translate(used));
-        MessageUtils.sendMessage(context, key.then("total").translate(total));
-        MessageUtils.sendMessage(context, key.then("max").translate(max));
+        MessageUtils.sendMessage(source, key.translate());
+        MessageUtils.sendMessage(source, key.then("used").translate(used));
+        MessageUtils.sendMessage(source, key.then("total").translate(total));
+        MessageUtils.sendMessage(source, key.then("max").translate(max));
         return (int) usedSize;
     }
 
@@ -93,11 +94,12 @@ public class RuntimeCommand extends AbstractServerCommand {
         long usedSize = memory.getTotal() - memory.getAvailable();
         Component total = displayMemory(memory.getTotal());
         Component used = displayMemory(usedSize);
-        MessageUtils.sendEmptyMessage(context);
+        CommandSourceStack source = context.getSource();
+        MessageUtils.sendEmptyMessage(source);
         LocalizationKey key = MEMORY.then("physical");
-        MessageUtils.sendMessage(context, key.translate());
-        MessageUtils.sendMessage(context, key.then("total").translate(total));
-        MessageUtils.sendMessage(context, key.then("used").translate(used));
+        MessageUtils.sendMessage(source, key.translate());
+        MessageUtils.sendMessage(source, key.then("total").translate(total));
+        MessageUtils.sendMessage(source, key.then("used").translate(used));
         return (int) usedSize;
     }
 
@@ -111,9 +113,10 @@ public class RuntimeCommand extends AbstractServerCommand {
         long size = runtime.freeMemory() - l;
         Component free = displayMemory(size);
         LocalizationKey key = KEY.then("gc");
-        MessageUtils.sendMessage(context, key.translate(free));
+        CommandSourceStack source = context.getSource();
+        MessageUtils.sendMessage(source, key.translate(free));
         Component prompt = TextBuilder.of(key.then("prompt").translate()).setGrayItalic().build();
-        MessageUtils.sendMessage(context.getSource(), prompt);
+        MessageUtils.sendMessage(source, prompt);
         return (int) size;
     }
 

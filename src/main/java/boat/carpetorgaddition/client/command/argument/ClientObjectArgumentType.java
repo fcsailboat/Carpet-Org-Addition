@@ -3,8 +3,8 @@ package boat.carpetorgaddition.client.command.argument;
 import boat.carpetorgaddition.client.util.ClientCommandUtils;
 import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.CommandUtils;
+import boat.carpetorgaddition.util.IdentityUtils;
 import boat.carpetorgaddition.util.MathUtils;
-import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -212,12 +212,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
 
         @Override
         public Component getName(Item item) {
-            return ServerUtils.getName(item);
+            return IdentityUtils.getName(item);
         }
 
         @Override
         public String getIdAsString(Item item) {
-            return ServerUtils.getIdAsString(item);
+            return IdentityUtils.getIdAsString(item);
         }
 
         @Override
@@ -241,12 +241,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
 
         @Override
         public Component getName(Block block) {
-            return ServerUtils.getName(block);
+            return IdentityUtils.getName(block);
         }
 
         @Override
         public String getIdAsString(Block block) {
-            return ServerUtils.getIdAsString(block);
+            return IdentityUtils.getIdAsString(block);
         }
 
         @Override
@@ -266,12 +266,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     private static class ClientEntityArgumentType extends ClientObjectArgumentType<EntityType<?>> {
         @Override
         public Component getName(EntityType<?> entityType) {
-            return ServerUtils.getName(entityType);
+            return IdentityUtils.getName(entityType);
         }
 
         @Override
         public String getIdAsString(EntityType<?> entityType) {
-            return ServerUtils.getIdAsString(entityType);
+            return IdentityUtils.getIdAsString(entityType);
         }
 
         @Override
@@ -292,12 +292,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     private static class ClientEnchantmentArgumentType extends ClientObjectArgumentType<Holder<Enchantment>> {
         @Override
         public Component getName(Holder<Enchantment> holder) {
-            return ServerUtils.getName(holder);
+            return IdentityUtils.getName(holder);
         }
 
         @Override
         public String getIdAsString(Holder<Enchantment> holder) {
-            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), holder);
+            return IdentityUtils.getIdAsString(ClientUtils.getRegistryAccess(), holder);
         }
 
         @Override
@@ -320,12 +320,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     private static class ClientStatusEffectArgumentType extends ClientObjectArgumentType<MobEffect> {
         @Override
         public Component getName(MobEffect mobEffect) {
-            return ServerUtils.getName(mobEffect);
+            return IdentityUtils.getName(mobEffect);
         }
 
         @Override
         public String getIdAsString(MobEffect mobEffect) {
-            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), mobEffect);
+            return IdentityUtils.getIdAsString(ClientUtils.getRegistryAccess(), mobEffect);
         }
 
         @Override
@@ -342,12 +342,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     private static class ClientBiomeArgumentType extends ClientObjectArgumentType<Biome> {
         @Override
         public Component getName(Biome biome) {
-            return ServerUtils.getName(ClientUtils.getRegistryAccess(), biome);
+            return IdentityUtils.getName(ClientUtils.getRegistryAccess(), biome);
         }
 
         @Override
         public String getIdAsString(Biome biome) {
-            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), biome);
+            return IdentityUtils.getIdAsString(ClientUtils.getRegistryAccess(), biome);
         }
 
         @Override
@@ -367,12 +367,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     private static class ClientGameModeArgumentType extends ClientObjectArgumentType<GameType> {
         @Override
         public Component getName(GameType gameType) {
-            return ServerUtils.getName(gameType);
+            return IdentityUtils.getName(gameType);
         }
 
         @Override
         public String getIdAsString(GameType gameType) {
-            return ServerUtils.getIdAsString(gameType);
+            return IdentityUtils.getIdAsString(gameType);
         }
 
         @Override
@@ -392,12 +392,12 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     private static class ClientGameRuleArgumentType extends ClientObjectArgumentType<GameRule<?>> {
         @Override
         public Component getName(GameRule<?> gameRule) {
-            return ServerUtils.getName(gameRule);
+            return IdentityUtils.getName(gameRule);
         }
 
         @Override
         public String getIdAsString(GameRule<?> gameRule) {
-            return ServerUtils.getIdAsString(ClientUtils.getRegistryAccess(), gameRule);
+            return IdentityUtils.getIdAsString(ClientUtils.getRegistryAccess(), gameRule);
         }
 
         @Override

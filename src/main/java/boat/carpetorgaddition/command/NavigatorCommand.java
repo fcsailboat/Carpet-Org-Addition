@@ -5,6 +5,7 @@ import boat.carpetorgaddition.periodic.PlayerComponentCoordinator;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.util.ServerUtils;
+import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.Waypoint;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.permission.PermissionLevel;
@@ -112,7 +113,7 @@ public class NavigatorCommand extends AbstractServerCommand {
         try {
             Waypoint waypoint = Waypoint.load(server, waypointArgument);
             PlayerComponentCoordinator.of(player).getNavigatorManager().setNavigator(waypoint);
-            MessageUtils.sendMessage(context, START_NAVIGATION.translate(player.getDisplayName(), "[" + waypointArgument + "]"));
+            MessageUtils.sendMessage(context.getSource(), START_NAVIGATION.translate(player.getDisplayName(), "[" + waypointArgument + "]"));
         } catch (IOException | RuntimeException e) {
             throw CommandUtils.createException(LocationsCommand.KEY.then("list").then("unable_to_parse").translate(waypointArgument));
         }
@@ -169,9 +170,9 @@ public class NavigatorCommand extends AbstractServerCommand {
         // 设置导航器，维度为玩家当前所在维度
         PlayerComponentCoordinator.of(player).getNavigatorManager().setNavigator(blockPos, world);
         // 发送命令反馈
-        Component pos = CommonTexts.blockPos(blockPos, ServerUtils.getColor(world));
+        Component pos = CommonTexts.blockPos(blockPos, WorldUtils.getColor(world));
         Component name = player.getDisplayName();
-        MessageUtils.sendMessage(context, START_NAVIGATION.translate(name, pos));
+        MessageUtils.sendMessage(context.getSource(), START_NAVIGATION.translate(name, pos));
         return 1;
     }
 
@@ -187,7 +188,7 @@ public class NavigatorCommand extends AbstractServerCommand {
         } catch (NullPointerException e) {
             throw CommandUtils.createException(KEY.then("unable_to_find").translate(player.getDisplayName(), spawnPoint));
         }
-        MessageUtils.sendMessage(context, START_NAVIGATION.translate(player.getDisplayName(), spawnPoint));
+        MessageUtils.sendMessage(context.getSource(), START_NAVIGATION.translate(player.getDisplayName(), spawnPoint));
         return 1;
     }
 
@@ -205,14 +206,15 @@ public class NavigatorCommand extends AbstractServerCommand {
         Component name = self ? death : HUD.then("of").translate(target.getDisplayName(), death);
         // 获取死亡坐标和死亡维度
         GlobalPos globalPos = lastDeathPos.get();
+        MinecraftServer server = context.getSource().getServer();
         PlayerComponentCoordinator.of(player).getNavigatorManager().setNavigator(globalPos.pos(),
-                context.getSource().getServer().getLevel(globalPos.dimension()), name);
+                server.getLevel(globalPos.dimension()), name);
         TextBuilder builder = START_NAVIGATION.builder(player.getDisplayName(), name);
         if (self || player == target) {
             MessageUtils.sendMessage(player, builder.build());
         } else {
             builder.setGrayItalic();
-            MessageUtils.sendMessage(context.getSource().getServer(), builder.build());
+            MessageUtils.sendMessage(server, builder.build());
         }
         return 1;
     }

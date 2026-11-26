@@ -9,10 +9,10 @@ import org.jspecify.annotations.NullMarked;
  * 反转物品栏
  */
 @NullMarked
-public class ReverseInventroy implements Container {
+public class ReverseInventory implements Container {
     private final Container container;
 
-    public ReverseInventroy(Container container) {
+    public ReverseInventory(Container container) {
         this.container = container;
     }
 
