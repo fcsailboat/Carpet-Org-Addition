@@ -655,7 +655,7 @@ _这不会改变漏斗、投掷器、合成器和比较器的行为_<br>
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
 
-### 记录服务器命令 (recordServerCommand)
+### 记录服务器命令(recordServerCommand)
 
 在服务器日志记录被执行的命令
 

@@ -54,10 +54,10 @@
     </tr>
     <tr>
       <td>1.21 - 1.21.11</td>
-      <td><a href="https://github.com/fcsailboat/Carpet-Org-Addition/releases/tag/v1.41.5">v1.41.5</a></td>
+      <td><a href="https://github.com/fcsailboat/Carpet-Org-Addition/releases/tag/v1.41.7">v1.41.7</a></td>
     </tr>
     <tr>
-      <td>26.1</td>
+      <td>26.x</td>
       <td>维护中</td>
       <td>-</td>
     </tr>
