@@ -6,6 +6,8 @@ import boat.carpetorgaddition.util.MessageUtils;
 import boat.carpetorgaddition.wheel.common.CommonTexts;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -15,8 +17,6 @@ import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-
-import java.util.ArrayList;
 
 public class TradeItemSearchTask extends AbstractTradeSearchTask {
     private final ItemStackPredicate predicate;
@@ -32,7 +32,7 @@ public class TradeItemSearchTask extends AbstractTradeSearchTask {
     @Override
     protected void searchVillager(AbstractVillager merchant) {
         MerchantOffers offers = merchant.getOffers();
-        ArrayList<Integer> list = new ArrayList<>();
+        IntList list = new IntArrayList();
         for (int index = 0; index < offers.size(); index++) {
             // 检查每个出售的物品是否与谓词匹配
             if (this.predicate.test(offers.get(index).getResult())) {
@@ -50,7 +50,7 @@ public class TradeItemSearchTask extends AbstractTradeSearchTask {
     /**
      * @return 获取查找结果
      */
-    private Result getResult(AbstractVillager merchant, ArrayList<Integer> list) {
+    private Result getResult(AbstractVillager merchant, IntList list) {
         return new Result() {
             @Override
             public int compare(Result o1, Result o2) {

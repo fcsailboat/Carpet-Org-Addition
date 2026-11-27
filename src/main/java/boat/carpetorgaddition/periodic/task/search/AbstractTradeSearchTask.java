@@ -9,6 +9,7 @@ import boat.carpetorgaddition.util.WorldUtils;
 import boat.carpetorgaddition.wheel.page.PageManager;
 import boat.carpetorgaddition.wheel.page.PagedCollection;
 import boat.carpetorgaddition.wheel.text.LocalizationKey;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -149,7 +150,7 @@ public abstract class AbstractTradeSearchTask extends ServerSearchTask {
      * @param list 一只村民所有符合条件交易的索引
      * @return 索引拼接后的字符串
      */
-    protected static String getIndexArray(ArrayList<Integer> list) {
+    protected static String getIndexArray(IntList list) {
         // 如果只有一个索引，直接返回元素字符串
         if (list.size() == 1) {
             return list.getFirst().toString();

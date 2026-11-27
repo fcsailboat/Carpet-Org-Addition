@@ -202,4 +202,8 @@ public class IdentityUtils {
     public static Block asBlock(String id) {
         return BuiltInRegistries.BLOCK.getValue(Identifier.parse(id));
     }
+
+    public static Holder<Enchantment> asEnchantment(RegistryAccess registryAccess, Identifier id) {
+        return registryAccess.lookupOrThrow(Registries.ENCHANTMENT).get(id).orElseThrow();
+    }
 }

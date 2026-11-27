@@ -290,7 +290,7 @@ public class FinderCommand extends AbstractServerCommand {
         Holder<Enchantment> enchantment = ResourceArgument.getEnchantment(context, "enchantment");
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
-        EnchantedBookPredicate predicate = new EnchantedBookPredicate(server, enchantment);
+        EnchantedBookPredicate predicate = EnchantedBookPredicate.of(server, enchantment);
         // 获取玩家所在的位置
         BlockPos sourcePos = player.blockPosition();
         Level world = ServerUtils.getWorld(player);

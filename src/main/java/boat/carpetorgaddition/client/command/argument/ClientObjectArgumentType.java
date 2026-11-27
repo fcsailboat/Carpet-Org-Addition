@@ -263,7 +263,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 实体参数
      */
-    private static class ClientEntityArgumentType extends ClientObjectArgumentType<EntityType<?>> {
+    public static class ClientEntityArgumentType extends ClientObjectArgumentType<EntityType<?>> {
         @Override
         public Component getName(EntityType<?> entityType) {
             return IdentityUtils.getName(entityType);
@@ -289,7 +289,15 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 魔咒参数
      */
-    private static class ClientEnchantmentArgumentType extends ClientObjectArgumentType<Holder<Enchantment>> {
+    public static class ClientEnchantmentArgumentType extends ClientObjectArgumentType<Holder<Enchantment>> {
+        public ClientEnchantmentArgumentType() {
+            super(false);
+        }
+
+        public ClientEnchantmentArgumentType(boolean patternMatching) {
+            super(patternMatching);
+        }
+
         @Override
         public Component getName(Holder<Enchantment> holder) {
             return IdentityUtils.getName(holder);
@@ -317,7 +325,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 状态效果参数
      */
-    private static class ClientStatusEffectArgumentType extends ClientObjectArgumentType<MobEffect> {
+    public static class ClientStatusEffectArgumentType extends ClientObjectArgumentType<MobEffect> {
         @Override
         public Component getName(MobEffect mobEffect) {
             return IdentityUtils.getName(mobEffect);
@@ -339,7 +347,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
         }
     }
 
-    private static class ClientBiomeArgumentType extends ClientObjectArgumentType<Biome> {
+    public static class ClientBiomeArgumentType extends ClientObjectArgumentType<Biome> {
         @Override
         public Component getName(Biome biome) {
             return IdentityUtils.getName(ClientUtils.getRegistryAccess(), biome);
@@ -364,7 +372,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 游戏模式参数
      */
-    private static class ClientGameModeArgumentType extends ClientObjectArgumentType<GameType> {
+    public static class ClientGameModeArgumentType extends ClientObjectArgumentType<GameType> {
         @Override
         public Component getName(GameType gameType) {
             return IdentityUtils.getName(gameType);
@@ -389,7 +397,7 @@ public abstract class ClientObjectArgumentType<T> implements ArgumentType<List<T
     /**
      * 游戏规则参数
      */
-    private static class ClientGameRuleArgumentType extends ClientObjectArgumentType<GameRule<?>> {
+    public static class ClientGameRuleArgumentType extends ClientObjectArgumentType<GameRule<?>> {
         @Override
         public Component getName(GameRule<?> gameRule) {
             return IdentityUtils.getName(gameRule);

@@ -17,7 +17,9 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
@@ -29,7 +31,6 @@ public class FinderByNameCommand extends AbstractClientCommand {
 
     @Override
     public void register(String name) {
-        // TODO 添加附魔书交易查找支持
         this.dispatcher.register(ClientCommands.literal(name)
                 .then(ClientCommands.literal("item")
                         .then(ClientCommands.argument("item", new ClientItemArgumentType(true))
@@ -50,9 +51,15 @@ public class FinderByNameCommand extends AbstractClientCommand {
                         .then(ClientCommands.literal("item")
                                 .then(ClientCommands.argument("item", new ClientItemArgumentType(true))
                                         .executes(context -> searchTradeItem(context, 64))
-                                        .then(ClientCommands.argument("range", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                        .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
-                                                .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "range"))))))));
+                                                .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "radius"))))))
+                        .then(ClientCommands.literal("enchantment")
+                                .then(ClientCommands.argument("enchantment", new ClientObjectArgumentType.ClientEnchantmentArgumentType(true))
+                                        .executes(context -> searchTradeEnchantedBook(context, 64))
+                                        .then(ClientCommands.argument("radius", IntegerArgumentType.integer(0, FinderCommand.MAX_HORIZONTAL_RADIUS))
+                                                .suggests(suggestionDefaultDistance())
+                                                .executes(context -> searchTradeEnchantedBook(context, IntegerArgumentType.getInteger(context, "radius"))))))));
     }
 
     private SuggestionProvider<FabricClientCommandSource> suggestionDefaultDistance() {
@@ -92,14 +99,29 @@ public class FinderByNameCommand extends AbstractClientCommand {
         return list.size();
     }
 
-    private int searchTradeItem(CommandContext<FabricClientCommandSource> context, int range) {
+    private int searchTradeItem(CommandContext<FabricClientCommandSource> context, int radius) {
         List<Item> list = getItemList(context);
         String name = CommandUtils.getArgumentLiteral(context, "item").orElseThrow();
-        ObjectSearchTaskCodecs.TradeItemSearchContext searchContext = new ObjectSearchTaskCodecs.TradeItemSearchContext(range, list);
+        ObjectSearchTaskCodecs.TradeItemSearchContext searchContext = new ObjectSearchTaskCodecs.TradeItemSearchContext(radius, list);
         JsonObject json = ObjectSearchTaskCodecs.TRADE_ITEM_SEARCH_CODEC.encode(searchContext);
         ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.TRADE_ITEM, name, json);
         ClientPlayNetworking.send(packet);
         return list.size();
+    }
+
+    @SuppressWarnings("unchecked")
+    private int searchTradeEnchantedBook(CommandContext<FabricClientCommandSource> context, int range) {
+        List<Holder<Enchantment>> enchantments = ClientObjectArgumentType.getType(context, "enchantment")
+                .stream()
+                .filter(t -> t instanceof Holder<?> holder && holder.value() instanceof Enchantment)
+                .map(t -> (Holder<Enchantment>) t)
+                .toList();
+        String name = CommandUtils.getArgumentLiteral(context, "enchantment").orElseThrow();
+        ObjectSearchTaskCodecs.TradeEnchantedBookSearchContext searchContext = new ObjectSearchTaskCodecs.TradeEnchantedBookSearchContext(range, enchantments);
+        JsonObject json = ObjectSearchTaskCodecs.TRADE_ENCHANTED_BOOK_SEARCH_CODEC.encode(searchContext);
+        ObjectSearchTaskC2SPacket packet = new ObjectSearchTaskC2SPacket(ObjectSearchTaskC2SPacket.Type.TRADE_ENCHANTED_BOOK, name, json);
+        ClientPlayNetworking.send(packet);
+        return enchantments.size();
     }
 
     private List<Item> getItemList(CommandContext<FabricClientCommandSource> context) {

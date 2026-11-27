@@ -41,7 +41,7 @@ public class InventoryUtils {
      * 从物品形式的潜影盒中获取第一个指定的物品，并将该物品从潜影盒的NBT中删除，使用时，为避免不必要的物品浪费，取出来的物品必须使用或丢出
      *
      * @param shulkerBox 潜影盒物品
-     * @param predicate  一个物品匹配器对象，用来指定要从潜影盒中拿取的物品
+     * @param predicate  一个物品谓词对象，用来指定要从潜影盒中拿取的物品
      * @return 潜影盒中获取的指定物品
      */
     @CheckReturnValue
@@ -217,9 +217,7 @@ public class InventoryUtils {
         if (isNonOrEmptyContainer(shulkerBox)) {
             return ImmutableInventory.empty();
         }
-        ItemContainerContents component = shulkerBox.get(DataComponents.CONTAINER);
-        // 因为有空潜影盒的判断，shulkerBox.get(DataComponentTypes.CONTAINER)不会返回null
-        //noinspection DataFlowIssue
+        ItemContainerContents component = shulkerBox.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
         return ImmutableInventory.of(component.nonEmptyItemCopyStream().toList());
     }
 

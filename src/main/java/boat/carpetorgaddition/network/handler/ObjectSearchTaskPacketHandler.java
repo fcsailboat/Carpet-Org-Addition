@@ -6,15 +6,13 @@ import boat.carpetorgaddition.network.codec.ObjectSearchTaskCodecs;
 import boat.carpetorgaddition.periodic.ServerComponentCoordinator;
 import boat.carpetorgaddition.periodic.task.ServerTask;
 import boat.carpetorgaddition.periodic.task.ServerTaskManager;
-import boat.carpetorgaddition.periodic.task.search.BlockSearchTask;
-import boat.carpetorgaddition.periodic.task.search.ItemSearchTask;
-import boat.carpetorgaddition.periodic.task.search.OfflinePlayerInventorySearchTask;
-import boat.carpetorgaddition.periodic.task.search.TradeItemSearchTask;
+import boat.carpetorgaddition.periodic.task.search.*;
 import boat.carpetorgaddition.util.CommandUtils;
 import boat.carpetorgaddition.util.ServerUtils;
 import boat.carpetorgaddition.wheel.permission.CommandPermission;
 import boat.carpetorgaddition.wheel.permission.PermissionManager;
 import boat.carpetorgaddition.wheel.predicate.BlockStatePredicate;
+import boat.carpetorgaddition.wheel.predicate.EnchantedBookPredicate;
 import boat.carpetorgaddition.wheel.predicate.ItemStackPredicate;
 import boat.carpetorgaddition.wheel.text.LocalizationKeys;
 import boat.carpetorgaddition.wheel.traverser.BlockEntityTraverser;
@@ -32,7 +30,7 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
     @Override
     public void receive(ObjectSearchTaskC2SPacket packet, ServerPlayNetworking.Context context) {
         ServerPlayer player = context.player();
-        MinecraftServer server = ServerUtils.getServer(player);
+        MinecraftServer server = context.server();
         ServerTaskManager taskManager = ServerComponentCoordinator.of(server).getServerTaskManager();
         ServerLevel world = ServerUtils.getWorld(player);
         CommandSourceStack source = player.createCommandSourceStack();
@@ -66,6 +64,12 @@ public class ObjectSearchTaskPacketHandler implements ServerPlayNetworking.PlayP
                 BlockPosTraverser traverser = new BlockPosTraverser(world, blockPos, decode.range());
                 ItemStackPredicate predicate = ItemStackPredicate.of(decode.list(), packet.name());
                 yield new TradeItemSearchTask(world, traverser.toBox(), blockPos, predicate, source, player);
+            }
+            case TRADE_ENCHANTED_BOOK -> {
+                ObjectSearchTaskCodecs.TradeEnchantedBookSearchContext decode = ObjectSearchTaskCodecs.TRADE_ENCHANTED_BOOK_SEARCH_CODEC.decode(packet.json());
+                BlockPosTraverser traverser = new BlockPosTraverser(world, blockPos, decode.range());
+                EnchantedBookPredicate predicate = EnchantedBookPredicate.of(server, decode.list(), packet.name());
+                yield new TradeEnchantedBookSearchTask(world, traverser.toBox(), blockPos, source, predicate, player);
             }
             default -> null;
         };

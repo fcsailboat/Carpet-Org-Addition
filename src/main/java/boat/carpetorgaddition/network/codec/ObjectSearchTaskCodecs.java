@@ -1,10 +1,16 @@
 package boat.carpetorgaddition.network.codec;
 
+import boat.carpetorgaddition.client.util.ClientUtils;
 import boat.carpetorgaddition.util.IdentityUtils;
+import boat.carpetorgaddition.util.ServerUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.NonNull;
 
@@ -113,6 +119,41 @@ public class ObjectSearchTaskCodecs {
         }
     };
 
+    public static final JsonObjectCodec<TradeEnchantedBookSearchContext> TRADE_ENCHANTED_BOOK_SEARCH_CODEC = new JsonObjectCodec<>() {
+        @Override
+        public JsonObject encode(TradeEnchantedBookSearchContext value) {
+            JsonObject json = new JsonObject();
+            json.addProperty("range", value.range());
+            JsonArray array = new JsonArray();
+            RegistryAccess registryAccess = ClientUtils.getRegistryAccess();
+            int len = 0;
+            for (Holder<Enchantment> holder : value.list()) {
+                String id = IdentityUtils.getIdAsString(registryAccess, holder);
+                len += id.length();
+                if (len >= 2000) {
+                    break;
+                }
+                array.add(id);
+            }
+            json.add("enchantments", array);
+            return json;
+        }
+
+        @Override
+        public TradeEnchantedBookSearchContext decode(JsonObject json) {
+            int range = json.get("range").getAsInt();
+            List<Holder<Enchantment>> list = json.get("enchantments")
+                    .getAsJsonArray()
+                    .asList()
+                    .stream()
+                    .map(JsonElement::getAsString)
+                    .map(Identifier::parse)
+                    .map(id -> IdentityUtils.asEnchantment(ServerUtils.getCurrentServerOrThrow().registryAccess(), id))
+                    .toList();
+            return new TradeEnchantedBookSearchContext(range, list);
+        }
+    };
+
     private static @NonNull JsonArray createItemArray(List<Item> list) {
         JsonArray array = new JsonArray();
         int len = 0;
@@ -137,5 +178,8 @@ public class ObjectSearchTaskCodecs {
     }
 
     public record TradeItemSearchContext(int range, List<Item> list) {
+    }
+
+    public record TradeEnchantedBookSearchContext(int range, List<Holder<Enchantment>> list) {
     }
 }
