@@ -13,19 +13,19 @@ public final class WaypointDataUpdater extends DataUpdater {
     }
 
     @Override
-    protected JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject json, int version) {
         if (version == 0) {
-            int x = oldJson.get("x").getAsInt();
-            int y = oldJson.get("y").getAsInt();
-            int z = oldJson.get("z").getAsInt();
-            String dimension = oldJson.get("dimension").getAsString();
-            String creator = oldJson.get("creator").getAsString();
-            String illustrate = oldJson.has("illustrate") ? oldJson.get("illustrate").getAsString() : "";
+            int x = json.get("x").getAsInt();
+            int y = json.get("y").getAsInt();
+            int z = json.get("z").getAsInt();
+            String dimension = json.get("dimension").getAsString();
+            String creator = json.get("creator").getAsString();
+            String illustrate = json.has("illustrate") ? json.get("illustrate").getAsString() : "";
             JsonObject anotherPos = new JsonObject();
-            if (oldJson.has("another_x") && oldJson.has("another_y") && oldJson.has("another_z")) {
-                int anotherX = oldJson.get("another_x").getAsInt();
-                int anotherY = oldJson.get("another_y").getAsInt();
-                int anotherZ = oldJson.get("another_z").getAsInt();
+            if (json.has("another_x") && json.has("another_y") && json.has("another_z")) {
+                int anotherX = json.get("another_x").getAsInt();
+                int anotherY = json.get("another_y").getAsInt();
+                int anotherZ = json.get("another_z").getAsInt();
                 anotherPos.addProperty("x", anotherX);
                 anotherPos.addProperty("y", anotherY);
                 anotherPos.addProperty("z", anotherZ);
@@ -43,7 +43,7 @@ public final class WaypointDataUpdater extends DataUpdater {
             newJson.add("another_pos", anotherPos);
             return this.update(newJson, 3);
         } else {
-            return oldJson;
+            return json;
         }
     }
 }

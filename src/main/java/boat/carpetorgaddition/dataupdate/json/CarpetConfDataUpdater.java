@@ -114,13 +114,13 @@ public final class CarpetConfDataUpdater extends DataUpdater {
     }
 
     @Override
-    protected JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject json, int version) {
         return switch (version) {
             case 0, 1 -> {
                 JsonObject newJson = new JsonObject();
                 newJson.addProperty(DataUpdater.DATA_VERSION, 2);
                 JsonObject newRules = new JsonObject();
-                for (Map.Entry<String, JsonElement> entry : oldJson.getAsJsonObject("rules").entrySet()) {
+                for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject("rules").entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue().getAsString();
                     switch (key) {
@@ -164,7 +164,7 @@ public final class CarpetConfDataUpdater extends DataUpdater {
                 JsonObject newJson = new JsonObject();
                 newJson.addProperty(DataUpdater.DATA_VERSION, 3);
                 JsonObject newRules = new JsonObject();
-                for (Map.Entry<String, JsonElement> entry : oldJson.getAsJsonObject("rules").entrySet()) {
+                for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject("rules").entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue().getAsString();
                     if ("openShulkerBoxForcibly".equals(key)) {
@@ -180,7 +180,7 @@ public final class CarpetConfDataUpdater extends DataUpdater {
                 JsonObject newJson = new JsonObject();
                 newJson.addProperty(DataUpdater.DATA_VERSION, 4);
                 JsonObject newRules = new JsonObject();
-                for (Map.Entry<String, JsonElement> entry : oldJson.getAsJsonObject("rules").entrySet()) {
+                for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject("rules").entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue().getAsString();
                     switch (key) {
@@ -193,7 +193,16 @@ public final class CarpetConfDataUpdater extends DataUpdater {
                 newJson.add("rules", newRules);
                 yield this.update(newJson, 4);
             }
-            default -> oldJson;
+            case 4 -> {
+                JsonObject rules = json.get("rules").getAsJsonObject();
+                JsonElement value = rules.remove("recordPlayerCommand");
+                if (value != null) {
+                    rules.addProperty("recordServerCommand", "true".equalsIgnoreCase(value.getAsString()) ? "all" : "false");
+                }
+                json.addProperty(DataUpdater.DATA_VERSION, 5);
+                yield this.update(json, 5);
+            }
+            default -> json;
         };
     }
 }

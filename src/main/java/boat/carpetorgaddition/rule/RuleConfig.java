@@ -23,7 +23,7 @@ public class RuleConfig {
     public static final String RULES = "rules";
     private final MinecraftServer server;
     private final File file;
-    private static final int CURRENT_VERSION = 4;
+    private static final int CURRENT_VERSION = 5;
 
     public RuleConfig(MinecraftServer server) {
         this.server = server;
@@ -74,7 +74,7 @@ public class RuleConfig {
                     map.put(entry.getKey(), entry.getValue().getAsString());
                 }
             } catch (IOException | RuntimeException e) {
-                CarpetOrgAddition.LOGGER.warn("When reading Carpet Org Addition rules, an unexpected error occurred", e);
+                CarpetOrgAddition.LOGGER.error("When reading Carpet Org Addition rules, an unexpected error occurred", e);
             }
         }
         return map;

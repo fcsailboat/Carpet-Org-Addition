@@ -21,11 +21,11 @@ public final class FakePlayerActionDataUpdater extends DataUpdater {
     }
 
     @Override
-    protected JsonObject update(JsonObject oldJson, int version) {
+    protected JsonObject update(JsonObject json, int version) {
         if (version == 0) {
             HashSet<Map.Entry<String, JsonObject>> entries = new HashSet<>();
             // 通常只会循环一次，因为一名玩家只能同时有一个动作
-            for (Map.Entry<String, JsonElement> oldActionEntry : oldJson.entrySet()) {
+            for (Map.Entry<String, JsonElement> oldActionEntry : json.entrySet()) {
                 Map.Entry<String, DataUpdater> actionUpdaterEntry = getDataUpdater(oldActionEntry.getKey(), version);
                 String key = actionUpdaterEntry.getKey();
                 DataUpdater dataUpdater = actionUpdaterEntry.getValue();
@@ -39,7 +39,7 @@ public final class FakePlayerActionDataUpdater extends DataUpdater {
             }
             return newJson;
         }
-        return oldJson;
+        return json;
     }
 
     /**
@@ -69,9 +69,9 @@ public final class FakePlayerActionDataUpdater extends DataUpdater {
         }
 
         @Override
-        protected JsonObject update(JsonObject oldJson, int version) {
+        protected JsonObject update(JsonObject json, int version) {
             if (version == 0) {
-                if (oldJson.has("allItem") && oldJson.get("allItem").getAsBoolean()) {
+                if (json.has("allItem") && json.get("allItem").getAsBoolean()) {
                     // 匹配任意物品
                     ItemStackPredicate predicate = ItemStackPredicate.WILDCARD;
                     JsonObject newJson = new JsonObject();
@@ -80,8 +80,8 @@ public final class FakePlayerActionDataUpdater extends DataUpdater {
                 } else {
                     // 匹配指定物品
                     ItemStackPredicate predicate;
-                    if (oldJson.has(EmptyTheContainerAction.ITEM)) {
-                        String item = oldJson.get(EmptyTheContainerAction.ITEM).getAsString();
+                    if (json.has(EmptyTheContainerAction.ITEM)) {
+                        String item = json.get(EmptyTheContainerAction.ITEM).getAsString();
                         predicate = new ItemStackPredicate(IdentityUtils.asItem(item));
                     } else {
                         predicate = ItemStackPredicate.WILDCARD;
@@ -91,7 +91,7 @@ public final class FakePlayerActionDataUpdater extends DataUpdater {
                     return newJson;
                 }
             }
-            return oldJson;
+            return json;
         }
     }
 
@@ -102,18 +102,18 @@ public final class FakePlayerActionDataUpdater extends DataUpdater {
         }
 
         @Override
-        protected JsonObject update(JsonObject oldJson, int version) {
+        protected JsonObject update(JsonObject json, int version) {
             if (version == 0) {
                 String key = FillTheContainerAction.DROP_OTHER;
                 // dropOther默认为true
-                boolean dropOther = !oldJson.has(key) || oldJson.get(key).getAsBoolean();
+                boolean dropOther = !json.has(key) || json.get(key).getAsBoolean();
                 ItemStackPredicate predicate;
-                if (oldJson.has("allItem") && oldJson.get("allItem").getAsBoolean()) {
+                if (json.has("allItem") && json.get("allItem").getAsBoolean()) {
                     // 匹配任意物品
                     predicate = ItemStackPredicate.WILDCARD;
-                } else if (oldJson.has(FillTheContainerAction.ITEM)) {
+                } else if (json.has(FillTheContainerAction.ITEM)) {
                     // 匹配指定物品
-                    String itemId = oldJson.get(FillTheContainerAction.ITEM).getAsString();
+                    String itemId = json.get(FillTheContainerAction.ITEM).getAsString();
                     predicate = new ItemStackPredicate(IdentityUtils.asItem(itemId));
                 } else {
                     predicate = ItemStackPredicate.WILDCARD;
@@ -123,7 +123,7 @@ public final class FakePlayerActionDataUpdater extends DataUpdater {
                 newJson.addProperty(FillTheContainerAction.DROP_OTHER, dropOther);
                 return newJson;
             }
-            return oldJson;
+            return json;
         }
     }
 }

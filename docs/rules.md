@@ -655,13 +655,13 @@ _这不会改变漏斗、投掷器、合成器和比较器的行为_<br>
 - 参考选项：`true`，`false`
 - 分类：`Org`，`生存`
 
-### 记录玩家命令(recordPlayerCommand)
+### 记录玩家命令 (recordServerCommand)
 
 在服务器控制台输出玩家执行的命令
 
-- 类型：`布尔值`
+- 类型：`枚举`
 - 默认值：`false`
-- 参考选项：`true`，`false`
+- 参考选项：`all`，`only_player`，`false`
 - 分类：`Org`
 
 ### 保护类魔咒兼容(protectionEnchantmentCompatible)

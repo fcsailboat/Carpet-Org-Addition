@@ -110,7 +110,7 @@
   "carpet.rule.applyToolEffectsImmediately.desc": "Fix that the mining speed will not take effect immediately after switching tools",
   "carpet.rule.forceRestock.desc": "Always auto-populate hotbar item as much as possible",
   "carpet.rule.autoSyncPlayerStatus.desc": "The status of the inventory and surrounding blocks is automatically synchronized every 30 game tick",
-  "carpet.rule.recordPlayerCommand.desc": "Outputs the commands executed by the player in the server console",
+  "carpet.rule.recordServerCommand.desc": "Record executed commands in server logs",
   "carpet.rule.protectionEnchantmentCompatible.desc": "Allow all protection enchantments to be compatible",
   "carpet.rule.damageEnchantmentCompatible.desc": "Allow all damage enchantments to be compatible",
   "carpet.rule.maxLinesPerPage.desc": "Control the maximum number of lines allowed on each page of content",

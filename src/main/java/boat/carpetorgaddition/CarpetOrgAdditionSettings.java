@@ -425,15 +425,6 @@ public class CarpetOrgAdditionSettings {
     );
 
     /**
-     * 绘制粒子线命令
-     */
-    public static final RuleAccessor<CommandPermissionLevel> COMMAND_PARTICLE_LINE = register(
-            RuleFactory.of("commandParticleLine", CommandPermissionLevel.FALSE)
-                    .setRemoved()
-                    .build()
-    );
-
-    /**
      * 禁止特定生物在和平模式下被清除
      */
     public static final RuleAccessor<Boolean> DISABLE_MOB_PEACEFUL_DESPAWN = register(
@@ -808,8 +799,8 @@ public class CarpetOrgAdditionSettings {
     /**
      * 记录玩家命令
      */
-    public static final RuleAccessor<Boolean> RECORD_PLAYER_COMMAND = register(
-            RuleFactory.of("recordPlayerCommand", false)
+    public static final RuleAccessor<RecordServerCommand> RECORD_SERVER_COMMAND = register(
+            RuleFactory.of("recordServerCommand", RecordServerCommand.FALSE)
                     .build()
     );
 

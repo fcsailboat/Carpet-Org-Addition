@@ -7,12 +7,13 @@ public abstract class DataUpdater {
     public static final int ZERO = 0;
     public static final DataUpdater UNCHANGED = new UnchangedDataUpdater();
 
-    protected abstract JsonObject update(JsonObject oldJson, int version);
+    protected abstract JsonObject update(JsonObject json, int version);
 
-    public final JsonObject update(JsonObject oldJson, int currentVersion, int targetVersion) {
-        JsonObject newJson = this.update(oldJson, currentVersion);
-        if (DataUpdater.getVersion(newJson) != targetVersion) {
-            throw new IllegalStateException("Json has not been updated to the target version");
+    public final JsonObject update(JsonObject json, int currentVersion, int targetVersion) {
+        JsonObject newJson = this.update(json, currentVersion);
+        int actualVersion = DataUpdater.getVersion(newJson);
+        if (actualVersion != targetVersion) {
+            throw new IllegalStateException("Json update failed: expected target version %d but got version %d (started from version %d)".formatted(targetVersion, actualVersion, currentVersion));
         }
         return newJson;
     }
@@ -32,8 +33,8 @@ public abstract class DataUpdater {
         }
 
         @Override
-        protected JsonObject update(JsonObject oldJson, int version) {
-            return oldJson;
+        protected JsonObject update(JsonObject json, int version) {
+            return json;
         }
     }
 }
