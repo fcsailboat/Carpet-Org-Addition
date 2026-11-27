@@ -42,7 +42,6 @@ public class MessageUtils {
     }
 
     public static void sendMessage(CommandSourceStack source, Component message) {
-        // TODO 是否受到发送命令反馈游戏规则影响
         source.sendSystemMessage(message);
         writeLog(source.getTextName(), message.getString());
     }

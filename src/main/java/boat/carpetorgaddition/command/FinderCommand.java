@@ -60,6 +60,8 @@ public class FinderCommand extends AbstractServerCommand {
      * 最大查找时间
      */
     public static final long MAX_SEARCH_TIME = 20L * 1000L;
+    /// 默认查找半径
+    public static final int DEFAULT_HORIZONTAL_RADIUS = 128;
     /**
      * 最大查找半径
      */
@@ -88,7 +90,7 @@ public class FinderCommand extends AbstractServerCommand {
                 .then(Commands.literal("block")
                         .requires(PermissionManager.register(FINDER_BLOCK, PermissionLevel.PASS))
                         .then(Commands.argument("blockState", BlockPredicateArgument.blockPredicate(this.access))
-                                .executes(context -> blockFinder(context, 64))
+                                .executes(context -> blockFinder(context, DEFAULT_HORIZONTAL_RADIUS))
                                 .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
                                         .executes(context -> blockFinder(context, IntegerArgumentType.getInteger(context, "radius"))))
@@ -100,7 +102,7 @@ public class FinderCommand extends AbstractServerCommand {
                 .then(Commands.literal("item")
                         .requires(PermissionManager.register(FINDER_ITEM, PermissionLevel.PASS))
                         .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
-                                .executes(context -> searchItem(context, 64))
+                                .executes(context -> searchItem(context, DEFAULT_HORIZONTAL_RADIUS))
                                 .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                         .suggests(suggestionDefaultDistance())
                                         .executes(context -> searchItem(context, IntegerArgumentType.getInteger(context, "radius"))))
@@ -116,13 +118,13 @@ public class FinderCommand extends AbstractServerCommand {
                         .requires(PermissionManager.register("finder.trade", PermissionLevel.PASS))
                         .then(Commands.literal("item")
                                 .then(Commands.argument("itemStack", ItemPredicateArgument.itemPredicate(this.access))
-                                        .executes(context -> searchTradeItem(context, 64))
+                                        .executes(context -> searchTradeItem(context, DEFAULT_HORIZONTAL_RADIUS))
                                         .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
                                                 .executes(context -> searchTradeItem(context, IntegerArgumentType.getInteger(context, "radius"))))))
                         .then(Commands.literal("enchanted_book")
                                 .then(Commands.argument("enchantment", ResourceArgument.resource(this.access, Registries.ENCHANTMENT))
-                                        .executes(context -> searchEnchantedBookTrade(context, 64))
+                                        .executes(context -> searchEnchantedBookTrade(context, DEFAULT_HORIZONTAL_RADIUS))
                                         .then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_HORIZONTAL_RADIUS))
                                                 .suggests(suggestionDefaultDistance())
                                                 .executes(context -> searchEnchantedBookTrade(context, IntegerArgumentType.getInteger(context, "radius")))))))
